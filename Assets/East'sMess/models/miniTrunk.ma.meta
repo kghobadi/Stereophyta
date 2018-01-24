@@ -1,0 +1,167 @@
+fileFormatVersion: 2
+guid: 88a5a795eb7c442e6a0a65ed49dacc1c
+timeCreated: 1508993953
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: group
+    100004: group1
+    100006: group2
+    100008: group3
+    100010: group4
+    100012: group5
+    100014: group6
+    100016: group7
+    100018: group8
+    100020: pasted__group
+    100022: pasted__group1
+    100024: pasted__group2
+    100026: pasted__group3
+    100028: pasted__group4
+    100030: pasted__group7
+    100032: pasted__pasted__group
+    100034: pasted__pasted__group1
+    100036: pasted__pasted__group2
+    100038: pasted__pasted__group3
+    100040: pasted__pasted__pasted__group
+    100042: pasted__pasted__pasted__group1
+    100044: pasted__pasted__pasted__group2
+    100046: pasted__pasted__pasted__pasted__group
+    100048: pasted__pasted__pasted__pasted__group1
+    100050: pasted__pasted__pasted__pasted__pasted__group
+    100052: pasted__pasted__pasted__pasted__pasted__pasted__pSphere1
+    100054: pasted__pasted__pasted__pasted__pasted__pSphere1
+    100056: pasted__pasted__pasted__pasted__pSphere1
+    100058: pasted__pasted__pasted__pSphere1
+    100060: pasted__pasted__pSphere1
+    100062: pasted__pSphere1
+    100064: pSphere1
+    100066: pSphere2
+    100068: transform1
+    100070: transform2
+    100072: transform3
+    100074: transform4
+    100076: transform5
+    100078: transform6
+    100080: transform7
+    400000: //RootNode
+    400002: group
+    400004: group1
+    400006: group2
+    400008: group3
+    400010: group4
+    400012: group5
+    400014: group6
+    400016: group7
+    400018: group8
+    400020: pasted__group
+    400022: pasted__group1
+    400024: pasted__group2
+    400026: pasted__group3
+    400028: pasted__group4
+    400030: pasted__group7
+    400032: pasted__pasted__group
+    400034: pasted__pasted__group1
+    400036: pasted__pasted__group2
+    400038: pasted__pasted__group3
+    400040: pasted__pasted__pasted__group
+    400042: pasted__pasted__pasted__group1
+    400044: pasted__pasted__pasted__group2
+    400046: pasted__pasted__pasted__pasted__group
+    400048: pasted__pasted__pasted__pasted__group1
+    400050: pasted__pasted__pasted__pasted__pasted__group
+    400052: pasted__pasted__pasted__pasted__pasted__pasted__pSphere1
+    400054: pasted__pasted__pasted__pasted__pasted__pSphere1
+    400056: pasted__pasted__pasted__pasted__pSphere1
+    400058: pasted__pasted__pasted__pSphere1
+    400060: pasted__pasted__pSphere1
+    400062: pasted__pSphere1
+    400064: pSphere1
+    400066: pSphere2
+    400068: transform1
+    400070: transform2
+    400072: transform3
+    400074: transform4
+    400076: transform5
+    400078: transform6
+    400080: transform7
+    2300000: //RootNode
+    2300002: pSphere2
+    3300000: //RootNode
+    3300002: pSphere2
+    4300000: pCylinder1
+    4300002: pSphere2
+    7400000: Take 001
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

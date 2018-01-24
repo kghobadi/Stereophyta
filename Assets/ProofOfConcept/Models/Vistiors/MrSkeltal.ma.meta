@@ -1,0 +1,780 @@
+fileFormatVersion: 2
+guid: 320cb10289c56f5408823767288b5673
+timeCreated: 1511237715
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Head
+    100002: Hips
+    100004: joint1
+    100006: joint10
+    100008: joint11
+    100010: joint12
+    100012: joint13
+    100014: joint14
+    100016: joint15
+    100018: joint16
+    100020: joint17
+    100022: joint18
+    100024: joint19
+    100026: joint2
+    100028: joint20
+    100030: joint3
+    100032: joint4
+    100034: joint5
+    100036: joint6
+    100038: joint7
+    100040: joint8
+    100042: joint9
+    100044: //RootNode
+    100046: pCylinder10
+    100048: pCylinder11
+    100050: pCylinder12
+    100052: pCylinder13
+    100054: pCylinder2
+    100056: pCylinder3
+    100058: pCylinder4
+    100060: pCylinder5
+    100062: pCylinder6
+    100064: pCylinder7
+    100066: pCylinder8
+    100068: pCylinder9
+    100070: pPyramid1
+    100072: pPyramid10
+    100074: pPyramid11
+    100076: pPyramid12
+    100078: pPyramid13
+    100080: pPyramid14
+    100082: pPyramid15
+    100084: pPyramid16
+    100086: pPyramid17
+    100088: pPyramid18
+    100090: pPyramid19
+    100092: pPyramid2
+    100094: pPyramid20
+    100096: pPyramid21
+    100098: pPyramid22
+    100100: pPyramid23
+    100102: pPyramid24
+    100104: pPyramid25
+    100106: pPyramid26
+    100108: pPyramid27
+    100110: pPyramid3
+    100112: pPyramid4
+    100114: pPyramid5
+    100116: pPyramid6
+    100118: pPyramid7
+    100120: pPyramid8
+    100122: pPyramid9
+    100124: pSphere2
+    100126: pSphere3
+    100128: pSphere4
+    100130: transform1
+    100132: transform10
+    100134: transform11
+    100136: transform12
+    100138: transform13
+    100140: transform14
+    100142: transform15
+    100144: transform16
+    100146: transform17
+    100148: transform18
+    100150: transform19
+    100152: transform2
+    100154: transform20
+    100156: transform21
+    100158: transform22
+    100160: transform23
+    100162: transform24
+    100164: transform25
+    100166: transform26
+    100168: transform27
+    100170: transform28
+    100172: transform29
+    100174: transform3
+    100176: transform30
+    100178: transform31
+    100180: transform32
+    100182: transform33
+    100184: transform34
+    100186: transform35
+    100188: transform36
+    100190: transform37
+    100192: transform38
+    100194: transform39
+    100196: transform4
+    100198: transform40
+    100200: transform41
+    100202: transform42
+    100204: transform5
+    100206: transform6
+    100208: transform7
+    100210: transform8
+    100212: transform9
+    400000: Head
+    400002: Hips
+    400004: joint1
+    400006: joint10
+    400008: joint11
+    400010: joint12
+    400012: joint13
+    400014: joint14
+    400016: joint15
+    400018: joint16
+    400020: joint17
+    400022: joint18
+    400024: joint19
+    400026: joint2
+    400028: joint20
+    400030: joint3
+    400032: joint4
+    400034: joint5
+    400036: joint6
+    400038: joint7
+    400040: joint8
+    400042: joint9
+    400044: //RootNode
+    400046: pCylinder10
+    400048: pCylinder11
+    400050: pCylinder12
+    400052: pCylinder13
+    400054: pCylinder2
+    400056: pCylinder3
+    400058: pCylinder4
+    400060: pCylinder5
+    400062: pCylinder6
+    400064: pCylinder7
+    400066: pCylinder8
+    400068: pCylinder9
+    400070: pPyramid1
+    400072: pPyramid10
+    400074: pPyramid11
+    400076: pPyramid12
+    400078: pPyramid13
+    400080: pPyramid14
+    400082: pPyramid15
+    400084: pPyramid16
+    400086: pPyramid17
+    400088: pPyramid18
+    400090: pPyramid19
+    400092: pPyramid2
+    400094: pPyramid20
+    400096: pPyramid21
+    400098: pPyramid22
+    400100: pPyramid23
+    400102: pPyramid24
+    400104: pPyramid25
+    400106: pPyramid26
+    400108: pPyramid27
+    400110: pPyramid3
+    400112: pPyramid4
+    400114: pPyramid5
+    400116: pPyramid6
+    400118: pPyramid7
+    400120: pPyramid8
+    400122: pPyramid9
+    400124: pSphere2
+    400126: pSphere3
+    400128: pSphere4
+    400130: transform1
+    400132: transform10
+    400134: transform11
+    400136: transform12
+    400138: transform13
+    400140: transform14
+    400142: transform15
+    400144: transform16
+    400146: transform17
+    400148: transform18
+    400150: transform19
+    400152: transform2
+    400154: transform20
+    400156: transform21
+    400158: transform22
+    400160: transform23
+    400162: transform24
+    400164: transform25
+    400166: transform26
+    400168: transform27
+    400170: transform28
+    400172: transform29
+    400174: transform3
+    400176: transform30
+    400178: transform31
+    400180: transform32
+    400182: transform33
+    400184: transform34
+    400186: transform35
+    400188: transform36
+    400190: transform37
+    400192: transform38
+    400194: transform39
+    400196: transform4
+    400198: transform40
+    400200: transform41
+    400202: transform42
+    400204: transform5
+    400206: transform6
+    400208: transform7
+    400210: transform8
+    400212: transform9
+    4300000: pPyramid27
+    7400000: Walk run
+    7400002: Bow
+    9500000: //RootNode
+    13700000: pPyramid27
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Walk run
+      takeName: Take 001
+      firstFrame: 1
+      lastFrame: 24
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Head
+        weight: 1
+      - path: Head/transform38
+        weight: 1
+      - path: Hips
+        weight: 1
+      - path: Hips/joint1
+        weight: 1
+      - path: Hips/joint1/joint2
+        weight: 1
+      - path: Hips/joint1/joint2/joint3
+        weight: 1
+      - path: Hips/joint1/joint2/joint3/joint4
+        weight: 1
+      - path: Hips/joint5
+        weight: 1
+      - path: Hips/joint5/joint6
+        weight: 1
+      - path: Hips/joint5/joint6/joint7
+        weight: 1
+      - path: Hips/joint5/joint6/joint7/joint8
+        weight: 1
+      - path: Hips/joint9
+        weight: 1
+      - path: Hips/joint9/joint10
+        weight: 1
+      - path: Hips/joint9/joint10/joint11
+        weight: 1
+      - path: Hips/joint9/joint10/joint11/joint12
+        weight: 1
+      - path: Hips/joint9/joint10/joint13
+        weight: 1
+      - path: Hips/joint9/joint10/joint13/joint14
+        weight: 1
+      - path: Hips/joint9/joint10/joint13/joint14/joint15
+        weight: 1
+      - path: Hips/joint9/joint10/joint13/joint14/joint15/joint16
+        weight: 1
+      - path: Hips/joint9/joint10/joint17
+        weight: 1
+      - path: Hips/joint9/joint10/joint17/joint18
+        weight: 1
+      - path: Hips/joint9/joint10/joint17/joint18/joint19
+        weight: 1
+      - path: Hips/joint9/joint10/joint17/joint18/joint19/joint20
+        weight: 1
+      - path: pCylinder2
+        weight: 1
+      - path: pCylinder2/transform28
+        weight: 1
+      - path: pCylinder3
+        weight: 1
+      - path: pCylinder3/transform27
+        weight: 1
+      - path: pCylinder4
+        weight: 1
+      - path: pCylinder4/transform29
+        weight: 1
+      - path: pCylinder5
+        weight: 1
+      - path: pCylinder5/transform24
+        weight: 1
+      - path: pCylinder6
+        weight: 1
+      - path: pCylinder6/transform31
+        weight: 1
+      - path: pCylinder7
+        weight: 1
+      - path: pCylinder7/transform30
+        weight: 1
+      - path: pCylinder8
+        weight: 1
+      - path: pCylinder8/transform25
+        weight: 1
+      - path: pCylinder9
+        weight: 1
+      - path: pCylinder9/transform32
+        weight: 1
+      - path: pCylinder10
+        weight: 1
+      - path: pCylinder10/transform1
+        weight: 1
+      - path: pCylinder11
+        weight: 1
+      - path: pCylinder11/transform33
+        weight: 1
+      - path: pCylinder12
+        weight: 1
+      - path: pCylinder12/transform37
+        weight: 1
+      - path: pCylinder13
+        weight: 1
+      - path: pCylinder13/transform36
+        weight: 1
+      - path: pPyramid1
+        weight: 1
+      - path: pPyramid1/transform42
+        weight: 1
+      - path: pPyramid2
+        weight: 1
+      - path: pPyramid2/transform40
+        weight: 1
+      - path: pPyramid3
+        weight: 1
+      - path: pPyramid3/transform2
+        weight: 1
+      - path: pPyramid4
+        weight: 1
+      - path: pPyramid4/transform3
+        weight: 1
+      - path: pPyramid5
+        weight: 1
+      - path: pPyramid5/transform4
+        weight: 1
+      - path: pPyramid6
+        weight: 1
+      - path: pPyramid6/transform6
+        weight: 1
+      - path: pPyramid7
+        weight: 1
+      - path: pPyramid7/transform7
+        weight: 1
+      - path: pPyramid8
+        weight: 1
+      - path: pPyramid8/transform8
+        weight: 1
+      - path: pPyramid9
+        weight: 1
+      - path: pPyramid9/transform9
+        weight: 1
+      - path: pPyramid10
+        weight: 1
+      - path: pPyramid10/transform39
+        weight: 1
+      - path: pPyramid11
+        weight: 1
+      - path: pPyramid11/transform5
+        weight: 1
+      - path: pPyramid12
+        weight: 1
+      - path: pPyramid12/transform41
+        weight: 1
+      - path: pPyramid13
+        weight: 1
+      - path: pPyramid13/transform11
+        weight: 1
+      - path: pPyramid14
+        weight: 1
+      - path: pPyramid14/transform16
+        weight: 1
+      - path: pPyramid15
+        weight: 1
+      - path: pPyramid15/transform17
+        weight: 1
+      - path: pPyramid16
+        weight: 1
+      - path: pPyramid16/transform18
+        weight: 1
+      - path: pPyramid17
+        weight: 1
+      - path: pPyramid17/transform19
+        weight: 1
+      - path: pPyramid18
+        weight: 1
+      - path: pPyramid18/transform20
+        weight: 1
+      - path: pPyramid19
+        weight: 1
+      - path: pPyramid19/transform21
+        weight: 1
+      - path: pPyramid20
+        weight: 1
+      - path: pPyramid20/transform22
+        weight: 1
+      - path: pPyramid21
+        weight: 1
+      - path: pPyramid21/transform23
+        weight: 1
+      - path: pPyramid22
+        weight: 1
+      - path: pPyramid22/transform13
+        weight: 1
+      - path: pPyramid23
+        weight: 1
+      - path: pPyramid23/transform12
+        weight: 1
+      - path: pPyramid24
+        weight: 1
+      - path: pPyramid24/transform14
+        weight: 1
+      - path: pPyramid25
+        weight: 1
+      - path: pPyramid25/transform10
+        weight: 1
+      - path: pPyramid26
+        weight: 1
+      - path: pPyramid26/transform15
+        weight: 1
+      - path: pPyramid27
+        weight: 1
+      - path: pSphere2
+        weight: 1
+      - path: pSphere2/transform34
+        weight: 1
+      - path: pSphere3
+        weight: 1
+      - path: pSphere3/transform35
+        weight: 1
+      - path: pSphere4
+        weight: 1
+      - path: pSphere4/transform26
+        weight: 1
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Bow
+      takeName: Take 001
+      firstFrame: 42
+      lastFrame: 70
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Head
+        weight: 1
+      - path: Head/transform38
+        weight: 1
+      - path: Hips
+        weight: 1
+      - path: Hips/joint1
+        weight: 1
+      - path: Hips/joint1/joint2
+        weight: 1
+      - path: Hips/joint1/joint2/joint3
+        weight: 1
+      - path: Hips/joint1/joint2/joint3/joint4
+        weight: 1
+      - path: Hips/joint5
+        weight: 1
+      - path: Hips/joint5/joint6
+        weight: 1
+      - path: Hips/joint5/joint6/joint7
+        weight: 1
+      - path: Hips/joint5/joint6/joint7/joint8
+        weight: 1
+      - path: Hips/joint9
+        weight: 1
+      - path: Hips/joint9/joint10
+        weight: 1
+      - path: Hips/joint9/joint10/joint11
+        weight: 1
+      - path: Hips/joint9/joint10/joint11/joint12
+        weight: 1
+      - path: Hips/joint9/joint10/joint13
+        weight: 1
+      - path: Hips/joint9/joint10/joint13/joint14
+        weight: 1
+      - path: Hips/joint9/joint10/joint13/joint14/joint15
+        weight: 1
+      - path: Hips/joint9/joint10/joint13/joint14/joint15/joint16
+        weight: 1
+      - path: Hips/joint9/joint10/joint17
+        weight: 1
+      - path: Hips/joint9/joint10/joint17/joint18
+        weight: 1
+      - path: Hips/joint9/joint10/joint17/joint18/joint19
+        weight: 1
+      - path: Hips/joint9/joint10/joint17/joint18/joint19/joint20
+        weight: 1
+      - path: pCylinder2
+        weight: 1
+      - path: pCylinder2/transform28
+        weight: 1
+      - path: pCylinder3
+        weight: 1
+      - path: pCylinder3/transform27
+        weight: 1
+      - path: pCylinder4
+        weight: 1
+      - path: pCylinder4/transform29
+        weight: 1
+      - path: pCylinder5
+        weight: 1
+      - path: pCylinder5/transform24
+        weight: 1
+      - path: pCylinder6
+        weight: 1
+      - path: pCylinder6/transform31
+        weight: 1
+      - path: pCylinder7
+        weight: 1
+      - path: pCylinder7/transform30
+        weight: 1
+      - path: pCylinder8
+        weight: 1
+      - path: pCylinder8/transform25
+        weight: 1
+      - path: pCylinder9
+        weight: 1
+      - path: pCylinder9/transform32
+        weight: 1
+      - path: pCylinder10
+        weight: 1
+      - path: pCylinder10/transform1
+        weight: 1
+      - path: pCylinder11
+        weight: 1
+      - path: pCylinder11/transform33
+        weight: 1
+      - path: pCylinder12
+        weight: 1
+      - path: pCylinder12/transform37
+        weight: 1
+      - path: pCylinder13
+        weight: 1
+      - path: pCylinder13/transform36
+        weight: 1
+      - path: pPyramid1
+        weight: 1
+      - path: pPyramid1/transform42
+        weight: 1
+      - path: pPyramid2
+        weight: 1
+      - path: pPyramid2/transform40
+        weight: 1
+      - path: pPyramid3
+        weight: 1
+      - path: pPyramid3/transform2
+        weight: 1
+      - path: pPyramid4
+        weight: 1
+      - path: pPyramid4/transform3
+        weight: 1
+      - path: pPyramid5
+        weight: 1
+      - path: pPyramid5/transform4
+        weight: 1
+      - path: pPyramid6
+        weight: 1
+      - path: pPyramid6/transform6
+        weight: 1
+      - path: pPyramid7
+        weight: 1
+      - path: pPyramid7/transform7
+        weight: 1
+      - path: pPyramid8
+        weight: 1
+      - path: pPyramid8/transform8
+        weight: 1
+      - path: pPyramid9
+        weight: 1
+      - path: pPyramid9/transform9
+        weight: 1
+      - path: pPyramid10
+        weight: 1
+      - path: pPyramid10/transform39
+        weight: 1
+      - path: pPyramid11
+        weight: 1
+      - path: pPyramid11/transform5
+        weight: 1
+      - path: pPyramid12
+        weight: 1
+      - path: pPyramid12/transform41
+        weight: 1
+      - path: pPyramid13
+        weight: 1
+      - path: pPyramid13/transform11
+        weight: 1
+      - path: pPyramid14
+        weight: 1
+      - path: pPyramid14/transform16
+        weight: 1
+      - path: pPyramid15
+        weight: 1
+      - path: pPyramid15/transform17
+        weight: 1
+      - path: pPyramid16
+        weight: 1
+      - path: pPyramid16/transform18
+        weight: 1
+      - path: pPyramid17
+        weight: 1
+      - path: pPyramid17/transform19
+        weight: 1
+      - path: pPyramid18
+        weight: 1
+      - path: pPyramid18/transform20
+        weight: 1
+      - path: pPyramid19
+        weight: 1
+      - path: pPyramid19/transform21
+        weight: 1
+      - path: pPyramid20
+        weight: 1
+      - path: pPyramid20/transform22
+        weight: 1
+      - path: pPyramid21
+        weight: 1
+      - path: pPyramid21/transform23
+        weight: 1
+      - path: pPyramid22
+        weight: 1
+      - path: pPyramid22/transform13
+        weight: 1
+      - path: pPyramid23
+        weight: 1
+      - path: pPyramid23/transform12
+        weight: 1
+      - path: pPyramid24
+        weight: 1
+      - path: pPyramid24/transform14
+        weight: 1
+      - path: pPyramid25
+        weight: 1
+      - path: pPyramid25/transform10
+        weight: 1
+      - path: pPyramid26
+        weight: 1
+      - path: pPyramid26/transform15
+        weight: 1
+      - path: pPyramid27
+        weight: 1
+      - path: pSphere2
+        weight: 1
+      - path: pSphere2/transform34
+        weight: 1
+      - path: pSphere3
+        weight: 1
+      - path: pSphere3/transform35
+        weight: 1
+      - path: pSphere4
+        weight: 1
+      - path: pSphere4/transform26
+        weight: 1
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.4
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

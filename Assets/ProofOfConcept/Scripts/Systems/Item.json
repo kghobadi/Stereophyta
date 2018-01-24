@@ -1,0 +1,13 @@
+{	
+	"ID" : 10,
+	"Title" : "<user input>" || "Seed Type",
+	"Prefab" : 230497209385-823-480920395-82-0384,
+	"Quantity" : 23
+}
+
+// UNIQUE ITEMS
+
+// telescope, need to serialize LineRenderer
+// recording device, 
+// map, need to serialize TrailRenderer
+// journal
