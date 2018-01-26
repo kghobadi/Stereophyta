@@ -1,18 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class Interactable : MonoBehaviour
 {
     protected GameObject _player;
     protected GameObject cammy; // camera reference
-    protected SpriteRenderer symbol; // 2d sprite renderer icon reference
+    protected Image symbol; // 2d sprite renderer icon reference
     protected Sprite normalSprite;
     private Sprite interactSprite;
     private Sprite clickSprite;
 
     //for hovering over objects
-    protected GameObject identifierObject; 
+    protected GameObject identifierObject;
     protected SpriteRenderer paper;
     public Sprite bookPage;
 
@@ -22,7 +23,7 @@ public abstract class Interactable : MonoBehaviour
 
 
     protected float withinDistance = 10f;
-    protected float withinDistanceActive = 10f;
+    protected float withinDistanceActive = 3f;
 
     protected AudioSource soundBoard;
     public AudioClip InteractSound, firstTimePickup;
@@ -40,17 +41,17 @@ public abstract class Interactable : MonoBehaviour
 
     public virtual void Start()
     {
-        bedScript = GameObject.FindGameObjectWithTag("Bed").GetComponent<Bed>();
-        worldMan = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        //bedScript = GameObject.FindGameObjectWithTag("Bed").GetComponent<Bed>();
+        //worldMan = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
         _player = GameObject.FindGameObjectWithTag("Player"); //searches for Player
         cammy = GameObject.FindGameObjectWithTag("MainCamera"); //searches for Camera
-        symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<SpriteRenderer>(); //searches for InteractSymbol
-        identifierObject = GameObject.FindGameObjectWithTag("Identifier");
-        paper = identifierObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
-        pageNotifier = GameObject.Find("PageNotifier");
+        symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
+        //identifierObject = GameObject.FindGameObjectWithTag("Identifier");
+        //paper = identifierObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
+        //pageNotifier = GameObject.Find("PageNotifier");
 
-        identifierObject.GetComponent<SpriteRenderer>().enabled = false;
-        paper.enabled = false;
+        //identifierObject.GetComponent<SpriteRenderer>().enabled = false;
+        //paper.enabled = false;
         //loads Cursor Sprites
         normalSprite = Resources.Load<Sprite>("CursorSprites/crosshair");
         interactSprite = Resources.Load<Sprite>("CursorSprites/crosshairclicked");
@@ -68,13 +69,13 @@ public abstract class Interactable : MonoBehaviour
     {
         if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
         {
-            if (!worldMan.firstTimePickups[objNumber])
-            {
-                identifierObject.GetComponent<SpriteRenderer>().enabled = true;
-                paper.enabled = true;
-            }
-            cammy.GetComponent<camMouseLook>().sensitivityX = 1.5f;
-            cammy.GetComponent<camMouseLook>().sensitivityY = 1.5f;
+            //if (!worldMan.firstTimePickups[objNumber])
+            //{
+            //    identifierObject.GetComponent<SpriteRenderer>().enabled = true;
+            //    paper.enabled = true;
+            //}
+            //cammy.GetComponent<camMouseLook>().sensitivityX = 1.5f;
+            //cammy.GetComponent<camMouseLook>().sensitivityY = 1.5f;
             symbol.sprite = interactSprite;
 
         }
@@ -89,38 +90,38 @@ public abstract class Interactable : MonoBehaviour
             symbol.sprite = normalSprite;
 
 
-            if (!worldMan.firstTimePickups[objNumber])
-            {
-                identifierObject.GetComponent<SpriteRenderer>().enabled = false;
-                paper.enabled = false;
-            }
+            //if (!worldMan.firstTimePickups[objNumber])
+            //{
+            //    identifierObject.GetComponent<SpriteRenderer>().enabled = false;
+            //    paper.enabled = false;
+            //}
         }
     }
 
     public virtual void handleClickSuccess()
     {
         
-        if (!worldMan.firstTimePickups[objNumber])
-        {
-            identifierObject.GetComponent<SpriteRenderer>().enabled = false;
-            paper.enabled = false;
-            worldMan.firstTimePickups[objNumber] = true;
-            symbol.sprite = clickSprite;
-            soundBoard.PlayOneShot(firstTimePickup);
-            symbol.sprite = normalSprite;
-            pageNotifier.GetComponent<SpriteRenderer>().enabled = true;
-            if(bookPage != null)
-            {
-                worldMan.bookRef.bookPages[worldMan.bookRef.pageAdder] = bookPage;
-                worldMan.bookRef.pageAdder++;
-            }
-        }
-        else
-        {
+        //if (!worldMan.firstTimePickups[objNumber])
+        //{
+        //    identifierObject.GetComponent<SpriteRenderer>().enabled = false;
+        //    paper.enabled = false;
+        //    worldMan.firstTimePickups[objNumber] = true;
+        //    symbol.sprite = clickSprite;
+        //    soundBoard.PlayOneShot(firstTimePickup);
+        //    symbol.sprite = normalSprite;
+        //    pageNotifier.GetComponent<SpriteRenderer>().enabled = true;
+        //    if(bookPage != null)
+        //    {
+        //        worldMan.bookRef.bookPages[worldMan.bookRef.pageAdder] = bookPage;
+        //        worldMan.bookRef.pageAdder++;
+        //    }
+        ////}
+        //else
+        //{
             symbol.sprite = clickSprite;
             Play();
             symbol.sprite = normalSprite;
-        }
+        //}
     }
 
 

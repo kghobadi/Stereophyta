@@ -15,7 +15,7 @@ public class MovingWind : MonoBehaviour {
 	void Update () {
         transform.Translate(currentSpeed * Time.deltaTime, 0, 0);
 
-        if(Vector3.Distance(transform.position, _windGen.transform.position) > _windGen.distanceToDestroy)
+        if (Vector3.Distance(transform.position, _windGen.transform.position) > _windGen.distanceToDestroy)
         {
             Destroy(gameObject);
         }
@@ -23,8 +23,7 @@ public class MovingWind : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("triggered");
-        if(other.gameObject.tag == "Seed")
+        if(other.gameObject.tag == "Plant")
         {
             other.gameObject.GetComponent<plant>().PlaySound();
         }

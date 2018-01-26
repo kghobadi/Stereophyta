@@ -21,8 +21,14 @@ public class WindGen : MonoBehaviour {
         timer -= Time.deltaTime;
         if(timer < 0)
         {
-            windClone = Instantiate(wind, transform.position, Quaternion.identity, transform);
+            windClone = Instantiate(wind, transform.position, new Quaternion (0,0,0,0) , transform);
             timer = timerTotal;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            
+            transform.localEulerAngles += new Vector3(0, 90, 0);
         }
 	}
 }

@@ -10,18 +10,14 @@ public class ThirdPersonController : MonoBehaviour
 
     Vector3 movement;
 
-    float moveForwardBackward;
-    float moveLeftRight;
-    float moveUpDown;
-
     AudioSource cameraAudSource;
 
-    Vector3 targetPosition; // for point to click
+    private Vector3 targetPosition;
+    private bool isMoving; // for point to click
     Vector3 origPosition;
 
     CameraController camControl;
-    public GameObject plants;
-    GameObject plantClone;
+    
     GameObject terrain;
 
     public LayerMask mask;
@@ -34,10 +30,32 @@ public class ThirdPersonController : MonoBehaviour
         origPosition = transform.position;
         terrain = GameObject.FindGameObjectWithTag("Ground");
 
+        targetPosition = transform.position;
     }
 
     void Update()
     {
+        //constant move to mouse pos
+        //if (Input.GetMouseButton(0))
+        //{
+        //    movement = new Vector3(0, 0, 1 * speed);
+        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //    RaycastHit hit;
+
+        //    if (Physics.Raycast(ray, out hit, 100, mask))
+        //    {
+        //        if (hit.transform.gameObject.tag == "Ground")
+        //        {
+        //            transform.LookAt(hit.point);
+        //            movement = transform.rotation * movement;
+        //            player.Move(movement * Time.deltaTime);
+
+        //            player.Move(new Vector3(0, -0.5f, 0));
+        //        }
+        //    }
+        //}
+
+        //click to move to point
         if (Input.GetMouseButton(0))
         {
             movement = new Vector3(0, 0, 1 * speed);
@@ -48,20 +66,29 @@ public class ThirdPersonController : MonoBehaviour
             {
                 if (hit.transform.gameObject.tag == "Ground")
                 {
-                    transform.LookAt(hit.point);
-                    movement = transform.rotation * movement;
-                    player.Move(movement * Time.deltaTime);
-
-                    player.Move(new Vector3(0, -0.5f, 0));
+                    targetPosition = hit.point;
+                    isMoving = true;
                 }
             }
         }
-        if (Input.GetKeyDown(KeyCode.Space) && transform.position.y < 10)
+
+        if (isMoving)
         {
-            plantClone = Instantiate(plants, transform.position + new Vector3(0, 0, 1.5f), Quaternion.identity);
+            MovePlayer();
         }
-
-
-       
     }
+   
+    void MovePlayer()
+    {
+        transform.LookAt(targetPosition);
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+        
+        if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
+        {
+            transform.position = targetPosition;
+            isMoving = false;
+        }
+    }
+
+
 }

@@ -6,8 +6,8 @@ using UnityEngine.UI;
 public class Inventory : MonoBehaviour
 {
 
-    FirstPersonController fpc;
-    camMouseLook cameraControl;
+    //FirstPersonController fpc;
+    CameraController cameraControl;
 
     GameObject inventory;
 
@@ -48,8 +48,8 @@ public class Inventory : MonoBehaviour
 
     void Start()
     {
-        fpc = GetComponent<FirstPersonController>();
-        cameraControl = Camera.main.GetComponent<camMouseLook>();
+        //fpc = GetComponent<FirstPersonController>();
+        cameraControl = Camera.main.GetComponent<CameraController>();
 
         inventory = GameObject.FindGameObjectWithTag("Inventory");
         soundBoard = GetComponentInChildren<AudioSource>();
@@ -277,15 +277,15 @@ public class Inventory : MonoBehaviour
     public void openInventory()
     {
         Debug.Log("opening");
-        fpc.enabled = false;
-        cameraControl.isActive = false;
-        Cursor.lockState = CursorLockMode.None;
+        //fpc.enabled = false;
+        //cameraControl.isActive = false;
+        //Cursor.lockState = CursorLockMode.None;
         inventory.transform.localPosition = inventoryPos;
         cameraControl.transform.LookAt(inventory.transform.position);
         inventoryOpen = true;
-        soundBoard.PlayOneShot(bagOpen);
+        //soundBoard.PlayOneShot(bagOpen);
 
-        inventCam.SetActive(true);
+        //inventCam.SetActive(true);
         //inventCam.transform.LookAt(inventory.transform.position);
         //add other cam functionaility
     }
@@ -293,13 +293,13 @@ public class Inventory : MonoBehaviour
     public void closeInventory()
     {
         //        Debug.Log("closing");
-        fpc.enabled = true;
-        cameraControl.isActive = true;
-        Cursor.lockState = CursorLockMode.Locked;
+        //fpc.enabled = true;
+        //cameraControl.isActive = true;
+        //Cursor.lockState = CursorLockMode.Locked;
         inventory.transform.position = new Vector3(1000, 1000, 1000);
         inventoryOpen = false;
-        soundBoard.PlayOneShot(bagClose);
-        inventCam.SetActive(false);
+        //soundBoard.PlayOneShot(bagClose);
+        //inventCam.SetActive(false);
     }
 
 
