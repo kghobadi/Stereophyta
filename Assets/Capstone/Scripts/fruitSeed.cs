@@ -9,7 +9,6 @@ public class fruitSeed : MonoBehaviour {
     GameObject plantClone;
 
     public int plantingRadius;
-    public int seedNum;
 
     inventoryMan inventMan;
     Inventory invent;
@@ -40,8 +39,8 @@ public class fruitSeed : MonoBehaviour {
                 }
                 if (canPlant)
                 {
-                    plantClone = Instantiate(plants, transform.position + new Vector3(0, 0, 1.5f), Quaternion.identity);
-                    plantClone.GetComponent<plant>().plantNum = seedNum;
+                    int randomRotation = Random.Range(0, 360);
+                    plantClone = Instantiate(plants, transform.position + new Vector3(0, 0, 1.5f), Quaternion.Euler(0, randomRotation, 0));
                 }
             }
         }

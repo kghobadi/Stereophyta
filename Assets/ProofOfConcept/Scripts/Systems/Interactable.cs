@@ -23,7 +23,7 @@ public abstract class Interactable : MonoBehaviour
 
 
     protected float withinDistance = 10f;
-    protected float withinDistanceActive = 3f;
+    public float withinDistanceActive = 3f;
 
     protected AudioSource soundBoard;
     public AudioClip InteractSound, firstTimePickup;
