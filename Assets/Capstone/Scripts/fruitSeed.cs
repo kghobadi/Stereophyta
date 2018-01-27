@@ -40,7 +40,7 @@ public class fruitSeed : MonoBehaviour {
                 if (canPlant)
                 {
                     int randomRotation = Random.Range(0, 360);
-                    plantClone = Instantiate(plants, transform.position + new Vector3(0, 0, 1.5f), Quaternion.Euler(0, randomRotation, 0));
+                    plantClone = Instantiate(plants, transform.position + new Vector3(0, 2f, 0), Quaternion.Euler(0, randomRotation, 0));
                 }
             }
         }
