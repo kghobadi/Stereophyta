@@ -120,7 +120,6 @@ public abstract class Interactable : MonoBehaviour
         //{
             symbol.sprite = clickSprite;
             Play();
-            symbol.sprite = normalSprite;
         //}
     }
 
