@@ -66,7 +66,7 @@ public class ThirdPersonController : MonoBehaviour
             {
                 if (hit.transform.gameObject.tag == "Ground")
                 {
-                    targetPosition = hit.point;
+                    targetPosition = hit.point + new Vector3(0,1,0);
                     isMoving = true;
                 }
             }
