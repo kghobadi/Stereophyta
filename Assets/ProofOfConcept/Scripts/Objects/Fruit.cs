@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TGS;
+//using TGS;
 
 public class Fruit : Interactable {
     public bool feedAnimal;
@@ -27,7 +27,7 @@ public class Fruit : Interactable {
     private GameObject sun;
     private Sun sunScript;
 
-    TerrainGridSystem tgs;
+    //TerrainGridSystem tgs;
     public float hungerValue;
 
 
@@ -59,7 +59,7 @@ public class Fruit : Interactable {
         rb.isKinematic = true;
 
         //TerrainGridSystem ref
-        tgs = TerrainGridSystem.instance;
+        //tgs = TerrainGridSystem.instance;
         
     }
 
@@ -135,11 +135,11 @@ public class Fruit : Interactable {
             
             //Checks what ground tile this is using collision point
             Vector3 collisionPoint = collision.contacts[0].point;
-            Cell groundTile = tgs.CellGetAtPosition(collisionPoint,true);
-            int cellIndex = tgs.CellGetIndex(groundTile);
+            //Cell groundTile = tgs.CellGetAtPosition(collisionPoint,true);
+            //int cellIndex = tgs.CellGetIndex(groundTile);
 
             //Starts Decompose using ground tile
-            StartCoroutine(Decompose(groundTile, cellIndex, tgs.CellGetTag(cellIndex)));
+            //StartCoroutine(Decompose(groundTile, cellIndex, tgs.CellGetTag(cellIndex)));
             
 
         }
@@ -148,35 +148,35 @@ public class Fruit : Interactable {
     }
 
     //Causes fruit to decay and either plant a seed on a fertile tile, or leave behind a seed for pick up
-    IEnumerator Decompose(Cell newTile, int index, int tagIndex)
-    {
-        //for loops waits given # of days
-        for(int i = 0; i < decompositionDay; i++)
-        {
-           // yield return new WaitUntil(() => sunScript.dayPassed == true);
+    //IEnumerator Decompose(Cell newTile, int index, int tagIndex)
+    //{
+    //    //for loops waits given # of days
+    //    for(int i = 0; i < decompositionDay; i++)
+    //    {
+    //       // yield return new WaitUntil(() => sunScript.dayPassed == true);
 
-        }
-        if (tagIndex == 1)
-        {
-            seedClone = Instantiate(seed, transform.position, Quaternion.identity);
-            //may need to alter seed Y pos here
-            seedClone.transform.position = new Vector3(tgs.CellGetPosition(index).x, transform.position.y, tgs.CellGetPosition(index).z);
-            yield return new WaitForSeconds(0.5f);
+    //    }
+    //    if (tagIndex == 1)
+    //    {
+    //        seedClone = Instantiate(seed, transform.position, Quaternion.identity);
+    //        //may need to alter seed Y pos here
+    //        seedClone.transform.position = new Vector3(tgs.CellGetPosition(index).x, transform.position.y, tgs.CellGetPosition(index).z);
+    //        yield return new WaitForSeconds(0.5f);
 
-            //Sets seed counter to 0, skipping animation, and plants seed on tile
-            seedClone.GetComponent<Seed>().counter = 0;
-            seedClone.GetComponent<Seed>().PlantSeed(newTile, index);
+    //        //Sets seed counter to 0, skipping animation, and plants seed on tile
+    //        seedClone.GetComponent<Seed>().counter = 0;
+    //        seedClone.GetComponent<Seed>().PlantSeed(newTile, index);
 
-            //Destroys fruit
-            Destroy(gameObject);
-        }
-        else
-        {
-            //Spawns seed on normal tile
-            seedClone = Instantiate(seed, transform.position, Quaternion.identity);
-            Destroy(gameObject);
-        }
+    //        //Destroys fruit
+    //        Destroy(gameObject);
+    //    }
+    //    else
+    //    {
+    //        //Spawns seed on normal tile
+    //        seedClone = Instantiate(seed, transform.position, Quaternion.identity);
+    //        Destroy(gameObject);
+    //    }
 
-    }
+    //}
 
 }

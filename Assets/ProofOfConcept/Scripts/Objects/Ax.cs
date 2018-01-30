@@ -1,24 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TGS;
 
 public class Ax : MonoBehaviour
 {
-    TerrainGridSystem tgs;
-
-    public Texture2D groundTexture;
 
     public float axDistance;
 
     GameObject _player;
 
-    GameObject currentTree;
-
-    public GameObject crop;
-    GameObject cropClone;
-
-    public AudioSource cameraSource;
+    AudioSource cameraSource;
     public AudioClip cropYield;
 
     SpriteRenderer symbol;
@@ -27,29 +18,20 @@ public class Ax : MonoBehaviour
     private Sprite clickSprite;
 
     inventoryMan inventMan;
-    int minCrop, maxCrop;
-
-    WorldManager worldMan;
-
+    
     public bool cursorChange, changeBack, swingAx, axBack;
     int frameCounter;
 
     float lerpVal;
-
-    //public float lerpSpeed;
-    //public Transform lerpTransform;
-
+    
     void Start()
     {
         frameCounter = 5;
-        //TerrainGridSystem reference
-        tgs = TerrainGridSystem.instance;
 
         _player = GameObject.FindWithTag("Player");
         symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<SpriteRenderer>(); //searches for InteractSymbol
         inventMan = GetComponent<inventoryMan>();
-
-        worldMan = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        cameraSource = Camera.main.GetComponent<AudioSource>();
 
         //loads Cursor Sprites
         normalSprite = Resources.Load<Sprite>("CursorSprites/crosshair");
@@ -74,7 +56,7 @@ public class Ax : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 //Checks if the hit is a ground tile and within Distance for hoeing
-                if (hit.transform.gameObject.tag == "sequencer" && Vector3.Distance(_player.transform.position, hit.point) <= axDistance)
+                if (hit.transform.gameObject.tag == "Plant" && Vector3.Distance(_player.transform.position, hit.point) <= axDistance)
                 {
                     Debug.Log("hit");
                     cursorChange = true;
@@ -89,44 +71,20 @@ public class Ax : MonoBehaviour
                 changeBack = false;
             }
 
-            
-            //Sends out raycast
             if (Input.GetMouseButton(0) && !swingAx && !axBack)
             {
                 //Checks if raycast hits
                 if (Physics.Raycast(ray, out hit))
                 {
                     //Checks if the hit is a ground tile and within Distance for hoeing
-                    if (hit.transform.gameObject.tag == "sequencer" && Vector3.Distance(_player.transform.position, hit.point) <= axDistance)
+                    if (hit.transform.gameObject.tag == "Plant" && Vector3.Distance(_player.transform.position, hit.point) <= axDistance)
                     {
                         cursorChange = true;
                         swingAx = true;
                         lerpVal = 0;
-                        currentTree = hit.transform.gameObject;
-                        Cell tree = tgs.CellGetAtPosition(hit.point, true);
-                        int index = currentTree.GetComponent<NewPlantLife>().cellIndex;
-                        tgs.CellToggleRegionSurface(index, true, groundTexture);
-                        tgs.CellSetTag(tree, 0);
-                        //play sound
-                        //play falling animation
-
-                        if (currentTree.GetComponent<NewPlantLife>().ageCounter == 1)
-                        {
-                            SpawnCrops(1, 3);
-                        }
-                        else if (currentTree.GetComponent<NewPlantLife>().ageCounter == 2)
-                        {
-                            SpawnCrops(3, 6);
-
-                        }
-                        else if (currentTree.GetComponent<NewPlantLife>().ageCounter == 3)
-                        {
-                            SpawnCrops(3, 6);
-
-                        }
-
-                        cameraSource.PlayOneShot(cropYield);
+                        
                         Destroy(hit.transform.gameObject);
+                        //SpawnSeed();
 
                     }
                 }
@@ -169,15 +127,8 @@ public class Ax : MonoBehaviour
         }
     }
 
-    void SpawnCrops(int min, int max)
+   void SpawnSpeed()
     {
-        int randoCrops = Random.Range(min, max);
-        int randomRotation = Random.Range(0, 360);
-        for (int i = 0; i < randoCrops; i++)
-        {
-            Vector3 xyz = (Vector3)Random.insideUnitSphere * 1 + Vector3.up;
-            Vector3 spawnPosition = xyz + currentTree.transform.position;
-            cropClone = Instantiate(crop, spawnPosition, Quaternion.Euler(0, randomRotation, 0));
-        }
+        // use this to spawn a seed when you limit the numbers
     }
 }

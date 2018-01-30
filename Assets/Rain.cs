@@ -1,16 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TGS;
+//using TGS;
 
 public class Rain: MonoBehaviour {
-    TerrainGridSystem tgs;
+    //TerrainGridSystem tgs;
 
     public ParticleSystem rainEffect;
     
     public Texture2D wateredTexture;
 
-    NewPlantLife currentPlant;
+    //NewPlantLife currentPlant;
 
     AudioSource rainSource;
     public AudioClip slightShower, downPour, heavyRain;
@@ -27,7 +27,7 @@ public class Rain: MonoBehaviour {
         rainSource = GetComponent<AudioSource>();
 
         //TerrainGridSystem reference
-        tgs = TerrainGridSystem.instance;
+        //tgs = TerrainGridSystem.instance;
         
         bed = GameObject.FindGameObjectWithTag("Bed");
         sleepScript = bed.GetComponent<Bed>();
@@ -53,21 +53,21 @@ public class Rain: MonoBehaviour {
 
     void OnParticleCollision(GameObject hit)
     {
-        if(hit.tag == "sequencer")
+        if(hit.tag == "Plant")
         {
 
-            currentPlant = hit.GetComponent<NewPlantLife>();
-            if (!currentPlant.hasBeenWateredToday)
-                {
-                    currentPlant.hasBeenWateredToday = true;
-                    currentPlant.hasBeenWatered = true;
+            //currentPlant = hit.GetComponent<NewPlantLife>();
+            //if (!currentPlant.hasBeenWateredToday)
+            //    {
+            //        currentPlant.hasBeenWateredToday = true;
+            //        currentPlant.hasBeenWatered = true;
 
-                    //to change ground texture to water texture
-                    Cell tree = tgs.CellGetAtPosition(hit.transform.position, true);
-                    int index = currentPlant.cellIndex;
-                    tgs.CellToggleRegionSurface(index, true, wateredTexture);
+            //        //to change ground texture to water texture
+            //        Cell tree = tgs.CellGetAtPosition(hit.transform.position, true);
+            //        int index = currentPlant.cellIndex;
+            //        tgs.CellToggleRegionSurface(index, true, wateredTexture);
 
-                }
+            //    }
             }
     }
 
