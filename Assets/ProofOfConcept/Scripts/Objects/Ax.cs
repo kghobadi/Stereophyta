@@ -23,7 +23,9 @@ public class Ax : MonoBehaviour
     int frameCounter;
 
     float lerpVal;
-    
+
+    public LayerMask mask;
+
     void Start()
     {
         frameCounter = 5;
@@ -53,7 +55,7 @@ public class Ax : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out hit, 100, mask))
             {
                 //Checks if the hit is a ground tile and within Distance for hoeing
                 if (hit.transform.gameObject.tag == "Plant" && Vector3.Distance(_player.transform.position, hit.point) <= axDistance)
@@ -71,10 +73,10 @@ public class Ax : MonoBehaviour
                 changeBack = false;
             }
 
-            if (Input.GetMouseButton(0) && !swingAx && !axBack)
+            if (Input.GetMouseButton(1) && !swingAx && !axBack)
             {
                 //Checks if raycast hits
-                if (Physics.Raycast(ray, out hit))
+                if (Physics.Raycast(ray, out hit, 100, mask))
                 {
                     //Checks if the hit is a ground tile and within Distance for hoeing
                     if (hit.transform.gameObject.tag == "Plant" && Vector3.Distance(_player.transform.position, hit.point) <= axDistance)
