@@ -37,7 +37,7 @@ public class Trader : Interactable
 
     bool setBack;
 
-    cellManager cellMan;
+    //cellManager cellMan;
 
     float tim;
     public GameObject horn;
@@ -55,7 +55,7 @@ public class Trader : Interactable
         
 
         invent = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
-        cellMan = GameObject.Find("cellManager").GetComponent<cellManager>();
+        //cellMan = GameObject.Find("cellManager").GetComponent<cellManager>();
 
         s1Interactable = slot1.GetComponent<TraderSlot>();
         s2Interactable = slot2.GetComponent<TraderSlot>();
@@ -245,7 +245,7 @@ public class Trader : Interactable
                     {
                         if (!traderAudio.isPlaying)
                             traderAudio.PlayOneShot(exchangeSound);
-                        cellMan.resizeTonight = true;
+                        //cellMan.resizeTonight = true;
                         cropCurrency.cropCounter -= s4Price;
                         s4Interactable.empty = true;
                         s4Interactable.slotPrice = "Thank you!";
@@ -342,17 +342,17 @@ public class Trader : Interactable
         s3Amount = worldMan.seedSpawnAmount;
 
 
-        if (cellMan.currentSize < cellMan.prices.Length - 1)
-        {
-            s4Interactable.empty = false;
-            s4Price = cellMan.prices[cellMan.currentSize + 1];
-            s4Interactable.slotPrice = s4Price.ToString();
-        }
-        else
-        {
-            s4Interactable.empty = true;
-            s4Interactable.slotPrice = "insert joke about greedy\n capitalism here please :)";
-        }
+        ////if (cellMan.currentSize < cellMan.prices.Length - 1)
+        ////{
+        ////    s4Interactable.empty = false;
+        ////    s4Price = cellMan.prices[cellMan.currentSize + 1];
+        ////    s4Interactable.slotPrice = s4Price.ToString();
+        ////}
+        //else
+        //{
+        //    s4Interactable.empty = true;
+        //    s4Interactable.slotPrice = "insert joke about greedy\n capitalism here please :)";
+        //}
 
 
         //Debug.Log(s1Price + "+" + s2Price + "+" + s3Price);

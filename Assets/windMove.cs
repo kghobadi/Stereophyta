@@ -13,17 +13,17 @@ public class windMove : MonoBehaviour {
     public int timesMoved;
     public Vector3 originalPos;
 
-	AudioHelm.AudioHelmClock clock;
+	//AudioHelm.AudioHelmClock clock;
 
-    cellManager cellMan;
+    //cellManager cellMan;
 
 	// Use this for initialization
 	void Start () {
-        cellMan = GameObject.Find("cellManager").GetComponent<cellManager>();
+        //cellMan = GameObject.Find("cellManager").GetComponent<cellManager>();
 		position = transform;
         originalPos = transform.position;
 		bed = GameObject.FindGameObjectWithTag("Bed").GetComponent<Bed> ();
-		clock = GameObject.Find ("clock").GetComponent<AudioHelm.AudioHelmClock> ();
+		//clock = GameObject.Find ("clock").GetComponent<AudioHelm.AudioHelmClock> ();
 		timer = timerTotal;
 		multiplier = 1;
 		particleMove = GetComponent<ParticleSystem>();
@@ -45,11 +45,11 @@ public class windMove : MonoBehaviour {
 			moveWind ();
 			timer = timerTotal;
 		}
-        if (timesMoved > (6 + cellMan.addToSequencer))
-        {
-            transform.position = originalPos;
-            timesMoved = 0;
-        }
+        //if (timesMoved > (6 + cellMan.addToSequencer))
+        //{
+        //    transform.position = originalPos;
+        //    timesMoved = 0;
+        //}
     }
 	void moveWind(){
 		position.position += moveAmount * dirMultiplier;
