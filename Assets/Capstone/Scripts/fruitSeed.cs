@@ -22,6 +22,8 @@ public class fruitSeed : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+
         if (inventMan.underPlayerControl)
         {
             if (Input.GetMouseButtonDown(1) && transform.position.y < 10)
@@ -43,6 +45,10 @@ public class fruitSeed : MonoBehaviour {
                     plantClone = Instantiate(plants, transform.position + new Vector3(0, 2f, 0), Quaternion.Euler(0, randomRotation, 0));
                 }
             }
+        }
+        else
+        {
+            transform.localEulerAngles += new Vector3(0, 1, 0);
         }
         
     }
