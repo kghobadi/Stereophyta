@@ -12,9 +12,11 @@ public class fruitSeed : MonoBehaviour {
 
     inventoryMan inventMan;
     Inventory invent;
+    ThirdPersonController tpc;
 
     void Start () {
         _player = GameObject.FindGameObjectWithTag("Player");
+        tpc = _player.GetComponent<ThirdPersonController>();
 
         inventMan = GetComponent<inventoryMan>();
         invent = _player.GetComponent<Inventory>();
@@ -41,8 +43,9 @@ public class fruitSeed : MonoBehaviour {
                 }
                 if (canPlant)
                 {
-                    int randomRotation = Random.Range(0, 360);
-                    plantClone = Instantiate(plants, transform.position + new Vector3(0, 2f, 0), Quaternion.Euler(0, randomRotation, 0));
+                    int[] rotations = new int[] { 0, 90, 180, 270 };
+                    int randomRotation = Random.Range(0, 4);
+                    plantClone = Instantiate(plants, transform.position + new Vector3(0, 2f, 0), Quaternion.Euler(0, rotations[randomRotation], 0));
                 }
             }
         }

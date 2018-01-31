@@ -22,6 +22,8 @@ public class ThirdPersonController : MonoBehaviour
 
     public LayerMask mask;
 
+    public bool isHoldingSomething;
+
     void Start()
     {
         player = GetComponent<CharacterController>();

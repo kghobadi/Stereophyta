@@ -10,6 +10,7 @@ public class PuzzleWind : MonoBehaviour {
 	void Start () {
         _windGen = GetComponentInParent<WindMachine>();
         currentSpeed = _windGen.windSpeed;
+        transform.SetParent(null);
 	}
 	
 	void Update () {

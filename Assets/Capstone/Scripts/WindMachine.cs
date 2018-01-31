@@ -11,6 +11,8 @@ public class WindMachine : Interactable {
     float timer;
     public float windSpeed;
     public float distanceToDestroy;
+
+    public bool transitioned;
 	
 	public override void Start () {
         base.Start();
@@ -26,12 +28,17 @@ public class WindMachine : Interactable {
             windClone = Instantiate(wind, transform.position, new Quaternion (0,0,0,0) , transform);
             timer = timerTotal;
         }
-        
+
+        if (transitioned)
+        {
+            transform.localEulerAngles += new Vector3(0, 90, 0);
+            transitioned = false;
+        }
 	}
 
     public override void handleClickSuccess()
     {
         base.handleClickSuccess();
-        transform.localEulerAngles += new Vector3(0, 90, 0);
+        transitioned = true;
     }
 }
