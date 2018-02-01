@@ -74,6 +74,7 @@ public class WindMachine : Interactable {
         }
     }
 
+
     public override void OnMouseOver()
     {
         if (!tpc.isHoldingSomething && !playerHolding)
