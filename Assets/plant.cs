@@ -11,6 +11,7 @@ public class plant : Interactable {
     AudioSource plantAudio;
 
     ParticleSystem notesPlaying;
+    public AudioClip lowerSound;
     
 
 	public override void Start () {
@@ -32,7 +33,32 @@ public class plant : Interactable {
         currentNote = Random.Range(0, musicalNotes.Length);
         currentSound = musicalNotes[currentNote]; //randomize note at start
         tubules[currentNote].transform.localScale *= 2;
-        
+        notesPlaying.transform.position = tubules[currentNote].transform.position;
+
+    }
+
+    public override void OnMouseOver()
+    {
+        base.OnMouseOver();
+        if (Input.GetMouseButtonDown(1))
+        {
+            tubules[currentNote].transform.localScale *= 0.5f;
+
+            if (currentNote > 0)
+            {
+                currentNote--;
+            }
+            else
+            {
+                currentNote = musicalNotes.Length - 1;
+            }
+            // chooses new note and enlarges tubule
+            currentSound = musicalNotes[currentNote];
+            tubules[currentNote].transform.localScale *= 2;
+            notesPlaying.transform.position = tubules[currentNote].transform.position;
+            soundBoard.PlayOneShot(lowerSound);
+            
+        }
     }
 
     public override void handleClickSuccess()
@@ -52,6 +78,7 @@ public class plant : Interactable {
         // chooses new note and enlarges tubule
         currentSound = musicalNotes[currentNote];
         tubules[currentNote].transform.localScale *= 2;
+        notesPlaying.transform.position = tubules[currentNote].transform.position;
         Debug.Log(currentNote);
     }
 

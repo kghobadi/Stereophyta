@@ -37,22 +37,21 @@ public abstract class Interactable : MonoBehaviour
 
     protected GameObject pageNotifier;
     protected Bed bedScript;
+    protected ThirdPersonController tpc;
 
+    protected GameObject rightArmObj;
+
+
+    protected bool playerHolding;
 
     public virtual void Start()
     {
-        //bedScript = GameObject.FindGameObjectWithTag("Bed").GetComponent<Bed>();
-        //worldMan = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+
         _player = GameObject.FindGameObjectWithTag("Player"); //searches for Player
         cammy = GameObject.FindGameObjectWithTag("MainCamera"); //searches for Camera
         symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
-        //identifierObject = GameObject.FindGameObjectWithTag("Identifier");
-        //paper = identifierObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
-        //pageNotifier = GameObject.Find("PageNotifier");
 
-        //identifierObject.GetComponent<SpriteRenderer>().enabled = false;
-        //paper.enabled = false;
-        //loads Cursor Sprites
+        tpc = _player.GetComponent<ThirdPersonController>();
         normalSprite = Resources.Load<Sprite>("CursorSprites/crosshair");
         interactSprite = Resources.Load<Sprite>("CursorSprites/crosshairclicked");
         clickSprite = Resources.Load<Sprite>("CursorSprites/crosshairclicked");
@@ -61,27 +60,27 @@ public abstract class Interactable : MonoBehaviour
 
         soundBoard = cammy.GetComponent<AudioSource>(); //assigns audio source
 
-        fpc = _player.GetComponent<FirstPersonController>();
-        //startScale = transform.localScale;
+        rightArmObj = GameObject.FindGameObjectWithTag("rightArm");
     }
 
     public virtual void OnMouseEnter()
     {
         if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
         {
-            //if (!worldMan.firstTimePickups[objNumber])
-            //{
-            //    identifierObject.GetComponent<SpriteRenderer>().enabled = true;
-            //    paper.enabled = true;
-            //}
-            //cammy.GetComponent<camMouseLook>().sensitivityX = 1.5f;
-            //cammy.GetComponent<camMouseLook>().sensitivityY = 1.5f;
+            
             symbol.sprite = interactSprite;
 
         }
     }
 
-    // can write an Update timer for Identifier if necessary
+    public virtual void OnMouseOver()
+    {
+        if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
+        {
+            symbol.sprite = interactSprite;
+
+        }
+    }
 
     public virtual void OnMouseExit()
     {
@@ -89,40 +88,18 @@ public abstract class Interactable : MonoBehaviour
         {
             symbol.sprite = normalSprite;
 
-
-            //if (!worldMan.firstTimePickups[objNumber])
-            //{
-            //    identifierObject.GetComponent<SpriteRenderer>().enabled = false;
-            //    paper.enabled = false;
-            //}
         }
     }
 
     public virtual void handleClickSuccess()
     {
         
-        //if (!worldMan.firstTimePickups[objNumber])
-        //{
-        //    identifierObject.GetComponent<SpriteRenderer>().enabled = false;
-        //    paper.enabled = false;
-        //    worldMan.firstTimePickups[objNumber] = true;
-        //    symbol.sprite = clickSprite;
-        //    soundBoard.PlayOneShot(firstTimePickup);
-        //    symbol.sprite = normalSprite;
-        //    pageNotifier.GetComponent<SpriteRenderer>().enabled = true;
-        //    if(bookPage != null)
-        //    {
-        //        worldMan.bookRef.bookPages[worldMan.bookRef.pageAdder] = bookPage;
-        //        worldMan.bookRef.pageAdder++;
-        //    }
-        ////}
-        //else
-        //{
+        
             symbol.sprite = clickSprite;
             Play();
 
             symbol.sprite = normalSprite;
-        //}
+     
     }
 
 

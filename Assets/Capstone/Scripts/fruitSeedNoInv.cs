@@ -10,11 +10,9 @@ public class fruitSeedNoInv : Interactable {
 
     public int plantingRadius;
     
-    ThirdPersonController tpc;
-    GameObject rightArmObj;
+    
     int originalLayer;
 
-    bool playerHolding;
     bool planting;
 
     public float fallingSpeed; //how fast seed falls to ground
@@ -22,8 +20,6 @@ public class fruitSeedNoInv : Interactable {
 
     public override void Start () {
         base.Start();
-        tpc = _player.GetComponent<ThirdPersonController>();
-        rightArmObj = GameObject.FindGameObjectWithTag("rightArm");
         originalLayer = gameObject.layer;
     }
 
