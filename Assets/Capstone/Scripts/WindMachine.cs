@@ -48,13 +48,11 @@ public class WindMachine : Interactable {
 
         if (transitionBack)
         {
-            transform.localEulerAngles += new Vector3(0, 90, 0);
-            transitionBack = false;
+            transform.localEulerAngles += new Vector3(0, 1, 0);
         }
         if (transitioned)
         {
-            transform.localEulerAngles += new Vector3(0, -90, 0);
-            transitioned = false;
+            transform.localEulerAngles += new Vector3(0, -1, 0);
         }
 
         if(Vector3.Distance(_player.transform.position, transform.position) < withinDistanceActive && interactable)
@@ -64,14 +62,15 @@ public class WindMachine : Interactable {
                 PickUpObject();
             }
         }
-	}
 
-    public override void handleClickSuccess()
-    {
-        if(!tpc.isHoldingSomething && !playerHolding)
+        if (Input.GetMouseButtonUp(0))
         {
-            base.handleClickSuccess();
-            transitioned = true;
+            transitioned = false;
+        }
+
+        if (Input.GetMouseButtonUp(1))
+        {
+            transitionBack = false;
         }
     }
 
@@ -80,11 +79,19 @@ public class WindMachine : Interactable {
         if (!tpc.isHoldingSomething && !playerHolding)
         {
             base.OnMouseOver();
-            if (Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButton(0))
+            {
+                transitioned = true;
+                if(!soundBoard.isPlaying)
+                    soundBoard.PlayOneShot(InteractSound);
+            }
+            if (Input.GetMouseButton(1))
             {
                 transitionBack = true;
-                soundBoard.PlayOneShot(selectLower);
+                if (!soundBoard.isPlaying)
+                    soundBoard.PlayOneShot(selectLower);
             }
+           
         }
     }
 
