@@ -25,10 +25,10 @@ public class WindGen : MonoBehaviour {
             timer = timerTotal;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
             
-            transform.localEulerAngles += new Vector3(0, 90, 0);
-        }
+        //    transform.localEulerAngles += new Vector3(0, 90, 0);
+        //}
 	}
 }

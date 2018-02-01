@@ -11,8 +11,7 @@ public class WindMachine : Interactable {
     float timer;
     public float windSpeed;
     public float distanceToDestroy;
-
-    public bool transitioned, transitionBack;
+    
     public AudioClip selectLower;
 
 
@@ -29,12 +28,10 @@ public class WindMachine : Interactable {
     }
 	
 	void Update () {
-        Debug.Log(playerHolding);
-        Debug.Log(interactable);
 
         if (playerHolding)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetMouseButtonDown(1))
             {
                 DropObject();
             }
@@ -44,57 +41,21 @@ public class WindMachine : Interactable {
         {
             windClone = Instantiate(wind, transform.position, new Quaternion (0,0,0,0) , transform);
             timer = timerTotal;
-        }
 
-        if (transitionBack)
-        {
-            transform.localEulerAngles += new Vector3(0, 1, 0);
-        }
-        if (transitioned)
-        {
-            transform.localEulerAngles += new Vector3(0, -1, 0);
-        }
-
-        if(Vector3.Distance(_player.transform.position, transform.position) < withinDistanceActive && interactable)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                PickUpObject();
-            }
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            transitioned = false;
-        }
-
-        if (Input.GetMouseButtonUp(1))
-        {
-            transitionBack = false;
+            //grab timerTotal from RhythmLever
         }
     }
 
-
-    public override void OnMouseOver()
+    public override void handleClickSuccess()
     {
-        if (!tpc.isHoldingSomething && !playerHolding)
+        if(interactable && !tpc.isHoldingSomething)
         {
-            base.OnMouseOver();
-            if (Input.GetMouseButton(0))
-            {
-                transitioned = true;
-                if(!soundBoard.isPlaying)
-                    soundBoard.PlayOneShot(InteractSound);
-            }
-            if (Input.GetMouseButton(1))
-            {
-                transitionBack = true;
-                if (!soundBoard.isPlaying)
-                    soundBoard.PlayOneShot(selectLower);
-            }
-           
+            base.handleClickSuccess();
+            PickUpObject();
         }
     }
+
+
 
     public void PickUpObject()
     {
@@ -111,7 +72,7 @@ public class WindMachine : Interactable {
 
     public void DropObject()
     {
-        transform.position -= new Vector3(0, -3, 0);
+        transform.localPosition -= new Vector3(0, 3, 0);
         transform.SetParent(null);
 
         tpc.isHoldingSomething = false;
