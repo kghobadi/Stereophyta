@@ -29,6 +29,8 @@ public class WindMachine : Interactable {
     }
 	
 	void Update () {
+        Debug.Log(playerHolding);
+        Debug.Log(interactable);
 
         if (playerHolding)
         {
@@ -75,9 +77,9 @@ public class WindMachine : Interactable {
 
     public override void OnMouseOver()
     {
-        base.OnMouseOver();
         if (!tpc.isHoldingSomething && !playerHolding)
         {
+            base.OnMouseOver();
             if (Input.GetMouseButtonDown(1))
             {
                 transitionBack = true;
