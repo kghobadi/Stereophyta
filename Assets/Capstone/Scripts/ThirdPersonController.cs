@@ -22,6 +22,8 @@ public class ThirdPersonController : MonoBehaviour
 
     public LayerMask mask;
 
+    public bool isHoldingSomething;
+
     void Start()
     {
         player = GetComponent<CharacterController>();
@@ -35,26 +37,6 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
-        //constant move to mouse pos
-        //if (Input.GetMouseButton(0))
-        //{
-        //    movement = new Vector3(0, 0, 1 * speed);
-        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        //    RaycastHit hit;
-
-        //    if (Physics.Raycast(ray, out hit, 100, mask))
-        //    {
-        //        if (hit.transform.gameObject.tag == "Ground")
-        //        {
-        //            transform.LookAt(hit.point);
-        //            movement = transform.rotation * movement;
-        //            player.Move(movement * Time.deltaTime);
-
-        //            player.Move(new Vector3(0, -0.5f, 0));
-        //        }
-        //    }
-        //}
-
         //click to move to point
         if (Input.GetMouseButton(0))
         {
@@ -67,12 +49,16 @@ public class ThirdPersonController : MonoBehaviour
                 if (hit.transform.gameObject.tag == "Ground")
                 {
                     targetPosition = hit.point + new Vector3(0,1,0);
-                    isMoving = true;
+                    Debug.Log(targetPosition);
+                    if(targetPosition.y < 3)
+                    {
+                        isMoving = true;
+                    }
                 }
             }
         }
 
-        if (isMoving)
+        if (isMoving && targetPosition.y < 3)
         {
             MovePlayer();
         }
