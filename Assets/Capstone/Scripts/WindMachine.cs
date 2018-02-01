@@ -46,15 +46,15 @@ public class WindMachine : Interactable {
             timer = timerTotal;
         }
 
-        if (transitioned)
-        {
-            transform.localEulerAngles += new Vector3(0, 90, 0);
-            transitioned = false;
-        }
         if (transitionBack)
         {
-            transform.localEulerAngles += new Vector3(0, -90, 0);
+            transform.localEulerAngles += new Vector3(0, 90, 0);
             transitionBack = false;
+        }
+        if (transitioned)
+        {
+            transform.localEulerAngles += new Vector3(0, -90, 0);
+            transitioned = false;
         }
 
         if(Vector3.Distance(_player.transform.position, transform.position) < withinDistanceActive && interactable)
