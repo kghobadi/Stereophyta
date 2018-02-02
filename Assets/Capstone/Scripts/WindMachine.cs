@@ -20,11 +20,12 @@ public class WindMachine : Interactable {
     public override void Start () {
         base.Start();
         timer = timerTotal;
-        windClone = Instantiate(wind, transform.position, Quaternion.identity, transform);
+
         interactable = true;
         windMachineModel = transform.GetChild(0);
 
         originalLayer = gameObject.layer;
+        windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.eulerAngles + new Vector3(0, 90, 0)), windMachineModel);
     }
 	
 	void Update () {
@@ -40,7 +41,7 @@ public class WindMachine : Interactable {
         if(timer < 0)
         {
             // this needs work
-            windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.localEulerAngles + new Vector3(0, 90,0)) , transform);
+            windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.eulerAngles + new Vector3(0,90,0)) , windMachineModel);
             timer = timerTotal;
         }
     }
