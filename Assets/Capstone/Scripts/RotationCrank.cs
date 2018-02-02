@@ -8,6 +8,7 @@ public class RotationCrank : Interactable {
     public AudioClip selectLower;
 
     public GameObject crank;
+    public GameObject windMachineModel;
 
     public override void Start()
     {
@@ -28,12 +29,12 @@ public class RotationCrank : Interactable {
 
         if (transitionBack)
         {
-            transform.parent.localEulerAngles += new Vector3(0, 1, 0);
+            windMachineModel.transform.localEulerAngles += new Vector3(0, 1, 0);
             crank.transform.localEulerAngles += new Vector3(0, 0, -1);
         }
         if (transitioned)
         {
-            transform.parent.localEulerAngles += new Vector3(0, -1, 0);
+            windMachineModel.transform.localEulerAngles += new Vector3(0, -1, 0);
             crank.transform.localEulerAngles += new Vector3(0, 0, 1);
         }
 

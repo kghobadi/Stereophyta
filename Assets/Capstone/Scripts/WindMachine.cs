@@ -13,7 +13,7 @@ public class WindMachine : Interactable {
     public float distanceToDestroy;
     
     public AudioClip selectLower;
-
+    Transform windMachineModel;
 
     int originalLayer;
 
@@ -22,7 +22,7 @@ public class WindMachine : Interactable {
         timer = timerTotal;
         windClone = Instantiate(wind, transform.position, Quaternion.identity, transform);
         interactable = true;
-
+        windMachineModel = transform.GetChild(0);
 
         originalLayer = gameObject.layer;
     }
@@ -39,10 +39,9 @@ public class WindMachine : Interactable {
         timer -= Time.deltaTime;
         if(timer < 0)
         {
-            windClone = Instantiate(wind, transform.position, new Quaternion (0,0,0,0) , transform);
+            // this needs work
+            windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.localEulerAngles + new Vector3(0, 90,0)) , transform);
             timer = timerTotal;
-
-            //grab timerTotal from RhythmLever
         }
     }
 
