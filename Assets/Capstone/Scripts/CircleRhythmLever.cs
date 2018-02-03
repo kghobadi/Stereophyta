@@ -10,21 +10,30 @@ public class CircleRhythmLever : Interactable {
 
     Transform windParent;
 
+    DirectionLever dirLever;
+
     CircleMill windTurbine;
 
     CircleWind windCircles;
 
-    public int leverState;
+    public int leverState, leverStateMax;
+
+    bool increasing;
 
     public override void Start()
     {
         base.Start();
         interactable = true;
         windParent = transform.parent;
-        windTurbine = windParent.gameObject.GetComponent<CircleMill>();
+        windTurbine = windParent.GetComponent<CircleMill>();
+        dirLever = windParent.GetChild(1).GetComponent<DirectionLever>();
         windCircles = windParent.GetChild(0).GetComponent<CircleWind>();
+
+        //set states
         leverState = 1;
-        LeverStateSwitch();
+        windCircles.windSpeed = 0.4f;
+        windTurbine.rotationSpeed = 0.4f;
+        lever.transform.localEulerAngles = new Vector3(0, 0, 0);
     }
 
     void Update()
@@ -41,72 +50,80 @@ public class CircleRhythmLever : Interactable {
 
     public override void handleClickSuccess()
     {
-        //nothing happens
-    }
-
-    public override void OnMouseOver()
-    {
         if (!tpc.isHoldingSomething && interactable)
         {
-            base.OnMouseOver();
-            if (Input.GetMouseButtonDown(0))
+            //base.handleClickSuccess();
+
+            if (increasing)
             {
-                if(leverState > 0)
-                {
-                    leverState--;
-                    LeverStateSwitch();
-                    if (!soundBoard.isPlaying)
-                        soundBoard.PlayOneShot(selectLower);
-                }
-            }
-            if (Input.GetMouseButtonDown(1))
-            {
-                if(leverState < 2) //could change this to maxState
+                if (leverState < leverStateMax)
                 {
                     leverState++;
                     LeverStateSwitch();
                     if (!soundBoard.isPlaying)
                         soundBoard.PlayOneShot(InteractSound);
                 }
+                else
+                {
+                    increasing = false;
+                    leverState--;
+                    LeverStateSwitch();
+                    if (!soundBoard.isPlaying)
+                        soundBoard.PlayOneShot(selectLower);
+                }
             }
-
+            else
+            {
+                if (leverState > 0)
+                {
+                    leverState--;
+                    LeverStateSwitch();
+                    if (!soundBoard.isPlaying)
+                        soundBoard.PlayOneShot(selectLower);
+                }
+                else
+                {
+                    increasing = true;
+                    leverState++;
+                    LeverStateSwitch();
+                    if (!soundBoard.isPlaying)
+                        soundBoard.PlayOneShot(InteractSound);
+                }
+            }
         }
     }
 
     public void LeverStateSwitch()
     {
-        switch (leverState)
+        if (dirLever.dirPositive)
         {
-            case 0:
-                windCircles.windSpeed = 0.2f;
-                if (windTurbine.negative)
-                    windTurbine.rotationSpeed = -0.2f;
-                else
-                {
-                    windTurbine.rotationSpeed = 0.2f;
-                }
-                lever.transform.localEulerAngles = new Vector3(-30, 0, 0);
-                break;
-            case 1:
-                windCircles.windSpeed = 0.4f;
-                if (windTurbine.negative)
-                    windTurbine.rotationSpeed = -0.4f;
-                else
-                {
-                    windTurbine.rotationSpeed = 0.4f;
-                }
-                lever.transform.localEulerAngles = new Vector3(0, 0, 0);
-                break;
-            case 2:
-                windCircles.windSpeed = 0.6f;
-                if (windTurbine.negative)
-                    windTurbine.rotationSpeed = -0.6f;
-                else
-                {
-                    windTurbine.rotationSpeed = 0.6f;
-                }
-                lever.transform.localEulerAngles = new Vector3(30, 0, 0);
-                break;
+            if (increasing)
+            {
+                windCircles.windSpeed += 0.2f;
+                windTurbine.rotationSpeed += 0.2f;
+                lever.transform.localEulerAngles += new Vector3(30, 0, 0);
+            }
+            else
+            {
+                windCircles.windSpeed -= 0.2f;
+                windTurbine.rotationSpeed -= 0.2f;
+                lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+            }
+        }
+        else
+        {
+            if (increasing)
+            {
+                windCircles.windSpeed -= 0.2f;
+                windTurbine.rotationSpeed -= 0.2f;
+                lever.transform.localEulerAngles += new Vector3(30, 0, 0);
+            }
+            else
+            {
+                windCircles.windSpeed += 0.2f;
+                windTurbine.rotationSpeed += 0.2f;
+                lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+            }
         }
     }
 }

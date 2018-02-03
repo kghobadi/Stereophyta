@@ -24,6 +24,8 @@ public class ThirdPersonController : MonoBehaviour
 
     public bool isHoldingSomething;
 
+    Animator blubAnimator;
+
     void Start()
     {
         player = GetComponent<CharacterController>();
@@ -33,6 +35,8 @@ public class ThirdPersonController : MonoBehaviour
         terrain = GameObject.FindGameObjectWithTag("Ground");
 
         targetPosition = transform.position;
+        blubAnimator = GetComponentInChildren<Animator>();
+        blubAnimator.SetBool("walking", false);
     }
 
     void Update()
@@ -61,6 +65,11 @@ public class ThirdPersonController : MonoBehaviour
         if (isMoving && targetPosition.y < 3)
         {
             MovePlayer();
+            blubAnimator.SetBool("walking", true);
+        }
+        else
+        {
+            blubAnimator.SetBool("walking", false);
         }
     }
    

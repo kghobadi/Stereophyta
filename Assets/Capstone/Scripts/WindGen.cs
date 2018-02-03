@@ -14,7 +14,7 @@ public class WindGen : MonoBehaviour {
 	
 	void Start () {
         timer = timerTotal;
-        windClone = Instantiate(wind, transform.position, Quaternion.identity, transform);
+        windClone = Instantiate(wind, transform.position, new Quaternion(0, 0, 0, 0), transform);
     }
 	
 	void Update () {
