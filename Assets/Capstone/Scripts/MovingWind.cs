@@ -26,6 +26,7 @@ public class MovingWind : MonoBehaviour {
         if(other.gameObject.tag == "Plant")
         {
             other.gameObject.GetComponent<plant>().PlaySound();
+            // need to change this to PlantGrowth when that works
         }
     }
 }
