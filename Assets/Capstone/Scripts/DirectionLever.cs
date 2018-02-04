@@ -15,7 +15,7 @@ public class DirectionLever : Interactable
 
     CircleMill windTurbine;
 
-    bool dir = true;
+    public bool dirPositive = true;
 
     public override void Start()
     {
@@ -47,17 +47,15 @@ public class DirectionLever : Interactable
             windCircles.windSpeed *= -1;
             windTurbine.rotationSpeed *= -1;
 
-            if (dir)
+            if (dirPositive)
             {
                 lever.transform.localEulerAngles = new Vector3(0, -30, 0);
-                dir = false;
-                windTurbine.negative = true;
+                dirPositive = false;
             }
             else
             {
                 lever.transform.localEulerAngles = new Vector3(0, 30, 0);
-                dir = true;
-                windTurbine.negative = false;
+                dirPositive = true;
             }
         }
     }
