@@ -12,16 +12,6 @@ public abstract class Interactable : MonoBehaviour
     private Sprite interactSprite;
     private Sprite clickSprite;
 
-    //for hovering over objects
-    protected GameObject identifierObject;
-    protected SpriteRenderer paper;
-    public Sprite bookPage;
-
-    //public Vector3 startScale;
-    //public float scaleFactor;
-    //public Material outlineShader;
-
-
     protected float withinDistance = 10f;
     public float withinDistanceActive = 3f;
 
@@ -30,13 +20,6 @@ public abstract class Interactable : MonoBehaviour
 
     public bool interactable;
 
-    protected FirstPersonController fpc;
-
-    public int objNumber;
-    protected WorldManager worldMan;
-
-    protected GameObject pageNotifier;
-    protected Bed bedScript;
     protected ThirdPersonController tpc;
 
     protected GameObject rightArmObj;
