@@ -52,9 +52,20 @@ public class ThirdPersonController : MonoBehaviour
             {
                 if (hit.transform.gameObject.tag == "Ground")
                 {
-                    targetPosition = hit.point + new Vector3(0,1,0);
+                    targetPosition = hit.point + new Vector3(0, 1, 0);
                     Debug.Log(targetPosition);
-                    if(targetPosition.y < 3)
+                    if (targetPosition.y < 3)
+                    {
+                        isMoving = true;
+                    }
+                }
+                else if (Vector3.Distance(transform.position, hit.point) > 5 && 
+                    (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant" || hit.transform.gameObject.tag == "Seed")) 
+                    // use if statement for interactable stuff which the player should auto walk towards
+                {
+                    targetPosition = hit.point + new Vector3(1, -1, 1);
+                    Debug.Log(targetPosition);
+                    if (targetPosition.y < 3)
                     {
                         isMoving = true;
                     }

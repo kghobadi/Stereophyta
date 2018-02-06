@@ -13,12 +13,17 @@ public class plant : Interactable {
     ParticleSystem notesPlaying;
     public AudioClip lowerSound;
 
+    public bool scalingUp, scalingDown;
+    public float scaleSpeed, growthMultiplier;
+    Vector3 origScale;
+
 	public override void Start () {
         base.Start();
         interactable = true; //when should it be interactable? after # branches > 1
         plantAudio = GetComponent<AudioSource>();
         notesPlaying = transform.GetChild(0).GetComponent<ParticleSystem>() ; //grabs particle system
         notesPlaying.Stop();
+        origScale = transform.localScale;
 
         //counts up through plant children, adding these to the list of Branches for later.
         if(transform.childCount > 1)
@@ -83,6 +88,8 @@ public class plant : Interactable {
             currentSound = musicalNotes[currentNote];
             branches[currentNote].transform.localScale *= 2;
             notesPlaying.transform.position = branches[currentNote].transform.position;
+            //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
+            //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
             Debug.Log(currentNote);
         }
     }
@@ -97,11 +104,34 @@ public class plant : Interactable {
         {
             plantAudio.Stop();
         }
+        if (scalingUp)
+        {
+            if(transform.localScale.x < origScale.x * 1.5)
+                transform.localScale += new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
+            else
+            {
+                scalingUp = false;
+                scalingDown = true;
+            }
+        }
+        if (scalingDown)
+        {
+            if(transform.localScale.x > origScale.x)
+                transform.localScale -= new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
+            else
+            {
+                scalingDown = false;
+            }
+        }
     }
 
     public void PlaySound()
     {
-        if (!plantAudio.isPlaying )
+        if (!plantAudio.isPlaying)
+        {
             plantAudio.PlayOneShot(currentSound);
+            scalingUp = true;
+        }
+        
     }
 }
