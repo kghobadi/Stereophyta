@@ -29,4 +29,11 @@ public class MovingWind : MonoBehaviour {
             // need to change this to PlantGrowth when that works
         }
     }
+    void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Plant")
+        {
+            other.gameObject.GetComponent<plant>().PlaySound();
+        }
+    }
 }

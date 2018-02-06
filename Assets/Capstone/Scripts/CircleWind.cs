@@ -23,4 +23,11 @@ public class CircleWind : MonoBehaviour {
             other.gameObject.GetComponent<plant>().PlaySound();
         }
     }
+    void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Plant")
+        {
+            other.gameObject.GetComponent<plant>().PlaySound();
+        }
+    }
 }
