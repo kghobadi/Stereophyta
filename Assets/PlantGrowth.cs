@@ -139,8 +139,7 @@ public class PlantGrowth : Interactable {
     {   if(plantStalk.transform.localScale.y < desiredHeight)
         {
             //constantly grow plant on y scale if not at desiredHeight
-            plantStalk.transform.localScale = new Vector3(plantStalk.transform.localScale.x, 
-                plantStalk.transform.localScale.y * growthSpeed, plantStalk.transform.localScale.z);
+            plantStalk.transform.localScale += new Vector3(0, growthSpeed * Time.deltaTime, 0);
             // can either grow all the way until fully grown -- quick
             // or can set it to grow at intervals, only adding # of branches and height each day
             if((plantStalk.transform.localScale.y % heightIntervals) < 0.01f && branchCount < musicalNotes.Length + 1 && !spawnedBranch)
