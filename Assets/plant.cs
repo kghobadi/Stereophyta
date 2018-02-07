@@ -97,10 +97,6 @@ public class plant : Interactable {
 
     void Update()
     {
-        if(Vector3.Distance(transform.position, _player.transform.position) > plantAudio.maxDistance + 10)
-        {
-            plantAudio.Stop();
-        }
         if (scalingUp)
         {
             notesPlaying.Emit(1);
