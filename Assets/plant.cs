@@ -88,6 +88,7 @@ public class plant : Interactable {
             currentSound = musicalNotes[currentNote];
             branches[currentNote].transform.localScale *= 2;
             notesPlaying.transform.position = branches[currentNote].transform.position;
+            // try setting parent to branch and setting position after!
             //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
             //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
             Debug.Log(currentNote);
@@ -96,17 +97,10 @@ public class plant : Interactable {
 
     void Update()
     {
-        if (plantAudio.isPlaying)
-        {
-            notesPlaying.Emit(1);
-        }
-        if(Vector3.Distance(transform.position, _player.transform.position) > plantAudio.maxDistance + 10)
-        {
-            plantAudio.Stop();
-        }
         if (scalingUp)
         {
-            if(transform.localScale.x < origScale.x * 1.5)
+            notesPlaying.Emit(1);
+            if (transform.localScale.x < origScale.x * 1.5)
                 transform.localScale += new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
             else
             {
@@ -116,7 +110,8 @@ public class plant : Interactable {
         }
         if (scalingDown)
         {
-            if(transform.localScale.x > origScale.x)
+            notesPlaying.Emit(1);
+            if (transform.localScale.x > origScale.x)
                 transform.localScale -= new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
             else
             {
