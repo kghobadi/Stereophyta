@@ -18,6 +18,7 @@ public class CircleRhythmLever : Interactable {
 
     public int leverState, leverStateMax;
 
+    public float rhythmInterval;
     bool increasing;
 
     public override void Start()
@@ -31,8 +32,6 @@ public class CircleRhythmLever : Interactable {
 
         //set states
         leverState = 1;
-        windCircles.windSpeed = 0.4f;
-        windTurbine.rotationSpeed = 0.4f;
         lever.transform.localEulerAngles = new Vector3(0, 0, 0);
     }
 
@@ -99,14 +98,14 @@ public class CircleRhythmLever : Interactable {
         {
             if (increasing)
             {
-                windCircles.windSpeed += 0.2f;
-                windTurbine.rotationSpeed += 0.2f;
+                windCircles.windSpeed += rhythmInterval;
+                windTurbine.rotationSpeed += rhythmInterval;
                 lever.transform.localEulerAngles += new Vector3(30, 0, 0);
             }
             else
             {
-                windCircles.windSpeed -= 0.2f;
-                windTurbine.rotationSpeed -= 0.2f;
+                windCircles.windSpeed -= rhythmInterval;
+                windTurbine.rotationSpeed -= rhythmInterval;
                 lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
             }
         }
@@ -114,14 +113,14 @@ public class CircleRhythmLever : Interactable {
         {
             if (increasing)
             {
-                windCircles.windSpeed -= 0.2f;
-                windTurbine.rotationSpeed -= 0.2f;
+                windCircles.windSpeed -= rhythmInterval;
+                windTurbine.rotationSpeed -= rhythmInterval;
                 lever.transform.localEulerAngles += new Vector3(30, 0, 0);
             }
             else
             {
-                windCircles.windSpeed += 0.2f;
-                windTurbine.rotationSpeed += 0.2f;
+                windCircles.windSpeed += rhythmInterval;
+                windTurbine.rotationSpeed += rhythmInterval;
                 lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
             }
         }

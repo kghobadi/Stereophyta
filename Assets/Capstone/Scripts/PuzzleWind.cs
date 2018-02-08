@@ -26,7 +26,7 @@ public class PuzzleWind : MonoBehaviour {
     {
         if(other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<plant>().PlaySound();
+            other.gameObject.GetComponent<Plant>().PlaySound();
         }
     }
 
@@ -34,7 +34,7 @@ public class PuzzleWind : MonoBehaviour {
     {
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<plant>().PlaySound();
+            other.gameObject.GetComponent<Plant>().PlaySound();
         }
     }
 }

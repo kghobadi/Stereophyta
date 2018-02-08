@@ -25,7 +25,7 @@ public class MovingWind : MonoBehaviour {
     {
         if(other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<plant>().PlaySound();
+            other.gameObject.GetComponent<Plant>().PlaySound();
             // need to change this to PlantGrowth when that works
         }
     }
@@ -33,7 +33,7 @@ public class MovingWind : MonoBehaviour {
     {
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<plant>().PlaySound();
+            other.gameObject.GetComponent<Plant>().PlaySound();
         }
     }
 }

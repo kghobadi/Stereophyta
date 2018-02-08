@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class plant : Interactable {
+public class Plant : Interactable {
     //should always have same number of musical notes as tubules
     public AudioClip[] musicalNotes;
     public List<GameObject> branches = new List<GameObject>();
@@ -17,7 +17,14 @@ public class plant : Interactable {
     public float scaleSpeed, growthMultiplier;
     Vector3 origScale;
 
-	public override void Start () {
+    public PlantSpecies plantSpecieName;
+
+    public enum PlantSpecies
+    {
+        SPHERESHRUB, CUBETREE, 
+    }
+
+    public override void Start () {
         base.Start();
         interactable = true; //when should it be interactable? after # branches > 1
         plantAudio = GetComponent<AudioSource>();
@@ -100,7 +107,7 @@ public class plant : Interactable {
         if (scalingUp)
         {
             notesPlaying.Emit(1);
-            if (transform.localScale.x < origScale.x * 1.5)
+            if (transform.localScale.x < origScale.x * growthMultiplier)
                 transform.localScale += new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
             else
             {
@@ -122,7 +129,7 @@ public class plant : Interactable {
 
     public void PlaySound()
     {
-        if (!plantAudio.isPlaying)
+        if (!plantAudio.isPlaying && !scalingDown)
         {
             plantAudio.PlayOneShot(currentSound);
             scalingUp = true;
