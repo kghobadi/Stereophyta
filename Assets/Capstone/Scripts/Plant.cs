@@ -54,21 +54,7 @@ public class Plant : Interactable {
             base.OnMouseOver();
             if (Input.GetMouseButtonDown(1))
             {
-                branches[currentNote].transform.localScale *= 0.5f;
-
-                if (currentNote > 0)
-                {
-                    currentNote--;
-                }
-                else
-                {
-                    currentNote = musicalNotes.Length - 1;
-                }
-                // chooses new note and enlarges tubule
-                currentSound = musicalNotes[currentNote];
-                branches[currentNote].transform.localScale *= 2;
-                notesPlaying.transform.position = branches[currentNote].transform.position;
-                soundBoard.PlayOneShot(lowerSound);
+                ShiftNoteDown();
 
             }
         }
@@ -80,25 +66,8 @@ public class Plant : Interactable {
         if (interactable)
         {
             base.handleClickSuccess();
-            //shrinks current tubule
-            branches[currentNote].transform.localScale *= 0.5f;
-
-            if (currentNote < (musicalNotes.Length - 1))
-            {
-                currentNote++;
-            }
-            else
-            {
-                currentNote = 0;
-            }
-            // chooses new note and enlarges tubule
-            currentSound = musicalNotes[currentNote];
-            branches[currentNote].transform.localScale *= 2;
-            notesPlaying.transform.position = branches[currentNote].transform.position;
-            // try setting parent to branch and setting position after!
-            //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
-            //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
-            Debug.Log(currentNote);
+            ShiftNoteUp();
+            
         }
     }
 
@@ -135,5 +104,47 @@ public class Plant : Interactable {
             scalingUp = true;
         }
         
+    }
+
+    public void ShiftNoteUp()
+    {
+        //shrinks current branch
+        branches[currentNote].transform.localScale *= 0.5f;
+
+        if (currentNote < (musicalNotes.Length - 1))
+        {
+            currentNote++;
+        }
+        else
+        {
+            currentNote = 0;
+        }
+        // chooses new note and enlarges branch
+        currentSound = musicalNotes[currentNote];
+        branches[currentNote].transform.localScale *= 2;
+        notesPlaying.transform.position = branches[currentNote].transform.position;
+        // try setting parent to branch and setting position after!
+        //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
+        //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
+        Debug.Log(currentNote);
+    }
+
+    public void ShiftNoteDown()
+    {
+        branches[currentNote].transform.localScale *= 0.5f;
+
+        if (currentNote > 0)
+        {
+            currentNote--;
+        }
+        else
+        {
+            currentNote = musicalNotes.Length - 1;
+        }
+        // chooses new note and enlarges tubule
+        currentSound = musicalNotes[currentNote];
+        branches[currentNote].transform.localScale *= 2;
+        notesPlaying.transform.position = branches[currentNote].transform.position;
+        soundBoard.PlayOneShot(lowerSound);
     }
 }
