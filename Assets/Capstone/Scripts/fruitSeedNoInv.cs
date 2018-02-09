@@ -13,7 +13,7 @@ public class fruitSeedNoInv : Interactable {
     
     int originalLayer;
 
-    bool planting;
+    bool planting, adjustedRotation;
 
     public float fallingSpeed; //how fast seed falls to ground
     public float heightAdjustment; //how high must this plant be instantiated
@@ -63,6 +63,7 @@ public class fruitSeedNoInv : Interactable {
                 {
                     planting = true;
                     playerHolding = false;
+                    
                 }
             }
         }
@@ -93,6 +94,17 @@ public class fruitSeedNoInv : Interactable {
     public void PlantSeed()
     {
         //player cant move while seed falls to ground
+        if (!adjustedRotation)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                _player.transform.LookAt(hit.point);
+                adjustedRotation = true;
+            }
+        }
         tpc.enabled = false;
         transform.Translate(0, fallingSpeed * Time.deltaTime, 0);
         if(transform.position.y < 0) //this will need to check collision with terrain eventually
