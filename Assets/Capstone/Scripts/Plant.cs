@@ -145,6 +145,6 @@ public class Plant : Interactable {
         currentSound = musicalNotes[currentNote];
         branches[currentNote].transform.localScale *= 2;
         notesPlaying.transform.position = branches[currentNote].transform.position;
-        soundBoard.PlayOneShot(lowerSound);
+        plantAudio.PlayOneShot(lowerSound);
     }
 }

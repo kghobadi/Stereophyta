@@ -8,18 +8,27 @@ public class NPC : MonoBehaviour {
 
     Plant currentPlant;
 
-    public float visionDistance, movementDistance, speed, waitingTime;
+    public float visionDistance, movementDistance, speed, waitingTime, wavingTime;
     int moveCounter;
 
     Vector3 targestDestination;
 
-    bool looking, moving, upOrDown;
+    bool looking, moving, upOrDown, hasWavedAtPlayer;
+
+    Animator animator;
+    GameObject _player;
 
 	void Start () {
         //should this be interactable?
+        _player = GameObject.FindGameObjectWithTag("Player");
         targestDestination = transform.position + new Vector3(0, 0, movementDistance);
         moveCounter = 0;
         moving = true;
+
+        animator = GetComponentInChildren<Animator>();
+        animator.SetBool("walking", true);
+
+        speed += Random.Range(-1, 1);
     }
 	
 	void Update () {
@@ -27,12 +36,27 @@ public class NPC : MonoBehaviour {
         if (moving)
         {
             Movement();
+
+            if (Vector3.Distance(transform.position, _player.transform.position) < 10 && !hasWavedAtPlayer)
+            {
+                StartCoroutine(WaveAtPlayer());
+                
+            }
         }
 	}
 
     void SetMove()
     {
-        transform.Rotate(0,90,0);
+        //randomly changes note up or down
+        int randomNum = Random.Range(0, 100);
+        if(randomNum < 50)
+        {
+            upOrDown = true;
+        }
+        else
+        {
+            upOrDown = false;
+        }
 
         if (moveCounter < 3)
         {
@@ -46,19 +70,19 @@ public class NPC : MonoBehaviour {
         {
             case 0:
                 targestDestination = transform.position + new Vector3(0, 0, movementDistance);
-                upOrDown = true;
+                transform.LookAt(transform.position + Vector3.forward);
                 break;
             case 1:
                 targestDestination = transform.position + new Vector3(movementDistance, 0, 0);
-                upOrDown = true;
+                transform.LookAt(transform.position + Vector3.right);
                 break;
             case 2:
                 targestDestination = transform.position + new Vector3(0, 0, -movementDistance);
-                upOrDown = false;
+                transform.LookAt(transform.position + Vector3.back);
                 break;
             case 3:
                 targestDestination = transform.position + new Vector3(-movementDistance, 0, 0);
-                upOrDown = false;
+                transform.LookAt(transform.position + Vector3.left);
                 break;
         }
         moving = true;
@@ -92,14 +116,6 @@ public class NPC : MonoBehaviour {
         }
         if (canPlayPlant)
         {
-            if (upOrDown)
-            {
-                currentPlant.ShiftNoteUp();
-            }
-            else
-            {
-                currentPlant.ShiftNoteDown();
-            }
             StartCoroutine(PlayTree());
             
         }
@@ -113,10 +129,50 @@ public class NPC : MonoBehaviour {
     {
         //play animation or do a color change on character
         //wait here a moment
+        animator.SetBool("walking", false);
+        transform.LookAt(currentPlant.transform.position - new Vector3(0,2,0));
         yield return new WaitForSeconds(waitingTime);
-
+        if (upOrDown)
+        {
+            currentPlant.ShiftNoteUp();
+        }
+        else
+        {
+            currentPlant.ShiftNoteDown();
+        }
         //set new move pos
         SetMove();
+        animator.SetBool("walking", true);
+    }
+
+    public IEnumerator WaveAtPlayer()
+    {
+        moving = false;
+        transform.LookAt(_player.transform);
+        animator.SetBool("waving", true);
+        animator.SetBool("walking", false);
+        yield return new WaitForSeconds(wavingTime);
+        //rotates back correctly
+        switch (moveCounter)
+        {
+            case 0:
+                transform.LookAt(transform.position + Vector3.forward);
+                break;
+            case 1:
+                transform.LookAt(transform.position + Vector3.right);
+                break;
+            case 2:
+                transform.LookAt(transform.position + Vector3.back);
+                break;
+            case 3:
+                transform.LookAt(transform.position + Vector3.left);
+                break;
+        }
+        //starts walking again
+        moving = true;
+        hasWavedAtPlayer = true;
+        animator.SetBool("waving", false);
+        animator.SetBool("walking", true);
     }
 
     //OTHER FUNCTIONS
