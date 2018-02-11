@@ -8,7 +8,7 @@ public class NPC : MonoBehaviour {
 
     Plant currentPlant;
 
-    public float visionDistance, movementDistance, speed, waitingTime, wavingTime;
+    public float visionDistance, movementDistance, speed, waitingTime, wavingTime, waveRefresh, waveRefreshTotal;
     int moveCounter;
 
     Vector3 targestDestination;
@@ -43,7 +43,15 @@ public class NPC : MonoBehaviour {
                 
             }
         }
-	}
+        if (hasWavedAtPlayer)
+        {
+            waveRefresh -= Time.deltaTime;
+            if (waveRefresh < 0)
+            {
+                hasWavedAtPlayer = false;
+            }
+        }
+    }
 
     void SetMove()
     {
@@ -171,6 +179,7 @@ public class NPC : MonoBehaviour {
         //starts walking again
         moving = true;
         hasWavedAtPlayer = true;
+        waveRefresh = waveRefreshTotal;
         animator.SetBool("waving", false);
         animator.SetBool("walking", true);
     }
