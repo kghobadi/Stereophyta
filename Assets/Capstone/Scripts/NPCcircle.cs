@@ -20,6 +20,8 @@ public class NPCcircle : MonoBehaviour {
 
     public Transform circleCenter; //can use this to manually position circle in editor
 
+    //should attach NPC movement speed to rhythm in environment
+
 	void Start () {
         //should this be interactable?
         _player = GameObject.FindGameObjectWithTag("Player");
