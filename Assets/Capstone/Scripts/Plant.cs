@@ -13,9 +13,12 @@ public class Plant : Interactable {
     ParticleSystem notesPlaying;
     public AudioClip lowerSound;
 
-    public bool scalingUp, scalingDown;
-    public float scaleSpeed, growthMultiplier;
+    public bool scalingUp, scalingDown, lerpingColor;
+    public float scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal;
     Vector3 origScale;
+
+    public Color lerpedColor;
+    Color origColor;
 
     public PlantSpecies plantSpecieName;
 
@@ -32,8 +35,11 @@ public class Plant : Interactable {
         notesPlaying.Stop();
         origScale = transform.localScale;
 
+        lerpingColor = false;
+        lerpTimer = lerpTimerTotal;
+
         //counts up through plant children, adding these to the list of Branches for later.
-        if(transform.childCount > 1)
+        if (transform.childCount > 1)
         {
             for (int i = 1; i < (transform.childCount); i++)
             {
@@ -49,7 +55,7 @@ public class Plant : Interactable {
 
     public override void OnMouseOver()
     {
-        if (interactable)
+        if (interactable && !lerpingColor)
         {
             base.OnMouseOver();
             if (Input.GetMouseButtonDown(1))
@@ -63,7 +69,7 @@ public class Plant : Interactable {
 
     public override void handleClickSuccess()
     {
-        if (interactable)
+        if (interactable && !lerpingColor)
         {
             base.handleClickSuccess();
             ShiftNoteUp();
@@ -94,6 +100,20 @@ public class Plant : Interactable {
                 scalingDown = false;
             }
         }
+        if (lerpingColor)
+        {
+            lerpTimer -= Time.deltaTime;
+            if(lerpTimer > 0)
+            {
+                branches[currentNote].GetComponent<MeshRenderer>().material.color = Color.Lerp(origColor, lerpedColor, Mathf.PingPong(Time.time, lerpTimerTotal));
+            }
+            else
+            {
+                branches[currentNote].GetComponent<MeshRenderer>().material.color = origColor;
+                lerpingColor = false;
+                lerpTimer = lerpTimerTotal;
+            }
+        }
     }
 
     public void PlaySound()
@@ -122,6 +142,8 @@ public class Plant : Interactable {
         // chooses new note and enlarges branch
         currentSound = musicalNotes[currentNote];
         branches[currentNote].transform.localScale *= 2;
+        origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
+        lerpingColor = true;
         notesPlaying.transform.position = branches[currentNote].transform.position;
         // try setting parent to branch and setting position after!
         //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
@@ -144,7 +166,10 @@ public class Plant : Interactable {
         // chooses new note and enlarges tubule
         currentSound = musicalNotes[currentNote];
         branches[currentNote].transform.localScale *= 2;
+        origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
+        lerpingColor = true;
         notesPlaying.transform.position = branches[currentNote].transform.position;
         plantAudio.PlayOneShot(lowerSound);
     }
+    
 }

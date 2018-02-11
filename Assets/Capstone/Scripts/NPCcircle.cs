@@ -18,10 +18,13 @@ public class NPCcircle : MonoBehaviour {
     GameObject model;
     GameObject _player;
 
+    public Transform circleCenter; //can use this to manually position circle in editor
+
 	void Start () {
         //should this be interactable?
         _player = GameObject.FindGameObjectWithTag("Player");
-        targetRotPoint = transform.position + new Vector3(0, 0, circleRadius);
+        targetRotPoint = circleCenter.position;
+        //targetRotPoint = transform.position + new Vector3(0, 0, circleRadius);
         transform.LookAt(transform.position + Vector3.forward);
         moving = true;
 
@@ -128,6 +131,7 @@ public class NPCcircle : MonoBehaviour {
     {
         moving = false;
         transform.LookAt(_player.transform);
+        model.transform.localEulerAngles = Vector3.zero;
         animator.SetBool("waving", true);
         animator.SetBool("walking", false);
         yield return new WaitForSeconds(wavingTime);
