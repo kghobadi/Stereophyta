@@ -14,13 +14,13 @@ public class NPCcircle : MonoBehaviour {
 
     bool looking, moving, upOrDown, hasWavedAtPlayer;
 
-    Animator animator;
+    public Animator animator;
     GameObject model;
     GameObject _player;
 
     public Transform circleCenter; //can use this to manually position circle in editor
 
-    //should attach NPC movement speed to rhythm in environment
+    DirectionLever walkingDirection;
 
 	void Start () {
         //should this be interactable?
@@ -36,6 +36,8 @@ public class NPCcircle : MonoBehaviour {
 
         speed += Random.Range(-1, 1);
         lookTimer = lookTimerTotal;
+
+        walkingDirection = GameObject.FindGameObjectWithTag("CircleMill").transform.GetChild(1).GetComponent<DirectionLever>();
     }
 	
 	void Update () {
@@ -67,8 +69,15 @@ public class NPCcircle : MonoBehaviour {
     {
         transform.RotateAround(targetRotPoint, Vector3.up, speed * Time.deltaTime);
         transform.LookAt(targetRotPoint);
-        
-        model.transform.eulerAngles = transform.eulerAngles - new Vector3(0, 90, 0);
+
+        if (walkingDirection.dirPositive)
+        {
+            model.transform.eulerAngles = transform.eulerAngles - new Vector3(0, 90, 0);
+        }
+        else
+        {
+            model.transform.eulerAngles = transform.eulerAngles - new Vector3(0, -90, 0);
+        }
         
         if (Vector3.Distance(transform.position, _player.transform.position) < 10 && !hasWavedAtPlayer)
         {

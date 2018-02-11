@@ -17,6 +17,10 @@ public class DirectionLever : Interactable
 
     public bool dirPositive = true;
 
+    public float windRadius;
+
+    GameObject[] circleNPCs;
+
     public override void Start()
     {
         base.Start();
@@ -24,7 +28,7 @@ public class DirectionLever : Interactable
         windParent = transform.parent;
         windTurbine = windParent.gameObject.GetComponent<CircleMill>();
         windCircles = windParent.GetChild(0).GetComponent<CircleWind>();
- 
+        circleNPCs = GameObject.FindGameObjectsWithTag("NPC");
     }
 
     void Update()
@@ -46,6 +50,14 @@ public class DirectionLever : Interactable
             base.handleClickSuccess();
             windCircles.windSpeed *= -1;
             windTurbine.rotationSpeed *= -1;
+
+            for (int i = 0; i < circleNPCs.Length; i++)
+            {
+                if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                {
+                    circleNPCs[i].GetComponent<NPCcircle>().speed *= -1;
+                }
+            }
 
             if (dirPositive)
             {
