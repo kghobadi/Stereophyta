@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Plant : Interactable {
     //should always have same number of musical notes as tubules
+
     public AudioClip[] musicalNotes;
     public List<GameObject> branches = new List<GameObject>();
     int currentNote;
@@ -24,7 +25,7 @@ public class Plant : Interactable {
 
     public enum PlantSpecies
     {
-        SPHERESHRUB, CUBETREE, 
+        SPHERESHRUB, CUBETREE, GUITAR, 
     }
 
     public override void Start () {
@@ -142,8 +143,11 @@ public class Plant : Interactable {
         // chooses new note and enlarges branch
         currentSound = musicalNotes[currentNote];
         branches[currentNote].transform.localScale *= 2;
-        origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
-        lerpingColor = true;
+        if (plantSpecieName != PlantSpecies.GUITAR)
+        {
+            origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
+            lerpingColor = true;
+        }
         notesPlaying.transform.position = branches[currentNote].transform.position;
         // try setting parent to branch and setting position after!
         //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
@@ -166,8 +170,11 @@ public class Plant : Interactable {
         // chooses new note and enlarges tubule
         currentSound = musicalNotes[currentNote];
         branches[currentNote].transform.localScale *= 2;
-        origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
-        lerpingColor = true;
+        if(plantSpecieName != PlantSpecies.GUITAR)
+        {
+            origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
+            lerpingColor = true;
+        }
         notesPlaying.transform.position = branches[currentNote].transform.position;
         plantAudio.PlayOneShot(lowerSound);
     }
