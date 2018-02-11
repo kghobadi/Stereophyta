@@ -22,6 +22,7 @@ public class CameraController : MonoBehaviour
         cameraPos = 0;
     }
 
+    //make a bool for cutscene
 
     void Update()
     {
@@ -105,6 +106,11 @@ public class CameraController : MonoBehaviour
         desiredPos =  new Vector3(_player.transform.position.x + currentXDist, 
             _player.transform.position.y + currentYDist, _player.transform.position.z + currentZDist);
         switchingCam = true;
+    }
+
+    public void CutScene()
+    {
+
     }
 
 }

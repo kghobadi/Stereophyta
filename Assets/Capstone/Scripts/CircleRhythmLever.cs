@@ -18,7 +18,10 @@ public class CircleRhythmLever : Interactable {
 
     public int leverState, leverStateMax;
 
+    public float rhythmInterval, NPCspeedInterval, animatorSpeedInterval, NPCLookInterval, windRadius;
     bool increasing;
+
+    GameObject[] circleNPCs;
 
     public override void Start()
     {
@@ -28,11 +31,10 @@ public class CircleRhythmLever : Interactable {
         windTurbine = windParent.GetComponent<CircleMill>();
         dirLever = windParent.GetChild(1).GetComponent<DirectionLever>();
         windCircles = windParent.GetChild(0).GetComponent<CircleWind>();
+        circleNPCs = GameObject.FindGameObjectsWithTag("NPC");
 
         //set states
         leverState = 1;
-        windCircles.windSpeed = 0.4f;
-        windTurbine.rotationSpeed = 0.4f;
         lever.transform.localEulerAngles = new Vector3(0, 0, 0);
     }
 
@@ -99,30 +101,74 @@ public class CircleRhythmLever : Interactable {
         {
             if (increasing)
             {
-                windCircles.windSpeed += 0.2f;
-                windTurbine.rotationSpeed += 0.2f;
+                windCircles.windSpeed += rhythmInterval;
+                windTurbine.rotationSpeed += rhythmInterval;
                 lever.transform.localEulerAngles += new Vector3(30, 0, 0);
+
+                //adjusts NPC circle men speeds
+                for (int i =0;i < circleNPCs.Length; i++)
+                {
+                    if(Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                    {
+                        circleNPCs[i].GetComponent<NPCcircle>().speed += NPCspeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().animator.speed += animatorSpeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal -= NPCLookInterval;
+                    }
+                }
             }
             else
             {
-                windCircles.windSpeed -= 0.2f;
-                windTurbine.rotationSpeed -= 0.2f;
+                windCircles.windSpeed -= rhythmInterval;
+                windTurbine.rotationSpeed -= rhythmInterval;
                 lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+
+                //adjusts NPC circle men speeds
+                for (int i = 0; i < circleNPCs.Length; i++)
+                {
+                    if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                    {
+                        circleNPCs[i].GetComponent<NPCcircle>().speed -= NPCspeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().animator.speed -= animatorSpeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal += NPCLookInterval;
+                    }
+                }
             }
         }
         else
         {
             if (increasing)
             {
-                windCircles.windSpeed -= 0.2f;
-                windTurbine.rotationSpeed -= 0.2f;
+                windCircles.windSpeed -= rhythmInterval;
+                windTurbine.rotationSpeed -= rhythmInterval;
                 lever.transform.localEulerAngles += new Vector3(30, 0, 0);
+
+                //adjusts NPC circle men speeds
+                for (int i = 0; i < circleNPCs.Length; i++)
+                {
+                    if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                    {
+                        circleNPCs[i].GetComponent<NPCcircle>().speed -= NPCspeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().animator.speed -= animatorSpeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal += NPCLookInterval;
+                    }
+                }
             }
             else
             {
-                windCircles.windSpeed += 0.2f;
-                windTurbine.rotationSpeed += 0.2f;
+                windCircles.windSpeed += rhythmInterval;
+                windTurbine.rotationSpeed += rhythmInterval;
                 lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+
+                //adjusts NPC circle men speeds
+                for (int i = 0; i < circleNPCs.Length; i++)
+                {
+                    if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                    {
+                        circleNPCs[i].GetComponent<NPCcircle>().speed += NPCspeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().animator.speed += animatorSpeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal -= NPCLookInterval;
+                    }
+                }
             }
         }
     }
