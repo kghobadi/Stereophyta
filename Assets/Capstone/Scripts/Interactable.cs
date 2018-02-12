@@ -22,10 +22,15 @@ public abstract class Interactable : MonoBehaviour
 
     protected ThirdPersonController tpc;
 
-    protected GameObject rightArmObj;
+    public GameObject rightArmObj;
 
+    public Gate gateScript; // can grab reference IN GATE SCRIPT
 
     protected bool playerHolding;
+
+    public bool interactionFulfilled, hasBeenChecked;
+    public int interactionCounter = 0;
+    public int interactionsNecessary;
 
     public virtual void Start()
     {
@@ -61,7 +66,20 @@ public abstract class Interactable : MonoBehaviour
         if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
         {
             symbol.sprite = interactSprite;
-
+            if(Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(0))
+            {
+                if(gateScript!= null)
+                {
+                    //increment interactionCounter
+                    interactionCounter++;
+                    if (interactionCounter >= interactionsNecessary)
+                    {
+                        interactionFulfilled = true;
+                        gateScript.CheckAreaComplete();
+                    }
+                }
+               
+            }
         }
     }
 
@@ -76,13 +94,22 @@ public abstract class Interactable : MonoBehaviour
 
     public virtual void handleClickSuccess()
     {
-        
-        
-            symbol.sprite = clickSprite;
-            Play();
+        //changes mouse cursor and plays interact sound
+        symbol.sprite = clickSprite;
+        Play();
+        symbol.sprite = normalSprite;
 
-            symbol.sprite = normalSprite;
-     
+        //increment interactionCounter
+        if (gateScript != null)
+        {
+            //increment interactionCounter
+            interactionCounter++;
+            if (interactionCounter >= interactionsNecessary)
+            {
+                interactionFulfilled = true;
+                gateScript.CheckAreaComplete();
+            }
+        }
     }
 
 

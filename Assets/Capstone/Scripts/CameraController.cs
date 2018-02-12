@@ -20,6 +20,8 @@ public class CameraController : MonoBehaviour
     //it will lerp the camera between these points and rotations in order of succession
     //finally, it will always return to zoom in on the player, then reactivate this script
 
+    //3 scripts on camera total. OpenGate, Cutscene, and this. 
+
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
