@@ -14,6 +14,12 @@ public class CameraController : MonoBehaviour
     bool switchingCam;
     public float camSpeed, camRotSpeed;
 
+    //for Camera Panning System, make a separate script attached to the camera
+    //when player hits trigger / triggers event, call that script and disable this one
+    //camera pan function will take a number of transforms (positions and rotations)
+    //it will lerp the camera between these points and rotations in order of succession
+    //finally, it will always return to zoom in on the player, then reactivate this script
+
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -21,8 +27,6 @@ public class CameraController : MonoBehaviour
         //transform.LookAt(_player.transform);
         cameraPos = 0;
     }
-
-    //make a bool for cutscene
 
     void Update()
     {
@@ -108,9 +112,6 @@ public class CameraController : MonoBehaviour
         switchingCam = true;
     }
 
-    public void CutScene()
-    {
-
-    }
+    
 
 }
