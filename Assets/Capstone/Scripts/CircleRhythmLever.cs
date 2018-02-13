@@ -18,8 +18,10 @@ public class CircleRhythmLever : Interactable {
 
     public int leverState, leverStateMax;
 
-    public float rhythmInterval;
+    public float rhythmInterval, NPCspeedInterval, animatorSpeedInterval, NPCLookInterval, windRadius;
     bool increasing;
+
+    GameObject[] circleNPCs;
 
     public override void Start()
     {
@@ -29,6 +31,7 @@ public class CircleRhythmLever : Interactable {
         windTurbine = windParent.GetComponent<CircleMill>();
         dirLever = windParent.GetChild(1).GetComponent<DirectionLever>();
         windCircles = windParent.GetChild(0).GetComponent<CircleWind>();
+        circleNPCs = GameObject.FindGameObjectsWithTag("NPC");
 
         //set states
         leverState = 1;
@@ -101,12 +104,34 @@ public class CircleRhythmLever : Interactable {
                 windCircles.windSpeed += rhythmInterval;
                 windTurbine.rotationSpeed += rhythmInterval;
                 lever.transform.localEulerAngles += new Vector3(30, 0, 0);
+
+                //adjusts NPC circle men speeds
+                for (int i =0;i < circleNPCs.Length; i++)
+                {
+                    if(Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                    {
+                        circleNPCs[i].GetComponent<NPCcircle>().speed += NPCspeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().animator.speed += animatorSpeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal -= NPCLookInterval;
+                    }
+                }
             }
             else
             {
                 windCircles.windSpeed -= rhythmInterval;
                 windTurbine.rotationSpeed -= rhythmInterval;
                 lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+
+                //adjusts NPC circle men speeds
+                for (int i = 0; i < circleNPCs.Length; i++)
+                {
+                    if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                    {
+                        circleNPCs[i].GetComponent<NPCcircle>().speed -= NPCspeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().animator.speed -= animatorSpeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal += NPCLookInterval;
+                    }
+                }
             }
         }
         else
@@ -116,12 +141,34 @@ public class CircleRhythmLever : Interactable {
                 windCircles.windSpeed -= rhythmInterval;
                 windTurbine.rotationSpeed -= rhythmInterval;
                 lever.transform.localEulerAngles += new Vector3(30, 0, 0);
+
+                //adjusts NPC circle men speeds
+                for (int i = 0; i < circleNPCs.Length; i++)
+                {
+                    if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                    {
+                        circleNPCs[i].GetComponent<NPCcircle>().speed -= NPCspeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().animator.speed += animatorSpeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal -= NPCLookInterval;
+                    }
+                }
             }
             else
             {
                 windCircles.windSpeed += rhythmInterval;
                 windTurbine.rotationSpeed += rhythmInterval;
                 lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+
+                //adjusts NPC circle men speeds
+                for (int i = 0; i < circleNPCs.Length; i++)
+                {
+                    if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                    {
+                        circleNPCs[i].GetComponent<NPCcircle>().speed += NPCspeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().animator.speed -= animatorSpeedInterval;
+                        circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal += NPCLookInterval;
+                    }
+                }
             }
         }
     }

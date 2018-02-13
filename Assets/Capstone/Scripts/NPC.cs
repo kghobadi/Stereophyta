@@ -138,7 +138,12 @@ public class NPC : MonoBehaviour {
         //play animation or do a color change on character
         //wait here a moment
         animator.SetBool("walking", false);
-        transform.LookAt(currentPlant.transform.position - new Vector3(0,2,0));
+        if(plantType == "CUBETREE")
+            transform.LookAt(currentPlant.transform.position - new Vector3(0,2,0));
+        else
+        {
+            transform.LookAt(currentPlant.transform.position);
+        }
         yield return new WaitForSeconds(waitingTime);
         if (upOrDown)
         {
