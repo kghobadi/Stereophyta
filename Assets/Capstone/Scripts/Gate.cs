@@ -21,11 +21,15 @@ public class Gate : MonoBehaviour {
 
     public Transform overlapSphereCenter;
 
-    public float areaRange;
+    public float areaRange, lowerSpeed;
 
     public bool areaComplete;
     public int interactionsNecessaryTotal;
     public int interactionCounterTotal = 0;
+
+    CutScene cutSceneScript;
+
+    public Vector3 cameraPos, cameraRot;
 
     //public string[] interactableTags; this format will be used later when there are more interactable objects
 
@@ -85,7 +89,7 @@ public class Gate : MonoBehaviour {
             i++;
         }
 
-
+        cutSceneScript = Camera.main.GetComponent<CutScene>();
     }
 	
 	public void CheckAreaComplete()
@@ -152,17 +156,22 @@ public class Gate : MonoBehaviour {
             }
         }
 
-        if(interactionCounterTotal >= interactionsNecessaryTotal)
+        if(interactionCounterTotal >= interactionsNecessaryTotal && !areaComplete)  
         {
-            OpenGate();
+            StartCoroutine(LowerGate());
+            cutSceneScript.ShowEvent(transform, cameraPos);
+            areaComplete = true;
         }
     }
 
-    void OpenGate()
+    IEnumerator LowerGate()
     {
-        Destroy(gameObject); 
-
-        //Lower over duration of time
-        //Play GateOpen cutscene through main Camera
+        //lowers gate until below 
+        while(transform.position.y > ((0 - (transform.localScale.y / 2)) - 1))
+        {
+            transform.Translate(0, lowerSpeed * Time.deltaTime, 0);
+            yield return new WaitForEndOfFrame();
+        }
+        Destroy(gameObject);
     }
 }
