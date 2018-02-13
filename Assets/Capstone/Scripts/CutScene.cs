@@ -64,6 +64,7 @@ public class CutScene : MonoBehaviour {
                 transform.localEulerAngles = origRotation;
                 tpc.enabled = true;
                 camController.enabled = true;
+                mainCam.nearClipPlane = -10;
             }
         }
 
@@ -108,7 +109,9 @@ public class CutScene : MonoBehaviour {
         tpc.enabled = false;
         camController.enabled = false;
 
-        camAudSource.PlayOneShot(gateOpened, 0.1f);
+        mainCam.nearClipPlane = -20;
+
+        camAudSource.PlayOneShot(gateOpened, 0.2f);
     }
 
     //Feeds all the information into the CutScene
@@ -128,6 +131,8 @@ public class CutScene : MonoBehaviour {
 
         transform.position = startingPos;
         transform.LookAt(startingRot);
+
+        mainCam.nearClipPlane = -20;
 
         StartCoroutine(ActiveCutScene());
     }
@@ -154,6 +159,7 @@ public class CutScene : MonoBehaviour {
 
         yield return new WaitUntil(() => backToPlayer == false);
 
+        mainCam.nearClipPlane = -10;
         mainCam.orthographicSize = camOrigSize;
         transform.position = origPosition;
         transform.localEulerAngles = origRotation;

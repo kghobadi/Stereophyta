@@ -34,16 +34,99 @@ public class Gate : MonoBehaviour {
     //public string[] interactableTags; this format will be used later when there are more interactable objects
 
     void Start () {
-        
-        for(int o = 0; o < transform.childCount - 1; o++)
+        if (transform.childCount > 1)
         {
-            overlapSphereCenters.Add(transform.GetChild(o));
+            for (int o = 0; o < transform.childCount; o++)
+            {
+                overlapSphereCenters.Add(transform.GetChild(o));
+            }
+            for (int T = 0; T < overlapSphereCenters.Count; T++)
+            {
+                //Checks overlapSphere and fills up the List
+                Collider[] hitColliders = Physics.OverlapSphere(overlapSphereCenters[T].position, areaRange);
+                int i = 0;
+                while (i < hitColliders.Length)
+                {
+                    //possible way of making this code more efficient and readable:
+                    //for(int t =0; t < interactableTags.Length - 1; t++)
+                    //{
+                    //    if(hitColliders[i].gameObject.tag == interactableTags[t])
+                    //    {
+                    //        hitColliders[i].GetComponent ... to do this, would need a way of going into an object's inherited Interactable script
+                    //    }
+                    //}
+                    if (hitColliders[i].gameObject.tag == "Plant")
+                    {
+                        if (!hitColliders[i].GetComponent<Plant>().hasBeenAdded)
+                        {
+                            hitColliders[i].GetComponent<Plant>().gateScript = gameObject.GetComponent<Gate>();
+                            interactableObjects.Add(hitColliders[i].gameObject);
+                            hitColliders[i].GetComponent<Plant>().hasBeenAdded = true;
+                            interactionsNecessaryTotal += hitColliders[i].GetComponent<Plant>().interactionsNecessary;
+                        }
+                    }
+                    if (hitColliders[i].gameObject.tag == "Seed")
+                    {
+                        if (!hitColliders[i].GetComponent<fruitSeedNoInv>().hasBeenAdded)
+                        {
+                            hitColliders[i].GetComponent<fruitSeedNoInv>().gateScript = gameObject.GetComponent<Gate>();
+                            interactableObjects.Add(hitColliders[i].gameObject);
+                            hitColliders[i].GetComponent<fruitSeedNoInv>().hasBeenAdded = true;
+                            interactionsNecessaryTotal += hitColliders[i].GetComponent<fruitSeedNoInv>().interactionsNecessary;
+                        }
+                    }
+                    if (hitColliders[i].gameObject.tag == "WindMachines")
+                    {
+                        //there are four possible objects within this tag
+                        if (hitColliders[i].gameObject.name == "DirectionLever")
+                        {
+                            if (!hitColliders[i].GetComponent<DirectionLever>().hasBeenAdded)
+                            {
+                                hitColliders[i].GetComponent<DirectionLever>().gateScript = gameObject.GetComponent<Gate>();
+                                interactionsNecessaryTotal += hitColliders[i].GetComponent<DirectionLever>().interactionsNecessary;
+                                hitColliders[i].GetComponent<DirectionLever>().hasBeenAdded = true;
+                            }
+                        }
+                        if (hitColliders[i].gameObject.name == "RhythmLever")
+                        {
+                            if (!hitColliders[i].GetComponent<RhythmLever>().hasBeenAdded)
+                            {
+                                hitColliders[i].GetComponent<RhythmLever>().gateScript = gameObject.GetComponent<Gate>();
+                                interactionsNecessaryTotal += hitColliders[i].GetComponent<RhythmLever>().interactionsNecessary;
+                                hitColliders[i].GetComponent<RhythmLever>().hasBeenAdded = true;
+                            }
+                        }
+                        if (hitColliders[i].gameObject.name == "RotationCrank")
+                        {
+                            if (!hitColliders[i].GetComponent<RotationCrank>().hasBeenAdded)
+                            {
+                                hitColliders[i].GetComponent<RotationCrank>().gateScript = gameObject.GetComponent<Gate>();
+                                interactionsNecessaryTotal += hitColliders[i].GetComponent<RotationCrank>().interactionsNecessary;
+                                hitColliders[i].GetComponent<RotationCrank>().hasBeenAdded = true;
+                            }
+                        }
+                        if (hitColliders[i].gameObject.name == "CircleRhythmLever")
+                        {
+                            if (!hitColliders[i].GetComponent<CircleRhythmLever>().hasBeenAdded)
+                            {
+                                hitColliders[i].GetComponent<CircleRhythmLever>().gateScript = gameObject.GetComponent<Gate>();
+                                interactionsNecessaryTotal += hitColliders[i].GetComponent<CircleRhythmLever>().interactionsNecessary;
+                                hitColliders[i].GetComponent<CircleRhythmLever>().hasBeenAdded = true;
+                            }
+                        }
+                        interactableObjects.Add(hitColliders[i].gameObject);
+                    }
+                    //NPCs will be added here later, the if statement will look much like that one ^
+                    i++;
+                }
+            }
         }
-        
-        for(int T = 0; T < overlapSphereCenters.Count - 1; T++)
+        else
         {
+            overlapSphereCenters.Add(transform.GetChild(0));
+
             //Checks overlapSphere and fills up the List
-            Collider[] hitColliders = Physics.OverlapSphere(overlapSphereCenters[T].position, areaRange);
+            Collider[] hitColliders = Physics.OverlapSphere(overlapSphereCenters[0].position, areaRange);
             int i = 0;
             while (i < hitColliders.Length)
             {
@@ -119,9 +202,8 @@ public class Gate : MonoBehaviour {
                 //NPCs will be added here later, the if statement will look much like that one ^
                 i++;
             }
-        }
-        
 
+        }
         cutSceneScript = Camera.main.GetComponent<CutScene>();
     }
 	

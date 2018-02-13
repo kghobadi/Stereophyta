@@ -9,8 +9,8 @@ public abstract class Interactable : MonoBehaviour
     protected GameObject cammy; // camera reference
     protected Image symbol; // 2d sprite renderer icon reference
     protected Sprite normalSprite;
-    private Sprite interactSprite;
-    private Sprite clickSprite;
+    protected Sprite interactSprite;
+    protected Sprite clickSprite;
 
     protected float withinDistance = 10f;
     public float withinDistanceActive = 3f;

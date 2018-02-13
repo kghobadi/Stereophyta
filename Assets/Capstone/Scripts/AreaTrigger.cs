@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class AreaTrigger : MonoBehaviour {
 
@@ -12,18 +13,47 @@ public class AreaTrigger : MonoBehaviour {
     public Transform[] highlightedObjects; // array of objects to look at while panning
 
     CutScene cameraCutScenes;
+    
+    public AudioMixerSnapshot oldArea, nextArea;
+    bool hasEntered, oldSnap, transitioned;
 
     void Start()
     {
         cameraCutScenes = Camera.main.GetComponent<CutScene>();
+        oldSnap = true;
+    }
+
+    void Update()
+    {
+        if (transitioned)
+        {
+            transitioned = false;
+        }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "Player")
+        if(other.gameObject.tag == "Player" )
         {
-            cameraCutScenes.ShowNewArea(startingPosition, startingRotation, cameraPositions, highlightedObjects);
-            Destroy(gameObject);
+            if (hasEntered && oldSnap && !transitioned)
+            {
+                nextArea.TransitionTo(1f);
+                oldSnap = false;
+                transitioned = true;
+            }
+            if (hasEntered && !oldSnap && !transitioned)
+            {
+                oldArea.TransitionTo(1f);
+                oldSnap = true;
+                transitioned = true;
+            }
+            if (!hasEntered)
+            {
+                cameraCutScenes.ShowNewArea(startingPosition, startingRotation, cameraPositions, highlightedObjects);
+                hasEntered = true;
+                nextArea.TransitionTo(1f);
+                oldSnap = false;
+            }
         }
     }
 }

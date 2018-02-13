@@ -72,7 +72,20 @@ public class Plant : Interactable {
     {
         if (interactable && !lerpingColor)
         {
-            base.handleClickSuccess();
+            symbol.sprite = clickSprite;
+            symbol.sprite = normalSprite;
+
+            //increment interactionCounter
+            if (gateScript != null)
+            {
+                //increment interactionCounter
+                interactionCounter++;
+                if (interactionCounter >= interactionsNecessary)
+                {
+                    interactionFulfilled = true;
+                    gateScript.CheckAreaComplete();
+                }
+            }
             ShiftNoteUp();
             
         }
@@ -153,6 +166,7 @@ public class Plant : Interactable {
         //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
         //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
         Debug.Log(currentNote);
+        plantAudio.PlayOneShot(InteractSound);
     }
 
     public void ShiftNoteDown()

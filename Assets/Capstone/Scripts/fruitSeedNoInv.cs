@@ -111,14 +111,17 @@ public class fruitSeedNoInv : Interactable {
         {
             //spawn plant
             plantClone = Instantiate(plants, transform.position + new Vector3(0, heightAdjustment, 0), Quaternion.identity);
-            plantClone.transform.localScale = new Vector3 (plantClone.transform.localScale.x, plantClone.transform.localScale.y * 3, plantClone.transform.localScale.z);
+            //plantClone.transform.localScale = new Vector3 (plantClone.transform.localScale.x, plantClone.transform.localScale.y * 3, plantClone.transform.localScale.z);
             //set bools
             planting = false;
             tpc.enabled = true;
             tpc.isHoldingSomething = false;
 
-            gateScript.interactableObjects.Remove(gameObject);
-            gateScript.interactionsNecessaryTotal--;
+            if(gateScript != null)
+            {
+                gateScript.interactableObjects.Remove(gameObject);
+                gateScript.interactionsNecessaryTotal--;
+            }
             //destroy
             Destroy(gameObject);
 
