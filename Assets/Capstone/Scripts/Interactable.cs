@@ -28,7 +28,7 @@ public abstract class Interactable : MonoBehaviour
 
     protected bool playerHolding;
 
-    public bool interactionFulfilled, hasBeenChecked;
+    public bool interactionFulfilled, hasBeenChecked, hasBeenAdded;
     public int interactionCounter = 0;
     public int interactionsNecessary;
 
