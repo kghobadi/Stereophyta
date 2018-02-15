@@ -66,6 +66,18 @@ public class fruitSeedNoInv : Interactable {
                     
                 }
             }
+
+            // if(Input.GetMouseButton(1) || Input.GetKey(KeyCode.Space))
+            // start plant throwCounter ... 
+            // if(throwCounter > throwMin && timer < throwMax)
+            // start charging throw (rotate arms & seed back over head)
+            // if(throwCounter > throwMax)
+            // stop charging, stopTimer, full throw = true, arms held back as far as possible
+            // if(Input.GetMoustButtonUp(1)|| Input.GetMouseButtonUp(KeyCode.Space))
+            // if (throwCounter < throwMin) 
+            // PlantSeed()
+            // else{
+            // ThrowSeed(throwCounter);
         }
         else if (planting)
         {
@@ -96,14 +108,19 @@ public class fruitSeedNoInv : Interactable {
         //player cant move while seed falls to ground
         if (!adjustedRotation)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+            float mouseX = Input.mousePosition.x;
 
-            if (Physics.Raycast(ray, out hit))
-            {
-                _player.transform.LookAt(hit.point);
-                adjustedRotation = true;
-            }
+            float mouseY = Input.mousePosition.y;
+
+            float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
+
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif));
+
+            Vector3 LookDirection = new Vector3(worldpos.x, _player.transform.position.y, worldpos.z);
+
+            _player.transform.LookAt(LookDirection);
+
+            adjustedRotation = true;
         }
         tpc.enabled = false;
         transform.Translate(0, fallingSpeed * Time.deltaTime, 0);
