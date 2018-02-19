@@ -26,6 +26,9 @@ public class ThirdPersonController : MonoBehaviour
 
     Animator blubAnimator;
 
+    public List<GameObject> followers = new List<GameObject>();
+    public int followerCountMax;
+
     void Start()
     {
         player = GetComponent<CharacterController>();

@@ -2,33 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPCcircle : MonoBehaviour {
+public class NPCcircle : NPC {
 
-    public string plantType;
-
-    Plant currentPlant;
-
-    public float visionDistance, circleRadius, speed, waitingTime, wavingTime, waveRefresh, waveRefreshTotal, lookTimer, lookTimerTotal;
+    public float visionDistance, circleRadius, waitingTime, wavingTime, waveRefresh, waveRefreshTotal, lookTimer, lookTimerTotal;
 
     Vector3 targetRotPoint;
 
-    bool looking, moving, upOrDown, hasWavedAtPlayer;
+    bool upOrDown;
 
-    public Animator animator;
     GameObject model;
-    GameObject _player;
 
     public Transform circleCenter; //can use this to manually position circle in editor
 
     DirectionLever walkingDirection;
 
-	void Start () {
-        //should this be interactable?
-        _player = GameObject.FindGameObjectWithTag("Player");
+	public override void Start () {
+        base.Start();
         targetRotPoint = circleCenter.position;
         //targetRotPoint = transform.position + new Vector3(0, 0, circleRadius);
         transform.LookAt(transform.position + Vector3.forward);
-        moving = true;
+        currentState = NPCState.MOVING;
 
         animator = GetComponentInChildren<Animator>();
         model = transform.GetChild(0).gameObject;
@@ -40,9 +33,15 @@ public class NPCcircle : MonoBehaviour {
         walkingDirection = GameObject.FindGameObjectWithTag("CircleMill").transform.GetChild(1).GetComponent<DirectionLever>();
     }
 	
-	void Update () {
+	public override void Update () {
+        base.Update();
         //states in here, distance check on player
-        if (moving)
+        if (currentState == NPCState.SETTINGMOVE)
+        {
+            targetRotPoint = transform.position + new Vector3(0, 0, circleRadius);
+            SetMove();
+        }
+        if (currentState == NPCState.MOVING)
         {
             
             lookTimer -= Time.deltaTime;
@@ -87,7 +86,7 @@ public class NPCcircle : MonoBehaviour {
     }
     public void SetMove()
     {
-        moving = true;
+        currentState = NPCState.MOVING;
         lookTimer = lookTimerTotal;
         animator.SetBool("walking", true);
         transform.LookAt(transform.position + Vector3.forward);
@@ -95,13 +94,13 @@ public class NPCcircle : MonoBehaviour {
 
     public void LookForPlants()
     {
-        moving = false;
+        currentState = NPCState.LOOKING;
         bool canPlayPlant = false;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
         int i = 0;
         while (i < hitColliders.Length)
         {
-            if (hitColliders[i].gameObject.tag == "Plant" && hitColliders[i].gameObject.GetComponent<Plant>().plantSpecieName.ToString() == plantType)
+            if (hitColliders[i].gameObject.tag == "Plant" /*&& hitColliders[i].gameObject.GetComponent<Plant>().plantSpecieName.ToString() == plantType*/)
             {
                 currentPlant = hitColliders[i].gameObject.GetComponent<Plant>();
                 canPlayPlant = true;
@@ -140,14 +139,18 @@ public class NPCcircle : MonoBehaviour {
 
     public IEnumerator WaveAtPlayer()
     {
-        moving = false;
+        currentState = NPCState.WAVING;
         transform.LookAt(_player.transform);
         model.transform.localEulerAngles = Vector3.zero;
         animator.SetBool("waving", true);
         animator.SetBool("walking", false);
         yield return new WaitForSeconds(wavingTime);
-        //starts walking again
-        moving = true;
+        if(currentState == NPCState.WAVING)
+        {
+            //starts walking again
+            currentState = NPCState.MOVING;
+
+        }
         hasWavedAtPlayer = true;
         waveRefresh = waveRefreshTotal;
         animator.SetBool("waving", false);
