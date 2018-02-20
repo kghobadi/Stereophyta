@@ -7,18 +7,23 @@ public class AreaTrigger : MonoBehaviour {
 
     //when a player runs thru this object, used to feed info for CutScene
 
-    public Vector3 startingPosition;
+    ThirdPersonController tpc;
+
+    public Transform startingPosition;
     public Transform startingRotation; // points at which cutscene should begin
-    public Vector3[] cameraPositions; //array of cameraPositions for panning
+    public Transform[] cameraPositions; //array of cameraPositions for panning
     public Transform[] highlightedObjects; // array of objects to look at while panning
 
     CutScene cameraCutScenes;
     
     public AudioMixerSnapshot oldArea, nextArea;
+    public AudioMixerGroup oldGroup, newGroup;
     bool hasEntered, oldSnap, transitioned;
+    public bool cutScene;
 
     void Start()
     {
+        tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
         cameraCutScenes = Camera.main.GetComponent<CutScene>();
         oldSnap = true;
     }
@@ -38,20 +43,31 @@ public class AreaTrigger : MonoBehaviour {
             if (hasEntered && oldSnap && !transitioned)
             {
                 nextArea.TransitionTo(1f);
+                oldArea = tpc.currentAudioMix;
+                tpc.currentAudioMix = nextArea;
+                oldGroup = tpc.plantingGroup;
+                tpc.plantingGroup = newGroup;
                 oldSnap = false;
                 transitioned = true;
             }
             if (hasEntered && !oldSnap && !transitioned)
             {
                 oldArea.TransitionTo(1f);
+                tpc.currentAudioMix = oldArea;
+                tpc.plantingGroup = oldGroup;
                 oldSnap = true;
                 transitioned = true;
             }
             if (!hasEntered)
             {
-                cameraCutScenes.ShowNewArea(startingPosition, startingRotation, cameraPositions, highlightedObjects);
+                if(cutScene)
+                    cameraCutScenes.ShowNewArea(startingPosition, startingRotation, cameraPositions, highlightedObjects);
                 hasEntered = true;
                 nextArea.TransitionTo(1f);
+                oldArea = tpc.currentAudioMix;
+                tpc.currentAudioMix = nextArea;
+                oldGroup = tpc.plantingGroup;
+                tpc.plantingGroup = newGroup;
                 oldSnap = false;
             }
         }

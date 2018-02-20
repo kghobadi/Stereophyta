@@ -9,7 +9,7 @@ public class Plant : Interactable {
     public List<GameObject> branches = new List<GameObject>();
     int currentNote;
     AudioClip currentSound;
-    AudioSource plantAudio;
+    public AudioSource plantAudio;
 
     ParticleSystem notesPlaying;
     public AudioClip lowerSound;
@@ -132,7 +132,7 @@ public class Plant : Interactable {
 
     public void PlaySound()
     {
-        if (!plantAudio.isPlaying && !scalingDown)
+        if (/*!plantAudio.isPlaying &&*/ !scalingUp && !scalingDown)
         {
             plantAudio.PlayOneShot(currentSound);
             scalingUp = true;

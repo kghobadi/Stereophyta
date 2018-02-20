@@ -19,9 +19,9 @@ public class CutScene : MonoBehaviour {
     public Vector3 origPosition, desiredPosition, origRotation, desiredRotation ;
 
     //for cutscenes
-    public Vector3[] shotPositions;
+    public Transform[] shotPositions;
     public Transform[] highlightedObjects;
-    public Vector3 firstShotPos;
+    public Transform firstShotPos;
     public Transform firstShotRot;
 
     public float camSpeedEvent, camSpeedCutScene, camRotSpeed;
@@ -115,7 +115,7 @@ public class CutScene : MonoBehaviour {
     }
 
     //Feeds all the information into the CutScene
-    public void ShowNewArea(Vector3 startingPos, Transform startingRot, Vector3[] shotPos, Transform[] impObjects)
+    public void ShowNewArea(Transform startingPos, Transform startingRot, Transform[] shotPos, Transform[] impObjects)
     {
         origPosition = transform.position;
         origRotation = transform.eulerAngles;
@@ -129,7 +129,7 @@ public class CutScene : MonoBehaviour {
         firstShotPos = startingPos;
         firstShotRot = startingRot;
 
-        transform.position = startingPos;
+        transform.position = startingPos.position;
         transform.LookAt(startingRot);
 
         mainCam.nearClipPlane = -20;
@@ -144,7 +144,7 @@ public class CutScene : MonoBehaviour {
         {
             atNextPos = false;
 
-            desiredPosition = shotPositions[i];
+            desiredPosition = shotPositions[i].position;
             desiredRotation = highlightedObjects[i].position;
 
             movingCut = true;
@@ -152,7 +152,7 @@ public class CutScene : MonoBehaviour {
             yield return new WaitUntil(() => atNextPos == true);
         }
         
-        transform.position = firstShotPos;
+        transform.position = firstShotPos.position;
         transform.LookAt(_player.transform.position);
         camOrigSize = mainCam.orthographicSize;
         backToPlayer = true;

@@ -128,6 +128,7 @@ public class fruitSeedNoInv : Interactable {
         {
             //spawn plant
             plantClone = Instantiate(plants, transform.position + new Vector3(0, heightAdjustment, 0), Quaternion.identity);
+            plantClone.GetComponent<Plant>().plantAudio.outputAudioMixerGroup = tpc.plantingGroup;
             //plantClone.transform.localScale = new Vector3 (plantClone.transform.localScale.x, plantClone.transform.localScale.y * 3, plantClone.transform.localScale.z);
             //set bools
             planting = false;

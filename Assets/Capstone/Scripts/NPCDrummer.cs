@@ -4,30 +4,40 @@ using UnityEngine;
 
 public class NPCDrummer : NPC {
 
+    public AudioClip[] basicBeats, baseDrums;
+
     public float visionDistance, waitingTime, wavingTime, waveRefresh, waveRefreshTotal;
     int moveCounter;
 
-    public float beatTimer, beatTimerTotal;
-
+    public float beatTimer, beatIncrement, beatTimerTotal, scaleColliderTime;
+    public int bassPlaysAt;
     Vector3 targestDestination;
     public Vector3 drumPosition;
 
-    bool upOrDown;
+    bool bassOrSnare;
 
-    ParticleSystem drumParticles;
+    ParticleSystem baseParticles, beatParticles;
     DrumCollider drumCollision;
     GameObject drumSet;
+
+    AudioSource drumBeatSource, bassDrumSource;
 
 	public override void Start () {
         base.Start();
         moveCounter = 0;
-        
+        beatIncrement = 0;
         animator.SetBool("walking", false);
+        animator.speed = 1.75f;
         beatTimer = beatTimerTotal;
-        drumParticles = GetComponentInChildren<ParticleSystem>();
-        drumParticles.Stop();
-        drumCollision = transform.GetChild(2).GetComponent<DrumCollider>();
-        drumSet = transform.GetChild(3).gameObject;
+        baseParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
+        baseParticles.Stop();
+        beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
+        beatParticles.Stop();
+        drumCollision = transform.GetChild(3).GetComponent<DrumCollider>();
+        drumSet = transform.GetChild(4).gameObject;
+
+        drumBeatSource = drumSet.GetComponent<AudioSource>();
+        bassDrumSource = GetComponent<AudioSource>();
 
         SetMove();
     }
@@ -42,6 +52,8 @@ public class NPCDrummer : NPC {
         if(currentState == NPCState.FOLLOWING)
         {
             drumSet.transform.localPosition = new Vector3(0, 1, -3);
+            bassDrumSource.outputAudioMixerGroup = tpc.plantingGroup;
+            drumBeatSource.outputAudioMixerGroup = tpc.plantingGroup;
         }
 
         //not using right now
@@ -80,11 +92,26 @@ public class NPCDrummer : NPC {
     {
         animator.SetBool("walking", false);
         beatTimer -= Time.deltaTime;
-        if(beatTimer < 0)
+        if (beatTimer < 0)
         {
-            drumParticles.Play();
-            drumCollision.StartCoroutine(drumCollision.LerpScale(0.5f));
+            beatParticles.Play();
+            drumCollision.StartCoroutine(drumCollision.LerpScale(scaleColliderTime));
             beatTimer = beatTimerTotal;
+            beatIncrement++;
+            drumBeatSource.PlayOneShot(basicBeats[0]);
+        }
+        if(beatIncrement == bassPlaysAt)
+        {
+            baseParticles.Play();
+            //drumCollision.StartCoroutine(drumCollision.LerpScale(0.5f));
+            if(bassOrSnare)
+                bassDrumSource.PlayOneShot(baseDrums[0]);
+            else
+            {
+                bassDrumSource.PlayOneShot(baseDrums[1]);
+            }
+            beatIncrement = 0;
+            bassOrSnare = !bassOrSnare;
         }
 
     }
@@ -94,7 +121,8 @@ public class NPCDrummer : NPC {
         drumSet.transform.localPosition = drumPosition;
 
         //how should we move the drummer when he needs to find rocks?
-        drumParticles.transform.localPosition = drumPosition + new Vector3(0,2,0);
+        baseParticles.transform.localPosition = drumPosition + new Vector3(0,2,0);
+        beatParticles.transform.localPosition = drumPosition + new Vector3(0, 2, 0);
         drumCollision.gameObject.transform.localPosition = drumPosition + new Vector3(0, 2, 0);
         currentState = NPCState.PLAYING;
     }
