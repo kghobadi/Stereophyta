@@ -1,6 +1,6 @@
 //Maya ASCII 2017 scene
-//Name: guitarTriFlower.ma
-//Last modified: Mon, Feb 19, 2018 10:02:50 PM
+//Name: guitarSeed.ma
+//Last modified: Mon, Feb 19, 2018 10:06:17 PM
 //Codeset: 1252
 requires maya "2017";
 currentUnit -l centimeter -a degree -t film;
@@ -13,8 +13,8 @@ fileInfo "license" "student";
 createNode transform -s -n "persp";
 	rename -uid "0083C121-4D2B-DA64-B437-95A76DC71A72";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" -14.502183423142942 9.1715689675275307 9.7751680631964035 ;
-	setAttr ".r" -type "double3" -20.7383527088211 1028.2000000001481 2.5715649280716124e-015 ;
+	setAttr ".t" -type "double3" -16.743688684050497 11.845177450153145 -1.3708750512071219 ;
+	setAttr ".r" -type "double3" -30.338352708826349 986.60000000013099 0 ;
 createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "02A0898B-48C2-DEFD-FA4F-409317E82E0D";
 	setAttr -k off ".v" no;
@@ -75,9 +75,26 @@ createNode transform -n "polySurface36";
 	rename -uid "14191409-49DF-0886-81DD-9E8AFEC28037";
 	setAttr ".rp" -type "double3" -0.78356391191482544 2.0147202908992767 0.019788205623626709 ;
 	setAttr ".sp" -type "double3" -0.78356391191482544 2.0147202908992767 0.019788205623626709 ;
-createNode mesh -n "polySurface36Shape" -p "polySurface36";
+createNode transform -n "polySurface42" -p "polySurface36";
+	rename -uid "384B3288-4E80-3E60-A4EE-ED90CC7AC66E";
+createNode mesh -n "polySurfaceShape6" -p "polySurface42";
+	rename -uid "DB1359D8-4A1B-0A4D-4016-A9BF3D346611";
+	setAttr -k off ".v";
+	setAttr -s 2 ".iog[0].og";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+createNode transform -n "transform1" -p "polySurface36";
+	rename -uid "7AB287FD-4213-2302-A973-10893B249186";
+	setAttr ".v" no;
+createNode mesh -n "polySurface36Shape" -p "transform1";
 	rename -uid "3F87B415-4AE8-68F9-1318-549CA8315E19";
 	setAttr -k off ".v";
+	setAttr ".io" yes;
 	setAttr ".iog[0].og[0].gcl" -type "componentList" 1 "f[0:99]";
 	setAttr ".vir" yes;
 	setAttr ".vif" yes;
@@ -460,6 +477,16 @@ createNode script -n "sceneConfigurationScriptNode";
 createNode groupId -n "groupId1";
 	rename -uid "4D2338F3-43AC-9AE0-9969-63814B1F2115";
 	setAttr ".ihi" 0;
+createNode polySeparate -n "polySeparate1";
+	rename -uid "3080A78A-4CC6-94F2-7993-0BB10ED1CDCE";
+	setAttr ".ic" 20;
+createNode groupId -n "groupId7";
+	rename -uid "26C84912-42FC-FD10-BA93-068D559BB52F";
+	setAttr ".ihi" 0;
+createNode groupParts -n "groupParts6";
+	rename -uid "2C1541DC-4758-2370-69B5-FB8D7A9E5F6E";
+	setAttr ".ihi" 0;
+	setAttr ".ic" -type "componentList" 1 "f[0:99]";
 select -ne :time1;
 	setAttr ".o" 1;
 	setAttr ".unw" 1;
@@ -478,7 +505,9 @@ select -ne :postProcessList1;
 	setAttr -s 2 ".p";
 select -ne :defaultRenderingList1;
 select -ne :initialShadingGroup;
+	setAttr -s 2 ".dsm";
 	setAttr ".ro" yes;
+	setAttr -s 2 ".gn";
 select -ne :initialParticleSE;
 	setAttr ".ro" yes;
 select -ne :defaultResolution;
@@ -486,6 +515,9 @@ select -ne :defaultResolution;
 select -ne :hardwareRenderGlobals;
 	setAttr ".ctrs" 256;
 	setAttr ".btrs" 512;
+connectAttr "groupParts6.og" "polySurfaceShape6.i";
+connectAttr "groupId7.id" "polySurfaceShape6.iog.og[0].gid";
+connectAttr ":initialShadingGroup.mwc" "polySurfaceShape6.iog.og[0].gco";
 connectAttr "groupId1.id" "polySurface36Shape.iog.og[0].gid";
 connectAttr ":initialShadingGroup.mwc" "polySurface36Shape.iog.og[0].gco";
 relationship "link" ":lightLinker1" ":initialShadingGroup.message" ":defaultLightSet.message";
@@ -494,7 +526,12 @@ relationship "shadowLink" ":lightLinker1" ":initialShadingGroup.message" ":defau
 relationship "shadowLink" ":lightLinker1" ":initialParticleSE.message" ":defaultLightSet.message";
 connectAttr "layerManager.dli[0]" "defaultLayer.id";
 connectAttr "renderLayerManager.rlmi[0]" "defaultRenderLayer.rlid";
+connectAttr "polySurface36Shape.o" "polySeparate1.ip";
+connectAttr "polySeparate1.out[5]" "groupParts6.ig";
+connectAttr "groupId7.id" "groupParts6.gi";
 connectAttr "defaultRenderLayer.msg" ":defaultRenderingList1.r" -na;
 connectAttr "polySurface36Shape.iog.og[0]" ":initialShadingGroup.dsm" -na;
+connectAttr "polySurfaceShape6.iog.og[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "groupId1.msg" ":initialShadingGroup.gn" -na;
-// End of guitarTriFlower.ma
+connectAttr "groupId7.msg" ":initialShadingGroup.gn" -na;
+// End of guitarSeed.ma
