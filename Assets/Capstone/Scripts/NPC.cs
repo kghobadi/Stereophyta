@@ -16,6 +16,8 @@ public class NPC : Interactable {
 
     public NPCState currentState;
 
+    TrailRenderer trailRender;
+
     public enum NPCState
     {
         LOOKING, SETTINGMOVE, MOVING, FOLLOWING, WAVING, PLAYING
@@ -24,7 +26,7 @@ public class NPC : Interactable {
     public override void Start () {
         //should this be interactable?
         base.Start();
-
+        trailRender = GetComponent<TrailRenderer>();
         currentState = NPCState.MOVING;
 
         animator = GetComponentInChildren<Animator>();
@@ -39,7 +41,12 @@ public class NPC : Interactable {
         if(currentState == NPCState.FOLLOWING)
         {
             followTimer += Time.deltaTime;
+            trailRender.enabled = false;
             FollowPlayer();
+        }
+        else
+        {
+            trailRender.enabled = true;
         }
     }
 
