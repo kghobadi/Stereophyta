@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class NPCDrummer : NPC {
 
@@ -13,6 +14,9 @@ public class NPCDrummer : NPC {
     public int bassPlaysAt;
     Vector3 targestDestination;
     public Vector3 drumPosition;
+
+    BoxCollider drummerCollider;
+    Vector3 originalColliderSize;
 
     bool bassOrSnare;
 
@@ -38,6 +42,8 @@ public class NPCDrummer : NPC {
 
         drumBeatSource = drumSet.GetComponent<AudioSource>();
         bassDrumSource = GetComponent<AudioSource>();
+        drummerCollider = GetComponent<BoxCollider>();
+        originalColliderSize = drummerCollider.size;
 
         SetMove();
     }
@@ -54,6 +60,7 @@ public class NPCDrummer : NPC {
             drumSet.transform.localPosition = new Vector3(0, 1, -3);
             bassDrumSource.outputAudioMixerGroup = tpc.plantingGroup;
             drumBeatSource.outputAudioMixerGroup = tpc.plantingGroup;
+            drummerCollider.size = new Vector3(originalColliderSize.x * 10, originalColliderSize.y * 3, originalColliderSize.z * 10);
         }
 
         //not using right now
@@ -70,7 +77,8 @@ public class NPCDrummer : NPC {
 
         if(currentState == NPCState.PLAYING)
         {
-            BeatDrums();
+            if(Vector3.Distance(_player.transform.position, transform.position) < 100)
+                BeatDrums();
             //if (Vector3.Distance(transform.position, _player.transform.position) < 10 && !hasWavedAtPlayer)
             //{
             //    StartCoroutine(WaveAtPlayer());
@@ -124,6 +132,7 @@ public class NPCDrummer : NPC {
         baseParticles.transform.localPosition = drumPosition + new Vector3(0,2,0);
         beatParticles.transform.localPosition = drumPosition + new Vector3(0, 2, 0);
         drumCollision.gameObject.transform.localPosition = drumPosition + new Vector3(0, 2, 0);
+        drummerCollider.size = originalColliderSize;
         currentState = NPCState.PLAYING;
     }
 

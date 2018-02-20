@@ -46,7 +46,7 @@ public class fruitSeedNoInv : Interactable {
 
         if (playerHolding)
         {
-            if (Input.GetMouseButtonDown(1) && transform.position.y < 10)
+            if (Input.GetMouseButtonDown(1))
             {
                 bool canPlant = true;
                 Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
@@ -124,11 +124,11 @@ public class fruitSeedNoInv : Interactable {
         }
         tpc.enabled = false;
         transform.Translate(0, fallingSpeed * Time.deltaTime, 0);
-        if(transform.position.y < 0) //this will need to check collision with terrain eventually
+        if(transform.position.y < tpc.startingHeight) //this will need to check collision with terrain eventually
         {
             //spawn plant
             plantClone = Instantiate(plants, transform.position + new Vector3(0, heightAdjustment, 0), Quaternion.identity);
-            plantClone.GetComponent<Plant>().plantAudio.outputAudioMixerGroup = tpc.plantingGroup;
+            plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             //plantClone.transform.localScale = new Vector3 (plantClone.transform.localScale.x, plantClone.transform.localScale.y * 3, plantClone.transform.localScale.z);
             //set bools
             planting = false;

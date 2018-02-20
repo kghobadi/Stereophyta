@@ -16,16 +16,15 @@ public class AreaTrigger : MonoBehaviour {
 
     CutScene cameraCutScenes;
     
-    public AudioMixerSnapshot oldArea, nextArea;
-    public AudioMixerGroup oldGroup, newGroup;
-    bool hasEntered, oldSnap, transitioned;
+    public AudioMixerSnapshot oldArea, thisArea;
+    public AudioMixerGroup oldGroup, thisGroup;
+    bool hasEntered, transitioned;
     public bool cutScene;
 
     void Start()
     {
         tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
         cameraCutScenes = Camera.main.GetComponent<CutScene>();
-        oldSnap = true;
     }
 
     void Update()
@@ -40,36 +39,30 @@ public class AreaTrigger : MonoBehaviour {
     {
         if(other.gameObject.tag == "Player" )
         {
-            if (hasEntered && oldSnap && !transitioned)
+            if (cutScene)
             {
-                nextArea.TransitionTo(1f);
-                oldArea = tpc.currentAudioMix;
-                tpc.currentAudioMix = nextArea;
-                oldGroup = tpc.plantingGroup;
-                tpc.plantingGroup = newGroup;
-                oldSnap = false;
-                transitioned = true;
-            }
-            if (hasEntered && !oldSnap && !transitioned)
-            {
-                oldArea.TransitionTo(1f);
-                tpc.currentAudioMix = oldArea;
-                tpc.plantingGroup = oldGroup;
-                oldSnap = true;
-                transitioned = true;
-            }
-            if (!hasEntered)
-            {
-                if(cutScene)
+                if (!hasEntered)
+                {
                     cameraCutScenes.ShowNewArea(startingPosition, startingRotation, cameraPositions, highlightedObjects);
-                hasEntered = true;
-                nextArea.TransitionTo(1f);
-                oldArea = tpc.currentAudioMix;
-                tpc.currentAudioMix = nextArea;
-                oldGroup = tpc.plantingGroup;
-                tpc.plantingGroup = newGroup;
-                oldSnap = false;
+                    hasEntered = true;
+                }
             }
+            thisArea.TransitionTo(1f);
+            tpc.currentAudioMix = thisArea;
+            tpc.plantingGroup = thisGroup;
+            transitioned = true;
         }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            oldArea.TransitionTo(1f);
+            tpc.currentAudioMix = oldArea;
+            tpc.plantingGroup = oldGroup;
+            transitioned = true;
+        }
+
     }
 }

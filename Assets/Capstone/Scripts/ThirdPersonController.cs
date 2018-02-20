@@ -33,7 +33,7 @@ public class ThirdPersonController : MonoBehaviour
     public AudioMixerSnapshot currentAudioMix;
     public AudioMixerGroup plantingGroup;
 
-    float startingHeight;
+    public float startingHeight;
 
     void Start()
     {
