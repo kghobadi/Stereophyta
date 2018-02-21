@@ -153,7 +153,10 @@ public class NPCspin : NPC {
         plantsToPlay.Clear();
 
         //set new move pos
-        SetMove();
+        if(currentState == NPCState.PLAYING)
+        {
+            SetMove();
+        }
         animator.SetBool("walking", true);
         animator.SetBool("spinning", false);
     }

@@ -28,6 +28,7 @@ public class ThirdPersonController : MonoBehaviour
     Animator blubAnimator;
 
     public List<GameObject> followers = new List<GameObject>();
+    public List<float> followerDistances = new List<float>();
     public int followerCountMax;
 
     public AudioMixerSnapshot currentAudioMix;
