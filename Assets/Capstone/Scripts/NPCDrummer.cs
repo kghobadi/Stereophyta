@@ -60,7 +60,7 @@ public class NPCDrummer : NPC {
             drumSet.transform.localPosition = new Vector3(0, 1, -3);
             bassDrumSource.outputAudioMixerGroup = tpc.plantingGroup;
             drumBeatSource.outputAudioMixerGroup = tpc.plantingGroup;
-            drummerCollider.size = new Vector3(originalColliderSize.x * 10, originalColliderSize.y * 5, originalColliderSize.z * 10);
+            drummerCollider.size = new Vector3(originalColliderSize.x * 10, originalColliderSize.y * 4, originalColliderSize.z * 10);
         }
 
         //not using right now

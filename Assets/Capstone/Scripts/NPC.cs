@@ -12,11 +12,13 @@ public class NPC : Interactable {
 
     public Animator animator;
 
-    public float speed, followDistance, followTimer, followTimeMin, heightAdjustment;
+    public float speed, followDistance, currentFollowDistance, followTimer, followTimeMin, heightAdjustment;
 
     public NPCState currentState;
 
     TrailRenderer trailRender;
+
+    int lastLineLength, placeInLine;
 
     public enum NPCState
     {
@@ -54,10 +56,24 @@ public class NPC : Interactable {
     {
         //if doing something other than following, start following player
         if(interactable && Vector3.Distance(_player.transform.position, transform.position) < withinDistanceActive
-            && currentState != NPCState.FOLLOWING && currentState != NPCState.LOOKING && tpc.followers.Count < tpc.followerCountMax)
+            && currentState != NPCState.FOLLOWING  && tpc.followers.Count < tpc.followerCountMax)
         {
             base.handleClickSuccess();
             tpc.followers.Add(gameObject);
+            tpc.followerDistances.Add(followDistance);
+            placeInLine = tpc.followers.IndexOf(gameObject);
+            if (placeInLine == 0)
+            {
+                currentFollowDistance = tpc.followerDistances[0];
+            }
+            if (placeInLine == 1)
+            {
+                currentFollowDistance = tpc.followerDistances[0] + tpc.followerDistances[1];
+            }
+            if (placeInLine == 2)
+            {
+                currentFollowDistance = tpc.followerDistances[0] + tpc.followerDistances[1] + tpc.followerDistances[2] ;
+            }
             currentState = NPCState.FOLLOWING;
             animator.SetBool("walking", true); // if there is a new animation for following add it here!
         }
@@ -66,23 +82,36 @@ public class NPC : Interactable {
         if (interactable  && followTimer > followTimeMin && currentState == NPCState.FOLLOWING)
         {
             base.handleClickSuccess();
-            tpc.followers.Remove(gameObject);
             currentState = NPCState.SETTINGMOVE;
+            tpc.followers.Remove(gameObject);
+            tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
             followTimer = 0;
         }
     }
 
     public virtual void FollowPlayer()
     {
-        Vector3 spotInLine = Vector3.zero;
-        if (tpc.followers.IndexOf(gameObject) == 0)
+        //check place in line
+        int currentLineLength = tpc.followers.Count;
+        if(currentLineLength != lastLineLength)
         {
-            spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - followDistance);
+            placeInLine = tpc.followers.IndexOf(gameObject);
+            if (placeInLine == 0)
+            {
+                currentFollowDistance = tpc.followerDistances[0];
+            }
+            if (placeInLine == 1)
+            {
+                currentFollowDistance = tpc.followerDistances[0] + tpc.followerDistances[1];
+            }
+            if (placeInLine == 2)
+            {
+                currentFollowDistance = tpc.followerDistances[0] + tpc.followerDistances[1] + tpc.followerDistances[2];
+            }
         }
-        else
-        {
-            spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - ((tpc.followers.IndexOf(gameObject) + 1) * followDistance));
-        }
+
+        Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
+        
         if (Vector3.Distance(transform.position,  spotInLine) > 0.25f)
         {
             transform.position = Vector3.MoveTowards(transform.position, spotInLine, speed * Time.deltaTime);
@@ -92,6 +121,7 @@ public class NPC : Interactable {
         {
             transform.LookAt(new Vector3(_player.transform.position.x, _player.transform.position.y + heightAdjustment, _player.transform.position.z));
         }
-        
+
+        lastLineLength = tpc.followers.Count;
     }
 }
