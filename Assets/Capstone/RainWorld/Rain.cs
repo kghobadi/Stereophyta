@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Rain : MonoBehaviour
 {
+    GameObject _player;
+    ThirdPersonController tpc;
 
     ParticleSystem rainEffect;
 
@@ -17,8 +19,13 @@ public class Rain : MonoBehaviour
 
     Transform cloud;
 
+    AudioSource rainSource;
+
     void Start()
     {
+        _player = GameObject.FindGameObjectWithTag("Player");
+        tpc = _player.GetComponent<ThirdPersonController>();
+
         rainEffect = GetComponent<ParticleSystem>();
         
         bed = GameObject.FindGameObjectWithTag("Bed");
@@ -32,6 +39,8 @@ public class Rain : MonoBehaviour
 
         cloud = transform.GetChild(0);
         cloud.eulerAngles = new Vector3(0, Random.Range(0, 360), 0);
+
+        rainSource = GetComponent<AudioSource>();
     }
     
     void Update()
@@ -60,7 +69,10 @@ public class Rain : MonoBehaviour
         if ((randomRotateDirection > 0 && transform.localScale.x < 2) || (randomRotateDirection < 0 && transform.localScale.x > 0.4f))
             transform.localScale += Vector3.one * Time.deltaTime * moveSpeed * 0.0025f * randomRotateDirection;
 
-
+        //if(Vector3.Distance(_player.transform.position, transform.position) < 50)
+        //{
+        //    rainSource.outputAudioMixerGroup = tpc.plantingGroup;
+        //}
 
     }
 

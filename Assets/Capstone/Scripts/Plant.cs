@@ -51,7 +51,7 @@ public class Plant : Interactable {
         {
             sapling = true;
             transform.localScale *= saplingScale;
-            transform.position = new Vector3(transform.position.x, transform.position.y - (origScale.y / 2), transform.position.z);
+            transform.position = new Vector3(transform.position.x, transform.position.y - (origScale.y / 2) + (transform.localScale.y / 2), transform.position.z);
         }
 
         //counts up through plant children, adding these to the list of Branches for later.
@@ -178,8 +178,20 @@ public class Plant : Interactable {
     {
         if (/*!plantAudio.isPlaying &&*/ !scalingUp && !scalingDown)
         {
-            plantAudio.PlayOneShot(currentSound);
-            scalingUp = true;
+            if (!sapling)
+            {
+                plantAudio.PlayOneShot(currentSound);
+                scalingUp = true;
+            }
+            else
+            {
+                if (!plantAudio.isPlaying)
+                {
+                    plantAudio.PlayOneShot(currentSound);
+                    notesPlaying.Emit(10);
+                }
+            }
+                
         }
         
     }

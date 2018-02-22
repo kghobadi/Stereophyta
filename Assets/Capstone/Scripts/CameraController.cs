@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class CameraController : MonoBehaviour
 {
     GameObject _player;
-    float currentXDist = -4, currentYDist=7, currentZDist = -4; //away from player
+    public float currentXDist = -4, currentYDist=7, currentZDist = -4; //away from player
     int cameraPos;
 
     Vector3 origPos, desiredPos, origRotation, desiredRotation;
@@ -25,7 +25,7 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
-        transform.position = new Vector3(_player.transform.position.x - 4, _player.transform.position.y + 7, _player.transform.position.z - 4);
+        transform.position = new Vector3(_player.transform.position.x - 4, _player.transform.position.y + 50, _player.transform.position.z - 4);
         //transform.LookAt(_player.transform);
         cameraPos = 0;
     }

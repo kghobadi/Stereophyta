@@ -7,11 +7,13 @@ public class RainMachine : MonoBehaviour
     public float rotateSpeed = 10;
     public int cloudInterval = 10;
     public GameObject rain;
+    GameObject rainHead;
 
     float timer;
     // Use this for initialization
     void Start()
     {
+        rainHead = transform.GetChild(0).gameObject;
         InstantiateRain();
     }
 
