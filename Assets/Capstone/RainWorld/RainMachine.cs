@@ -18,16 +18,12 @@ public class RainMachine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftArrow))
-            transform.Rotate(Vector3.up * Time.deltaTime * -rotateSpeed);
-
-        if (Input.GetKey(KeyCode.RightArrow))
-            transform.Rotate(Vector3.up * Time.deltaTime * rotateSpeed);
-
         timer += Time.deltaTime;
 
         if (timer > cloudInterval)
         {
+            transform.Rotate(0, 90, 0);
+
             InstantiateRain();
 
             timer = 0;
