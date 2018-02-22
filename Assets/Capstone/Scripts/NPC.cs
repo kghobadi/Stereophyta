@@ -2,196 +2,126 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPC : MonoBehaviour {
+public class NPC : Interactable {
 
     public string plantType;
 
-    Plant currentPlant;
+    protected Plant currentPlant;
 
-    public float visionDistance, movementDistance, speed, waitingTime, wavingTime, waveRefresh, waveRefreshTotal;
-    int moveCounter;
+    protected bool hasWavedAtPlayer;
 
-    Vector3 targestDestination;
+    public Animator animator;
 
-    bool looking, moving, upOrDown, hasWavedAtPlayer;
+    public float speed, followDistance, currentFollowDistance, followTimer, followTimeMin, heightAdjustment;
 
-    Animator animator;
-    GameObject _player;
+    public NPCState currentState;
 
-	void Start () {
+    TrailRenderer trailRender;
+
+    int lastLineLength, placeInLine;
+
+    public enum NPCState
+    {
+        LOOKING, SETTINGMOVE, MOVING, FOLLOWING, WAVING, PLAYING
+    }
+
+    public override void Start () {
         //should this be interactable?
-        _player = GameObject.FindGameObjectWithTag("Player");
-        targestDestination = transform.position + new Vector3(0, 0, movementDistance);
-        moveCounter = 0;
-        moving = true;
+        base.Start();
+        trailRender = GetComponent<TrailRenderer>();
+        currentState = NPCState.MOVING;
 
         animator = GetComponentInChildren<Animator>();
         animator.SetBool("walking", true);
 
-        speed += Random.Range(-1, 1);
+        interactable = true;
+        followTimer = 0;
     }
-	
-	void Update () {
-        //states in here, distance check on player
-        if (moving)
-        {
-            Movement();
 
-            if (Vector3.Distance(transform.position, _player.transform.position) < 10 && !hasWavedAtPlayer)
+    public virtual void Update()
+    {
+        if(currentState == NPCState.FOLLOWING)
+        {
+            followTimer += Time.deltaTime;
+            trailRender.enabled = false;
+            FollowPlayer();
+        }
+        else
+        {
+            trailRender.enabled = true;
+        }
+    }
+
+    public override void handleClickSuccess()
+    {
+        //if doing something other than following, start following player
+        if(interactable && Vector3.Distance(_player.transform.position, transform.position) < withinDistanceActive
+            && currentState != NPCState.FOLLOWING  && tpc.followers.Count < tpc.followerCountMax)
+        {
+            base.handleClickSuccess();
+            tpc.followers.Add(gameObject);
+            tpc.followerDistances.Add(followDistance);
+            placeInLine = tpc.followers.IndexOf(gameObject);
+            if (placeInLine == 0)
             {
-                StartCoroutine(WaveAtPlayer());
-                
+                currentFollowDistance = tpc.followerDistances[0];
+            }
+            if (placeInLine == 1)
+            {
+                currentFollowDistance = tpc.followerDistances[0] + tpc.followerDistances[1];
+            }
+            if (placeInLine == 2)
+            {
+                currentFollowDistance = tpc.followerDistances[0] + tpc.followerDistances[1] + tpc.followerDistances[2] ;
+            }
+            currentState = NPCState.FOLLOWING;
+            animator.SetBool("walking", true); // if there is a new animation for following add it here!
+        }
+
+        //if following player, deploy NPC
+        if (interactable  && followTimer > followTimeMin && currentState == NPCState.FOLLOWING)
+        {
+            base.handleClickSuccess();
+            currentState = NPCState.SETTINGMOVE;
+            tpc.followers.Remove(gameObject);
+            tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
+            followTimer = 0;
+        }
+    }
+
+    public virtual void FollowPlayer()
+    {
+        //check place in line
+        int currentLineLength = tpc.followers.Count;
+        if(currentLineLength != lastLineLength)
+        {
+            placeInLine = tpc.followers.IndexOf(gameObject);
+            if (placeInLine == 0)
+            {
+                currentFollowDistance = tpc.followerDistances[0];
+            }
+            if (placeInLine == 1)
+            {
+                currentFollowDistance = tpc.followerDistances[0] + tpc.followerDistances[1];
+            }
+            if (placeInLine == 2)
+            {
+                currentFollowDistance = tpc.followerDistances[0] + tpc.followerDistances[1] + tpc.followerDistances[2];
             }
         }
-        if (hasWavedAtPlayer)
-        {
-            waveRefresh -= Time.deltaTime;
-            if (waveRefresh < 0)
-            {
-                hasWavedAtPlayer = false;
-            }
-        }
-    }
 
-    void SetMove()
-    {
-        //randomly changes note up or down
-        int randomNum = Random.Range(0, 100);
-        if(randomNum < 50)
+        Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
+        
+        if (Vector3.Distance(transform.position,  spotInLine) > 0.25f)
         {
-            upOrDown = true;
+            transform.position = Vector3.MoveTowards(transform.position, spotInLine, speed * Time.deltaTime);
+            transform.LookAt(spotInLine); 
         }
         else
         {
-            upOrDown = false;
+            transform.LookAt(new Vector3(_player.transform.position.x, _player.transform.position.y + heightAdjustment, _player.transform.position.z));
         }
 
-        if (moveCounter < 3)
-        {
-            moveCounter++;
-        }
-        else
-        {
-            moveCounter = 0;
-        }
-        switch (moveCounter)
-        {
-            case 0:
-                targestDestination = transform.position + new Vector3(0, 0, movementDistance);
-                transform.LookAt(transform.position + Vector3.forward);
-                break;
-            case 1:
-                targestDestination = transform.position + new Vector3(movementDistance, 0, 0);
-                transform.LookAt(transform.position + Vector3.right);
-                break;
-            case 2:
-                targestDestination = transform.position + new Vector3(0, 0, -movementDistance);
-                transform.LookAt(transform.position + Vector3.back);
-                break;
-            case 3:
-                targestDestination = transform.position + new Vector3(-movementDistance, 0, 0);
-                transform.LookAt(transform.position + Vector3.left);
-                break;
-        }
-        moving = true;
+        lastLineLength = tpc.followers.Count;
     }
-
-    public void Movement()
-    {
-        transform.position = Vector3.MoveTowards(transform.position, targestDestination, speed * Time.deltaTime);
-
-        if (Vector3.Distance(transform.position, targestDestination) < 0.01f)
-        {
-            transform.position = targestDestination;
-            moving = false;
-            LookForPlants();
-        }
-    }
-
-    public void LookForPlants()
-    {
-        bool canPlayPlant = false;
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
-        int i = 0;
-        while (i < hitColliders.Length)
-        {
-            if (hitColliders[i].gameObject.tag == "Plant" && hitColliders[i].gameObject.GetComponent<Plant>().plantSpecieName.ToString() == plantType)
-            {
-                currentPlant = hitColliders[i].gameObject.GetComponent<Plant>();
-                canPlayPlant = true;
-            }
-            i++;
-        }
-        if (canPlayPlant)
-        {
-            StartCoroutine(PlayTree());
-            
-        }
-        else
-        {
-            SetMove();
-        }
-    }
-
-    public IEnumerator PlayTree()
-    {
-        //play animation or do a color change on character
-        //wait here a moment
-        animator.SetBool("walking", false);
-        if(plantType == "CUBETREE")
-            transform.LookAt(currentPlant.transform.position - new Vector3(0,2,0));
-        else
-        {
-            transform.LookAt(currentPlant.transform.position);
-        }
-        yield return new WaitForSeconds(waitingTime);
-        if (upOrDown)
-        {
-            currentPlant.ShiftNoteUp();
-        }
-        else
-        {
-            currentPlant.ShiftNoteDown();
-        }
-        //set new move pos
-        SetMove();
-        animator.SetBool("walking", true);
-    }
-
-    public IEnumerator WaveAtPlayer()
-    {
-        moving = false;
-        transform.LookAt(_player.transform);
-        animator.SetBool("waving", true);
-        animator.SetBool("walking", false);
-        yield return new WaitForSeconds(wavingTime);
-        //rotates back correctly
-        switch (moveCounter)
-        {
-            case 0:
-                transform.LookAt(transform.position + Vector3.forward);
-                break;
-            case 1:
-                transform.LookAt(transform.position + Vector3.right);
-                break;
-            case 2:
-                transform.LookAt(transform.position + Vector3.back);
-                break;
-            case 3:
-                transform.LookAt(transform.position + Vector3.left);
-                break;
-        }
-        //starts walking again
-        moving = true;
-        hasWavedAtPlayer = true;
-        waveRefresh = waveRefreshTotal;
-        animator.SetBool("waving", false);
-        animator.SetBool("walking", true);
-    }
-
-    //OTHER FUNCTIONS
-    //pick up seed ()
-    //plant seed ()
-
-    //playerInteract()
 }

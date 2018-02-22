@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class ThirdPersonController : MonoBehaviour
 {
@@ -26,6 +27,15 @@ public class ThirdPersonController : MonoBehaviour
 
     Animator blubAnimator;
 
+    public List<GameObject> followers = new List<GameObject>();
+    public List<float> followerDistances = new List<float>();
+    public int followerCountMax;
+
+    public AudioMixerSnapshot currentAudioMix;
+    public AudioMixerGroup plantingGroup;
+
+    public float startingHeight;
+
     void Start()
     {
         player = GetComponent<CharacterController>();
@@ -37,6 +47,8 @@ public class ThirdPersonController : MonoBehaviour
         targetPosition = transform.position;
         blubAnimator = GetComponentInChildren<Animator>();
         blubAnimator.SetBool("walking", false);
+        startingHeight = transform.position.y;
+
     }
 
     void Update()
@@ -54,7 +66,7 @@ public class ThirdPersonController : MonoBehaviour
                 {
                     targetPosition = hit.point + new Vector3(0, 1, 0);
                     //Debug.Log(targetPosition);
-                    if (targetPosition.y < 3)
+                    if (targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight - 3))
                     {
                         isMoving = true;
                     }
@@ -73,7 +85,7 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
 
-        if (isMoving && targetPosition.y < 3)
+        if (isMoving && targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight-3))
         {
             MovePlayer();
             blubAnimator.SetBool("walking", true);

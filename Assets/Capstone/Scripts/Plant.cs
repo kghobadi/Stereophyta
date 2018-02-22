@@ -9,7 +9,7 @@ public class Plant : Interactable {
     public List<GameObject> branches = new List<GameObject>();
     int currentNote;
     AudioClip currentSound;
-    AudioSource plantAudio;
+    public AudioSource plantAudio;
 
     ParticleSystem notesPlaying;
     public AudioClip lowerSound;
@@ -132,7 +132,7 @@ public class Plant : Interactable {
 
     public void PlaySound()
     {
-        if (!plantAudio.isPlaying && !scalingDown)
+        if (/*!plantAudio.isPlaying &&*/ !scalingUp && !scalingDown)
         {
             plantAudio.PlayOneShot(currentSound);
             scalingUp = true;
@@ -156,16 +156,15 @@ public class Plant : Interactable {
         // chooses new note and enlarges branch
         currentSound = musicalNotes[currentNote];
         branches[currentNote].transform.localScale *= 2;
-        if (plantSpecieName != PlantSpecies.GUITAR)
-        {
+       
             origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
             lerpingColor = true;
-        }
+        
         notesPlaying.transform.position = branches[currentNote].transform.position;
         // try setting parent to branch and setting position after!
         //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
         //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
-        Debug.Log(currentNote);
+        //Debug.Log(currentNote);
         plantAudio.PlayOneShot(InteractSound);
     }
 
@@ -184,11 +183,10 @@ public class Plant : Interactable {
         // chooses new note and enlarges tubule
         currentSound = musicalNotes[currentNote];
         branches[currentNote].transform.localScale *= 2;
-        if(plantSpecieName != PlantSpecies.GUITAR)
-        {
+      
             origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
             lerpingColor = true;
-        }
+        
         notesPlaying.transform.position = branches[currentNote].transform.position;
         plantAudio.PlayOneShot(lowerSound);
     }

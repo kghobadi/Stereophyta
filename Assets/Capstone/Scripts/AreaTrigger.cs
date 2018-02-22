@@ -7,20 +7,24 @@ public class AreaTrigger : MonoBehaviour {
 
     //when a player runs thru this object, used to feed info for CutScene
 
-    public Vector3 startingPosition;
+    ThirdPersonController tpc;
+
+    public Transform startingPosition;
     public Transform startingRotation; // points at which cutscene should begin
-    public Vector3[] cameraPositions; //array of cameraPositions for panning
+    public Transform[] cameraPositions; //array of cameraPositions for panning
     public Transform[] highlightedObjects; // array of objects to look at while panning
 
     CutScene cameraCutScenes;
     
-    public AudioMixerSnapshot oldArea, nextArea;
-    bool hasEntered, oldSnap, transitioned;
+    public AudioMixerSnapshot oldArea, thisArea;
+    public AudioMixerGroup oldGroup, thisGroup;
+    bool hasEntered, transitioned;
+    public bool cutScene;
 
     void Start()
     {
+        tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
         cameraCutScenes = Camera.main.GetComponent<CutScene>();
-        oldSnap = true;
     }
 
     void Update()
@@ -35,25 +39,30 @@ public class AreaTrigger : MonoBehaviour {
     {
         if(other.gameObject.tag == "Player" )
         {
-            if (hasEntered && oldSnap && !transitioned)
+            if (cutScene)
             {
-                nextArea.TransitionTo(1f);
-                oldSnap = false;
-                transitioned = true;
+                if (!hasEntered)
+                {
+                    cameraCutScenes.ShowNewArea(startingPosition, startingRotation, cameraPositions, highlightedObjects);
+                    hasEntered = true;
+                }
             }
-            if (hasEntered && !oldSnap && !transitioned)
-            {
-                oldArea.TransitionTo(1f);
-                oldSnap = true;
-                transitioned = true;
-            }
-            if (!hasEntered)
-            {
-                cameraCutScenes.ShowNewArea(startingPosition, startingRotation, cameraPositions, highlightedObjects);
-                hasEntered = true;
-                nextArea.TransitionTo(1f);
-                oldSnap = false;
-            }
+            thisArea.TransitionTo(1f);
+            tpc.currentAudioMix = thisArea;
+            tpc.plantingGroup = thisGroup;
+            transitioned = true;
         }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            oldArea.TransitionTo(1f);
+            tpc.currentAudioMix = oldArea;
+            tpc.plantingGroup = oldGroup;
+            transitioned = true;
+        }
+
     }
 }
