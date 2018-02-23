@@ -198,53 +198,60 @@ public class Plant : Interactable {
 
     public void ShiftNoteUp()
     {
-        //shrinks current branch
-        branches[currentNote].transform.localScale *= 0.5f;
+        if (!sapling)
+        {
 
-        if (currentNote < (musicalNotes.Length - 1))
-        {
-            currentNote++;
-        }
-        else
-        {
-            currentNote = 0;
-        }
-        // chooses new note and enlarges branch
-        currentSound = musicalNotes[currentNote];
-        branches[currentNote].transform.localScale *= 2;
-       
+            //shrinks current branch
+            branches[currentNote].transform.localScale *= 0.5f;
+
+            if (currentNote < (musicalNotes.Length - 1))
+            {
+                currentNote++;
+            }
+            else
+            {
+                currentNote = 0;
+            }
+            // chooses new note and enlarges branch
+            currentSound = musicalNotes[currentNote];
+            branches[currentNote].transform.localScale *= 2;
+
             origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
             lerpingColor = true;
-        
-        notesPlaying.transform.position = branches[currentNote].transform.position;
-        // try setting parent to branch and setting position after!
-        //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
-        //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
-        //Debug.Log(currentNote);
-        plantAudio.PlayOneShot(selectionNotes[currentNote]);
+
+            notesPlaying.transform.position = branches[currentNote].transform.position;
+            // try setting parent to branch and setting position after!
+            //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
+            //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
+            //Debug.Log(currentNote);
+            plantAudio.PlayOneShot(selectionNotes[currentNote]);
+        }
     }
 
     public void ShiftNoteDown()
     {
-        branches[currentNote].transform.localScale *= 0.5f;
+        if (!sapling)
+        {
+            branches[currentNote].transform.localScale *= 0.5f;
 
-        if (currentNote > 0)
-        {
-            currentNote--;
+            if (currentNote > 0)
+            {
+                currentNote--;
+            }
+            else
+            {
+                currentNote = musicalNotes.Length - 1;
+            }
+            // chooses new note and enlarges Branch
+            currentSound = musicalNotes[currentNote];
+            branches[currentNote].transform.localScale *= 2;
+
+            origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
+            lerpingColor = true;
+
+            notesPlaying.transform.position = branches[currentNote].transform.position;
+            plantAudio.PlayOneShot(selectionNotes[currentNote]);
         }
-        else
-        {
-            currentNote = musicalNotes.Length - 1;
-        }
-        // chooses new note and enlarges Branch
-        currentSound = musicalNotes[currentNote];
-        branches[currentNote].transform.localScale *= 2;
-      
-        origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
-        lerpingColor = true;
-        
-        notesPlaying.transform.position = branches[currentNote].transform.position;
-        plantAudio.PlayOneShot(selectionNotes[currentNote]);
     }
     
 }
