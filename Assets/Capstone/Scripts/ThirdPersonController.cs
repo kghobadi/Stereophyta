@@ -5,7 +5,7 @@ using UnityEngine.Audio;
 
 public class ThirdPersonController : MonoBehaviour
 {
-    public float speed;
+    public float currentSpeed, walkSpeed, runSpeedMax;
     public float scrollSpeed = 2.0f;
     CharacterController player;
 
@@ -34,7 +34,9 @@ public class ThirdPersonController : MonoBehaviour
     public AudioMixerSnapshot currentAudioMix;
     public AudioMixerGroup plantingGroup;
 
-    public float startingHeight;
+    public float startingHeight, runTime;
+
+    float clickTimer;
 
     void Start()
     {
@@ -49,6 +51,7 @@ public class ThirdPersonController : MonoBehaviour
         blubAnimator.SetBool("walking", false);
         startingHeight = transform.position.y;
 
+        currentSpeed = walkSpeed;
     }
 
     void Update()
@@ -56,9 +59,14 @@ public class ThirdPersonController : MonoBehaviour
         //click to move to point
         if (Input.GetMouseButton(0))
         {
-            movement = new Vector3(0, 0, 1 * speed);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
+
+            clickTimer += Time.deltaTime;
+            if(clickTimer > runTime && currentSpeed < runSpeedMax)
+            {
+                currentSpeed += Time.deltaTime * 3;
+            }
 
             if (Physics.Raycast(ray, out hit, 100, mask))
             {
@@ -72,12 +80,14 @@ public class ThirdPersonController : MonoBehaviour
                     }
                 }
                 else if (Vector3.Distance(transform.position, hit.point) > 5 && 
-                    (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant" || hit.transform.gameObject.tag == "Seed")) 
+                    (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant" 
+                    || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
+                    || hit.transform.gameObject.tag == "NPC")) 
                     // use if statement for interactable stuff which the player should auto walk towards
                 {
                     targetPosition = hit.point + new Vector3(1, -1, 1);
                     Debug.Log(targetPosition);
-                    if (targetPosition.y < 3)
+                    if (targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight - 3))
                     {
                         isMoving = true;
                     }
@@ -85,21 +95,42 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
 
+        if (Input.GetMouseButtonUp(0))
+        {
+            if(clickTimer < runTime)
+            {
+                isMoving = true;
+                clickTimer = 0;
+                currentSpeed = walkSpeed;
+            }
+            else
+            {
+                isMoving = false;
+                clickTimer = 0;
+                currentSpeed = walkSpeed;
+            }
+        }
+
         if (isMoving && targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight-3))
         {
             MovePlayer();
             blubAnimator.SetBool("walking", true);
+            //if(clickTimer < runTime)
+            // blubAnimator.SetBool("walking", true);
+            //else{
+            // blubAnimator.SetBool("running", true); 
+            //could tie running animation speed to speed var
         }
         else
         {
-            blubAnimator.SetBool("walking", false);
+            blubAnimator.SetBool("walking", false); // idle animation
         }
     }
    
     void MovePlayer()
     {
         transform.LookAt(targetPosition);
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
         
         if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
         {

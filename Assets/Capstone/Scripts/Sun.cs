@@ -32,7 +32,7 @@ public class Sun : MonoBehaviour
         if(transform.position.x > middayInterval)
         {
 			sun.color = Color.Lerp(sun.color, morn, Time.deltaTime / 10);
-			sun.intensity = Mathf.Lerp (sun.intensity, 1.5f, Time.deltaTime);
+			//sun.intensity = Mathf.Lerp (sun.intensity, 1.5f, Time.deltaTime);
             isMorning = true;
             isMidday = false;
             isNight = false;
@@ -40,7 +40,7 @@ public class Sun : MonoBehaviour
         else if(transform.position.x < middayInterval && transform.position.x > nightInterval)
         {
 			sun.color = Color.Lerp (sun.color, mid, Time.deltaTime / 10);
-			sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
+			//sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
             isMorning = false;
             isMidday = true;
             isNight = false;
@@ -48,7 +48,7 @@ public class Sun : MonoBehaviour
         else if (transform.position.x < nightInterval)
         {
 			sun.color = Color.Lerp(sun.color, night, Time.deltaTime / 10);
-			sun.intensity = Mathf.Lerp (sun.intensity, .25f, Time.deltaTime);
+			//sun.intensity = Mathf.Lerp (sun.intensity, .25f, Time.deltaTime);
 
             isMorning = false;
             isMidday = false;
