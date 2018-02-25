@@ -24,6 +24,8 @@ public class Plant : Interactable {
     public Color lerpedColor;
     Color origColor;
 
+    bool playerClick;
+
     public PlantSpecies plantSpecieName;
 
     public enum PlantSpecies
@@ -81,6 +83,7 @@ public class Plant : Interactable {
             base.OnMouseOver();
             if (Input.GetMouseButtonDown(1))
             {
+                playerClick = true;
                 ShiftNoteDown();
 
             }
@@ -106,6 +109,7 @@ public class Plant : Interactable {
             //        gateScript.CheckAreaComplete();
             //    }
             //}
+            playerClick = true;
             ShiftNoteUp();
             
         }
@@ -224,7 +228,11 @@ public class Plant : Interactable {
             //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
             //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
             //Debug.Log(currentNote);
-            plantAudio.PlayOneShot(selectionNotes[currentNote]);
+            if (playerClick)
+            {
+                plantAudio.PlayOneShot(selectionNotes[currentNote]);
+                playerClick = false;
+            }
         }
     }
 
@@ -250,7 +258,12 @@ public class Plant : Interactable {
             lerpingColor = true;
 
             notesPlaying.transform.position = branches[currentNote].transform.position;
-            plantAudio.PlayOneShot(selectionNotes[currentNote]);
+
+            if (playerClick)
+            {
+                plantAudio.PlayOneShot(selectionNotes[currentNote]);
+                playerClick = false;
+            }
         }
     }
     

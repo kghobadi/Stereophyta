@@ -31,10 +31,15 @@ public class ThirdPersonController : MonoBehaviour
     public List<float> followerDistances = new List<float>();
     public int followerCountMax;
 
+    public List<GameObject> seedLine = new List<GameObject>();
+    public int seedMax;
+
     public AudioMixerSnapshot currentAudioMix;
     public AudioMixerGroup plantingGroup;
 
     public float startingHeight, runTime;
+    
+    public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
 
     float clickTimer;
 
@@ -56,6 +61,15 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
+        if(seedLine.Count == 0)
+        {
+            isHoldingSomething = false;
+        }
+        else
+        {
+            isHoldingSomething = true;
+        }
+
         //click to move to point
         if (Input.GetMouseButton(0))
         {
@@ -85,7 +99,7 @@ public class ThirdPersonController : MonoBehaviour
                     || hit.transform.gameObject.tag == "NPC")) 
                     // use if statement for interactable stuff which the player should auto walk towards
                 {
-                    targetPosition = hit.point + new Vector3(1, -1, 1);
+                    targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
                     Debug.Log(targetPosition);
                     if (targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight - 3))
                     {
