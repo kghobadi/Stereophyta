@@ -57,9 +57,9 @@ public class Rain : MonoBehaviour
         {
             float randy = Random.Range(0, 100);
             if (randy > 50)
-                randomRotateDirection = Random.Range(0, 2.0f);
+                randomRotateDirection = Random.Range(0, 1.0f);
             else
-                randomRotateDirection = Random.Range(-2.0f, 0);
+                randomRotateDirection = Random.Range(-1.0f, 0);
 
 
         }

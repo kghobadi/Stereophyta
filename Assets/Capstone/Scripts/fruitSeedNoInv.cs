@@ -12,12 +12,12 @@ public class fruitSeedNoInv : Interactable {
     
     int originalLayer;
 
-    bool inSeedLine, planting, throwing, adjustedRotation;
+    bool inSeedLine, planting, throwing, adjustedRotation, throwToPlant;
 
     public float fallingSpeed; //how fast seed falls to ground
     public float heightAdjustment; //how high must this plant be instantiated
 
-    float throwCounter, yVelocity;
+    float throwCounter, yVelocity, followSpeedOrig, followSpeed;
 
     Rigidbody fruitBody;
     BoxCollider bCollider;
@@ -34,6 +34,8 @@ public class fruitSeedNoInv : Interactable {
         bCollider = GetComponent<BoxCollider>();
         currentSpot = -1;
         origScale = transform.localScale;
+        followSpeedOrig = 15f;
+        followSpeed = followSpeedOrig;
     }
 
     public override void handleClickSuccess()
@@ -121,14 +123,20 @@ public class fruitSeedNoInv : Interactable {
                 }
             }
         }
-        else if (inSeedLine && !playerHolding)
+        else if (inSeedLine && !playerHolding && currentSpot!= 0)
         {
-            targetPos = _player.transform.position;
-            for (int i = 0; i <= tpc.seedLine.IndexOf(gameObject); i++)
+            if(currentSpot == 1)
             {
-                targetPos += new Vector3(0, 0, -1);
+                targetPos = _player.transform.localPosition - new Vector3(0,0,1);
+                followSpeed = followSpeedOrig;
             }
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, 10 * Time.deltaTime);
+            else 
+            {
+                targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
+                followSpeed = followSpeedOrig - (currentSpot /2);
+            }
+            transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);
+            transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
         }
 
         else if (planting)
@@ -173,7 +181,7 @@ public class fruitSeedNoInv : Interactable {
             transform.localEulerAngles = Vector3.zero;
             for (int i = 0; i <= tpc.seedLine.IndexOf(gameObject); i++)
             {
-                transform.localPosition += new Vector3(0, 0, -1);
+                //transform.localPosition += new Vector3(0, 0, -1);
                 transform.localScale *= 0.9f;
             }
         }
@@ -181,6 +189,7 @@ public class fruitSeedNoInv : Interactable {
 
     public void CheckPlaceInLine()
     {
+        inSeedLine = true;
             if (currentSpot != lastSpot && lastSpot != -1)
             {
                 if (currentSpot == 0)
@@ -226,7 +235,10 @@ public class fruitSeedNoInv : Interactable {
 
             adjustedRotation = true;
         }
-        tpc.enabled = false;
+        if (!throwToPlant)
+        {
+            tpc.enabled = false;
+        }
         transform.Translate(0, fallingSpeed * Time.deltaTime, 0);
         if(transform.position.y < tpc.startingHeight) //this will need to check collision with terrain eventually
         {
@@ -291,14 +303,28 @@ public class fruitSeedNoInv : Interactable {
 
     void OnCollisionEnter(Collision collision)
     {
-        
+        if (throwing)
+        {
             fruitBody.isKinematic = true;
             bCollider.isTrigger = true;
             throwing = false;
-            throwCounter = 0;
-            transform.localScale = origScale;
-        transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
-        adjustedRotation = false;
+
+            if (collision.gameObject.tag == "Ground")
+            {
+                throwToPlant = true;
+                planting = true;
+                throwing = false;
+            }
+            else
+            {
+                throwCounter = 0;
+                transform.localScale = origScale;
+                transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
+                adjustedRotation = false;
+            }
+        }
+        
+            
         //Destroy(GetComponent<TrailRenderer>());
     }
 
