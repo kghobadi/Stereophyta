@@ -7,27 +7,25 @@ public class RainMachine : MonoBehaviour
     public float rotateSpeed = 10;
     public int cloudInterval = 10;
     public GameObject rain;
+    GameObject rainHead;
 
     float timer;
     // Use this for initialization
     void Start()
     {
+        rainHead = transform.GetChild(0).gameObject;
         InstantiateRain();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftArrow))
-            transform.Rotate(Vector3.up * Time.deltaTime * -rotateSpeed);
-
-        if (Input.GetKey(KeyCode.RightArrow))
-            transform.Rotate(Vector3.up * Time.deltaTime * rotateSpeed);
-
         timer += Time.deltaTime;
 
         if (timer > cloudInterval)
         {
+            transform.Rotate(0, 90, 0);
+
             InstantiateRain();
 
             timer = 0;

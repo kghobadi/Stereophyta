@@ -68,7 +68,11 @@ public abstract class Interactable : MonoBehaviour
         if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
         {
             symbol.sprite = interactSprite;
-            if(Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(0))
+            tpc.blubAnimator.SetBool("walking", false);
+            tpc.blubAnimator.SetBool("running", false);
+            tpc.blubAnimator.SetBool("idle", false);
+            tpc.blubAnimator.SetBool("touchingPlant", true);
+            if (Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(0))
             {
                 if(gateScript!= null)
                 {
@@ -89,6 +93,7 @@ public abstract class Interactable : MonoBehaviour
     {
         if (interactable)
         {
+            tpc.blubAnimator.SetBool("touchingPlant", false);
             symbol.sprite = normalSprite;
 
         }
