@@ -14,7 +14,7 @@ public class ThirdPersonController : MonoBehaviour
     AudioSource cameraAudSource;
 
     private Vector3 targetPosition;
-    private bool isMoving; // for point to click
+    public bool isMoving; // for point to click
     Vector3 origPosition;
 
     CameraController camControl;
@@ -41,7 +41,8 @@ public class ThirdPersonController : MonoBehaviour
     
     public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
 
-    float clickTimer;
+    float clickTimer, headTurnTimer;
+    bool hasTurnedHead;
 
     void Start()
     {
@@ -55,6 +56,7 @@ public class ThirdPersonController : MonoBehaviour
         blubAnimator = GetComponentInChildren<Animator>();
         blubAnimator.SetBool("idle", true);
         startingHeight = transform.position.y;
+        headTurnTimer = 0;
 
         currentSpeed = walkSpeed;
     }
@@ -93,18 +95,22 @@ public class ThirdPersonController : MonoBehaviour
                         isMoving = true;
                     }
                 }
-                else if (Vector3.Distance(transform.position, hit.point) > 5 && 
-                    (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant" 
+                else if (Vector3.Distance(transform.position, hit.transform.position) > 7 &&
+                    (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
                     || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
-                    || hit.transform.gameObject.tag == "NPC")) 
-                    // use if statement for interactable stuff which the player should auto walk towards
+                    || hit.transform.gameObject.tag == "NPC"))
+                    //use if statement for interactable stuff which the player should auto walk towards
                 {
-                    targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                    Debug.Log(targetPosition);
-                    if (targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight - 3))
-                    {
-                        isMoving = true;
+                        targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
+                        Debug.Log(targetPosition);
+                        if (targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight - 3))
+                        {
+                            isMoving = true;
+                        }
                     }
+                else
+                {
+                    isMoving = false;
                 }
             }
         }
@@ -129,6 +135,7 @@ public class ThirdPersonController : MonoBehaviour
         {
             MovePlayer();
             blubAnimator.SetBool("idle", false);
+            headTurnTimer = 0;
 
             blubAnimator.SetBool("touchingPlant", false);
             if (currentSpeed > 12)
@@ -141,17 +148,22 @@ public class ThirdPersonController : MonoBehaviour
                 blubAnimator.SetBool("walking", true);
                 blubAnimator.SetBool("running", false);
             }
-            //if(clickTimer < runTime)
-            // blubAnimator.SetBool("walking", true);
-            //else{
-            // blubAnimator.SetBool("running", true); 
-            //could tie running animation speed to speed var
         }
         else
         {
-            blubAnimator.SetBool("idle", true);
-            blubAnimator.SetBool("walking", false);
-            blubAnimator.SetBool("running", false);
+            if(headTurnTimer < 5)
+            {
+                blubAnimator.SetBool("idle", true);
+                blubAnimator.SetBool("walking", false);
+                blubAnimator.SetBool("running", false);
+            }
+            headTurnTimer += Time.deltaTime;
+            if (headTurnTimer > 5 && !blubAnimator.GetBool("touchingPlant"))
+            {
+                if (!hasTurnedHead)
+                    StartCoroutine(Wait(1f));
+                Debug.Log(headTurnTimer);
+            }
         }
     }
    
@@ -167,5 +179,14 @@ public class ThirdPersonController : MonoBehaviour
         }
     }
 
-
+    IEnumerator Wait(float time)
+    {
+        hasTurnedHead = true;
+        blubAnimator.SetBool("idle", false);
+        blubAnimator.Play("HeadTurn", 0);
+        yield return new WaitForSeconds(time);
+        headTurnTimer = 0;
+        hasTurnedHead = false;
+        blubAnimator.SetBool("idle", true);
+    }
 }

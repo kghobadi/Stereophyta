@@ -10,6 +10,7 @@ public class Sun : MonoBehaviour
     public Light sun;
     public bool isMorning, isMidday, isNight;
 	public Color morn, mid, night;
+    public Gradient lightColorMap;
     float totalXRange, interval, middayInterval, nightInterval;
 
 

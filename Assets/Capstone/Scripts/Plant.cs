@@ -86,15 +86,14 @@ public class Plant : Interactable {
         if (interactable && !lerpingColor)
         {
             base.OnMouseOver();
-            tpc.blubAnimator.SetBool("walking", false);
-            tpc.blubAnimator.SetBool("running", false);
-            tpc.blubAnimator.SetBool("idle", false);
-            tpc.blubAnimator.SetBool("touchingPlant", true);
+            tpc.isMoving = false;
+            _player.transform.LookAt(new Vector3(branches[currentNote].transform.position.x, _player.transform.position.y, branches[currentNote].transform.position.z));
+            
             if (Input.GetMouseButtonDown(1))
             {
                 playerClick = true;
                 ShiftNoteDown();
-
+                tpc.isMoving = false;
             }
         }
         
@@ -120,6 +119,8 @@ public class Plant : Interactable {
             //}
             playerClick = true;
             ShiftNoteUp();
+            _player.transform.LookAt(new Vector3(branches[currentNote].transform.position.x, _player.transform.position.y, branches[currentNote].transform.position.z));
+            tpc.isMoving = false;
 
         }
     }
