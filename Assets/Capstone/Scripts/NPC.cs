@@ -61,7 +61,7 @@ public class NPC : Interactable {
             base.handleClickSuccess();
             tpc.followers.Add(gameObject);
             tpc.followerDistances.Add(followDistance);
-
+            tpc.blubAnimator.Play("Wave",0);
             CheckPlaceInLine();
 
             currentState = NPCState.FOLLOWING;
@@ -75,6 +75,7 @@ public class NPC : Interactable {
             currentState = NPCState.SETTINGMOVE;
             tpc.followers.Remove(gameObject);
             tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
+            tpc.blubAnimator.Play("Wave", 0);
             followTimer = 0;
         }
     }

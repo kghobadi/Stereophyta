@@ -127,13 +127,13 @@ public class fruitSeedNoInv : Interactable {
         {
             if(currentSpot == 1)
             {
-                targetPos = _player.transform.localPosition - new Vector3(0,0,1);
-                followSpeed = followSpeedOrig;
+                transform.SetParent(_player.transform);
+                transform.localPosition = new Vector3(0, 0, -2);
             }
             else 
             {
                 targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
-                followSpeed = followSpeedOrig - (currentSpot /2);
+                followSpeed = followSpeedOrig - (currentSpot /1.5f);
             }
             transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);
             transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));

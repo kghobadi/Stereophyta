@@ -25,7 +25,7 @@ public class ThirdPersonController : MonoBehaviour
 
     public bool isHoldingSomething;
 
-    Animator blubAnimator;
+    public Animator blubAnimator;
 
     public List<GameObject> followers = new List<GameObject>();
     public List<float> followerDistances = new List<float>();
@@ -53,7 +53,7 @@ public class ThirdPersonController : MonoBehaviour
 
         targetPosition = transform.position;
         blubAnimator = GetComponentInChildren<Animator>();
-        blubAnimator.SetBool("walking", false);
+        blubAnimator.SetBool("idle", true);
         startingHeight = transform.position.y;
 
         currentSpeed = walkSpeed;
@@ -79,7 +79,7 @@ public class ThirdPersonController : MonoBehaviour
             clickTimer += Time.deltaTime;
             if(clickTimer > runTime && currentSpeed < runSpeedMax)
             {
-                currentSpeed += Time.deltaTime * 3;
+                currentSpeed += Time.deltaTime * 5;
             }
 
             if (Physics.Raycast(ray, out hit, 100, mask))
@@ -128,7 +128,19 @@ public class ThirdPersonController : MonoBehaviour
         if (isMoving && targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight-3))
         {
             MovePlayer();
-            blubAnimator.SetBool("walking", true);
+            blubAnimator.SetBool("idle", false);
+
+            blubAnimator.SetBool("touchingPlant", false);
+            if (currentSpeed > 12)
+            {
+                blubAnimator.SetBool("running", true);
+                blubAnimator.SetBool("walking", false);
+            }
+            else
+            {
+                blubAnimator.SetBool("walking", true);
+                blubAnimator.SetBool("running", false);
+            }
             //if(clickTimer < runTime)
             // blubAnimator.SetBool("walking", true);
             //else{
@@ -137,7 +149,9 @@ public class ThirdPersonController : MonoBehaviour
         }
         else
         {
-            blubAnimator.SetBool("walking", false); // idle animation
+            blubAnimator.SetBool("idle", true);
+            blubAnimator.SetBool("walking", false);
+            blubAnimator.SetBool("running", false);
         }
     }
    

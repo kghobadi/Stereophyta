@@ -75,12 +75,21 @@ public class Plant : Interactable {
             notesPlaying.transform.position = branches[currentNote].transform.position;
         }
     }
+    public override void OnMouseEnter()
+    {
+        base.OnMouseEnter();
+        tpc.blubAnimator.Play("ListenToPlant", 0);
+    }
 
     public override void OnMouseOver()
     {
         if (interactable && !lerpingColor)
         {
             base.OnMouseOver();
+            tpc.blubAnimator.SetBool("walking", false);
+            tpc.blubAnimator.SetBool("running", false);
+            tpc.blubAnimator.SetBool("idle", false);
+            tpc.blubAnimator.SetBool("touchingPlant", true);
             if (Input.GetMouseButtonDown(1))
             {
                 playerClick = true;
@@ -111,8 +120,13 @@ public class Plant : Interactable {
             //}
             playerClick = true;
             ShiftNoteUp();
-            
+
         }
+    }
+    public override void OnMouseExit()
+    {
+        base.OnMouseExit();
+        tpc.blubAnimator.SetBool("touchingPlant", false);
     }
 
     void Update()
