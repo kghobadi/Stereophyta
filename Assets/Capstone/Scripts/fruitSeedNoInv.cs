@@ -127,16 +127,35 @@ public class fruitSeedNoInv : Interactable {
         {
             if(currentSpot == 1)
             {
-                transform.SetParent(_player.transform);
-                transform.localPosition = new Vector3(0, 0, -2);
+                targetPos = _player.transform.localPosition - new Vector3(0,0,1);
+                followSpeed = followSpeedOrig;
+                transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
             }
             else 
             {
                 targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
                 followSpeed = followSpeedOrig - (currentSpot /1.5f);
+                transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
             }
             transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);
-            transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
+            
+
+            //childed approach, almost works, but everything becomes rigid and auto moves 
+            //if (currentSpot == 1)
+            //{
+            //    transform.SetParent(_player.transform);
+            //    targetPos = new Vector3(0, 0, -2);
+            //    followSpeed = followSpeedOrig;
+            //    transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+            //}
+            //else
+            //{
+            //    transform.SetParent(tpc.seedLine[currentSpot - 1].transform);
+            //    targetPos = new Vector3(0, 0, -1);
+            //    followSpeed = followSpeedOrig - (currentSpot / 1.5f);
+            //    transform.LookAt(new Vector3(transform.parent.position.x, transform.position.y, transform.parent.position.z));
+            //}
+            //transform.localPosition = Vector3.MoveTowards(transform.localPosition, targetPos, followSpeed * Time.deltaTime);
         }
 
         else if (planting)
@@ -225,9 +244,9 @@ public class fruitSeedNoInv : Interactable {
 
             float mouseY = Input.mousePosition.y;
 
-            float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
+            //float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
 
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif));
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 30));
 
             Vector3 LookDirection = new Vector3(worldpos.x, _player.transform.position.y, worldpos.z);
 
@@ -270,9 +289,9 @@ public class fruitSeedNoInv : Interactable {
 
             float mouseY = Input.mousePosition.y;
 
-            float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
+            //float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
 
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif));
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 30));
 
             Vector3 LookDirection = new Vector3(worldpos.x, _player.transform.position.y, worldpos.z);
 

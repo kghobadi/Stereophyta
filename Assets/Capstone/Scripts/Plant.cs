@@ -127,7 +127,7 @@ public class Plant : Interactable {
     public override void OnMouseExit()
     {
         base.OnMouseExit();
-        tpc.blubAnimator.SetBool("touchingPlant", false);
+        
     }
 
     void Update()
