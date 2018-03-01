@@ -36,6 +36,11 @@ public class NPCcircle : NPC {
 	public override void Update () {
         base.Update();
         //states in here, distance check on player
+        if(currentState == NPCState.FOLLOWING)
+        {
+            model.transform.localEulerAngles = new Vector3(0, 0, 0);
+        }
+
         if (currentState == NPCState.SETTINGMOVE)
         {
             targetRotPoint = transform.position + new Vector3(0, 0, circleRadius);
