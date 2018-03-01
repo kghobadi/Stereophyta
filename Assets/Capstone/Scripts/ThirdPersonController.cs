@@ -23,7 +23,7 @@ public class ThirdPersonController : MonoBehaviour
 
     public LayerMask mask;
 
-    public bool isHoldingSomething;
+    public bool isHoldingSomething, canUseSeed;
 
     public Animator blubAnimator;
 
@@ -32,7 +32,7 @@ public class ThirdPersonController : MonoBehaviour
     public int followerCountMax;
 
     public List<GameObject> seedLine = new List<GameObject>();
-    public int seedMax;
+    //public int seedMax;
 
     public AudioMixerSnapshot currentAudioMix;
     public AudioMixerGroup plantingGroup;
@@ -57,7 +57,7 @@ public class ThirdPersonController : MonoBehaviour
         blubAnimator.SetBool("idle", true);
         startingHeight = transform.position.y;
         headTurnTimer = 0;
-
+        canUseSeed = true;
         currentSpeed = walkSpeed;
     }
 
@@ -97,8 +97,7 @@ public class ThirdPersonController : MonoBehaviour
                 }
                 else if (Vector3.Distance(transform.position, hit.transform.position) > 7 &&
                     (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
-                    || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
-                    || hit.transform.gameObject.tag == "NPC"))
+                    || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"))
                     //use if statement for interactable stuff which the player should auto walk towards
                 {
                         targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
@@ -158,7 +157,7 @@ public class ThirdPersonController : MonoBehaviour
                 blubAnimator.SetBool("running", false);
             }
             headTurnTimer += Time.deltaTime;
-            if (headTurnTimer > 5 && !blubAnimator.GetBool("touchingPlant"))
+            if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
             {
                 if (!hasTurnedHead)
                     StartCoroutine(Wait(1f));

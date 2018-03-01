@@ -56,7 +56,7 @@ public class NPC : Interactable {
     {
         //if doing something other than following, start following player
         if(interactable && Vector3.Distance(_player.transform.position, transform.position) < withinDistanceActive
-            && currentState != NPCState.FOLLOWING  && tpc.followers.Count < tpc.followerCountMax)
+            && currentState != NPCState.FOLLOWING /* && tpc.followers.Count < tpc.followerCountMax*/)
         {
             base.handleClickSuccess();
             tpc.followers.Add(gameObject);

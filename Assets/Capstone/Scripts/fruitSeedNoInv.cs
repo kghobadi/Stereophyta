@@ -24,7 +24,7 @@ public class fruitSeedNoInv : Interactable {
 
     int lastLineLength, currentSeedCount, currentSpot, lastSpot;
 
-    Vector3 targetPos, origScale;
+    Vector3 targetPos, origScale, throwForce;
 
     public override void Start () {
         base.Start();
@@ -51,7 +51,7 @@ public class fruitSeedNoInv : Interactable {
     void Update () {
         //if player is holding another object, this can't be interactable
         currentSeedCount = tpc.seedLine.Count;
-        if (!inSeedLine && !playerHolding && !planting && !throwing && tpc.seedLine.Count < tpc.seedMax) //change this to if(tpc.seedLine.Count < seedMax)
+        if (!inSeedLine && !playerHolding && !planting && !throwing /*&& tpc.seedLine.Count < tpc.seedMax*/) //change this to if(tpc.seedLine.Count < seedMax)
         {
             interactable = true;
         }
@@ -63,7 +63,7 @@ public class fruitSeedNoInv : Interactable {
 
         if (playerHolding)
         {
-            if (Input.GetMouseButton(1))
+            if (Input.GetMouseButton(1) && tpc.canUseSeed)
             {
                 throwCounter += Time.deltaTime;
 
@@ -161,6 +161,7 @@ public class fruitSeedNoInv : Interactable {
         else if (planting)
         {
             PlantSeed();
+            
         }
         else if (throwing)
         {
@@ -208,6 +209,7 @@ public class fruitSeedNoInv : Interactable {
 
     public void CheckPlaceInLine()
     {
+        
         inSeedLine = true;
             if (currentSpot != lastSpot && lastSpot != -1)
             {
@@ -232,11 +234,13 @@ public class fruitSeedNoInv : Interactable {
                     }
                 }
         }
+        //yield return new WaitForSeconds(0.5f);
 
     }
 
     public void PlantSeed()
     {
+        tpc.canUseSeed = false;
         //player cant move while seed falls to ground
         if (!adjustedRotation)
         {
@@ -268,6 +272,7 @@ public class fruitSeedNoInv : Interactable {
             //set bools
             planting = false;
             tpc.enabled = true;
+            tpc.canUseSeed = true;
             //tpc.isHoldingSomething = false;
 
             if(gateScript != null)
@@ -283,8 +288,13 @@ public class fruitSeedNoInv : Interactable {
 
     public void ThrowSeed()
     {
+        transform.SetParent(null);
+
         if (!adjustedRotation)
         {
+            tpc.canUseSeed = false;
+
+
             float mouseX = Input.mousePosition.x;
 
             float mouseY = Input.mousePosition.y;
@@ -297,12 +307,17 @@ public class fruitSeedNoInv : Interactable {
 
             _player.transform.LookAt(LookDirection);
 
+            throwForce = _player.transform.forward;
+
             adjustedRotation = true;
+
+            
         }
         fruitBody.isKinematic = false;
         bCollider.isTrigger = false;
+        interactable = false;
         yVelocity -= tpc.throwStrengthMultiplier * Time.deltaTime;
-        fruitBody.AddForce(_player.transform.forward * (tpc.throwStrength + throwCounter * tpc.throwStrengthMultiplier) + new Vector3(0, yVelocity, 0));
+        fruitBody.AddForce(throwForce * (tpc.throwStrength + throwCounter * tpc.throwStrengthMultiplier) + new Vector3(0, yVelocity, 0));
         
         //throw seed in an arc, using throwStrength to determine how far it will go
         //when it collides with the ground, bounce a lil up
@@ -327,6 +342,7 @@ public class fruitSeedNoInv : Interactable {
             fruitBody.isKinematic = true;
             bCollider.isTrigger = true;
             throwing = false;
+            tpc.canUseSeed = true;
 
             if (collision.gameObject.tag == "Ground")
             {
