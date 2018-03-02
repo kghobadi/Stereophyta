@@ -29,7 +29,6 @@ public class Plant : Interactable {
 
     bool playerClick;
     public float pullMin, pullMax, pullDistance;
-    float pullFruitTimer = 0;
     Vector3 startingMousePos, releaseMousePos;
 
     public PlantSpecies plantSpecieName;
@@ -103,28 +102,28 @@ public class Plant : Interactable {
             if (Input.GetMouseButton(0))
             {
                 playerClick = true;
-                pullFruitTimer += Time.deltaTime;
+                tpc.pullFruitTimer += Time.deltaTime;
                 releaseMousePos = Input.mousePosition;
 
-                if (pullFruitTimer > pullMax && Vector3.Distance(startingMousePos, releaseMousePos) > pullDistance)
+                if (tpc.pullFruitTimer > pullMax && Vector3.Distance(startingMousePos, releaseMousePos) > pullDistance)
                 {
                     TakeFruitSeed();
-                    pullFruitTimer = 0;
+                    tpc.pullFruitTimer = 0;
                 }
 
             }
             if (Input.GetMouseButtonUp(0))
             {
                 releaseMousePos = Input.mousePosition;
-                if(pullFruitTimer < pullMin)
+                if(tpc.pullFruitTimer < pullMin)
                 {
                     ShiftNoteUp();
                 }
-                else if (pullFruitTimer > pullMin && Vector3.Distance(startingMousePos,releaseMousePos) > pullDistance)
+                else if (tpc.pullFruitTimer > pullMin && Vector3.Distance(startingMousePos,releaseMousePos) > pullDistance)
                 {
                     TakeFruitSeed();
                 }
-                pullFruitTimer = 0;
+                tpc.pullFruitTimer = 0;
             }
 
             if (Input.GetMouseButtonDown(1))
@@ -145,7 +144,7 @@ public class Plant : Interactable {
     public override void OnMouseExit()
     {
         base.OnMouseExit();
-        
+        //tpc.pullFruitTimer = 0;
     }
 
     void Update()

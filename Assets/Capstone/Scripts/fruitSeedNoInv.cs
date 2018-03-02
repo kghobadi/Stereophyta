@@ -353,9 +353,31 @@ public class fruitSeedNoInv : Interactable {
 
             if (collision.gameObject.tag == "Ground")
             {
-                throwToPlant = true;
-                planting = true;
-                throwing = false;
+                //OVERLAP SPHERE TO SEE IF WE CAN PLANT HERE
+                bool canPlant = true;
+                Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
+                int i = 0;
+                while (i < hitColliders.Length)
+                {
+                    if (hitColliders[i].gameObject.tag == "Plant")
+                    {
+                        canPlant = false;
+                    }
+                    i++;
+                }
+                if (canPlant)
+                {
+                    throwToPlant = true;
+                    planting = true;
+                    throwing = false;
+                }
+                else
+                {
+                    throwCounter = 0;
+                    transform.localScale = origScale;
+                    transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
+                    adjustedRotation = false;
+                }
             }
             else
             {

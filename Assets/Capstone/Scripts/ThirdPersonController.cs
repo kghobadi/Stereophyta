@@ -39,7 +39,7 @@ public class ThirdPersonController : MonoBehaviour
 
     public float startingHeight, runTime;
     
-    public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
+    public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity, pullFruitTimer=0;
 
     float clickTimer, headTurnTimer;
     bool hasTurnedHead;
@@ -73,7 +73,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //click to move to point
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && pullFruitTimer ==0)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -168,6 +168,7 @@ public class ThirdPersonController : MonoBehaviour
    
     void MovePlayer()
     {
+        pullFruitTimer = 0;
         transform.LookAt(targetPosition);
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
         
