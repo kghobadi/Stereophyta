@@ -161,7 +161,7 @@ public class ThirdPersonController : MonoBehaviour
             {
                 if (!hasTurnedHead)
                     StartCoroutine(Wait(1f));
-                Debug.Log(headTurnTimer);
+                //Debug.Log(headTurnTimer);
             }
         }
     }

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class fruitSeedNoInv : Interactable {
- 
+
+    public bool pickedByPlayer = false;
 
     public GameObject plants;
     GameObject plantClone;
@@ -36,6 +37,12 @@ public class fruitSeedNoInv : Interactable {
         origScale = transform.localScale;
         followSpeedOrig = 15f;
         followSpeed = followSpeedOrig;
+
+        if (pickedByPlayer)
+        {
+            PickUpSeed();
+        }
+        
     }
 
     public override void handleClickSuccess()
@@ -184,7 +191,7 @@ public class fruitSeedNoInv : Interactable {
 
     public void PickUpSeed()
     {
-        tpc.seedLine.Add(gameObject);
+        tpc.seedLine.Add(this.gameObject);
         inSeedLine = true;
         if (tpc.seedLine.Count == 1)
         {
