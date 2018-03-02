@@ -20,7 +20,7 @@ public class Plant : Interactable {
     public AudioClip lowerSound;
 
     public bool placedInEditor,sapling, scalingUp, scalingDown, lerpingColor;
-    public float saplingScale, scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal, waterTimer =0, waterNecessary;
+    public float saplingScale, scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal, waterTimer =0, waterNecessary, regenTimer =0, regenNecessary;
     Vector3 origScale;
     Vector3 startingPos;
 
