@@ -21,6 +21,8 @@ public class Rain : MonoBehaviour
 
     AudioSource rainSource;
 
+    Plant currentPlant;
+
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -93,12 +95,24 @@ public class Rain : MonoBehaviour
     {
         if (other.gameObject.tag == "Plant")
         {
-            if (other.gameObject.GetComponent<Plant>().sapling)
+            currentPlant = other.gameObject.GetComponent<Plant>();
+            if (currentPlant.sapling)
             {
-                other.gameObject.GetComponent<Plant>().waterTimer += Time.deltaTime;
-                if(other.gameObject.GetComponent<Plant>().waterTimer > other.gameObject.GetComponent<Plant>().waterNecessary)
+                currentPlant.waterTimer += Time.deltaTime;
+                if(currentPlant.waterTimer > currentPlant.waterNecessary)
                 {
-                    other.gameObject.GetComponent<Plant>().GrowPlant();
+                    currentPlant.GrowPlant();
+                    currentPlant.waterTimer = 0;
+                }
+            }
+
+            if (!currentPlant.sapling ) //also check if its missing fruitSeeds
+            {
+                currentPlant.waterTimer += Time.deltaTime;
+                if (currentPlant.regenTimer > currentPlant.regenNecessary)
+                {
+                    currentPlant.GrowFruitSeed();
+                    currentPlant.regenTimer = 0;
                 }
             }
         }

@@ -12,12 +12,15 @@ public class Plant : Interactable {
     AudioClip currentSound;
     public AudioSource plantAudio;
 
+    public GameObject fruitSeed;
+    GameObject fruitSeedClone;
+
     ParticleSystem notesPlaying;
     ParticleSystem poofParticles;
     public AudioClip lowerSound;
 
     public bool placedInEditor,sapling, scalingUp, scalingDown, lerpingColor;
-    public float saplingScale, scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal, waterTimer =0, waterNecessary;
+    public float saplingScale, scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal, waterTimer =0, waterNecessary, regenTimer =0, regenNecessary;
     Vector3 origScale;
     Vector3 startingPos;
 
@@ -25,6 +28,8 @@ public class Plant : Interactable {
     Color origColor;
 
     bool playerClick;
+    public float pullMin, pullMax, pullDistance;
+    Vector3 startingMousePos, releaseMousePos;
 
     public PlantSpecies plantSpecieName;
 
@@ -83,51 +88,63 @@ public class Plant : Interactable {
 
     public override void OnMouseOver()
     {
-        if (interactable && !lerpingColor)
+        if (interactable && !lerpingColor && !sapling)
         {
             base.OnMouseOver();
             tpc.isMoving = false;
             _player.transform.LookAt(new Vector3(branches[currentNote].transform.position.x, _player.transform.position.y, branches[currentNote].transform.position.z));
-            
+
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                startingMousePos = Input.mousePosition;
+            }
+            if (Input.GetMouseButton(0))
+            {
+                playerClick = true;
+                tpc.pullFruitTimer += Time.deltaTime;
+                releaseMousePos = Input.mousePosition;
+
+                if (tpc.pullFruitTimer > pullMax && Vector3.Distance(startingMousePos, releaseMousePos) > pullDistance)
+                {
+                    TakeFruitSeed();
+                    tpc.pullFruitTimer = 0;
+                }
+
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                releaseMousePos = Input.mousePosition;
+                if(tpc.pullFruitTimer < pullMin)
+                {
+                    ShiftNoteUp();
+                }
+                else if (tpc.pullFruitTimer > pullMin && Vector3.Distance(startingMousePos,releaseMousePos) > pullDistance)
+                {
+                    TakeFruitSeed();
+                }
+                tpc.pullFruitTimer = 0;
+            }
+
             if (Input.GetMouseButtonDown(1))
             {
                 playerClick = true;
                 ShiftNoteDown();
-                tpc.isMoving = false;
             }
+
+            _player.transform.LookAt(new Vector3(branches[currentNote].transform.position.x, _player.transform.position.y, branches[currentNote].transform.position.z));
         }
         
     }
 
     public override void handleClickSuccess()
     {
-        if (interactable && !lerpingColor && !sapling)
-        {
-            symbol.sprite = clickSprite;
-            symbol.sprite = normalSprite;
-
-            //increment interactionCounter
-            //if (gateScript != null)
-            //{
-            //    //increment interactionCounter
-            //    interactionCounter++;
-            //    if (interactionCounter >= interactionsNecessary)
-            //    {
-            //        interactionFulfilled = true;
-            //        gateScript.CheckAreaComplete();
-            //    }
-            //}
-            playerClick = true;
-            ShiftNoteUp();
-            _player.transform.LookAt(new Vector3(branches[currentNote].transform.position.x, _player.transform.position.y, branches[currentNote].transform.position.z));
-            tpc.isMoving = false;
-
-        }
+        //nothing happens in here
     }
     public override void OnMouseExit()
     {
         base.OnMouseExit();
-        tpc.blubAnimator.SetBool("touchingPlant", false);
+        //tpc.pullFruitTimer = 0;
     }
 
     void Update()
@@ -193,6 +210,58 @@ public class Plant : Interactable {
         sapling = false;
     }
 
+    public void TakeFruitSeed()
+    {
+        branches[currentNote].transform.localScale *= 0.5f;
+        branches[currentNote].SetActive(false);
+        
+        //instantiate seed and add it to player seed line
+        fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
+        fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = true;
+
+
+        //checks if all seeds are gone. if so, destroy, otherwise randomly shift notes
+        int seedsGone = 0;
+        for (int i = 0; i < branches.Count; i++)
+        {
+            if (!branches[i].activeSelf)
+            {
+                seedsGone ++;
+            }
+        }
+        if (seedsGone == branches.Count)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            //shiftnoteup or shiftnotedown
+            float randomShift = Random.Range(0f, 100f);
+            if (randomShift < 50f)
+            {
+                ShiftNoteDown();
+            }
+            else
+            {
+                ShiftNoteUp();
+            }
+        }
+    }
+
+    public void GrowFruitSeed()
+    {
+        //randomly grow a fruitSeed from the list of Branches
+        bool hasGrownASeed = false;
+        for(int i=0;i < branches.Count; i++)
+        {
+            if(!branches[i].activeSelf && !hasGrownASeed)
+            {
+                branches[i].SetActive(true);
+            }
+        }
+
+    }
+
     public void PlaySound()
     {
         if (/*!plantAudio.isPlaying &&*/ !scalingUp && !scalingDown)
@@ -219,18 +288,31 @@ public class Plant : Interactable {
     {
         if (!sapling)
         {
-
             //shrinks current branch
-            branches[currentNote].transform.localScale *= 0.5f;
+            //first check if active
+            //maybe use a list of Bools for checking if each is active
+            if (branches[currentNote].activeSelf)
+            {
+                branches[currentNote].transform.localScale *= 0.5f;
+            }
 
-            if (currentNote < (musicalNotes.Length - 1))
+            bool canPlayNote = false;
+
+            while (!canPlayNote)
             {
-                currentNote++;
+                if (currentNote < (musicalNotes.Length - 1))
+                {
+                    currentNote++;
+                }
+                else
+                {
+                    currentNote = 0;
+                }
+
+                if (branches[currentNote].activeSelf)
+                    canPlayNote = true;
             }
-            else
-            {
-                currentNote = 0;
-            }
+
             // chooses new note and enlarges branch
             currentSound = musicalNotes[currentNote];
             branches[currentNote].transform.localScale *= 2;
@@ -255,15 +337,26 @@ public class Plant : Interactable {
     {
         if (!sapling)
         {
-            branches[currentNote].transform.localScale *= 0.5f;
-
-            if (currentNote > 0)
+            if (branches[currentNote].activeSelf)
             {
-                currentNote--;
+                branches[currentNote].transform.localScale *= 0.5f;
             }
-            else
+
+            bool canPlayNote = false;
+
+            while (!canPlayNote)
             {
-                currentNote = musicalNotes.Length - 1;
+                if (currentNote > 0)
+                {
+                    currentNote--;
+                }
+                else
+                {
+                    currentNote = musicalNotes.Length - 1;
+                }
+
+                if (branches[currentNote].activeSelf)
+                    canPlayNote = true;
             }
             // chooses new note and enlarges Branch
             currentSound = musicalNotes[currentNote];

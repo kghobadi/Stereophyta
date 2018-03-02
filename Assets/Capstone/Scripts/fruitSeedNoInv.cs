@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class fruitSeedNoInv : Interactable {
- 
+
+    public bool pickedByPlayer = false;
 
     public GameObject plants;
     GameObject plantClone;
@@ -24,7 +25,7 @@ public class fruitSeedNoInv : Interactable {
 
     int lastLineLength, currentSeedCount, currentSpot, lastSpot;
 
-    Vector3 targetPos, origScale;
+    Vector3 targetPos, origScale, throwForce;
 
     public override void Start () {
         base.Start();
@@ -36,6 +37,12 @@ public class fruitSeedNoInv : Interactable {
         origScale = transform.localScale;
         followSpeedOrig = 15f;
         followSpeed = followSpeedOrig;
+
+        if (pickedByPlayer)
+        {
+            PickUpSeed();
+        }
+        
     }
 
     public override void handleClickSuccess()
@@ -51,7 +58,7 @@ public class fruitSeedNoInv : Interactable {
     void Update () {
         //if player is holding another object, this can't be interactable
         currentSeedCount = tpc.seedLine.Count;
-        if (!inSeedLine && !playerHolding && !planting && !throwing && tpc.seedLine.Count < tpc.seedMax) //change this to if(tpc.seedLine.Count < seedMax)
+        if (!inSeedLine && !playerHolding && !planting && !throwing /*&& tpc.seedLine.Count < tpc.seedMax*/) //change this to if(tpc.seedLine.Count < seedMax)
         {
             interactable = true;
         }
@@ -63,7 +70,7 @@ public class fruitSeedNoInv : Interactable {
 
         if (playerHolding)
         {
-            if (Input.GetMouseButton(1))
+            if (Input.GetMouseButton(1) && tpc.canUseSeed)
             {
                 throwCounter += Time.deltaTime;
 
@@ -127,21 +134,41 @@ public class fruitSeedNoInv : Interactable {
         {
             if(currentSpot == 1)
             {
-                transform.SetParent(_player.transform);
-                transform.localPosition = new Vector3(0, 0, -2);
+                targetPos = _player.transform.localPosition - new Vector3(0,0,1);
+                followSpeed = followSpeedOrig;
+                transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
             }
             else 
             {
                 targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
                 followSpeed = followSpeedOrig - (currentSpot /1.5f);
+                transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
             }
             transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);
-            transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
+            
+
+            //childed approach, almost works, but everything becomes rigid and auto moves 
+            //if (currentSpot == 1)
+            //{
+            //    transform.SetParent(_player.transform);
+            //    targetPos = new Vector3(0, 0, -2);
+            //    followSpeed = followSpeedOrig;
+            //    transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+            //}
+            //else
+            //{
+            //    transform.SetParent(tpc.seedLine[currentSpot - 1].transform);
+            //    targetPos = new Vector3(0, 0, -1);
+            //    followSpeed = followSpeedOrig - (currentSpot / 1.5f);
+            //    transform.LookAt(new Vector3(transform.parent.position.x, transform.position.y, transform.parent.position.z));
+            //}
+            //transform.localPosition = Vector3.MoveTowards(transform.localPosition, targetPos, followSpeed * Time.deltaTime);
         }
 
         else if (planting)
         {
             PlantSeed();
+            
         }
         else if (throwing)
         {
@@ -164,7 +191,7 @@ public class fruitSeedNoInv : Interactable {
 
     public void PickUpSeed()
     {
-        tpc.seedLine.Add(gameObject);
+        tpc.seedLine.Add(this.gameObject);
         inSeedLine = true;
         if (tpc.seedLine.Count == 1)
         {
@@ -189,6 +216,7 @@ public class fruitSeedNoInv : Interactable {
 
     public void CheckPlaceInLine()
     {
+        
         inSeedLine = true;
             if (currentSpot != lastSpot && lastSpot != -1)
             {
@@ -213,11 +241,13 @@ public class fruitSeedNoInv : Interactable {
                     }
                 }
         }
+        //yield return new WaitForSeconds(0.5f);
 
     }
 
     public void PlantSeed()
     {
+        tpc.canUseSeed = false;
         //player cant move while seed falls to ground
         if (!adjustedRotation)
         {
@@ -225,9 +255,9 @@ public class fruitSeedNoInv : Interactable {
 
             float mouseY = Input.mousePosition.y;
 
-            float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
+            //float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
 
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif));
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 30));
 
             Vector3 LookDirection = new Vector3(worldpos.x, _player.transform.position.y, worldpos.z);
 
@@ -249,6 +279,7 @@ public class fruitSeedNoInv : Interactable {
             //set bools
             planting = false;
             tpc.enabled = true;
+            tpc.canUseSeed = true;
             //tpc.isHoldingSomething = false;
 
             if(gateScript != null)
@@ -264,26 +295,36 @@ public class fruitSeedNoInv : Interactable {
 
     public void ThrowSeed()
     {
+        transform.SetParent(null);
+
         if (!adjustedRotation)
         {
+            tpc.canUseSeed = false;
+
+
             float mouseX = Input.mousePosition.x;
 
             float mouseY = Input.mousePosition.y;
 
-            float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
+            //float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
 
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif));
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 30));
 
             Vector3 LookDirection = new Vector3(worldpos.x, _player.transform.position.y, worldpos.z);
 
             _player.transform.LookAt(LookDirection);
 
+            throwForce = _player.transform.forward;
+
             adjustedRotation = true;
+
+            
         }
         fruitBody.isKinematic = false;
         bCollider.isTrigger = false;
+        interactable = false;
         yVelocity -= tpc.throwStrengthMultiplier * Time.deltaTime;
-        fruitBody.AddForce(_player.transform.forward * (tpc.throwStrength + throwCounter * tpc.throwStrengthMultiplier) + new Vector3(0, yVelocity, 0));
+        fruitBody.AddForce(throwForce * (tpc.throwStrength + throwCounter * tpc.throwStrengthMultiplier) + new Vector3(0, yVelocity, 0));
         
         //throw seed in an arc, using throwStrength to determine how far it will go
         //when it collides with the ground, bounce a lil up
@@ -308,12 +349,35 @@ public class fruitSeedNoInv : Interactable {
             fruitBody.isKinematic = true;
             bCollider.isTrigger = true;
             throwing = false;
+            tpc.canUseSeed = true;
 
             if (collision.gameObject.tag == "Ground")
             {
-                throwToPlant = true;
-                planting = true;
-                throwing = false;
+                //OVERLAP SPHERE TO SEE IF WE CAN PLANT HERE
+                bool canPlant = true;
+                Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
+                int i = 0;
+                while (i < hitColliders.Length)
+                {
+                    if (hitColliders[i].gameObject.tag == "Plant")
+                    {
+                        canPlant = false;
+                    }
+                    i++;
+                }
+                if (canPlant)
+                {
+                    throwToPlant = true;
+                    planting = true;
+                    throwing = false;
+                }
+                else
+                {
+                    throwCounter = 0;
+                    transform.localScale = origScale;
+                    transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
+                    adjustedRotation = false;
+                }
             }
             else
             {
