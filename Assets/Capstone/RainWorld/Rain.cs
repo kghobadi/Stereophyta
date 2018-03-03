@@ -108,7 +108,7 @@ public class Rain : MonoBehaviour
 
             if (!currentPlant.sapling ) //also check if its missing fruitSeeds
             {
-                currentPlant.waterTimer += Time.deltaTime;
+                currentPlant.regenTimer += Time.deltaTime;
                 if (currentPlant.regenTimer > currentPlant.regenNecessary)
                 {
                     currentPlant.GrowFruitSeed();
