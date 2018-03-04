@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Sun : MonoBehaviour
 {
-
+    public GameObject waterDay, waterNight;
     public float rotationSpeed = 10;
     public Transform rotation;
 
@@ -40,28 +40,39 @@ public class Sun : MonoBehaviour
 			//sun.intensity = Mathf.Lerp (sun.intensity, 1.5f, Time.deltaTime);
             isMorning = true;
             isNight = false;
+            isMidday = false;
+            isDusk = false;
+            waterDay.SetActive(true);
+            waterNight.SetActive(false);
         }
         else if(transform.position.x < middayInterval && transform.position.x > duskInterval)
         {
 			sun.color = Color.Lerp (sun.color, mid, Time.deltaTime / 10);
-			//sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
-            isMorning = false;
+            //sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
             isMidday = true;
+            isMorning = false;
+            isDusk = false;
+            isNight = false;
         }
         else if (transform.position.x < duskInterval && transform.position.x > nightInterval)
         {
             sun.color = Color.Lerp(sun.color, mid, Time.deltaTime / 10);
             //sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
             isMidday = false;
+            isMorning = false;
             isDusk = true;
+            isNight = false;
         }
         else if (transform.position.x < nightInterval)
         {
 			sun.color = Color.Lerp(sun.color, night, Time.deltaTime / 10);
-			//sun.intensity = Mathf.Lerp (sun.intensity, .25f, Time.deltaTime);
-
+            //sun.intensity = Mathf.Lerp (sun.intensity, .25f, Time.deltaTime);
+            isMorning = false;
+            isMidday = false;
             isDusk = false;
             isNight = true;
+            waterDay.SetActive(false);
+            waterNight.SetActive(true);
         }
 
         transform.LookAt(Vector3.zero);
