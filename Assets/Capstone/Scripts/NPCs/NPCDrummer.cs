@@ -6,8 +6,7 @@ using UnityEngine.Audio;
 public class NPCDrummer : NPC {
 
     public AudioClip[] basicBeats, baseDrums;
-
-    public float visionDistance, waitingTime, wavingTime, waveRefresh, waveRefreshTotal;
+    
     int moveCounter;
 
     public float beatTimer, beatIncrement, beatTimerTotal, scaleColliderTime;
@@ -60,7 +59,7 @@ public class NPCDrummer : NPC {
             drumSet.transform.localPosition = new Vector3(0, 1, -3);
             bassDrumSource.outputAudioMixerGroup = tpc.plantingGroup;
             drumBeatSource.outputAudioMixerGroup = tpc.plantingGroup;
-            drummerCollider.size = new Vector3(originalColliderSize.x * 10, originalColliderSize.y * 4, originalColliderSize.z * 10);
+            //drummerCollider.size = new Vector3(originalColliderSize.x * 5, originalColliderSize.y , originalColliderSize.z * 5);
         }
 
         //not using right now

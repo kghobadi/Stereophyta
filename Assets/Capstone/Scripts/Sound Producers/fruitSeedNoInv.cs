@@ -309,11 +309,11 @@ public class fruitSeedNoInv : Interactable {
             tpc.canUseSeed = true;
             //tpc.isHoldingSomething = false;
 
-            if(gateScript != null)
-            {
-                gateScript.interactableObjects.Remove(gameObject);
-                gateScript.interactionsNecessaryTotal--;
-            }
+            //if(gateScript != null)
+            //{
+            //    gateScript.interactableObjects.Remove(gameObject);
+            //    gateScript.interactionsNecessaryTotal--;
+            //}
             //destroy
             Destroy(gameObject);
 

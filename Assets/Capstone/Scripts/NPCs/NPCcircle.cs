@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NPCcircle : NPC {
 
-    public float visionDistance, circleRadius, waitingTime, wavingTime, waveRefresh, waveRefreshTotal, lookTimer, lookTimerTotal;
+    public float circleRadius, lookTimer, lookTimerTotal;
 
     Vector3 targetRotPoint;
 

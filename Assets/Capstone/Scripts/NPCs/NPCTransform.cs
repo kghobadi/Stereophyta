@@ -2,20 +2,33 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPCcube : NPC {
-
-    public float  movementDistance;
+public class NPCTransform : NPC {
+    
     int moveCounter;
 
     Vector3 targestDestination;
+    protected Transform movementPointsContainer;
+    public List<Transform> movementPoints = new List<Transform>();
 
     bool upOrDown;
 
 
 	public override void Start () {
         base.Start();
-        targestDestination = transform.position + new Vector3(0, 0, movementDistance);
+        //for generic transform movements 
+        movementPointsContainer = transform.GetChild(1);
+        //loops through children of container and adds them to list
+        for (int i = 0; i < movementPointsContainer.childCount; i++)
+        {
+            movementPoints.Add(movementPointsContainer.GetChild(i));
+        }
+        //set target dest to first position in transform array
         moveCounter = 0;
+        targestDestination = movementPoints[moveCounter].position;
+        transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
+
+        movementPointsContainer.SetParent(null);
+        currentState = NPCState.MOVING;
 
         speed += Random.Range(-1.5f, 1.5f);
     }
@@ -26,6 +39,16 @@ public class NPCcube : NPC {
         {
             SetMove();
         }
+        if (currentState == NPCState.FOLLOWING)
+        {
+            movementPointsContainer.SetParent(transform);
+            movementPointsContainer.transform.localPosition = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            movementPointsContainer.SetParent(null);
+        }
+
 
         if (currentState == NPCState.MOVING)
         {
@@ -50,7 +73,8 @@ public class NPCcube : NPC {
 
     void SetMove()
     {
-        if (moveCounter < 3)
+        animator.SetBool("walking", true);
+        if (moveCounter < (movementPoints.Count - 1))
         {
             moveCounter++;
         }
@@ -58,30 +82,14 @@ public class NPCcube : NPC {
         {
             moveCounter = 0;
         }
-        switch (moveCounter)
-        {
-            case 0:
-                targestDestination = transform.position + new Vector3(0, 0, movementDistance);
-                transform.LookAt(transform.position + Vector3.forward);
-                break;
-            case 1:
-                targestDestination = transform.position + new Vector3(movementDistance, 0, 0);
-                transform.LookAt(transform.position + Vector3.right);
-                break;
-            case 2:
-                targestDestination = transform.position + new Vector3(0, 0, -movementDistance);
-                transform.LookAt(transform.position + Vector3.back);
-                break;
-            case 3:
-                targestDestination = transform.position + new Vector3(-movementDistance, 0, 0);
-                transform.LookAt(transform.position + Vector3.left);
-                break;
-        }
+        targestDestination = movementPoints[moveCounter].position;
+
         currentState = NPCState.MOVING;
     }
 
     public void Movement()
     {
+        transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
         transform.position = Vector3.MoveTowards(transform.position, targestDestination, speed * Time.deltaTime);
 
         if (Vector3.Distance(transform.position, targestDestination) < 0.01f)
@@ -161,21 +169,6 @@ public class NPCcube : NPC {
         //rotates back correctly
         if(currentState == NPCState.WAVING)
         {
-            switch (moveCounter)
-            {
-                case 0:
-                    transform.LookAt(transform.position + Vector3.forward);
-                    break;
-                case 1:
-                    transform.LookAt(transform.position + Vector3.right);
-                    break;
-                case 2:
-                    transform.LookAt(transform.position + Vector3.back);
-                    break;
-                case 3:
-                    transform.LookAt(transform.position + Vector3.left);
-                    break;
-            }
             //starts walking again
             currentState = NPCState.MOVING;
         }

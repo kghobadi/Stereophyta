@@ -13,10 +13,12 @@ public class NPC : Interactable {
     public Animator animator;
 
     public float speed, followDistance, currentFollowDistance, followTimer, followTimeMin, heightAdjustment;
+    public float wavingTime, waveRefresh, waveRefreshTotal, visionDistance, waitingTime;
 
     public NPCState currentState;
 
     TrailRenderer trailRender;
+    protected Vector3 homePosition;
 
     public int lastLineLength, placeInLine;
 
@@ -28,6 +30,7 @@ public class NPC : Interactable {
     public override void Start () {
         //should this be interactable?
         base.Start();
+        homePosition = transform.position;
         trailRender = GetComponent<TrailRenderer>();
         currentState = NPCState.MOVING;
 
@@ -50,6 +53,7 @@ public class NPC : Interactable {
         {
             trailRender.enabled = true;
         }
+
     }
 
     public override void handleClickSuccess()

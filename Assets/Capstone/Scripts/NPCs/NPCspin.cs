@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NPCspin : NPC {
 
-    public float visionDistance, movementDistance, waitingTime, wavingTime, waveRefresh, waveRefreshTotal;
+    public float movementDistance;
     int moveCounter;
 
     Vector3 targestDestination;
