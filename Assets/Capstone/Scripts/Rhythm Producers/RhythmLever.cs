@@ -19,7 +19,7 @@ public class RhythmLever : Interactable {
         base.Start();
         interactable = true;
         windParent = GetComponentInParent<WindMachine>();
-        leverState = 1;
+        leverState = 2;
 
         //set states
         windParent.windSpeed = 5;
