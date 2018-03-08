@@ -23,7 +23,7 @@ public class RhythmLever : Interactable {
 
         //set states
         windParent.windSpeed = 5;
-        windParent.timerTotal = 4;
+        windParent.timeScale = 2;
         lever.transform.localEulerAngles = new Vector3(0, 0, 0);
     }
 
@@ -94,13 +94,13 @@ public class RhythmLever : Interactable {
             if (increasing)
             {
             windParent.windSpeed += 2;
-            windParent.timerTotal -= 2;
+            windParent.timeScale += 1;
             lever.transform.localEulerAngles += new Vector3(30, 0, 0);
             }
             else
         {
             windParent.windSpeed -= 2;
-            windParent.timerTotal += 2;
+            windParent.timeScale -= 1;
             lever.transform.localEulerAngles -= new Vector3(30, 0, 0);
         }
 

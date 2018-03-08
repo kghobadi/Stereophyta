@@ -26,9 +26,22 @@ public class DrumCollider : Rhythm {
 
     }
 
+    public override void OnTriggerEnter(Collider other)
+    {
+        base.OnTriggerEnter(other);
+        if(other.gameObject.tag == "Rock")
+        {
+            other.gameObject.GetComponent<Rock>().PlaySound();
+        }
+    }
+
     public override void OnTriggerStay(Collider other)
     {
         // nothing happens here 
+        //if (other.gameObject.tag == "Rock")
+        //{
+        //    other.gameObject.GetComponent<Rock>().PlaySound();
+        //}
     }
 
 }

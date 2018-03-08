@@ -5,46 +5,89 @@ using UnityEngine.Audio;
 
 public class NPCDrummer : NPC {
 
-    public AudioClip[] basicBeats, baseDrums;
+    public AudioClip[] basicBeat;
     
     int moveCounter;
 
-    public float beatTimer, beatIncrement, beatTimerTotal, scaleColliderTime;
-    public int bassPlaysAt;
+    public float scaleColliderTime;
+    float collisionSpeed, particleSpeed, particleLifetime;
+    public int timeScale;
     Vector3 targestDestination;
-    public Vector3 drumPosition;
 
     BoxCollider drummerCollider;
     Vector3 originalColliderSize;
 
-    bool bassOrSnare;
+    bool bassOrSnare, playedAudio, playParticles;
+    public AudioMixerGroup normal, silent;
 
-    ParticleSystem baseParticles, beatParticles;
+    ParticleSystem beatParticles;
     DrumCollider drumCollision;
-    GameObject drumSet;
+    public List<GameObject> drumSet = new List<GameObject>();
+    List<Vector3> drumPositions = new List<Vector3>();
 
-    AudioSource drumBeatSource, bassDrumSource;
+    AudioSource drumBeatSource;
 
-	public override void Start () {
+    private void Awake()
+    {
+        SimpleClock.ThirtySecond += OnThirtySecond;
+    }
+
+    private void OnDestroy()
+    {
+        SimpleClock.ThirtySecond -= OnThirtySecond;
+    }
+
+    void OnThirtySecond(BeatArgs e)
+    {
+        switch (timeScale)
+        {
+            case 0:
+                if (e.TickMask[TickValue.Quarter])
+                {
+                    playParticles = true;
+                }
+                break;
+            case 1:
+                if (e.TickMask[TickValue.Eighth])
+                {
+                    playParticles = true;
+                }
+                break;
+            case 2:
+                if (e.TickMask[TickValue.Sixteenth])
+                {
+                    playParticles = true;
+                }
+                break;
+        }
+        
+    }
+    public override void Start () {
         base.Start();
         moveCounter = 0;
-        beatIncrement = 0;
         animator.SetBool("walking", false);
-        animator.speed = 1.75f;
-        beatTimer = beatTimerTotal;
-        baseParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
-        baseParticles.Stop();
-        beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
-        beatParticles.Stop();
-        drumCollision = transform.GetChild(3).GetComponent<DrumCollider>();
-        drumSet = transform.GetChild(4).gameObject;
+        animator.speed = 0.75f;
 
-        drumBeatSource = drumSet.GetComponent<AudioSource>();
-        bassDrumSource = GetComponent<AudioSource>();
+        beatParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
+        beatParticles.Stop();
+        drumCollision = transform.GetChild(2).GetComponent<DrumCollider>();
+
+        if(transform.childCount > 3)
+        {
+            for (int i = 3; i < (transform.childCount); i++)
+            {
+                drumSet.Add(transform.GetChild(i).gameObject); //Going to be adding these one at a time in GrowPlant
+                drumPositions.Add(transform.GetChild(i).localPosition);
+            }
+        }
+
+        drumBeatSource = GetComponent<AudioSource>();
+        drumBeatSource.clip = basicBeat[timeScale]; //sets sound based on timeScale
         drummerCollider = GetComponent<BoxCollider>();
         originalColliderSize = drummerCollider.size;
-
+        
         SetMove();
+
     }
 	
 	public override void Update () {
@@ -56,8 +99,12 @@ public class NPCDrummer : NPC {
 
         if(currentState == NPCState.FOLLOWING)
         {
-            drumSet.transform.localPosition = new Vector3(0, 1, -3);
-            bassDrumSource.outputAudioMixerGroup = tpc.plantingGroup;
+            for(int i=0;i < drumSet.Count; i++)
+            {
+                drumSet[i].transform.localPosition = new Vector3(0, 1, -3);
+                drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
+            }
+            //bassDrumSource.outputAudioMixerGroup = tpc.plantingGroup;
             drumBeatSource.outputAudioMixerGroup = tpc.plantingGroup;
             //drummerCollider.size = new Vector3(originalColliderSize.x * 5, originalColliderSize.y , originalColliderSize.z * 5);
         }
@@ -76,13 +123,17 @@ public class NPCDrummer : NPC {
 
         if(currentState == NPCState.PLAYING)
         {
+            animator.SetBool("walking", false);
             if(Vector3.Distance(_player.transform.position, transform.position) < 100)
-                BeatDrums();
-            //if (Vector3.Distance(transform.position, _player.transform.position) < 10 && !hasWavedAtPlayer)
-            //{
-            //    StartCoroutine(WaveAtPlayer());
-
-            //}
+            {
+                AudioRhythm();
+                if (playParticles)
+                {
+                    drumCollision.StartCoroutine(drumCollision.LerpScale(collisionSpeed));
+                    beatParticles.Play();
+                    playParticles = false;
+                }
+            }
         }
 
         if (hasWavedAtPlayer)
@@ -94,43 +145,86 @@ public class NPCDrummer : NPC {
             }
         }
     }
-
-    void BeatDrums()
+    
+    void AudioRhythm()
     {
-        animator.SetBool("walking", false);
-        beatTimer -= Time.deltaTime;
-        if (beatTimer < 0)
+        if (!playedAudio)
         {
-            beatParticles.Play();
-            drumCollision.StartCoroutine(drumCollision.LerpScale(scaleColliderTime));
-            beatTimer = beatTimerTotal;
-            beatIncrement++;
-            drumBeatSource.PlayOneShot(basicBeats[0]);
+            SwitchTimeScale();
+            playedAudio = true;
         }
-        if(beatIncrement == bassPlaysAt)
+        else
         {
-            baseParticles.Play();
-            //drumCollision.StartCoroutine(drumCollision.LerpScale(0.5f));
-            if(bassOrSnare)
-                bassDrumSource.PlayOneShot(baseDrums[0]);
+            if (!drumBeatSource.isPlaying )
+            {
+                SwitchTimeScale();
+                playedAudio = false;
+
+            }
+        }
+    }
+
+    void SwitchTimeScale()
+    {
+        drumBeatSource.clip = basicBeat[timeScale];
+        ParticleSystem.MainModule beatParticlesModule = beatParticles.main;
+
+        switch (timeScale)
+        {
+            case 0:
+                drumBeatSource.PlayScheduled(SimpleClock.AtNextQuarter());
+                collisionSpeed = 4f;
+                particleSpeed = 7.5f;
+                particleLifetime = 3f;
+                break;
+            case 1:
+                drumBeatSource.PlayScheduled(SimpleClock.AtNextEighth());
+                collisionSpeed = 2f;
+                particleSpeed = 15f;
+                particleLifetime = 1.5f;
+                break;
+            case 2:
+                drumBeatSource.PlayScheduled(SimpleClock.AtNextSixteenth());
+                collisionSpeed = 1f;
+                particleSpeed = 30f;
+                particleLifetime = 0.75f;
+                break;
+            //case 3:
+            //    drumBeatSource.PlayScheduled(SimpleClock.AtNextQuarterTriplet());
+            //    break;
+        }
+        beatParticlesModule.startSpeed = particleSpeed;
+        beatParticlesModule.startLifetime = particleLifetime;
+    }
+
+    public override void OnMouseOver()
+    {
+        base.OnMouseOver();
+        if (Input.GetMouseButtonDown(1) && currentState != NPCState.FOLLOWING) 
+        {
+            if (timeScale < 2)
+            {
+                timeScale++;
+                animator.speed += 0.25f;
+            }
             else
             {
-                bassDrumSource.PlayOneShot(baseDrums[1]);
+                timeScale = 0;
+                animator.speed = 0.25f;
             }
-            beatIncrement = 0;
-            bassOrSnare = !bassOrSnare;
         }
-
     }
 
     void SetMove()
     {
-        drumSet.transform.localPosition = drumPosition;
+        for (int i = 0; i < drumSet.Count; i++)
+        {
+            drumSet[i].transform.localPosition = drumPositions[i];
+            drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
+        }
 
         //how should we move the drummer when he needs to find rocks?
-        baseParticles.transform.localPosition = drumPosition + new Vector3(0,2,0);
-        beatParticles.transform.localPosition = drumPosition + new Vector3(0, 2, 0);
-        drumCollision.gameObject.transform.localPosition = drumPosition + new Vector3(0, 2, 0);
+        //baseParticles.transform.localPosition = drumPosition + new Vector3(0,2,0);
         drummerCollider.size = originalColliderSize;
         currentState = NPCState.PLAYING;
     }

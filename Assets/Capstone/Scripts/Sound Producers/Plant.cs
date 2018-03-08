@@ -2,32 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Plant : Interactable {
-    //should always have same number of musical notes as tubules
-
-    public AudioClip[] musicalNotes;
-    public AudioClip[] selectionNotes;
-    public List<GameObject> branches = new List<GameObject>();
-    int currentNote;
-    AudioClip currentSound;
-    public AudioSource plantAudio;
+public class Plant : SoundProducer {
 
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
 
-    ParticleSystem notesPlaying;
     ParticleSystem poofParticles;
-    public AudioClip lowerSound;
 
-    public bool placedInEditor,sapling, scalingUp, scalingDown, lerpingColor;
-    public float saplingScale, scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal, waterTimer =0, waterNecessary, regenTimer =0, regenNecessary;
-    Vector3 origScale;
-    Vector3 startingPos;
-
-    public Color lerpedColor;
-    Color origColor;
-
-    bool playerClick;
+    public bool sapling;
+    public float saplingScale, waterTimer =0, waterNecessary, regenTimer =0, regenNecessary;
+    
     public float waitPullFruit, pullMin, pullMax, pullDistance;
     Vector3 startingMousePos, releaseMousePos;
 
@@ -39,20 +23,11 @@ public class Plant : Interactable {
     }
 
     public override void Start () {
+        particleCount = 2;
         base.Start();
-        interactable = true; //when should it be interactable? after # branches > 1
-        plantAudio = GetComponent<AudioSource>();
-        notesPlaying = transform.GetChild(0).GetComponent<ParticleSystem>() ; //grabs particle system
         poofParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
-        notesPlaying.Stop();
         poofParticles.Stop();
-
-        origScale = transform.localScale;
-        startingPos = transform.position;
-
-        lerpingColor = false;
-        lerpTimer = lerpTimerTotal;
-
+        
         //set to sapling stage
         if (!placedInEditor)
         {
@@ -61,23 +36,10 @@ public class Plant : Interactable {
             transform.position = new Vector3(transform.position.x, transform.position.y - (origScale.y / 2) + (transform.localScale.y / 2), transform.position.z);
         }
 
-        //counts up through plant children, adding these to the list of Branches for later.
-        if (transform.childCount > 2)
-        {
-            for (int i = 2; i < (transform.childCount); i++)
-            {
-                branches.Add(transform.GetChild(i).gameObject); //Going to be adding these one at a time in GrowPlant
-            }
-        }
-
-        //randomize note at start
-        currentNote = Random.Range(0, musicalNotes.Length); 
-        currentSound = musicalNotes[currentNote];
-
         if (!sapling)
         {
-            branches[currentNote].transform.localScale *= 2;
-            notesPlaying.transform.position = branches[currentNote].transform.position;
+            soundSources[currentNote].transform.localScale *= 2;
+            notesPlaying.transform.position = soundSources[currentNote].transform.position;
         }
     }
     public override void OnMouseEnter()
@@ -92,7 +54,7 @@ public class Plant : Interactable {
         {
             base.OnMouseOver();
             tpc.isMoving = false;
-            _player.transform.LookAt(new Vector3(branches[currentNote].transform.position.x, _player.transform.position.y, branches[currentNote].transform.position.z));
+            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
             waitPullFruit += Time.deltaTime;
 
             if (Input.GetMouseButtonDown(0))
@@ -133,7 +95,7 @@ public class Plant : Interactable {
                 ShiftNoteDown();
             }
 
-            _player.transform.LookAt(new Vector3(branches[currentNote].transform.position.x, _player.transform.position.y, branches[currentNote].transform.position.z));
+            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
         }
         
     }
@@ -148,49 +110,7 @@ public class Plant : Interactable {
         waitPullFruit = 0;
         //tpc.pullFruitTimer = 0;
     }
-
-    void Update()
-    {
-        //when PlaySound() is called, plant scales up then back down
-        if (scalingUp)
-        {
-            notesPlaying.Emit(1);
-            if (transform.localScale.x < origScale.x * growthMultiplier)
-                transform.localScale += new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
-            else
-            {
-                scalingUp = false;
-                scalingDown = true;
-            }
-        }
-        if (scalingDown)
-        {
-            notesPlaying.Emit(1);
-            if (transform.localScale.x > origScale.x)
-                transform.localScale -= new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
-            else
-            {
-                scalingDown = false;
-            }
-        }
-
-        //lerps the color of a single branch whenever ShiftNote() functions are called
-        if (lerpingColor)
-        {
-            lerpTimer -= Time.deltaTime;
-            if(lerpTimer > 0)
-            {
-                branches[currentNote].GetComponent<MeshRenderer>().material.color = Color.Lerp(origColor, lerpedColor, Mathf.PingPong(Time.time, lerpTimerTotal));
-            }
-            else
-            {
-                branches[currentNote].GetComponent<MeshRenderer>().material.color = origColor;
-                lerpingColor = false;
-                lerpTimer = lerpTimerTotal;
-            }
-        }
-    }
-
+    
     public void GrowPlant()
     {
         //scale back to fully grown 
@@ -205,8 +125,8 @@ public class Plant : Interactable {
         currentSound = musicalNotes[currentNote];
 
         //scale branch and change note particles to that branch
-        branches[currentNote].transform.localScale *= 2;
-        notesPlaying.transform.position = branches[currentNote].transform.position;
+        soundSources[currentNote].transform.localScale *= 2;
+        notesPlaying.transform.position = soundSources[currentNote].transform.position;
 
         //allow branch switching and ignore rain
         sapling = false;
@@ -214,8 +134,8 @@ public class Plant : Interactable {
 
     public void TakeFruitSeed()
     {
-        branches[currentNote].transform.localScale *= 0.5f;
-        branches[currentNote].SetActive(false);
+        soundSources[currentNote].transform.localScale *= 0.5f;
+        soundSources[currentNote].SetActive(false);
         
         //instantiate seed and add it to player seed line
         fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
@@ -224,14 +144,14 @@ public class Plant : Interactable {
 
         //checks if all seeds are gone. if so, destroy, otherwise randomly shift notes
         int seedsGone = 0;
-        for (int i = 0; i < branches.Count; i++)
+        for (int i = 0; i < soundSources.Count; i++)
         {
-            if (!branches[i].activeSelf)
+            if (!soundSources[i].activeSelf)
             {
                 seedsGone ++;
             }
         }
-        if (seedsGone == branches.Count)
+        if (seedsGone == soundSources.Count)
         {
             poofParticles.Play();
             Destroy(gameObject);
@@ -255,12 +175,12 @@ public class Plant : Interactable {
     {
         //randomly grow a fruitSeed from the list of Branches
         bool hasGrownASeed = false;
-        for(int i=0;i < branches.Count; i++)
+        for(int i=0;i < soundSources.Count; i++)
         {
-            if(!branches[i].activeSelf && !hasGrownASeed)
+            if(!soundSources[i].activeSelf && !hasGrownASeed)
             {
-                branches[i].SetActive(true);
-                poofParticles.transform.position = branches[i].transform.position;
+                soundSources[i].SetActive(true);
+                poofParticles.transform.position = soundSources[i].transform.position;
                 poofParticles.transform.localScale = new Vector3(1, 1, 1);
                 poofParticles.Play();
                 hasGrownASeed = true;
@@ -275,14 +195,14 @@ public class Plant : Interactable {
         {
             if (!sapling)
             {
-                plantAudio.PlayOneShot(currentSound);
+                audioSource.PlayOneShot(currentSound);
                 scalingUp = true;
             }
             else
             {
-                if (!plantAudio.isPlaying)
+                if (!audioSource.isPlaying)
                 {
-                    plantAudio.PlayOneShot(currentSound);
+                    audioSource.PlayOneShot(currentSound);
                     notesPlaying.Emit(10);
                 }
             }
@@ -291,94 +211,19 @@ public class Plant : Interactable {
         
     }
 
-    public void ShiftNoteUp()
+    public override void ShiftNoteUp()
     {
         if (!sapling)
         {
-            //shrinks current branch
-            //first check if active
-            //maybe use a list of Bools for checking if each is active
-            if (branches[currentNote].activeSelf)
-            {
-                branches[currentNote].transform.localScale *= 0.5f;
-            }
-
-            bool canPlayNote = false;
-
-            while (!canPlayNote)
-            {
-                if (currentNote < (musicalNotes.Length - 1))
-                {
-                    currentNote++;
-                }
-                else
-                {
-                    currentNote = 0;
-                }
-
-                if (branches[currentNote].activeSelf)
-                    canPlayNote = true;
-            }
-
-            // chooses new note and enlarges branch
-            currentSound = musicalNotes[currentNote];
-            branches[currentNote].transform.localScale *= 2;
-
-            origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
-            lerpingColor = true;
-
-            notesPlaying.transform.position = branches[currentNote].transform.position;
-            // try setting parent to branch and setting position after!
-            //Vector3(branches[currentNote].transform.position.x - (branches[currentNote].transform.localScale.x /2), 
-            //    branches[currentNote].transform.position.y, branches[currentNote].transform.position.z); // need some to move this to tip of branch
-            //Debug.Log(currentNote);
-            if (playerClick)
-            {
-                plantAudio.PlayOneShot(selectionNotes[currentNote]);
-                playerClick = false;
-            }
+            base.ShiftNoteUp();
         }
     }
 
-    public void ShiftNoteDown()
+    public override void ShiftNoteDown()
     {
         if (!sapling)
         {
-            if (branches[currentNote].activeSelf)
-            {
-                branches[currentNote].transform.localScale *= 0.5f;
-            }
-
-            bool canPlayNote = false;
-
-            while (!canPlayNote)
-            {
-                if (currentNote > 0)
-                {
-                    currentNote--;
-                }
-                else
-                {
-                    currentNote = musicalNotes.Length - 1;
-                }
-
-                if (branches[currentNote].activeSelf)
-                    canPlayNote = true;
-            }
-            // chooses new note and enlarges Branch
-            currentSound = musicalNotes[currentNote];
-            branches[currentNote].transform.localScale *= 2;
-
-            origColor = branches[currentNote].GetComponent<MeshRenderer>().material.color;
-            lerpingColor = true;
-
-            notesPlaying.transform.position = branches[currentNote].transform.position;
-
-            if (playerClick)
-            {
-                plantAudio.PlayOneShot(selectionNotes[currentNote]);
-                playerClick = false;
-            }
+            base.ShiftNoteDown();
         }
     }
     

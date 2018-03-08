@@ -6,20 +6,72 @@ public class WindMachine : Interactable {
 
     public GameObject wind;
     GameObject windClone;
-
-    public float timerTotal;
-    float timer;
+    
     public float windSpeed;
     public float distanceToDestroy;
-    
+    public int timeScale;
+
+    bool showRhythm;
     public AudioClip selectLower;
     Transform windMachineModel;
 
     int originalLayer;
 
+    private void Awake()
+    {
+        SimpleClock.ThirtySecond += OnThirtySecond;
+    }
+
+    private void OnDestroy()
+    {
+        SimpleClock.ThirtySecond -= OnThirtySecond;
+    }
+
+    void OnThirtySecond(BeatArgs e)
+    {
+        switch(timeScale)
+        {
+            case 0:
+                if (e.TickMask[TickValue.Measure])
+            {
+                // rhythm creation / beat visual
+                showRhythm = true;
+            }
+            break;
+            case 1:
+                if (e.TickMask[TickValue.Quarter])
+            {
+                // rhythm creation / beat visual
+                showRhythm = true;
+            }
+            break;
+            case 2:
+                if (e.TickMask[TickValue.Eighth])
+            {
+                // rhythm creation / beat visual
+                showRhythm = true;
+            }
+            break;
+            case 3:
+                if (e.TickMask[TickValue.Sixteenth])
+            {
+                // rhythm creation / beat visual
+                showRhythm = true;
+            }
+            break;
+            case 4:
+                if (e.TickMask[TickValue.ThirtySecond])
+            {
+                // rhythm creation / beat visual
+                showRhythm = true;
+            }
+            break;
+        }
+
+    }
+
     public override void Start () {
         base.Start();
-        timer = timerTotal;
 
         interactable = true;
         windMachineModel = transform.GetChild(0);
@@ -37,12 +89,14 @@ public class WindMachine : Interactable {
                 DropObject();
             }
         }
-        timer -= Time.deltaTime;
-        if(timer < 0)
+        if (Vector3.Distance(_player.transform.position, transform.position) < 100)
         {
-            // this needs work
-            windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.eulerAngles + new Vector3(0,90,0)) , windMachineModel);
-            timer = timerTotal;
+            if (showRhythm)
+            {
+                //instantiate wind, show particles, etc.
+                windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.eulerAngles + new Vector3(0, 90, 0)), windMachineModel);
+                showRhythm = false;
+            }
         }
     }
 
