@@ -46,6 +46,12 @@ public class Plant : SoundProducer {
     {
         base.OnMouseEnter();
         tpc.blubAnimator.Play("ListenToPlant", 0);
+        if (!sapling)
+        {
+            symbol.GetComponent<AnimateUI>().active = true;
+            symbol.transform.localScale *= 3;
+        }
+        
     }
 
     public override void OnMouseOver()
@@ -108,6 +114,13 @@ public class Plant : SoundProducer {
     {
         base.OnMouseExit();
         waitPullFruit = 0;
+
+        if (symbol.GetComponent<AnimateUI>().active)
+        {
+            symbol.GetComponent<AnimateUI>().active = false;
+            symbol.transform.localScale *= (1f / 3f);
+        }
+        
         //tpc.pullFruitTimer = 0;
     }
     
