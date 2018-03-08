@@ -105,6 +105,7 @@ public class NPCDrummer : NPC {
                 drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
             //bassDrumSource.outputAudioMixerGroup = tpc.plantingGroup;
+            drumCollision.gameObject.SetActive(false);
             drumBeatSource.outputAudioMixerGroup = tpc.plantingGroup;
             //drummerCollider.size = new Vector3(originalColliderSize.x * 5, originalColliderSize.y , originalColliderSize.z * 5);
         }
@@ -226,6 +227,7 @@ public class NPCDrummer : NPC {
         //how should we move the drummer when he needs to find rocks?
         //baseParticles.transform.localPosition = drumPosition + new Vector3(0,2,0);
         drummerCollider.size = originalColliderSize;
+        drumCollision.gameObject.SetActive(true);
         currentState = NPCState.PLAYING;
     }
 
