@@ -26,13 +26,13 @@ public abstract class Interactable : MonoBehaviour
 
     public GameObject rightArmObj;
 
-    public Gate gateScript; // can grab reference IN GATE SCRIPT
+    //public Gate gateScript; // can grab reference IN GATE SCRIPT
 
     protected bool playerHolding;
 
-    public bool interactionFulfilled, hasBeenChecked, hasBeenAdded;
-    public int interactionCounter = 0;
-    public int interactionsNecessary;
+    //public bool interactionFulfilled, hasBeenChecked, hasBeenAdded;
+    //public int interactionCounter = 0;
+    //public int interactionsNecessary;
 
     public virtual void Start()
     {
@@ -74,16 +74,16 @@ public abstract class Interactable : MonoBehaviour
             tpc.blubAnimator.SetBool("touchingPlant", true);
             if (Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(0))
             {
-                if(gateScript!= null)
-                {
-                    //increment interactionCounter
-                    interactionCounter++;
-                    if (interactionCounter >= interactionsNecessary)
-                    {
-                        interactionFulfilled = true;
-                        gateScript.CheckAreaComplete();
-                    }
-                }
+                //if(gateScript!= null)
+                //{
+                //    //increment interactionCounter
+                //    interactionCounter++;
+                //    if (interactionCounter >= interactionsNecessary)
+                //    {
+                //        interactionFulfilled = true;
+                //        gateScript.CheckAreaComplete();
+                //    }
+                //}
                
             }
         }
@@ -107,16 +107,16 @@ public abstract class Interactable : MonoBehaviour
         symbol.sprite = normalSprite;
 
         //increment interactionCounter
-        if (gateScript != null)
-        {
-            //increment interactionCounter
-            interactionCounter++;
-            if (interactionCounter >= interactionsNecessary)
-            {
-                interactionFulfilled = true;
-                gateScript.CheckAreaComplete();
-            }
-        }
+        //if (gateScript != null)
+        //{
+        //    //increment interactionCounter
+        //    interactionCounter++;
+        //    if (interactionCounter >= interactionsNecessary)
+        //    {
+        //        interactionFulfilled = true;
+        //        gateScript.CheckAreaComplete();
+        //    }
+        //}
     }
 
 
