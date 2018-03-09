@@ -115,11 +115,10 @@ public class Plant : SoundProducer {
         base.OnMouseExit();
         waitPullFruit = 0;
 
-        if (symbol.GetComponent<AnimateUI>().active)
-        {
-            symbol.GetComponent<AnimateUI>().active = false;
+ 
             symbol.transform.localScale *= (1f / 3f);
-        }
+            symbol.GetComponent<AnimateUI>().active = false;
+        
         
         //tpc.pullFruitTimer = 0;
     }

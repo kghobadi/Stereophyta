@@ -15,6 +15,7 @@ public class NPCTransform : NPC {
 
 	public override void Start () {
         base.Start();
+        interactable = false;
         //for generic transform movements 
         movementPointsContainer = transform.GetChild(1);
         //loops through children of container and adds them to list
