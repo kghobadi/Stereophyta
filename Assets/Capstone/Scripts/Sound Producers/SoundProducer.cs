@@ -53,7 +53,9 @@ public abstract class SoundProducer : Interactable {
 
     }
 	
-	public virtual void Update () {
+	public override void Update () {
+        base.Update();
+
         //when PlaySound() is called, plant scales up then back down
         if (scalingUp)
         {
@@ -92,13 +94,66 @@ public abstract class SoundProducer : Interactable {
                 lerpTimer = lerpTimerTotal;
             }
         }
+
+        if(playerClicked)
+        {
+            playerClick = true;
+        }
     }
 
-    public virtual void ShiftNoteUp()
+    //ShiftNoteDown
+    public override void Selection_One()
     {
+        if (playerClicked)
+        {
+            base.Selection_One();
+        }
+        if (soundSources[currentNote].activeSelf)
+        {
+            soundSources[currentNote].transform.localScale *= 0.5f;
+        }
+
+        bool canPlayNote = false;
+
+        while (!canPlayNote)
+        {
+            if (currentNote > 0)
+            {
+                currentNote--;
+            }
+            else
+            {
+                currentNote = musicalNotes.Length - 1;
+            }
+
+            if (soundSources[currentNote].activeSelf)
+                canPlayNote = true;
+        }
+        // chooses new note and enlarges Branch
+        currentSound = musicalNotes[currentNote];
+        soundSources[currentNote].transform.localScale *= 2;
+
+        origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
+        lerpingColor = true;
+
+        notesPlaying.transform.position = soundSources[currentNote].transform.position;
+
+        if (playerClick)
+        {
+            audioSource.PlayOneShot(musicalNotes[currentNote]);
+            playerClick = false;
+        }
+    }
+
+    //ShiftNoteUp
+    public override void Selection_Two()
+    {
+        if (playerClicked) {
+            base.Selection_Two();
+            }
+        
         //shrinks current branch
         //first check if active
-        //maybe use a list of Bools for checking if each is active
         if (soundSources[currentNote].activeSelf)
         {
             soundSources[currentNote].transform.localScale *= 0.5f;
@@ -135,47 +190,7 @@ public abstract class SoundProducer : Interactable {
             audioSource.PlayOneShot(musicalNotes[currentNote]);
             playerClick = false;
         }
-
     }
 
-    public virtual void ShiftNoteDown()
-    {
-
-        if (soundSources[currentNote].activeSelf)
-        {
-            soundSources[currentNote].transform.localScale *= 0.5f;
-        }
-
-        bool canPlayNote = false;
-
-        while (!canPlayNote)
-        {
-            if (currentNote > 0)
-            {
-                currentNote--;
-            }
-            else
-            {
-                currentNote = musicalNotes.Length - 1;
-            }
-
-            if (soundSources[currentNote].activeSelf)
-                canPlayNote = true;
-        }
-        // chooses new note and enlarges Branch
-        currentSound = musicalNotes[currentNote];
-        soundSources[currentNote].transform.localScale *= 2;
-
-        origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
-        lerpingColor = true;
-
-        notesPlaying.transform.position = soundSources[currentNote].transform.position;
-
-        if (playerClick)
-        {
-            audioSource.PlayOneShot(musicalNotes[currentNote]);
-            playerClick = false;
-        }
-
-    }
+    
 }

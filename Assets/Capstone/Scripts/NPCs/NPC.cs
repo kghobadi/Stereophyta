@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class NPC : Interactable {
 
@@ -22,6 +23,8 @@ public class NPC : Interactable {
 
     public int lastLineLength, placeInLine;
 
+    protected NavMeshAgent navMeshAgent;
+
     public enum NPCState
     {
         LOOKING, SETTINGMOVE, MOVING, FOLLOWING, WAVING, PLAYING
@@ -30,6 +33,9 @@ public class NPC : Interactable {
     public override void Start () {
         //should this be interactable?
         base.Start();
+
+        navMeshAgent = GetComponent<NavMeshAgent>();
+
         homePosition = transform.position;
         trailRender = GetComponent<TrailRenderer>();
         currentState = NPCState.MOVING;
@@ -41,12 +47,14 @@ public class NPC : Interactable {
         followTimer = 0;
     }
 
-    public virtual void Update()
+    public override void Update()
     {
+        base.Update();
         if(currentState == NPCState.FOLLOWING)
         {
             followTimer += Time.deltaTime;
             trailRender.enabled = false;
+            withinDistanceActive = 30;
             FollowPlayer();
         }
         else
@@ -97,7 +105,7 @@ public class NPC : Interactable {
         
         if (Vector3.Distance(transform.position,  spotInLine) > 0.25f)
         {
-            transform.position = Vector3.MoveTowards(transform.position, spotInLine, speed * Time.deltaTime);
+            navMeshAgent.SetDestination(spotInLine);
             transform.LookAt(spotInLine); 
         }
         else

@@ -149,11 +149,11 @@ public class NPCTransform : NPC {
         yield return new WaitForSeconds(waitingTime);
         if (upOrDown)
         {
-            currentPlant.ShiftNoteUp();
+            currentPlant.Selection_Two();
         }
         else
         {
-            currentPlant.ShiftNoteDown();
+            currentPlant.Selection_One();
         }
         //set new move pos
         SetMove();

@@ -82,11 +82,11 @@ public class NPCcube : NPC {
 
     public void Movement()
     {
-        transform.position = Vector3.MoveTowards(transform.position, targestDestination, speed * Time.deltaTime);
+        navMeshAgent.SetDestination(targestDestination);
 
-        if (Vector3.Distance(transform.position, targestDestination) < 0.01f)
+        if (Vector3.Distance(transform.position, targestDestination) < 0.25f)
         {
-            transform.position = targestDestination;
+            //transform.position = targestDestination;
             currentState = NPCState.LOOKING;
             LookForPlants();
         }
@@ -140,11 +140,11 @@ public class NPCcube : NPC {
         yield return new WaitForSeconds(waitingTime);
         if (upOrDown)
         {
-            currentPlant.ShiftNoteUp();
+            currentPlant.Selection_Two();
         }
         else
         {
-            currentPlant.ShiftNoteDown();
+            currentPlant.Selection_One();
         }
         //set new move pos
         SetMove();

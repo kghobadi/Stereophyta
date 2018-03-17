@@ -46,11 +46,7 @@ public class Plant : SoundProducer {
     {
         base.OnMouseEnter();
         tpc.blubAnimator.Play("ListenToPlant", 0);
-        if (!sapling)
-        {
-            symbol.GetComponent<AnimateUI>().active = true;
-            symbol.transform.localScale *= 3;
-        }
+      
         
     }
 
@@ -59,68 +55,20 @@ public class Plant : SoundProducer {
         if (interactable && !lerpingColor && !sapling)
         {
             base.OnMouseOver();
-            tpc.isMoving = false;
             _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
-            waitPullFruit += Time.deltaTime;
-
-            if (Input.GetMouseButtonDown(0))
-            {
-                startingMousePos = Input.mousePosition;
-            }
-            if (Input.GetMouseButton(0))
-            {
-                playerClick = true;
-                if(waitPullFruit > 0.5f)
-                    tpc.pullFruitTimer += Time.deltaTime;
-                releaseMousePos = Input.mousePosition;
-
-                if (tpc.pullFruitTimer > pullMax && Vector3.Distance(startingMousePos, releaseMousePos) > pullDistance)
-                {
-                    TakeFruitSeed();
-                    tpc.pullFruitTimer = 0;
-                }
-
-            }
-            if (Input.GetMouseButtonUp(0))
-            {
-                releaseMousePos = Input.mousePosition;
-                if(tpc.pullFruitTimer < pullMin)
-                {
-                    ShiftNoteUp();
-                }
-                else if (tpc.pullFruitTimer > pullMin && Vector3.Distance(startingMousePos,releaseMousePos) > pullDistance)
-                {
-                    TakeFruitSeed();
-                }
-                tpc.pullFruitTimer = 0;
-            }
-
-            if (Input.GetMouseButtonDown(1))
-            {
-                playerClick = true;
-                ShiftNoteDown();
-            }
-
-            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
+            
         }
         
     }
 
     public override void handleClickSuccess()
     {
-        //nothing happens in here
+        base.handleClickSuccess();
     }
     public override void OnMouseExit()
     {
         base.OnMouseExit();
-        waitPullFruit = 0;
-
- 
-            symbol.transform.localScale *= (1f / 3f);
-            symbol.GetComponent<AnimateUI>().active = false;
         
-        
-        //tpc.pullFruitTimer = 0;
     }
     
     public void GrowPlant()
@@ -144,11 +92,13 @@ public class Plant : SoundProducer {
         sapling = false;
     }
 
-    public void TakeFruitSeed()
+    //Take Fruit Seed
+    public override void Selection_Three()
     {
+        base.Selection_Three();
         soundSources[currentNote].transform.localScale *= 0.5f;
         soundSources[currentNote].SetActive(false);
-        
+
         //instantiate seed and add it to player seed line
         fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
         fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = true;
@@ -160,7 +110,7 @@ public class Plant : SoundProducer {
         {
             if (!soundSources[i].activeSelf)
             {
-                seedsGone ++;
+                seedsGone++;
             }
         }
         if (seedsGone == soundSources.Count)
@@ -174,11 +124,13 @@ public class Plant : SoundProducer {
             float randomShift = Random.Range(0f, 100f);
             if (randomShift < 50f)
             {
-                ShiftNoteDown();
+                //down
+                Selection_One();
             }
             else
             {
-                ShiftNoteUp();
+                //up
+                Selection_Two();
             }
         }
     }
@@ -223,19 +175,21 @@ public class Plant : SoundProducer {
         
     }
 
-    public override void ShiftNoteUp()
+    //shift note down
+    public override void Selection_One()
     {
         if (!sapling)
         {
-            base.ShiftNoteUp();
+            base.Selection_One();
         }
     }
 
-    public override void ShiftNoteDown()
+    //shift note up
+    public override void Selection_Two()
     {
         if (!sapling)
         {
-            base.ShiftNoteDown();
+            base.Selection_Two();
         }
     }
     

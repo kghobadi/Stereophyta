@@ -133,11 +133,11 @@ public class NPCcircle : NPC {
         yield return new WaitForSeconds(waitingTime);
         if (upOrDown)
         {
-            currentPlant.ShiftNoteUp();
+            currentPlant.Selection_One();
         }
         else
         {
-            currentPlant.ShiftNoteDown();
+            currentPlant.Selection_Two();
         }
         SetMove();
     }

@@ -142,11 +142,11 @@ public class NPCspin : NPC {
             int randomShift = Random.Range(0, 100);
             if(randomShift > 50)
             {
-                plantsToPlay[i].ShiftNoteUp();
+                plantsToPlay[i].Selection_Two();
             }
             else
             {
-                plantsToPlay[i].ShiftNoteDown();
+                plantsToPlay[i].Selection_One();
             }
             yield return new WaitForSeconds(waitingTime);
         }
