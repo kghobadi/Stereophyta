@@ -33,7 +33,8 @@ public class ConnectedWaypoint : Waypoint {
 
     public override void OnDrawGizmos()
     {
-        base.OnDrawGizmos();
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, debugDrawRadius);
 
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, connectivityRadius);

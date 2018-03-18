@@ -4,31 +4,32 @@ using UnityEngine;
 
 public class NPCTransform : NPC {
     
-    int moveCounter;
-
+    //movement vars
+    public int moveCounter;
     Vector3 targestDestination;
-    protected Transform movementPointsContainer;
+    public Transform movementPointsContainer;
     public List<Transform> movementPoints = new List<Transform>();
 
-    bool upOrDown;
+    //for note up or down
+    bool upOrDown, hasLooked;
 
 
 	public override void Start () {
         base.Start();
         interactable = false;
-        //for generic transform movements 
-        movementPointsContainer = transform.GetChild(1);
+
         //loops through children of container and adds them to list
         for (int i = 0; i < movementPointsContainer.childCount; i++)
         {
             movementPoints.Add(movementPointsContainer.GetChild(i));
         }
+
         //set target dest to first position in transform array
         moveCounter = 0;
         targestDestination = movementPoints[moveCounter].position;
         transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
 
-        movementPointsContainer.SetParent(null);
+        navMeshAgent.SetDestination(targestDestination);
         currentState = NPCState.MOVING;
 
         speed += Random.Range(-1.5f, 1.5f);
@@ -36,10 +37,10 @@ public class NPCTransform : NPC {
 	
 	public override void Update () {
         base.Update();
-        if(currentState == NPCState.SETTINGMOVE)
-        {
-            SetMove();
-        }
+        //if(currentState == NPCState.SETTINGMOVE)
+        //{
+        //    SetMove();
+        //}
         if (currentState == NPCState.FOLLOWING)
         {
             movementPointsContainer.SetParent(transform);
@@ -53,7 +54,13 @@ public class NPCTransform : NPC {
 
         if (currentState == NPCState.MOVING)
         {
-            Movement();
+            if (Vector3.Distance(transform.position, targestDestination) < 3f)
+            {
+                navMeshAgent.isStopped = true;
+                currentState = NPCState.LOOKING;
+                if (!hasLooked)
+                    LookForPlants();
+            }
 
             if (Vector3.Distance(transform.position, _player.transform.position) < 10 && !hasWavedAtPlayer)
             {
@@ -74,10 +81,12 @@ public class NPCTransform : NPC {
 
     void SetMove()
     {
+        Debug.Log("set move");
+        navMeshAgent.isStopped = false;
         animator.SetBool("walking", true);
         if (moveCounter < (movementPoints.Count - 1))
         {
-            moveCounter++;
+            moveCounter+= 1;
         }
         else
         {
@@ -85,24 +94,18 @@ public class NPCTransform : NPC {
         }
         targestDestination = movementPoints[moveCounter].position;
 
+        navMeshAgent.SetDestination(targestDestination);
+        Debug.Log(targestDestination);
+
+        hasLooked = false;
+
         currentState = NPCState.MOVING;
     }
-
-    public void Movement()
-    {
-        transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
-        transform.position = Vector3.MoveTowards(transform.position, targestDestination, speed * Time.deltaTime);
-
-        if (Vector3.Distance(transform.position, targestDestination) < 0.01f)
-        {
-            transform.position = targestDestination;
-            currentState = NPCState.LOOKING;
-            LookForPlants();
-        }
-    }
-
+    
     public void LookForPlants()
     {
+        Debug.Log("I Looked");
+        hasLooked = true;
         bool canPlayPlant = false;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
         int i = 0;
@@ -118,7 +121,6 @@ public class NPCTransform : NPC {
         if (canPlayPlant)
         {
             StartCoroutine(PlayTree());
-            
         }
         else
         {
@@ -163,6 +165,7 @@ public class NPCTransform : NPC {
     public IEnumerator WaveAtPlayer()
     {
         currentState = NPCState.WAVING;
+        navMeshAgent.isStopped = true;
         transform.LookAt(_player.transform);
         animator.SetBool("waving", true);
         animator.SetBool("walking", false);
@@ -171,6 +174,7 @@ public class NPCTransform : NPC {
         if(currentState == NPCState.WAVING)
         {
             //starts walking again
+            navMeshAgent.isStopped = false;
             currentState = NPCState.MOVING;
         }
         hasWavedAtPlayer = true;

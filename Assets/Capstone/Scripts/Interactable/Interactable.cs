@@ -211,12 +211,12 @@ public abstract class Interactable : MonoBehaviour
             }
         }
 
-        if(selectionMenu.enabled && !playerClicked)
+        if(selectionMenu!= null && selectionMenu.enabled && !playerClicked)
         {
             interactable = false;
         }
 
-        if(!selectionMenu.enabled && !playerHolding)
+        if(selectionMenu != null && !selectionMenu.enabled && !playerHolding)
         {
             interactable = true;
         }

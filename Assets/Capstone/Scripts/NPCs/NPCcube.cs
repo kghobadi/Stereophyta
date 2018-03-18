@@ -84,7 +84,7 @@ public class NPCcube : NPC {
     {
         navMeshAgent.SetDestination(targestDestination);
 
-        if (Vector3.Distance(transform.position, targestDestination) < 0.25f)
+        if (navMeshAgent.remainingDistance < 0.5f)
         {
             //transform.position = targestDestination;
             currentState = NPCState.LOOKING;
@@ -154,6 +154,7 @@ public class NPCcube : NPC {
     public IEnumerator WaveAtPlayer()
     {
         currentState = NPCState.WAVING;
+        navMeshAgent.isStopped = true;
         transform.LookAt(_player.transform);
         animator.SetBool("waving", true);
         animator.SetBool("walking", false);
@@ -177,6 +178,7 @@ public class NPCcube : NPC {
                     break;
             }
             //starts walking again
+            navMeshAgent.isStopped = false;
             currentState = NPCState.MOVING;
         }
         hasWavedAtPlayer = true;

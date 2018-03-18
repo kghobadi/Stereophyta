@@ -38,7 +38,7 @@ public class NPC : Interactable {
 
         homePosition = transform.position;
         trailRender = GetComponent<TrailRenderer>();
-        currentState = NPCState.MOVING;
+        //currentState = NPCState.MOVING;
 
         animator = GetComponentInChildren<Animator>();
         animator.SetBool("walking", true);
@@ -103,14 +103,14 @@ public class NPC : Interactable {
 
         Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
         
-        if (Vector3.Distance(transform.position,  spotInLine) > 0.25f)
+        if (Vector3.Distance(transform.position,  spotInLine) > 3f)
         {
             navMeshAgent.SetDestination(spotInLine);
             transform.LookAt(spotInLine); 
         }
         else
         {
-            transform.LookAt(new Vector3(_player.transform.position.x, _player.transform.position.y + heightAdjustment, _player.transform.position.z));
+            transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         }
 
         lastLineLength = tpc.followers.Count;
