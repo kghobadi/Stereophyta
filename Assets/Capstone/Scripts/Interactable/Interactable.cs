@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [Serializable]
@@ -25,7 +27,7 @@ public abstract class Interactable : MonoBehaviour
 
     //UI sounds
     protected AudioSource soundBoard;
-    public AudioClip InteractSound, firstTimePickup;
+    public AudioClip InteractSound;
 
     //controls when an object can be clicked
     public bool interactable, playerClicked;
@@ -39,6 +41,10 @@ public abstract class Interactable : MonoBehaviour
     protected Sprite selectionMenuDisplay; // menu image -- this will vary based on the object
     protected List<GameObject> selectionButtons = new List<GameObject>(); //buttons in selection wheel
     public Sprite[] selectionImages; // button sprites
+
+    //Canvas vars
+    protected GameObject canvasObject;
+    protected CanvasRaycaster graphicRaycaster;
 
 
     public virtual void Start()
@@ -55,6 +61,10 @@ public abstract class Interactable : MonoBehaviour
         interactSprite = Resources.Load<Sprite>("CursorSprites/crosshairclicked");
         clickSprite = Resources.Load<Sprite>("CursorSprites/crosshairclicked");
         symbol.sprite = normalSprite;
+
+        //Canvas refs
+        canvasObject = GameObject.FindGameObjectWithTag("MainCanvas");
+        graphicRaycaster = canvasObject.GetComponent<CanvasRaycaster>();
 
         //Selection wheel component refs
         if (selectionCounter > 1)
@@ -109,6 +119,7 @@ public abstract class Interactable : MonoBehaviour
             tpc.blubAnimator.SetBool("running", false);
             tpc.blubAnimator.SetBool("idle", false);
             tpc.blubAnimator.SetBool("touchingPlant", true);
+            _player.transform.LookAt(new Vector3(transform.position.x, _player.transform.position.y, transform.position.z));
         }
     }
 
@@ -142,6 +153,7 @@ public abstract class Interactable : MonoBehaviour
 
             selectionMenu.enabled = true;
             selectionMenu.sprite = selectionMenuDisplay;
+            
 
             for(int i=0; i < selectionCounter; i++)
             {
@@ -163,18 +175,19 @@ public abstract class Interactable : MonoBehaviour
     {
         if (selectionMenu != null && selectionMenu.enabled && playerClicked)
         {
-            if (Input.GetMouseButton(0))
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
+            tpc.blubAnimator.SetBool("walking", false);
+            tpc.blubAnimator.SetBool("running", false);
+            tpc.blubAnimator.SetBool("idle", false);
+            tpc.blubAnimator.SetBool("touchingPlant", true);
 
-                if (Physics.Raycast(ray, out hit))
-                {
-                    if(Vector3.Distance(hit.point, _player.transform.position) > 15)
-                    {
-                        DeactivateSelectionMenu();
-                    }
-                }
+            if (selectionMenu.GetComponent<SelectionMenu>().clickTimer > selectionMenu.GetComponent<SelectionMenu>().clickWait)
+            {
+                graphicRaycaster.graphicsCastingOn = true;
+            }
+
+            if (graphicRaycaster.hitWorld)
+            {
+                DeactivateSelectionMenu();
             }
 
             if (selectionMenu.GetComponent<SelectionMenu>().selected)
@@ -197,29 +210,39 @@ public abstract class Interactable : MonoBehaviour
                 }
             }
         }
+
+        if(selectionMenu.enabled && !playerClicked)
+        {
+            interactable = false;
+        }
+
+        if(!selectionMenu.enabled && !playerHolding)
+        {
+            interactable = true;
+        }
     }
 
     public virtual void Selection_One()
     {
-        DeactivateSelectionMenu();
+        selectionMenu.GetComponent<SelectionMenu>().clickTimer = 0f;
     }
 
     public virtual void Selection_Two()
     {
-        DeactivateSelectionMenu();
+        selectionMenu.GetComponent<SelectionMenu>().clickTimer = 0f;
     }
 
     public virtual void Selection_Three()
     {
-        DeactivateSelectionMenu();
+        selectionMenu.GetComponent<SelectionMenu>().clickTimer = 0f;
     }
 
     public virtual void Selection_Four()
     {
-        DeactivateSelectionMenu();
+        selectionMenu.GetComponent<SelectionMenu>().clickTimer = 0f;
     }
 
-    //All selections call this 
+    //Call this whenever player is done interacting with an object
     public virtual void DeactivateSelectionMenu()
     {
         // set images to null and turn buttons off.
@@ -228,6 +251,8 @@ public abstract class Interactable : MonoBehaviour
         symbol.sprite = normalSprite;
 
         selectionMenu.enabled = false;
+        graphicRaycaster.graphicsCastingOn = false;
+        graphicRaycaster.hitWorld = false;
 
         for (int i = 0; i < selectionCounter; i++)
         {

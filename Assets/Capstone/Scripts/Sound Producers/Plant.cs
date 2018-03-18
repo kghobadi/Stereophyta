@@ -63,7 +63,11 @@ public class Plant : SoundProducer {
 
     public override void handleClickSuccess()
     {
-        base.handleClickSuccess();
+        if (!sapling)
+        {
+            base.handleClickSuccess();
+        }
+       
     }
     public override void OnMouseExit()
     {
@@ -116,6 +120,7 @@ public class Plant : SoundProducer {
         if (seedsGone == soundSources.Count)
         {
             poofParticles.Play();
+            DeactivateSelectionMenu();
             Destroy(gameObject);
         }
         else

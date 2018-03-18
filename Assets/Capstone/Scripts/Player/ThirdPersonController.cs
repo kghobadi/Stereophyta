@@ -95,7 +95,7 @@ public class ThirdPersonController : MonoBehaviour
                         isMoving = true;
                     }
                 }
-                else if (Vector3.Distance(transform.position, hit.transform.position) > 10 &&
+                else if (Vector3.Distance(transform.position, hit.transform.position) > 5 &&
                     (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
                     || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
                     || hit.transform.gameObject.tag == "Rock"))

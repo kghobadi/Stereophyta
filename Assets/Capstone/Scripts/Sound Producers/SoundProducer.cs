@@ -111,6 +111,7 @@ public abstract class SoundProducer : Interactable {
         if (soundSources[currentNote].activeSelf)
         {
             soundSources[currentNote].transform.localScale *= 0.5f;
+            soundSources[currentNote].GetComponent<MeshRenderer>().material.color = origColor;
         }
 
         bool canPlayNote = false;
@@ -141,6 +142,7 @@ public abstract class SoundProducer : Interactable {
         if (playerClick)
         {
             audioSource.PlayOneShot(musicalNotes[currentNote]);
+            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
             playerClick = false;
         }
     }
@@ -150,6 +152,7 @@ public abstract class SoundProducer : Interactable {
     {
         if (playerClicked) {
             base.Selection_Two();
+
             }
         
         //shrinks current branch
@@ -157,6 +160,7 @@ public abstract class SoundProducer : Interactable {
         if (soundSources[currentNote].activeSelf)
         {
             soundSources[currentNote].transform.localScale *= 0.5f;
+            soundSources[currentNote].GetComponent<MeshRenderer>().material.color = origColor;
         }
 
         bool canPlayNote = false;
@@ -188,6 +192,7 @@ public abstract class SoundProducer : Interactable {
         if (playerClick)
         {
             audioSource.PlayOneShot(musicalNotes[currentNote]);
+            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
             playerClick = false;
         }
     }

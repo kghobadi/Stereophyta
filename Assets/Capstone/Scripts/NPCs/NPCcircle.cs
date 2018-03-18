@@ -14,7 +14,7 @@ public class NPCcircle : NPC {
 
     public Transform circleCenter; //can use this to manually position circle in editor
 
-    DirectionLever walkingDirection;
+    CircleMillControls walkingDirection;
 
 	public override void Start () {
         base.Start();
@@ -30,7 +30,7 @@ public class NPCcircle : NPC {
         speed += Random.Range(-1, 1);
         lookTimer = lookTimerTotal;
 
-        walkingDirection = GameObject.FindGameObjectWithTag("CircleMill").transform.GetChild(1).GetComponent<DirectionLever>();
+        walkingDirection = GameObject.FindGameObjectWithTag("CircleMill").transform.GetChild(1).GetComponent<CircleMillControls>();
     }
 	
 	public override void Update () {
@@ -39,6 +39,10 @@ public class NPCcircle : NPC {
         if(currentState == NPCState.FOLLOWING)
         {
             model.transform.localEulerAngles = new Vector3(0, 0, 0);
+            if(speed < 0)
+            {
+                speed *= -1;
+            }
         }
 
         if (currentState == NPCState.SETTINGMOVE)
