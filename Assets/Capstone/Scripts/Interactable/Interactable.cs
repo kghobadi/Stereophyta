@@ -71,28 +71,8 @@ public abstract class Interactable : MonoBehaviour
         {
             // get the menu object itself
             selectionMenu = GameObject.FindGameObjectWithTag("SelectionMenu").GetComponent<Image>();
-            //find and load correct selectionMenuImage, store corresponding Buttons
-            switch (selectionCounter)
-            {
-                case 2:
-                    selectionMenuDisplay = Resources.Load<Sprite>("SelectionMenus/SelectionWheel2");
-                    selectionButtons.Add(selectionMenu.transform.GetChild(0).gameObject);
-                    selectionButtons.Add(selectionMenu.transform.GetChild(1).gameObject);
-                    break;
-                case 3:
-                    selectionMenuDisplay = Resources.Load<Sprite>("SelectionMenus/SelectionWheel3");
-                    selectionButtons.Add(selectionMenu.transform.GetChild(2).gameObject);
-                    selectionButtons.Add(selectionMenu.transform.GetChild(3).gameObject);
-                    selectionButtons.Add(selectionMenu.transform.GetChild(4).gameObject);
-                    break;
-                case 4:
-                    selectionMenuDisplay = Resources.Load<Sprite>("SelectionMenus/SelectionWheel4");
-                    selectionButtons.Add(selectionMenu.transform.GetChild(5).gameObject);
-                    selectionButtons.Add(selectionMenu.transform.GetChild(6).gameObject);
-                    selectionButtons.Add(selectionMenu.transform.GetChild(7).gameObject);
-                    selectionButtons.Add(selectionMenu.transform.GetChild(8).gameObject);
-                    break;
-            }
+            //find and load correct selectionMenuImage, store corresponding Buttons (function at bottom)
+            SwitchSelectionButtons();
         }
 
         //assigns audio source
@@ -264,6 +244,33 @@ public abstract class Interactable : MonoBehaviour
     void Play()
     {
         soundBoard.PlayOneShot(InteractSound);
+    }
+
+    public virtual void SwitchSelectionButtons()
+    {
+        selectionButtons.Clear();
+
+        switch (selectionCounter)
+        {
+            case 2:
+                selectionMenuDisplay = Resources.Load<Sprite>("SelectionMenus/SelectionWheel2");
+                selectionButtons.Add(selectionMenu.transform.GetChild(0).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(1).gameObject);
+                break;
+            case 3:
+                selectionMenuDisplay = Resources.Load<Sprite>("SelectionMenus/SelectionWheel3");
+                selectionButtons.Add(selectionMenu.transform.GetChild(2).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(3).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(4).gameObject);
+                break;
+            case 4:
+                selectionMenuDisplay = Resources.Load<Sprite>("SelectionMenus/SelectionWheel4");
+                selectionButtons.Add(selectionMenu.transform.GetChild(5).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(6).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(7).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(8).gameObject);
+                break;
+        }
     }
 }
 
