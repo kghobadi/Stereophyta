@@ -5,8 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.AI;
 
 public class NPC : Interactable {
-    //can use to denote plantType from home area, or store a Plant script
-    public string plantType;
+    //list to store Plant & Rock scripts
     protected List<Plant> currentPlants = new List<Plant>();
     protected List<Rock> currentRocks = new List<Rock>();
     
@@ -15,8 +14,8 @@ public class NPC : Interactable {
     TrailRenderer trailRender;
 
     //following in player line variables
-    public float followDistance, currentFollowDistance, followTimer, followTimeMin, heightAdjustment;
-    public int lastLineLength, placeInLine;
+    public float followDistance, currentFollowDistance, followTimer, followTimeMin;
+    int lastLineLength, placeInLine;
 
     //wave animation variables
     public float wavingTime, waveRefresh, waveRefreshTotal, visionDistance, waitingTime;
@@ -44,6 +43,7 @@ public class NPC : Interactable {
     Transform homeContainer;
     public List<Transform> movementPoints = new List<Transform>();
     List<Transform> homePoints = new List<Transform>();
+    Transform chosenWaypoint; // for finding new path
 
     //navMeshSpeeds -- SHOULD JUST LINK THIS TO MYMUSIC.TEMPO
     public float moveSpeedInterval, moveSpeedMax; 
@@ -131,15 +131,10 @@ public class NPC : Interactable {
             withinDistanceActive = 10;
         }
 
-        //enables musician script and stops movement
+        //stops movement
         if(currentState == NPCState.PLAYING)
         {
-            myMusic.enabled = true;
             navMeshAgent.isStopped = true;
-        }
-        else
-        {
-            myMusic.enabled = false;
         }
 
         //controls movement
@@ -207,6 +202,7 @@ public class NPC : Interactable {
     //Called as a command to NPCs who are FOLLOWING or PLAYING
     void GoHome()
     {
+        //reactivate navMesh
         navMeshAgent.isStopped = false;
         animator.SetBool("walking", true);
 
@@ -221,12 +217,72 @@ public class NPC : Interactable {
     //Called when setting a follower to Labor in a new area
     void FindNewPath()
     {
-        //look at nearby area
-        //go to nearest path of My Music type
-        // from nearest movement point, get parent waypoint container
-        // movementPointContainer = WaypointContainer;
-        // movementPoints for loop to get container children
-        SetMove();
+        //empty current pathing points
+        movementPointsContainer = null;
+        chosenWaypoint = null;
+        movementPoints.Clear();
+
+        //temp list for storing waypoints & distance check size
+        List<GameObject> nearbyWaypoints = new List<GameObject>();
+        float pathFindingDistance = 50f;
+        float closestDistance = 50f;
+
+        //Look for nearby waypoints with correct myMusic/myPath type 
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, pathFindingDistance);
+        int i = 0;
+        while (i < hitColliders.Length)
+        {
+            if(hitColliders[i].gameObject.tag == "Waypoint")
+            {
+                if(hitColliders[i].gameObject.GetComponent<Waypoint>().pathType.ToString() == myMusic.musicType.ToString())
+                    nearbyWaypoints.Add(hitColliders[i].gameObject);
+            }
+        }
+
+        //if there are waypoints, find the closest one
+        if(nearbyWaypoints.Count > 0)
+        {
+            for(int w=0;w <nearbyWaypoints.Count; w++)
+            {
+                float currentDist = Vector3.Distance(transform.position, nearbyWaypoints[w].transform.position);
+                if (currentDist < closestDistance)
+                {
+                    closestDistance = currentDist;
+                    chosenWaypoint = nearbyWaypoints[w].transform;
+                }
+            }
+            
+            //using the closest waypoint, reset transform container and the pathing points
+            if (chosenWaypoint != null)
+            {
+                movementPointsContainer = chosenWaypoint.parent;
+                //loops through children of container and adds them to list
+                for (int t = 0; t < movementPointsContainer.childCount; t++)
+                {
+                    movementPoints.Add(movementPointsContainer.GetChild(t));
+                }
+
+                //set movecounter to the right index, set destination
+                moveCounter = movementPoints.IndexOf(chosenWaypoint);
+                navMeshAgent.SetDestination(chosenWaypoint.position);
+                currentState = NPCState.MOVING;
+            }
+        }
+        //if no nearby paths, continue following 
+        else
+        {
+            //go back to following 
+            tpc.followers.Add(gameObject);
+            tpc.followerDistances.Add(followDistance);
+            tpc.blubAnimator.Play("Wave", 0);
+            CheckPlaceInLine();
+
+            currentState = NPCState.FOLLOWING;
+            animator.SetBool("walking", true);
+
+            DeactivateSelectionMenu();
+            SwitchSelectionButtons();
+        }
     }
 
     //fills up lists of nearby plants and rocks

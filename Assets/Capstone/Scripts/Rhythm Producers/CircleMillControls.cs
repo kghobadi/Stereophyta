@@ -142,8 +142,8 @@ public class CircleMillControls : Interactable {
             if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
             {
                 //circleNPCs[i].GetComponent<NPCcircle>().speed += NPCspeedInterval;
-                circleNPCs[i].GetComponent<NPCcircle>().animator.speed += animatorSpeedInterval;
-                circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal -= NPCLookInterval;
+                //circleNPCs[i].GetComponent<NPCcircle>().animator.speed += animatorSpeedInterval;
+                //circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal -= NPCLookInterval;
             }
         }
     }
@@ -160,8 +160,8 @@ public class CircleMillControls : Interactable {
             if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
             {
                 //circleNPCs[i].GetComponent<NPCcircle>().speed -= NPCspeedInterval;
-                circleNPCs[i].GetComponent<NPCcircle>().animator.speed -= animatorSpeedInterval;
-                circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal += NPCLookInterval;
+                //circleNPCs[i].GetComponent<NPCcircle>().animator.speed -= animatorSpeedInterval;
+                //circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal += NPCLookInterval;
             }
         }
     }

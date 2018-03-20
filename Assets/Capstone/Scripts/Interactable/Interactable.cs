@@ -17,9 +17,9 @@ public abstract class Interactable : MonoBehaviour
 
     //mouse cursor images 
     protected Image symbol; // 2d sprite renderer icon reference
-    protected Sprite normalSprite;
-    protected Sprite interactSprite;
-    protected Sprite clickSprite;
+    protected Sprite normalSprite; // walking feet cursor
+    protected Sprite interactSprite; // hand for interact
+    protected Sprite clickSprite; 
 
     //click distances checks on player
     protected float withinDistance = 10f; // for OnMouseOver
