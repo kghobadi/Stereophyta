@@ -2,56 +2,54 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 
 public class ThirdPersonController : MonoBehaviour
 {
-    public float currentSpeed, walkSpeed, runSpeedMax;
-    public float scrollSpeed = 2.0f;
+    //Player movment variables. 
     CharacterController player;
-
-    Vector3 movement;
-
-    AudioSource cameraAudSource;
-
+    public float currentSpeed, walkSpeed, runSpeedMax;
+    public float startingHeight, runTime;
     private Vector3 targetPosition;
     public bool isMoving; // for point to click
-    Vector3 origPosition;
+    public Animator blubAnimator;
+    float clickTimer, headTurnTimer;
+    bool hasTurnedHead;
+    //these are used in seed script
+    public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
 
+    //Camera ref variables
+    AudioSource cameraAudSource;
     CameraController camControl;
-    
-    GameObject terrain;
 
+    //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask mask;
 
+    //control player actions with interactable objects
     public bool isHoldingSomething, canUseSeed;
-
-    public Animator blubAnimator;
-
+ 
+    //Lists for follower line and seed line
     public List<GameObject> followers = new List<GameObject>();
     public List<float> followerDistances = new List<float>();
     public int followerCountMax;
 
     public List<GameObject> seedLine = new List<GameObject>();
-    //public int seedMax;
 
+    //Store the current audio mixer info so when you plant stuff and drop off followers, they adjust to where player is on map
     public AudioMixerSnapshot currentAudioMix;
     public AudioMixerGroup plantingGroup;
 
-    public float startingHeight, runTime;
-    
-    public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity, pullFruitTimer=0;
-
-    float clickTimer, headTurnTimer;
-    bool hasTurnedHead;
+    //Player command menu refs
+    public Image playerCommandsMenu;
 
     void Start()
     {
-        player = GetComponent<CharacterController>();
+        //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         camControl = Camera.main.GetComponent<CameraController>();
-        origPosition = transform.position;
-        terrain = GameObject.FindGameObjectWithTag("Ground");
 
+        //set starting points for most vars
+        player = GetComponent<CharacterController>();
         targetPosition = transform.position;
         blubAnimator = GetComponentInChildren<Animator>();
         blubAnimator.SetBool("idle", true);
@@ -63,6 +61,7 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
+        //this is used in fruitSeedNoInv to let seed know whether player has a seed already
         if(seedLine.Count == 0)
         {
             isHoldingSomething = false;
@@ -73,7 +72,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //click to move to point
-        if (Input.GetMouseButton(0) && pullFruitTimer ==0)
+        if (Input.GetMouseButton(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -86,26 +85,25 @@ public class ThirdPersonController : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, 100, mask))
             {
+                //if we hit the ground & height is in range, move the character to that position
                 if (hit.transform.gameObject.tag == "Ground")
                 {
                     targetPosition = hit.point + new Vector3(0, 1, 0);
-                    //Debug.Log(targetPosition);
                     if (targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight - 3))
                     {
                         isMoving = true;
                     }
                 }
-                else if (Vector3.Distance(transform.position, hit.transform.position) > 7 &&
+
+                //if we hit an interactable object AND we are far from it, the player should auto walk towards it
+                else if (Vector3.Distance(transform.position, hit.transform.position) > 5 &&
                     (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
-                    || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"))
-                    //use if statement for interactable stuff which the player should auto walk towards
+                    || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
+                    || hit.transform.gameObject.tag == "Rock"))
                 {
                         targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                        //Debug.Log(targetPosition);
-                        if (targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight - 3))
-                        {
-                            isMoving = true;
-                        }
+                        isMoving = true;
+                        
                     }
                 else
                 {
@@ -114,6 +112,7 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
 
+        //On mouse up, we check clickTimer to see if we are walking to that point or stopping the character from running 
         if (Input.GetMouseButtonUp(0))
         {
             if(clickTimer < runTime)
@@ -130,6 +129,14 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
 
+        //Check for spacebar to open PlayerCommand Menu
+        if (Input.GetKeyDown(KeyCode.Space) && playerCommandsMenu.enabled == false)
+        {
+            // enable player commands 
+            playerCommandsMenu.enabled = true;
+        }
+
+        //Check if we are moving and transition animation controller
         if (isMoving && targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight-3))
         {
             MovePlayer();
@@ -148,6 +155,7 @@ public class ThirdPersonController : MonoBehaviour
                 blubAnimator.SetBool("running", false);
             }
         }
+        //this timer only plays the idle animation if we are not moving. still a little buggy
         else
         {
             if(headTurnTimer < 5)
@@ -160,15 +168,14 @@ public class ThirdPersonController : MonoBehaviour
             if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
             {
                 if (!hasTurnedHead)
-                    StartCoroutine(Wait(1f));
-                //Debug.Log(headTurnTimer);
+                    StartCoroutine(Idle(1f));
             }
         }
     }
    
+    //Movement function which relies on vector3 movetowards. when we arrive at target, stop moving.
     void MovePlayer()
     {
-        pullFruitTimer = 0;
         transform.LookAt(targetPosition);
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
         
@@ -179,14 +186,14 @@ public class ThirdPersonController : MonoBehaviour
         }
     }
 
-    IEnumerator Wait(float time)
+    //this waits for the idle animation to finish and resets the timers
+    IEnumerator Idle(float time)
     {
         hasTurnedHead = true;
         blubAnimator.SetBool("idle", false);
         blubAnimator.Play("HeadTurn", 0);
         yield return new WaitForSeconds(time);
         headTurnTimer = 0;
-        pullFruitTimer = 0;
         hasTurnedHead = false;
         blubAnimator.SetBool("idle", true);
     }

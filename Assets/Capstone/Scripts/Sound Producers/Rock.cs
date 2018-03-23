@@ -32,35 +32,19 @@ public class Rock : SoundProducer {
         if (interactable && !lerpingColor )
         {
             base.OnMouseOver();
-            tpc.isMoving = false;
             _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
-
-            if (Input.GetMouseButtonDown(0))
-            {
-                playerClick = true;
-                ShiftNoteUp();
-            }
-
-            if (Input.GetMouseButtonDown(1))
-            {
-                playerClick = true;
-                ShiftNoteDown();
-            }
-
-            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
+            
         }
         
     }
 
     public override void handleClickSuccess()
     {
-        //nothing happens in here
+        base.handleClickSuccess();
     }
     public override void OnMouseExit()
     {
         base.OnMouseExit();
-        //waitPullCrystal = 0;
-        //tpc.pullFruitTimer = 0;
     }
 
     public void PlaySound()

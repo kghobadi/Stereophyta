@@ -9,11 +9,12 @@ public class CircleWind : Rhythm {
 
 	void Start () {
         windMill = transform.parent.gameObject;
+        windSpeed = 30f;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        transform.RotateAround(windMill.transform.position, Vector3.up, windSpeed);
+        transform.RotateAround(windMill.transform.position, Vector3.up, windSpeed * Time.deltaTime);
 	}
 
 }

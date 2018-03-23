@@ -29,10 +29,6 @@ public class Rain : MonoBehaviour
         tpc = _player.GetComponent<ThirdPersonController>();
 
         rainEffect = GetComponent<ParticleSystem>();
-        
-        bed = GameObject.FindGameObjectWithTag("Bed");
-
-        rainEffect = GetComponent<ParticleSystem>();
 
         lifeTime = Random.Range(40, 100);
         moveSpeed = Random.Range(2.5f, 6.0f);
@@ -71,25 +67,8 @@ public class Rain : MonoBehaviour
         if ((randomRotateDirection > 0 && transform.localScale.x < 2) || (randomRotateDirection < 0 && transform.localScale.x > 0.4f))
             transform.localScale += Vector3.one * Time.deltaTime * moveSpeed * 0.0025f * randomRotateDirection;
 
-        //if(Vector3.Distance(_player.transform.position, transform.position) < 50)
-        //{
-        //    rainSource.outputAudioMixerGroup = tpc.plantingGroup;
-        //}
 
     }
-
-
-    //SHOULD MAYBE DO THIS WITH A RAYCAST INSTEAD? CHECKING EACH PARTICLE'S COLLISION MIGHT BE TOO EXPENSIVE
-    //void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.gameObject.tag == "Plant")
-    //    {
-    //        if (other.gameObject.GetComponent<Plant>().sapling)
-    //        {
-    //            other.gameObject.GetComponent<Plant>().GrowPlant();
-    //        }
-    //    }
-    //}
 
     void OnTriggerStay(Collider other)
     {

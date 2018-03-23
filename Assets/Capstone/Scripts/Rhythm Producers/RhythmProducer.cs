@@ -2,27 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class RhythmProducer : MonoBehaviour {
+public abstract class RhythmProducer : Interactable {
     public AudioClip[] basicBeats;
     protected AudioSource beatSource;
-    protected GameObject _player;
 
     protected bool playedAudio, showRhythm;
 
     public int timeScale;
 
-    private void Awake()
+    public virtual void Awake()
     {
         SimpleClock.ThirtySecond += OnThirtySecond;
         _player = GameObject.FindGameObjectWithTag("Player");
     }
 
-    private void OnDestroy()
+    public virtual void OnDestroy()
     {
         SimpleClock.ThirtySecond -= OnThirtySecond;
     }
 
-    void OnThirtySecond(BeatArgs e)
+    public virtual void OnThirtySecond(BeatArgs e)
     {
         switch (timeScale)
         {
@@ -65,13 +64,14 @@ public abstract class RhythmProducer : MonoBehaviour {
 
     }
     // Update is called once per frame
-    public virtual void Update () {
+    public override void Update () {
+        base.Update();
         //may need to qualify this with and if statement in override
         AudioRhythm();
         
 	}
 
-    void AudioRhythm()
+    public virtual void AudioRhythm()
     {
         if (!playedAudio)
         {
@@ -89,7 +89,7 @@ public abstract class RhythmProducer : MonoBehaviour {
         }
     }
 
-    void SwitchTimeScale()
+    public virtual void SwitchTimeScale()
     {
         switch (timeScale)
         {
