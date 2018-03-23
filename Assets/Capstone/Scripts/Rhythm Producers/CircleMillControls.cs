@@ -35,6 +35,8 @@ public class CircleMillControls : Interactable {
         //mill refs
         circleMill = transform.parent;
         windCircles = circleMill.GetChild(0).GetComponent<CircleWind>();
+
+        // this will need more logic to work correctly
         circleNPCs = GameObject.FindGameObjectsWithTag("NPC");
 
         //set rhythm states
@@ -74,6 +76,14 @@ public class CircleMillControls : Interactable {
                 soundBoard.PlayOneShot(selectLower);
             dirLever.transform.localEulerAngles = new Vector3(0, -30, 0);
             dirPositive = false;
+            //change NPC direction
+            for (int i = 0; i < circleNPCs.Length; i++)
+            {
+                if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                {
+                    circleNPCs[i].GetComponent<HornNPC>().walkingDirection = false;
+                }
+            }
         }
         else
         {
@@ -81,6 +91,14 @@ public class CircleMillControls : Interactable {
                 soundBoard.PlayOneShot(InteractSound);
             dirLever.transform.localEulerAngles = new Vector3(0, 30, 0);
             dirPositive = true;
+            //change NPC direction
+            for (int i = 0; i < circleNPCs.Length; i++)
+            {
+                if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                {
+                    circleNPCs[i].GetComponent<HornNPC>().walkingDirection = true;
+                }
+            }
         }
     }
 
@@ -141,9 +159,8 @@ public class CircleMillControls : Interactable {
         {
             if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
             {
-                //circleNPCs[i].GetComponent<NPCcircle>().speed += NPCspeedInterval;
-                //circleNPCs[i].GetComponent<NPCcircle>().animator.speed += animatorSpeedInterval;
-                //circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal -= NPCLookInterval;
+                circleNPCs[i].GetComponent<HornNPC>().navMeshAgent.speed += NPCspeedInterval;
+                circleNPCs[i].GetComponent<HornNPC>().animator.speed += animatorSpeedInterval;
             }
         }
     }
@@ -159,9 +176,8 @@ public class CircleMillControls : Interactable {
         {
             if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
             {
-                //circleNPCs[i].GetComponent<NPCcircle>().speed -= NPCspeedInterval;
-                //circleNPCs[i].GetComponent<NPCcircle>().animator.speed -= animatorSpeedInterval;
-                //circleNPCs[i].GetComponent<NPCcircle>().lookTimerTotal += NPCLookInterval;
+                circleNPCs[i].GetComponent<HornNPC>().navMeshAgent.speed -= NPCspeedInterval;
+                circleNPCs[i].GetComponent<HornNPC>().animator.speed -= animatorSpeedInterval;
             }
         }
     }

@@ -26,7 +26,7 @@ public class NPC : Interactable {
     protected string myPath; // will use this to find relevant transform Containers
 
     //navmesh ref and musician script ref
-    protected NavMeshAgent navMeshAgent;
+    public NavMeshAgent navMeshAgent;
     protected Musician myMusic;
 
     //will use these to swap out selection menu among different states (starts out as what's set directly thru Interactable)
@@ -35,7 +35,7 @@ public class NPC : Interactable {
 
     //movement vars
     public int moveCounter;
-    Vector3 targestDestination;
+    protected Vector3 targestDestination;
 
     //movement point container and list -- and home version
     public bool setInEditor;
