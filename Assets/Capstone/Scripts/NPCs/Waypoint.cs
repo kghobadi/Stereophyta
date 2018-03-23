@@ -15,7 +15,22 @@ public class Waypoint : MonoBehaviour {
 
     public virtual void OnDrawGizmos()
     {
-        Gizmos.color = Color.blue;
+        if(pathType == PathType.GUITAR)
+        {
+            Gizmos.color = Color.blue;
+        }
+        else if(pathType == PathType.DRUM)
+        {
+            Gizmos.color = Color.magenta;
+        }
+        else if(pathType == PathType.HORN)
+        {
+            Gizmos.color = Color.yellow;
+        }
+        else if (pathType == PathType.PIANO)
+        {
+            Gizmos.color = Color.cyan;
+        }
         Gizmos.DrawWireSphere(transform.position, debugDrawRadius);
     }
 }

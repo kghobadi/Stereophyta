@@ -136,7 +136,7 @@ public class NPC : Interactable {
         if(currentState == NPCState.PLAYING)
         {
             navMeshAgent.isStopped = true;
-            transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+            //transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
             animator.SetBool("walking", false);
         }
 
@@ -223,12 +223,18 @@ public class NPC : Interactable {
         //reset move points
         moveCounter = 0;
         movementPointsContainer = homeContainer;
-        movementPoints = homePoints;
+        movementPoints.Clear();
+
+        for(int i = 0; i < homePoints.Count; i++)
+        {
+            movementPoints.Add(homePoints[i]);
+        }
+
         SetMove();
     }
 
     //Called when setting a follower to Labor in a new area
-    void FindNewPath()
+    protected void FindNewPath()
     {
         Debug.Log("looking for new path");
         //empty current pathing points
