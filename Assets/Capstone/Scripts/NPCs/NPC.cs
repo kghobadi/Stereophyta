@@ -359,10 +359,12 @@ public class NPC : Interactable {
             if (randomShift > 50)
             {
                 currentPlants[i].Selection_Two(); //ShiftNoteUp
+                currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
             }
             else
             {
                 currentPlants[i].Selection_One(); //ShiftNoteDown
+                currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
             }
             yield return new WaitForSeconds(waitingTime);
         }
@@ -372,10 +374,12 @@ public class NPC : Interactable {
             if (randomShift > 50)
             {
                 currentRocks[i].Selection_Two(); //ShiftNoteUp
+                currentRocks[i].audioSource.PlayOneShot(currentRocks[i].currentSound);
             }
             else
             {
                 currentRocks[i].Selection_One(); //ShiftNoteDown
+                currentRocks[i].audioSource.PlayOneShot(currentRocks[i].currentSound);
             }
             yield return new WaitForSeconds(waitingTime);
         }

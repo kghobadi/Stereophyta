@@ -6,7 +6,8 @@ public abstract class SoundProducer : Interactable {
 
     public AudioClip[] musicalNotes;
     public List<GameObject> soundSources = new List<GameObject>();
-    protected int currentNote, particleCount;
+    protected int particleCount;
+    public int currentNote;
     public AudioClip currentSound;
     public AudioSource audioSource;
 

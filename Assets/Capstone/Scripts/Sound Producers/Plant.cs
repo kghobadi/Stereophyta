@@ -7,7 +7,7 @@ public class Plant : SoundProducer {
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
 
-    ParticleSystem poofParticles;
+    public ParticleSystem poofParticles;
 
     public bool sapling;
     public float saplingScale, waterTimer =0, waterNecessary, regenTimer =0, regenNecessary;
