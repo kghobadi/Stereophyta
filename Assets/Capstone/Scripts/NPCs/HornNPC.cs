@@ -21,7 +21,7 @@ public class HornNPC : NPC {
 
     public override void SetMove()
     {
-        Debug.Log("set move");
+        //Debug.Log("set move");
         navMeshAgent.isStopped = false;
         animator.SetBool("walking", true);
         if (walkingDirection)
@@ -145,7 +145,6 @@ public class HornNPC : NPC {
         //Sucker if false
         else
         {
-          
                 //for the number of plants exceeding the max
                 for (int p = 0; p < (currentPlants.Count - plantMaximum); p++)
                 {
@@ -162,6 +161,8 @@ public class HornNPC : NPC {
                                 //turn off fruit
                                 currentPlants[randomPlant].soundSources[i].transform.localScale *= 0.5f;
                                 currentPlants[randomPlant].soundSources[i].SetActive(false);
+
+                            currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].musicalNotes[currentPlants[randomPlant].currentNote]);
 
                                 yield return new WaitForSeconds(waitingTime);
                             }

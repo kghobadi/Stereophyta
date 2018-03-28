@@ -32,7 +32,7 @@ public class PianoMonkNPC : NPC {
             }
                 
         }
-        Debug.Log(plantsToGrow.Count);
+        //Debug.Log(plantsToGrow.Count);
         if(saplingCount > saplingsNecessary)
         {
             //do divine Light effect and animation!!

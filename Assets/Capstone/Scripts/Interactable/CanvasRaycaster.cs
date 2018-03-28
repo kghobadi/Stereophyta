@@ -47,6 +47,7 @@ public class CanvasRaycaster : MonoBehaviour
                 if(results.Count <= 1)
                 {
                     hitWorld = true;
+                    Debug.Log("hit world");
                 }
             }
         }

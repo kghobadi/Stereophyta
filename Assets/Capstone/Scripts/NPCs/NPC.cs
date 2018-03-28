@@ -34,7 +34,7 @@ public class NPC : Interactable {
     public Sprite[] laborSelectionImages, followingSelectionImages, playingSelectionImages;
 
     //movement vars
-    public int moveCounter;
+    public int moveCounter =0;
     protected Vector3 targestDestination;
 
     //movement point container and list -- and home version
@@ -100,7 +100,6 @@ public class NPC : Interactable {
         homeContainer = movementPointsContainer;
 
         //set target dest to first position in transform array
-        moveCounter = 0;
         targestDestination = movementPoints[moveCounter].position;
         transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
 
@@ -164,10 +163,9 @@ public class NPC : Interactable {
         {
             navMeshAgent.isStopped = true;
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
-            if (graphicRaycaster.hitWorld)
+            if (graphicRaycaster.hitWorld || Vector3.Distance(_player.transform.position,transform.position) > 10 || !selectionMenu.enabled)
             {
-                currentState = lastState;
-                navMeshAgent.isStopped = false;
+                SetMove();
             }
         }
 
@@ -194,7 +192,7 @@ public class NPC : Interactable {
     //Call this function whenever you want an NPC to enter the Labor/Movement loop
     public virtual void SetMove()
     {
-        Debug.Log("set move");
+        //Debug.Log("set move");
         navMeshAgent.isStopped = false;
         animator.SetBool("walking", true);
         if (moveCounter < (movementPoints.Count - 1))

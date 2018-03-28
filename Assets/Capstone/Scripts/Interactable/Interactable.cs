@@ -17,7 +17,7 @@ public abstract class Interactable : MonoBehaviour
 
     //mouse cursor images 
     protected Image symbol; // 2d sprite renderer icon reference
-    protected Sprite normalSprite; // walking feet cursor
+    protected List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
     protected Sprite interactSprite; // hand for interact
     protected Sprite clickSprite; 
 
@@ -55,12 +55,18 @@ public abstract class Interactable : MonoBehaviour
         cammy = GameObject.FindGameObjectWithTag("MainCamera"); //searches for Camera
         rightArmObj = GameObject.FindGameObjectWithTag("rightArm");
 
-        //mouse cursor ref components
+        //mouse cursor ref components & animate walking UI 
         symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
-        normalSprite = Resources.Load<Sprite>("CursorSprites/crosshair");
+        for (int i = 1; i < 4; i++)
+        {
+            walkingSprites.Add(Resources.Load<Sprite>("CursorSprites/Foot" + i));
+            symbol.gameObject.GetComponent<AnimateUI>().animationSprites.Add(Resources.Load<Sprite>("CursorSprites/Foot" + i));
+        }
         interactSprite = Resources.Load<Sprite>("CursorSprites/crosshairclicked");
         clickSprite = Resources.Load<Sprite>("CursorSprites/crosshairclicked");
-        symbol.sprite = normalSprite;
+
+        symbol.sprite = walkingSprites[0];
+        symbol.gameObject.GetComponent<AnimateUI>().active = true;
 
         //Canvas refs
         canvasObject = GameObject.FindGameObjectWithTag("MainCanvas");
@@ -86,6 +92,7 @@ public abstract class Interactable : MonoBehaviour
         if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
         {
             symbol.sprite = interactSprite;
+            symbol.gameObject.GetComponent<AnimateUI>().active = false;
         }
     }
 
@@ -95,6 +102,7 @@ public abstract class Interactable : MonoBehaviour
         if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
         {
             symbol.sprite = interactSprite;
+            symbol.gameObject.GetComponent<AnimateUI>().active = false;
             tpc.blubAnimator.SetBool("walking", false);
             tpc.blubAnimator.SetBool("running", false);
             tpc.blubAnimator.SetBool("idle", false);
@@ -109,7 +117,8 @@ public abstract class Interactable : MonoBehaviour
         if (interactable)
         {
             tpc.blubAnimator.SetBool("touchingPlant", false);
-            symbol.sprite = normalSprite;
+            symbol.sprite = walkingSprites[0];
+            symbol.gameObject.GetComponent<AnimateUI>().active = true;
         }
     }
 
@@ -126,10 +135,12 @@ public abstract class Interactable : MonoBehaviour
     public virtual void handleClickSuccess()
     {
         playerClicked = true;
+        SwitchSelectionButtons();
         if(selectionCounter > 1)
         {
             tpc.enabled = false;
-            symbol.sprite = normalSprite;
+            symbol.sprite = interactSprite;
+            symbol.gameObject.GetComponent<AnimateUI>().active = false;
 
             selectionMenu.enabled = true;
             selectionMenu.sprite = selectionMenuDisplay;
@@ -146,28 +157,30 @@ public abstract class Interactable : MonoBehaviour
             //changes mouse cursor and plays interact sound
             symbol.sprite = clickSprite;
             Play();
-            symbol.sprite = normalSprite;
         }
     }
 
     //only runs when selection menu is on, then runs corresponding function in inherited scripts
     public virtual void Update()
     {
+        if (graphicRaycaster.hitWorld /*|| (tpc.enabled && selectionButtons[0].activeSelf)*/)
+        {
+            DeactivateSelectionMenu();
+        }
+
         if (selectionMenu != null && selectionMenu.enabled && playerClicked)
         {
+            symbol.sprite = interactSprite;
+            symbol.gameObject.GetComponent<AnimateUI>().active = false;
+
             tpc.blubAnimator.SetBool("walking", false);
             tpc.blubAnimator.SetBool("running", false);
             tpc.blubAnimator.SetBool("idle", false);
             tpc.blubAnimator.SetBool("touchingPlant", true);
 
-            if (selectionMenu.GetComponent<SelectionMenu>().clickTimer > selectionMenu.GetComponent<SelectionMenu>().clickWait)
+            if (selectionMenu.GetComponent<SelectionMenu>().clickTimer > selectionMenu.GetComponent<SelectionMenu>().clickWait && !graphicRaycaster.graphicsCastingOn)
             {
                 graphicRaycaster.graphicsCastingOn = true;
-            }
-
-            if (graphicRaycaster.hitWorld)
-            {
-                DeactivateSelectionMenu();
             }
 
             if (selectionMenu.GetComponent<SelectionMenu>().selected)
@@ -200,6 +213,15 @@ public abstract class Interactable : MonoBehaviour
         {
             interactable = true;
         }
+
+        if (!selectionMenu.enabled)
+        {
+            for (int i = 0; i < selectionCounter; i++)
+            {
+                selectionButtons[i].SetActive(false);
+            }
+            playerClicked = false;
+        }
     }
 
     public virtual void Selection_One()
@@ -226,18 +248,22 @@ public abstract class Interactable : MonoBehaviour
     public virtual void DeactivateSelectionMenu()
     {
         // set images to null and turn buttons off.
-        playerClicked = false;
-        tpc.enabled = true;
-        symbol.sprite = normalSprite;
-
         selectionMenu.enabled = false;
         graphicRaycaster.graphicsCastingOn = false;
         graphicRaycaster.hitWorld = false;
+        playerClicked = false;
 
         for (int i = 0; i < selectionCounter; i++)
         {
             selectionButtons[i].SetActive(false);
         }
+
+        
+        tpc.enabled = true;
+
+        symbol.sprite = walkingSprites[0];
+        symbol.gameObject.GetComponent<AnimateUI>().active = true;
+        Debug.Log("deactivated");
     }
 
     //only used for handleClickSuccess
