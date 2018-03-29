@@ -13,6 +13,19 @@ public class PianoMonkNPC : NPC {
 
     List<Plant> plantsToGrow = new List<Plant>();
 
+    public override void Update()
+    {
+        if(currentState == NPCState.LABOR)
+        {
+            //nothing 
+        }
+        else
+        {
+            base.Update();
+        }
+       
+    }
+
     public override IEnumerator PerformLabor()
     {
         //wait here a moment

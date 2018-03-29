@@ -18,7 +18,7 @@ public class NPCDrummer : NPC
     public List<GameObject> drumSet = new List<GameObject>();
     List<Transform> drumPositions = new List<Transform>();
 
-    bool setDrumPosition; // use this in update
+    bool startSounds, setDrumPosition; // use this in update
 
     public override void Start()
     {
@@ -52,6 +52,7 @@ public class NPCDrummer : NPC
         drummerCollider = GetComponent<BoxCollider>();
         originalColliderSize = drummerCollider.size;
 
+        startSounds = true;
         currentState = NPCState.PLAYING;
         myMusic.isPlaying = true;
         SwitchSelectionButtons();
@@ -78,7 +79,8 @@ public class NPCDrummer : NPC
             for (int i = 0; i < drumSet.Count; i++)
             {
                 drumSet[i].transform.localPosition = drumPositions[i].localPosition;
-                drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
+                if(!startSounds)
+                    drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
 
             if (myMusic.showRhythm && myMusic.isPlaying)
@@ -91,6 +93,12 @@ public class NPCDrummer : NPC
                 }
             
         }
+    }
+
+    public override void handleClickSuccess()
+    {
+        base.handleClickSuccess();
+        startSounds = false;
     }
 
     //fills up lists of nearby plants and rocks
@@ -162,29 +170,29 @@ public class NPCDrummer : NPC
         switch (myMusic.primaryTempo)
         {
             case 0:
+                collisionSpeed = 16;
+                particleSpeed = 1.875f;
+                particleLifetime = 12f;
+                break;
+            case 1:
+                collisionSpeed = 8f;
+                particleSpeed = 3.75f;
+                particleLifetime = 6f;
+                break;
+            case 2:
                 collisionSpeed = 4f;
                 particleSpeed = 7.5f;
                 particleLifetime = 3f;
                 break;
-            case 1:
+            case 3:
                 collisionSpeed = 2f;
                 particleSpeed = 15f;
                 particleLifetime = 1.5f;
                 break;
-            case 2:
+            case 4:
                 collisionSpeed = 1f;
                 particleSpeed = 30f;
                 particleLifetime = 0.75f;
-                break;
-            case 3:
-                collisionSpeed = 0.5f;
-                particleSpeed = 60f;
-                particleLifetime = 0.375f;
-                break;
-            case 4:
-                collisionSpeed = 0.25f;
-                particleSpeed = 120f;
-                particleLifetime = 0.1875f;
                 break;
         }
         beatParticlesModule.startSpeed = particleSpeed;

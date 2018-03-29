@@ -19,6 +19,19 @@ public class HornNPC : NPC {
     public float heightAdjustment;
     public float plantingRadius;
 
+    public override void Update()
+    {
+        if(currentState == NPCState.LABOR)
+        {
+            //nothing
+        }
+        else
+        {
+            base.Update();
+        }
+        
+    }
+
     public override void SetMove()
     {
         //Debug.Log("set move");

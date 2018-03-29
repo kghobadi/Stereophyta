@@ -169,6 +169,11 @@ public class NPC : Interactable {
             }
         }
 
+        if(currentState == NPCState.LABOR)
+        {
+            transform.Rotate(new Vector3(0, 5, 0));
+        }
+
         //For something like NPC Circle, can inherit this Update() and say
         // if(currentState = NPCState.MOVING)
         //     IrregMovement()
@@ -350,7 +355,8 @@ public class NPC : Interactable {
         //wait here a moment
         animator.SetBool("walking", false);
         yield return new WaitForSeconds(waitingTime);
-        
+        currentState = NPCState.LABOR;
+
         for (int i = 0; i < currentPlants.Count; i++)
         {
             int randomShift = Random.Range(0, 100);
