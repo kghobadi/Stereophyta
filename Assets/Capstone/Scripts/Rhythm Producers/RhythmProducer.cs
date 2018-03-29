@@ -13,7 +13,6 @@ public abstract class RhythmProducer : Interactable {
     public virtual void Awake()
     {
         SimpleClock.ThirtySecond += OnThirtySecond;
-        _player = GameObject.FindGameObjectWithTag("Player");
     }
 
     public virtual void OnDestroy()
