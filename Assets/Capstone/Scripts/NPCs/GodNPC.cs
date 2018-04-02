@@ -28,8 +28,10 @@ public class GodNPC : GodInteractable {
     public int moveCounter =0;
     protected Vector3 targestDestination;
 
+    protected Musician myMusic;
+
     //movement point container and list -- and home version
-    public bool setInEditor;
+    public bool setInEditor, isMusician;
     public Transform movementPointsContainer;
     public List<Transform> movementPoints = new List<Transform>();
 
@@ -46,7 +48,7 @@ public class GodNPC : GodInteractable {
     // all NPC states are shared, what they do in those states can be quite different 
     public enum NPCState
     {
-        LABOR, MOVING, WAITING, WAVING
+        LABOR, MOVING, WAITING, WAVING, PLAYING
     }
 
     public override void Start () {
@@ -54,6 +56,10 @@ public class GodNPC : GodInteractable {
         base.Start();
 
         navMeshAgent = GetComponent<NavMeshAgent>();
+        if (isMusician)
+        {
+            myMusic = GetComponent<Musician>();
+        }
 
         homePosition = transform.position;
         trailRender = GetComponent<TrailRenderer>();
@@ -82,6 +88,7 @@ public class GodNPC : GodInteractable {
     {
         base.Update();
         
+        
         //controls movement
         if (currentState == NPCState.MOVING)
         {
@@ -107,6 +114,8 @@ public class GodNPC : GodInteractable {
             navMeshAgent.isStopped = true;
             trailRender.enabled = false;
             movementPointsContainer.transform.localPosition = new Vector3(0, 0, 0);
+
+            
             //transform.LookAt(new Vector3(mouse position));
         }
         else
@@ -234,12 +243,12 @@ public class GodNPC : GodInteractable {
             if (randomShift > 50)
             {
                 currentPlants[i].ShiftNoteUp(); //ShiftNoteUp
-                currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
+                currentPlants[i].PlaySound();
             }
             else
             {
                 currentPlants[i].ShiftNoteDown(); //ShiftNoteDown
-                currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
+                currentPlants[i].PlaySound();
             }
             yield return new WaitForSeconds(waitingTime);
         }
@@ -249,12 +258,12 @@ public class GodNPC : GodInteractable {
             if (randomShift > 50)
             {
                 currentRocks[i].ShiftNoteUp(); //ShiftNoteUp
-                currentRocks[i].audioSource.PlayOneShot(currentRocks[i].currentSound);
+                currentPlants[i].PlaySound();
             }
             else
             {
                 currentRocks[i].ShiftNoteDown(); //ShiftNoteDown
-                currentRocks[i].audioSource.PlayOneShot(currentRocks[i].currentSound);
+                currentPlants[i].PlaySound();
             }
             yield return new WaitForSeconds(waitingTime);
         }
@@ -308,6 +317,11 @@ public class GodNPC : GodInteractable {
             symbol.sprite = normalSprite;
             movementPointsContainer.SetParent(transform);
             currentState = NPCState.WAITING;
+
+            for (int i = 0; i < movementPoints.Count; i++)
+            {
+                movementPoints[i].GetComponent<GodWaypoint>().showMesh = true;
+            }
         }
        
         
@@ -318,6 +332,10 @@ public class GodNPC : GodInteractable {
     {
         base.DropObject();
         ResetPath();
+        for (int i = 0; i < movementPoints.Count; i++)
+        {
+            movementPoints[i].GetComponent<GodWaypoint>().showMesh = false;
+        }
     }
     
 }

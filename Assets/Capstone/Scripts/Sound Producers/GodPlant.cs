@@ -151,7 +151,7 @@ public class GodPlant : GodSoundCreator {
                 if (!audioSource.isPlaying)
                 {
                     audioSource.PlayOneShot(currentSound);
-                    notesPlaying.Emit(10);
+                    notesPlaying.Play();
                 }
             }
                 

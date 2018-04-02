@@ -113,15 +113,15 @@ public class Musician : MonoBehaviour {
         if (isPlaying && Vector3.Distance(transform.position, _player.transform.position) < 100)
         {
             primarySource.outputAudioMixerGroup = tpc.plantingGroup;
-            if(hasSecondary)
+            if (hasSecondary)
                 secondarySource.outputAudioMixerGroup = tpc.plantingGroup;
-            if(hasTertiary)
+            if (hasTertiary)
                 tertiarySource.outputAudioMixerGroup = tpc.plantingGroup;
 
             PlayInstrument();
         }
-        
-       
+
+
     }
 
     public void PlayInstrument()

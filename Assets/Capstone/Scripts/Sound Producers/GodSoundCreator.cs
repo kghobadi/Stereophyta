@@ -128,7 +128,7 @@ public abstract class GodSoundCreator : GodInteractable {
         origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
         lerpingColor = true;
 
-        notesPlaying.transform.position = soundSources[currentNote].transform.position;
+        notesPlaying.transform.localPosition = soundSources[currentNote].transform.localPosition;
 
     }
 
@@ -167,8 +167,8 @@ public abstract class GodSoundCreator : GodInteractable {
         origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
         lerpingColor = true;
 
-        notesPlaying.transform.position = soundSources[currentNote].transform.position;
+        notesPlaying.transform.localPosition = soundSources[currentNote].transform.localPosition;
     }
-
     
+
 }
