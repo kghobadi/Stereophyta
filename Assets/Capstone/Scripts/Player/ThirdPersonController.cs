@@ -198,24 +198,31 @@ public class ThirdPersonController : MonoBehaviour
         if (currentDist > 1f)
         {
             transform.LookAt(targetPosition);
+
+            //then set movement
+            Vector3 movement = new Vector3(0, 0, currentSpeed);
+
+            movement = transform.rotation * movement;
+
+            //Actually move
+            player.Move(movement * Time.deltaTime);
+
+            player.Move(new Vector3(0, -0.5f, 0));
         }
-        else if (currentDist < 0.25f)
+        else if (currentDist < 1f && currentDist > 0.1f)
         {
+            //just use move towards at this point to avoid weird jitters
             transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z));
+
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed);
+        }
+        else if (currentDist < 0.1f)
+        {
             transform.position = targetPosition;
             isMoving = false;
         }
 
-        //then set movement
-
-        Vector3 movement = new Vector3(0, 0, currentSpeed);
-
-        movement = transform.rotation * movement;
-
-        player.Move(movement * Time.deltaTime);
-
-        player.Move(new Vector3(0, -0.5f, 0));
-
+       
     }
 
     //this waits for the idle animation to finish and resets the timers

@@ -214,7 +214,7 @@ public abstract class Interactable : MonoBehaviour
             interactable = true;
         }
 
-        if (!selectionMenu.enabled)
+        if (selectionMenu != null && !selectionMenu.enabled)
         {
             for (int i = 0; i < selectionCounter; i++)
             {
