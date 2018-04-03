@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AnimateUI : MonoBehaviour {
+public class AnimateDialogue : MonoBehaviour {
     Image thisImage;
-    public List<Sprite> animationSprites = new List<Sprite>();
+    public Sprite[] animationSprites;
     int currentSprite;
     public bool active;
 
@@ -24,7 +24,7 @@ public class AnimateUI : MonoBehaviour {
             frameTimer -= Time.deltaTime;
             if (frameTimer < 0)
             {
-                if (currentSprite < (animationSprites.Count - 1))
+                if (currentSprite < (animationSprites.Length - 1))
                 {
                     currentSprite++;
                 }

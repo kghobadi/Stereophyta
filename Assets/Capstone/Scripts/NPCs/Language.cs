@@ -23,7 +23,7 @@ public class Language : Interactable
     //list of all English words/phrases that shall be used for translation
     public List<string> englishWords = new List<string>();
     //list of pictures and images which correspond to english words
-    public List<Sprite> images = new List<Sprite>();
+    public List<Sprite> cloudImages = new List<Sprite>();
     //ideally this should be expressed as a List<Sprite[]> in inspector
     public List<NumberedImage> pictures = new List<NumberedImage>();
     //list of symbols which may portray words at random if the player is unfamiliar / they aren't contained in images list
@@ -39,8 +39,8 @@ public class Language : Interactable
 
     //UI object refs 
     //Image container which switches out images and can be animated
-    Image imageDisplay;
-    AnimateUI imageAnimator;
+    Image imageDisplay, thoughtCloud;
+    AnimateDialogue imageAnimator, cloudAnimator;
     //Dialogue container - symbol container
     //any effects which emit from speaking character
     AudioSource voice;
@@ -52,8 +52,15 @@ public class Language : Interactable
     public override void Start()
     {
         base.Start();
+        //some UI refs
+        thoughtCloud = GameObject.FindGameObjectWithTag("ThoughtCloud").GetComponent<Image>();
+        cloudAnimator = thoughtCloud.gameObject.GetComponent<AnimateDialogue>();
+
         imageDisplay = GameObject.FindGameObjectWithTag("SpeechImage").GetComponent<Image>();
-        imageAnimator = imageDisplay.gameObject.GetComponent<AnimateUI>();
+        imageAnimator = imageDisplay.gameObject.GetComponent<AnimateDialogue>();
+
+        thoughtCloud.enabled = false;
+        cloudAnimator.active = false;
         imageDisplay.enabled = false;
         imageAnimator.active = false;
         voice = GetComponent<AudioSource>();
@@ -71,16 +78,23 @@ public class Language : Interactable
     public IEnumerator Speak(List<int> wordsToTranslate)
     {
         Debug.Log("speaking");
-        
-
+        //open cloud manual anim
+        tpc.enabled = false;
+        thoughtCloud.enabled = true;
+        thoughtCloud.sprite = cloudImages[0];
+        yield return new WaitForSeconds(waitTime);
+        thoughtCloud.sprite = cloudImages[1];
+        yield return new WaitForSeconds(waitTime);
+        thoughtCloud.sprite = cloudImages[2];
+        yield return new WaitForSeconds(waitTime);
+        cloudAnimator.active = true;
         //show first thing out of for loop
-        imageDisplay.sprite = images[wordsToTranslate[0]];
+        imageDisplay.sprite = pictures[wordsToTranslate[0]].image[0];
         voice.PlayOneShot(sounds[wordsToTranslate[0]]);
         yield return new WaitForSeconds(waitTime);
 
         //set all relevant bools
         talking = true;
-        tpc.enabled = false;
         interactable = false;
         imageDisplay.enabled = true;
         advance = false;
@@ -97,16 +111,19 @@ public class Language : Interactable
             int currentIndex = wordsToTranslate[i];
 
             //display first image of the sprite array
-            imageDisplay.sprite = images[currentIndex];
+            //imageDisplay.sprite = images[currentIndex];
 
-                //if image array is animated, loop thru it
-                //if (images[currentIndex].Length > 1)
-                //{
-                //    imageAnimator.active = true;
-                //}
+            imageDisplay.sprite = pictures[currentIndex].image[0];
 
-                //play corresponding sound from NPC
-                voice.PlayOneShot(sounds[currentIndex]);
+            //if image array is animated, loop thru it
+            if (pictures[currentIndex].image.Length > 1)
+            {
+                imageAnimator.animationSprites = pictures[currentIndex].image;
+                imageAnimator.active = true;
+            }
+
+            //play corresponding sound from NPC
+            voice.PlayOneShot(sounds[currentIndex]);
 
                 //wait to move on until player clicks
                 yield return new WaitUntil(() => advance == true);
@@ -120,7 +137,11 @@ public class Language : Interactable
         tpc.enabled = true;
         interactable = true;
         imageDisplay.enabled = false;
+        thoughtCloud.enabled = false;
+        cloudAnimator.active = false;
         //return to NPC menu or end dialogue state and have NPC return to other State
+        //Should switch out currentDialogue to next series of ints from allDialogue based on events/goal complete 
+        //Or based on numbers of days that pass 
     }
 
     public override void Update()
