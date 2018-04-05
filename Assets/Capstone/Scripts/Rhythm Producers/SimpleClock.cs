@@ -216,7 +216,7 @@ public class SimpleClock : MonoBehaviour
     /// Event sent every 32nd note
     /// </summary>
     public static event BeatEvent Measure;
-
+    
     /// <summary>
     /// Creates a tick mask array based on the number of ticks per measure
     /// </summary>
@@ -271,6 +271,7 @@ public class SimpleClock : MonoBehaviour
         if (_thirtySecondCount % 32 != 0) return;
         if (MeasureMessage) BroadcastMessage("Measure");
         ThisBeatMask[BeatValue.Measure] = true;
+        ResetBeatCounts();
     }
 
     /// <summary>

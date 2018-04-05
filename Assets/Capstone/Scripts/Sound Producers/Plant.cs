@@ -19,7 +19,7 @@ public class Plant : SoundProducer {
 
     public enum PlantSpecies
     {
-        SPHERESHRUB, CUBETREE, GUITAR, 
+        HORN, PIANO, GUITAR, 
     }
 
     public override void Start () {

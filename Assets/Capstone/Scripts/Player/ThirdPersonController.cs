@@ -106,7 +106,7 @@ public class ThirdPersonController : MonoBehaviour
                 else if (Vector3.Distance(transform.position, hit.transform.position) > 5 &&
                     (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
                     || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
-                    || hit.transform.gameObject.tag == "Rock"))
+                    || hit.transform.gameObject.tag == "Rock" || hit.transform.gameObject.tag == "NPC"))
                 {
                         targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
                         isMoving = true;

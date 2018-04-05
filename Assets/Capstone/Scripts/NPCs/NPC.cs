@@ -605,7 +605,7 @@ public class NPC : Interactable {
     //for selections with gunky bools
     public override void DeactivateSelectionMenu()
     {
-        Debug.Log("deactivated");
+        //Debug.Log("deactivated");
         base.DeactivateSelectionMenu();
         clickedButton = false;
     }
@@ -613,7 +613,7 @@ public class NPC : Interactable {
     //Switch out all the image displays for the menu based on NPC state
     public override void SwitchSelectionButtons()
     {
-        Debug.Log("switched buttons");
+        //Debug.Log("switched buttons");
         if(currentState!= NPCState.FOLLOWING && currentState != NPCState.PLAYING)
         {
             selectionImages = laborSelectionImages;

@@ -38,6 +38,7 @@ public abstract class Interactable : MonoBehaviour
     //Selection Wheel Menu variables
     public int selectionCounter; // number of interactable options
     protected Image selectionMenu; //menu itself 
+    protected SelectionMenu menuScript;
     protected Sprite selectionMenuDisplay; // menu image -- this will vary based on the object
     protected List<GameObject> selectionButtons = new List<GameObject>(); //buttons in selection wheel
     public Sprite[] selectionImages; // button sprites
@@ -77,6 +78,10 @@ public abstract class Interactable : MonoBehaviour
         {
             // get the menu object itself
             selectionMenu = GameObject.FindGameObjectWithTag("SelectionMenu").GetComponent<Image>();
+
+            //store script ref
+            menuScript = selectionMenu.GetComponent<SelectionMenu>();
+
             //find and load correct selectionMenuImage, store corresponding Buttons (function at bottom)
             SwitchSelectionButtons();
         }
@@ -167,8 +172,12 @@ public abstract class Interactable : MonoBehaviour
         {
             DeactivateSelectionMenu();
         }
+        //to proceed, need selectionMenu
+        if (selectionMenu == null) return;
+        //store selectionMenu.enabled
+        bool selectionMenuEnabled = selectionMenu.enabled;
 
-        if (selectionMenu != null && selectionMenu.enabled && playerClicked)
+        if (selectionMenuEnabled && playerClicked)
         {
             symbol.sprite = interactSprite;
             symbol.gameObject.GetComponent<AnimateUI>().active = false;
@@ -178,15 +187,15 @@ public abstract class Interactable : MonoBehaviour
             tpc.blubAnimator.SetBool("idle", false);
             tpc.blubAnimator.SetBool("touchingPlant", true);
 
-            if (selectionMenu.GetComponent<SelectionMenu>().clickTimer > selectionMenu.GetComponent<SelectionMenu>().clickWait && !graphicRaycaster.graphicsCastingOn)
+            if (menuScript.clickTimer > menuScript.clickWait && !graphicRaycaster.graphicsCastingOn)
             {
                 graphicRaycaster.graphicsCastingOn = true;
             }
 
-            if (selectionMenu.GetComponent<SelectionMenu>().selected)
+            if (menuScript.selected)
             {
-                selectionMenu.GetComponent<SelectionMenu>().selected = false;
-                switch (selectionMenu.GetComponent<SelectionMenu>().selectedFunction)
+                menuScript.selected = false;
+                switch (menuScript.selectedFunction)
                 {
                     case 1:
                         Selection_One();
@@ -204,17 +213,17 @@ public abstract class Interactable : MonoBehaviour
             }
         }
 
-        if(selectionMenu!= null && selectionMenu.enabled && !playerClicked)
+        if(selectionMenuEnabled && !playerClicked)
         {
             interactable = false;
         }
 
-        if(selectionMenu != null && !selectionMenu.enabled && !playerHolding)
+        if(!selectionMenuEnabled && !playerHolding)
         {
             interactable = true;
         }
 
-        if (selectionMenu != null && !selectionMenu.enabled)
+        if (!selectionMenuEnabled)
         {
             for (int i = 0; i < selectionCounter; i++)
             {
@@ -226,22 +235,22 @@ public abstract class Interactable : MonoBehaviour
 
     public virtual void Selection_One()
     {
-        selectionMenu.GetComponent<SelectionMenu>().clickTimer = 0f;
+        menuScript.clickTimer = 0f;
     }
 
     public virtual void Selection_Two()
     {
-        selectionMenu.GetComponent<SelectionMenu>().clickTimer = 0f;
+        menuScript.clickTimer = 0f;
     }
 
     public virtual void Selection_Three()
     {
-        selectionMenu.GetComponent<SelectionMenu>().clickTimer = 0f;
+        menuScript.clickTimer = 0f;
     }
 
     public virtual void Selection_Four()
     {
-        selectionMenu.GetComponent<SelectionMenu>().clickTimer = 0f;
+        menuScript.clickTimer = 0f;
     }
 
     //Call this whenever player is done interacting with an object
@@ -263,7 +272,7 @@ public abstract class Interactable : MonoBehaviour
 
         symbol.sprite = walkingSprites[0];
         symbol.gameObject.GetComponent<AnimateUI>().active = true;
-        Debug.Log("deactivated");
+        //Debug.Log("deactivated");
     }
 
     //only used for handleClickSuccess
