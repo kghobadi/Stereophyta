@@ -170,13 +170,16 @@ public class Language : Interactable
             //open cloud manual anim
             tpc.enabled = false;
             interactable = false;
+            mainCam.zoomedOut = false;
+            mainCam.zoomedIn = true;
+            transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
             thoughtCloud.enabled = true;
             //go through cloud opening
-            for (int t = 0; t < cloudImages.Count; t++)
-            {
-                thoughtCloud.sprite = cloudImages[t];
-                yield return new WaitForSeconds(waitTime);
-            }
+            //for (int t = 0; t < cloudImages.Count; t++)
+            //{
+            //    thoughtCloud.sprite = cloudImages[t];
+            //    yield return new WaitForSeconds(waitTime);
+            //}
             cloudAnimator.active = true;
         }
         else
@@ -190,8 +193,6 @@ public class Language : Interactable
             {
                 //set all relevant bools on first image
                 talking = true;
-                mainCam.zoomedOut = false;
-                mainCam.zoomedIn = true;
                 imageDisplay.enabled = true;
             }
             else

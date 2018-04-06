@@ -14,7 +14,7 @@ public abstract class SoundProducer : Interactable {
     protected ParticleSystem notesPlaying;
 
     public bool placedInEditor, scalingUp, scalingDown, lerpingColor;
-    public float scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal;
+    public float scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal = 2f;
     protected Vector3 origScale;
     protected Vector3 startingPos;
 
@@ -33,6 +33,7 @@ public abstract class SoundProducer : Interactable {
         notesPlaying.Stop();
         //poofParticles.Stop();
 
+        
         origScale = transform.localScale;
         startingPos = transform.position;
 
@@ -51,7 +52,7 @@ public abstract class SoundProducer : Interactable {
         //randomize note at start
         currentNote = Random.Range(0, musicalNotes.Length);
         currentSound = musicalNotes[currentNote];
-
+        origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
     }
 	
 	public override void Update () {
@@ -86,7 +87,7 @@ public abstract class SoundProducer : Interactable {
             lerpTimer -= Time.deltaTime;
             if (lerpTimer > 0)
             {
-                soundSources[currentNote].GetComponent<MeshRenderer>().material.color = Color.Lerp(origColor, lerpedColor, Mathf.PingPong(Time.time, lerpTimerTotal));
+                soundSources[currentNote].GetComponent<MeshRenderer>().material.color = Color.Lerp(soundSources[currentNote].GetComponent<MeshRenderer>().material.color, lerpedColor, Time.deltaTime * 10);
             }
             else
             {
@@ -140,8 +141,11 @@ public abstract class SoundProducer : Interactable {
         currentSound = musicalNotes[currentNote];
         soundSources[currentNote].transform.localScale *= 2;
 
-        origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
-        lerpingColor = true;
+        lerpTimer = lerpTimerTotal;
+        if (!lerpingColor)
+        {
+            lerpingColor = true;
+        }
 
         notesPlaying.transform.position = soundSources[currentNote].transform.position;
 
@@ -186,8 +190,12 @@ public abstract class SoundProducer : Interactable {
         currentSound = musicalNotes[currentNote];
         soundSources[currentNote].transform.localScale *= 2;
 
-        origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
-        lerpingColor = true;
+        lerpTimer = lerpTimerTotal;
+        if (!lerpingColor)
+        {
+            lerpingColor = true;
+        }
+
 
         notesPlaying.transform.position = soundSources[currentNote].transform.position;
 
