@@ -7,7 +7,7 @@ using UnityEngine.UI;
 [Serializable]
 public struct NumberedImage
 {
-    public Sprite[] image; //array of images to allow for one pic or animation
+    public Sprite[] imageArray; //array of images to allow for one pic or animation
 }
 
 [Serializable]
@@ -20,9 +20,9 @@ public struct Dialogue
 [Serializable]
 public struct QuestObjects
 {
-    //will auto-add all Images tagged as questobject in editor
-    public Image questImage;
-    public Sprite findThisObject, foundObject;
+    public Image questImage; //this gets manually set in the inspector
+    public int pictureArray; //corresponds to picture[].imageArray
+    public Sprite foundObject; // a single image for completed quest object
     public string objectTag, objectType;
     //has this quest been fulfilled
     public bool fulfilled;
@@ -65,6 +65,12 @@ public class Language : Interactable
     //number of quest objs fulfilled
     int fullfilledCount = 0;
 
+    //pops up when player has not clicked thru dialogue yet
+    Image clickReminder;
+    float reminderTimer = 0f, reminderTimerTotal = 2f;
+
+    CameraController mainCam;
+
     public override void Start()
     {
         base.Start();
@@ -74,6 +80,7 @@ public class Language : Interactable
         cloudAnimator = thoughtCloud.gameObject.GetComponent<AnimateDialogue>();
 
         imageDisplay = GameObject.FindGameObjectWithTag("SpeechImage").GetComponent<Image>();
+        clickReminder = GameObject.FindGameObjectWithTag("ClickReminder").GetComponent<Image>();
 
         //gotta manually set numbers on for loop to load right stuff from resources
         for (int i = 1; i < 5; i++)
@@ -98,12 +105,16 @@ public class Language : Interactable
         cloudAnimator.active = false;
         imageDisplay.enabled = false;
         imageAnimator.active = false;
+        clickReminder.GetComponent<AnimateDialogue>().active = true;
+        clickReminder.enabled = false;
         voice = GetComponent<AudioSource>();
         interactable = true;
 
         //set current dialogue and check if quest line
         currentDialogue = allDialogues[dialogueCounter].wordNumbers;
         questActive = allDialogues[dialogueCounter].questLine;
+
+        mainCam = Camera.main.GetComponent<CameraController>();
     }
 
     private void OnDrawGizmos()
@@ -117,6 +128,36 @@ public class Language : Interactable
     {
         base.handleClickSuccess();
         StartCoroutine(Speak());
+        
+    }
+
+    public override void Update()
+    {
+        base.Update();
+        //checks for mouse input to advance dialogue
+        if (talking)
+        {
+            if (Input.GetMouseButtonDown(0) && !advance)
+            {
+                advance = true;
+            }
+        }
+        //if dialogue active and the player hasn't advanced
+        if (talking && !advance)
+        {
+            //wait a sec, then remind them to click!
+            reminderTimer += Time.deltaTime;
+            if(reminderTimer > reminderTimerTotal)
+            {
+                clickReminder.enabled = true;
+            }
+        }
+        //turn off reminder
+        else
+        {
+            reminderTimer = 0f;
+            clickReminder.enabled = false;
+        }
         
     }
 
@@ -149,6 +190,8 @@ public class Language : Interactable
             {
                 //set all relevant bools on first image
                 talking = true;
+                mainCam.zoomedOut = false;
+                mainCam.zoomedIn = true;
                 imageDisplay.enabled = true;
             }
             else
@@ -171,12 +214,12 @@ public class Language : Interactable
             //use the index to translate to other lists
             int currentIndex = currentDialogue[i];
             //set to first image in pictures list
-            imageDisplay.sprite = pictures[currentIndex].image[0];
+            imageDisplay.sprite = pictures[currentIndex].imageArray[0];
 
             //if image array is animated, loop thru it
-            if (pictures[currentIndex].image.Length > 1)
+            if (pictures[currentIndex].imageArray.Length > 1)
             {
-                imageAnimator.animationSprites = pictures[currentIndex].image;
+                imageAnimator.animationSprites = pictures[currentIndex].imageArray;
                 imageAnimator.active = true;
             }
 
@@ -212,6 +255,8 @@ public class Language : Interactable
         {
             //close out of dialogue
             talking = false;
+            mainCam.zoomedOut = true;
+            mainCam.zoomedIn = false;
             cloudAnimator.active = false;
             imageDisplay.enabled = false;
 
@@ -232,22 +277,6 @@ public class Language : Interactable
         }
     }
 
-    public override void Update()
-    {
-        base.Update();
-        if (talking)
-        {
-            if (Input.GetMouseButtonDown(0) && !advance)
-            {
-                advance = true;
-            }
-        }
-
-        //return to NPC menu or end dialogue state and have NPC return to other State
-        //Should switch out currentDialogue to next series of ints from allDialogue based on events/goal complete 
-        //Or based on numbers of days that pass 
-    }
-
     //search for stuff nearby
     public void SearchForQuestItems()
     {
@@ -261,7 +290,7 @@ public class Language : Interactable
                 if (!allQuestObjects[q].fulfilled)
                 {
                     //check tags
-                    if (hitColliders[i].gameObject.tag == allQuestObjects[q].objectTag)
+                    if (hitColliders[i].gameObject.tag == allQuestObjects[q].objectTag && hitColliders[i].gameObject != this.gameObject)
                     {
                         //send this object to questObject for further checking
                         CheckFoundObject(hitColliders[i].gameObject, q);
@@ -269,7 +298,13 @@ public class Language : Interactable
                     //just set it to unfulfilled
                     else
                     {
-                        allQuestObjects[q].questImage.sprite = allQuestObjects[q].findThisObject;
+                        allQuestObjects[q].questImage.sprite = pictures[allQuestObjects[q].pictureArray].imageArray[0];
+
+                        if(pictures[allQuestObjects[q].pictureArray].imageArray.Length > 1)
+                        {
+                            allQuestObjects[q].questImage.gameObject.GetComponent<AnimateDialogue>().animationSprites = pictures[allQuestObjects[q].pictureArray].imageArray;
+                            allQuestObjects[q].questImage.gameObject.GetComponent<AnimateDialogue>().active = true;
+                        }
                     }
                 }
             }
@@ -316,13 +351,21 @@ public class Language : Interactable
         if (allQuestObjects[questObjNumber].foundObjCount >= allQuestObjects[questObjNumber].desiredAmount)
         {
             allQuestObjects[questObjNumber].fulfilled = true;
+            allQuestObjects[questObjNumber].questImage.gameObject.GetComponent<AnimateDialogue>().active = false;
             allQuestObjects[questObjNumber].questImage.sprite = allQuestObjects[questObjNumber].foundObject;
             fullfilledCount++;
         }
         //quest obj shows unfullfilled
         else
         {
-            allQuestObjects[questObjNumber].questImage.sprite = allQuestObjects[questObjNumber].findThisObject;
+            allQuestObjects[questObjNumber].questImage.sprite = pictures[allQuestObjects[questObjNumber].pictureArray].imageArray[0];
+
+            //animate if picture array is greater than 1
+            if (pictures[allQuestObjects[questObjNumber].pictureArray].imageArray.Length > 1)
+            {
+                allQuestObjects[questObjNumber].questImage.gameObject.GetComponent<AnimateDialogue>().animationSprites = pictures[allQuestObjects[questObjNumber].pictureArray].imageArray;
+                allQuestObjects[questObjNumber].questImage.gameObject.GetComponent<AnimateDialogue>().active = true;
+            }
         }
     }
 }

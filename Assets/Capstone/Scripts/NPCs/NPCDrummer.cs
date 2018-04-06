@@ -8,9 +8,11 @@ public class NPCDrummer : NPC
     public float scaleColliderTime;
     float collisionSpeed, particleSpeed, particleLifetime;
 
+    //so we can set the interactable body collider
     BoxCollider drummerCollider;
     Vector3 originalColliderSize;
- 
+    Vector3 originalColliderPos;
+
     ParticleSystem beatParticles;
     DrumCollider drumCollision;
     public Transform drumBackpack, drumPosContainer;
@@ -49,8 +51,10 @@ public class NPCDrummer : NPC
             }
         }
         
+        //set body collider stuff
         drummerCollider = GetComponent<BoxCollider>();
         originalColliderSize = drummerCollider.size;
+        originalColliderPos = drummerCollider.center;
 
         startSounds = true;
         currentState = NPCState.PLAYING;
@@ -65,17 +69,41 @@ public class NPCDrummer : NPC
 
         if (currentState == NPCState.FOLLOWING)
         {
+            //set rock drum positions
             for (int i = 0; i < drumSet.Count; i++)
             {
                 drumSet[i].transform.localPosition = drumBackpack.localPosition;
                 drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
+            //no drum beat colliding
             drumCollision.gameObject.SetActive(false);
+            //readjust body collider
+            drummerCollider.size = new Vector3(4f, 2.25f, 10f);
+            drummerCollider.center = new Vector3(0, .38f, -2.5f);
+        }
+
+        if (currentState == NPCState.LABOR || currentState == NPCState.MOVING)
+        {
+            //set rock drum positions
+            for (int i = 0; i < drumSet.Count; i++)
+            {
+                drumSet[i].transform.localPosition = drumBackpack.localPosition;
+            }
+            //no drum beat colliding
+            drumCollision.gameObject.SetActive(false);
+            //readjust body collider
+            drummerCollider.size = new Vector3(4f, 2.25f, 10f);
+            drummerCollider.center = new Vector3(0, .38f, -2.5f);
         }
 
         if (currentState == NPCState.PLAYING)
         {
+            //turn on drum beat
             drumCollision.gameObject.SetActive(true);
+            //readjust body collider
+            drummerCollider.size = originalColliderSize;
+            drummerCollider.center = originalColliderPos;
+
             for (int i = 0; i < drumSet.Count; i++)
             {
                 drumSet[i].transform.localPosition = drumPositions[i].localPosition;

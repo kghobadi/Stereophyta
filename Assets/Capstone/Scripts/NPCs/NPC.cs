@@ -30,8 +30,9 @@ public class NPC : Interactable {
     protected Musician myMusic;
 
     //will use these to swap out selection menu among different states (starts out as what's set directly thru Interactable)
-    public Sprite laborDisplay, followingSelectionMenuDisplay, playingSelectionMenuDisplay, stopPlayingMusic, startPlayingMusic;
-    public Sprite[] laborSelectionImages, followingSelectionImages, playingSelectionImages;
+    public Sprite laborDisplay, followingSelectionMenuDisplay, playingSelectionMenuDisplay;
+    public Sprite[] stopPlayingMusic, startPlayingMusic;
+    public ButtonImages[] laborSelectionImages, followingSelectionImages, playingSelectionImages;
 
     //movement vars
     public int moveCounter =0;
@@ -58,7 +59,7 @@ public class NPC : Interactable {
     // all NPC states are shared, what they do in those states can be quite different 
     public enum NPCState
     {
-        LABOR, MOVING, FOLLOWING, PLAYING, WAITING, WAVING
+        LABOR, MOVING, FOLLOWING, PLAYING, WAITING, WAVING, DISABLED,
     }
 
     public override void Start () {
@@ -120,15 +121,15 @@ public class NPC : Interactable {
         {
             followTimer += Time.deltaTime;
             trailRender.enabled = false;
-            withinDistance = 50;
-            withinDistanceActive = 30;
+            canSeeDistance = 50;
+            canClickDistance = 30;
             FollowPlayer();
         }
         else
         {
             trailRender.enabled = true;
-            withinDistance = 15;
-            withinDistanceActive = 10;
+            canSeeDistance = 15;
+            canClickDistance = 10;
         }
 
         //stops movement
@@ -167,6 +168,11 @@ public class NPC : Interactable {
             {
                 SetMove();
             }
+        }
+
+        if(currentState == NPCState.DISABLED)
+        {
+            //nothing
         }
 
         if(currentState == NPCState.LABOR)
@@ -629,18 +635,34 @@ public class NPC : Interactable {
         else if(currentState == NPCState.PLAYING && myMusic.isPlaying)
         {
             selectionImages = playingSelectionImages;
-            selectionImages[1] = stopPlayingMusic;
+            selectionImages[1].buttonImages = stopPlayingMusic;
             selectionMenuDisplay = playingSelectionMenuDisplay;
             selectionCounter = 4;
         }
         else if (currentState == NPCState.PLAYING && !myMusic.isPlaying)
         {
             selectionImages = playingSelectionImages;
-            selectionImages[1] = startPlayingMusic;
+            selectionImages[1].buttonImages = startPlayingMusic;
             selectionMenuDisplay = playingSelectionMenuDisplay;
             selectionCounter = 4;
         }
 
         base.SwitchSelectionButtons();
+    }
+
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        lastState = currentState;
+        currentState = NPCState.DISABLED;
+    }
+
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        if(enabledCounter > 1)
+        {
+            SetMove();
+        }
     }
 }

@@ -61,4 +61,14 @@ public class Rock : SoundProducer {
         }
         
     }
+
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        if (enabledCounter > 1)
+        {
+            Start();
+            soundSources[currentNote].transform.localScale *= 0.5f;
+        }
+    }
 }

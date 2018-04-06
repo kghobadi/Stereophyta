@@ -102,8 +102,59 @@ public abstract class SoundProducer : Interactable {
         }
     }
 
-    //ShiftNoteDown
+    //ShiftNoteUp
     public override void Selection_One()
+    {
+        if (playerClicked)
+        {
+            base.Selection_Two();
+
+        }
+
+        //shrinks current branch
+        //first check if active
+        if (soundSources[currentNote].activeSelf)
+        {
+            soundSources[currentNote].transform.localScale *= 0.5f;
+            soundSources[currentNote].GetComponent<MeshRenderer>().material.color = origColor;
+        }
+
+        bool canPlayNote = false;
+
+        while (!canPlayNote)
+        {
+            if (currentNote < (musicalNotes.Length - 1))
+            {
+                currentNote++;
+            }
+            else
+            {
+                currentNote = 0;
+            }
+
+            if (soundSources[currentNote].activeSelf)
+                canPlayNote = true;
+        }
+
+        // chooses new note and enlarges branch
+        currentSound = musicalNotes[currentNote];
+        soundSources[currentNote].transform.localScale *= 2;
+
+        origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
+        lerpingColor = true;
+
+        notesPlaying.transform.position = soundSources[currentNote].transform.position;
+
+        if (playerClick)
+        {
+            audioSource.PlayOneShot(musicalNotes[currentNote]);
+            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
+            playerClick = false;
+        }
+    }
+
+    //ShiftNoteDown
+    public override void Selection_Two()
     {
         if (playerClicked)
         {
@@ -146,56 +197,7 @@ public abstract class SoundProducer : Interactable {
             _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
             playerClick = false;
         }
-    }
-
-    //ShiftNoteUp
-    public override void Selection_Two()
-    {
-        if (playerClicked) {
-            base.Selection_Two();
-
-            }
         
-        //shrinks current branch
-        //first check if active
-        if (soundSources[currentNote].activeSelf)
-        {
-            soundSources[currentNote].transform.localScale *= 0.5f;
-            soundSources[currentNote].GetComponent<MeshRenderer>().material.color = origColor;
-        }
-
-        bool canPlayNote = false;
-
-        while (!canPlayNote)
-        {
-            if (currentNote < (musicalNotes.Length - 1))
-            {
-                currentNote++;
-            }
-            else
-            {
-                currentNote = 0;
-            }
-
-            if (soundSources[currentNote].activeSelf)
-                canPlayNote = true;
-        }
-
-        // chooses new note and enlarges branch
-        currentSound = musicalNotes[currentNote];
-        soundSources[currentNote].transform.localScale *= 2;
-
-        origColor = soundSources[currentNote].GetComponent<MeshRenderer>().material.color;
-        lerpingColor = true;
-
-        notesPlaying.transform.position = soundSources[currentNote].transform.position;
-
-        if (playerClick)
-        {
-            audioSource.PlayOneShot(musicalNotes[currentNote]);
-            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
-            playerClick = false;
-        }
     }
 
     

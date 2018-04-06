@@ -7,6 +7,12 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [Serializable]
+public struct ButtonImages
+{
+    public Sprite[] buttonImages; //array of images to allow for button pic or animation
+}
+
+[Serializable]
 public abstract class Interactable : MonoBehaviour
 {
     //player refs
@@ -19,11 +25,14 @@ public abstract class Interactable : MonoBehaviour
     protected Image symbol; // 2d sprite renderer icon reference
     protected List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
     protected Sprite interactSprite; // hand for interact
-    protected Sprite clickSprite; 
+    protected Sprite clickSprite;
 
     //click distances checks on player
-    protected float withinDistance = 10f; // for OnMouseOver
-    public float withinDistanceActive = 5f; // for OnMouseDown
+    protected WorldManager _worldManager; //used for optimization 
+    protected int enabledCounter = 0; // used to count # of enables
+    protected float distanceFromPlayer; // stores distance away
+    protected float canSeeDistance = 15f; // for OnMouseOver
+    public float canClickDistance = 10f; // for OnMouseDown
 
     //UI sounds
     protected AudioSource soundBoard;
@@ -33,7 +42,7 @@ public abstract class Interactable : MonoBehaviour
     public bool interactable, playerClicked;
 
     // lets us know if object is now held by player
-    protected bool playerHolding;
+    protected bool playerHolding, buttonsOn;
 
     //Selection Wheel Menu variables
     public int selectionCounter; // number of interactable options
@@ -41,7 +50,7 @@ public abstract class Interactable : MonoBehaviour
     protected SelectionMenu menuScript;
     protected Sprite selectionMenuDisplay; // menu image -- this will vary based on the object
     protected List<GameObject> selectionButtons = new List<GameObject>(); //buttons in selection wheel
-    public Sprite[] selectionImages; // button sprites
+    public ButtonImages[] selectionImages; // button sprite arrays
 
     //Canvas vars
     protected GameObject canvasObject;
@@ -55,6 +64,7 @@ public abstract class Interactable : MonoBehaviour
         tpc = _player.GetComponent<ThirdPersonController>();
         cammy = GameObject.FindGameObjectWithTag("MainCamera"); //searches for Camera
         rightArmObj = GameObject.FindGameObjectWithTag("rightArm");
+        _worldManager = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
 
         //mouse cursor ref components & animate walking UI 
         symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
@@ -94,7 +104,7 @@ public abstract class Interactable : MonoBehaviour
     //inheritable, checks distance
     public virtual void OnMouseEnter()
     {
-        if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
+        if (distanceFromPlayer <= canSeeDistance && interactable)
         {
             symbol.sprite = interactSprite;
             symbol.gameObject.GetComponent<AnimateUI>().active = false;
@@ -104,7 +114,7 @@ public abstract class Interactable : MonoBehaviour
     //inheritable, should always play animation for player
     public virtual void OnMouseOver()
     {
-        if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistance && interactable)
+        if (distanceFromPlayer <= canSeeDistance && interactable)
         {
             symbol.sprite = interactSprite;
             symbol.gameObject.GetComponent<AnimateUI>().active = false;
@@ -130,7 +140,7 @@ public abstract class Interactable : MonoBehaviour
     //private check
     void OnMouseDown()
     {
-        if (Vector3.Distance(transform.position, _player.transform.position) <= withinDistanceActive && interactable)
+        if (distanceFromPlayer <= canClickDistance && interactable)
         {
             handleClickSuccess();
         }
@@ -149,12 +159,20 @@ public abstract class Interactable : MonoBehaviour
 
             selectionMenu.enabled = true;
             selectionMenu.sprite = selectionMenuDisplay;
+            buttonsOn = true;
             
-
+            //sets selection Menu button images
             for(int i=0; i < selectionCounter; i++)
             {
                 selectionButtons[i].SetActive(true);
-                selectionButtons[i].GetComponent<Image>().sprite = selectionImages[i];
+                selectionButtons[i].GetComponent<Image>().sprite = selectionImages[i].buttonImages[0];
+
+                //if the image array is greater than 1, animate it!
+                if(selectionImages[i].buttonImages.Length > 1)
+                {
+                    selectionButtons[i].GetComponent<AnimateDialogue>().animationSprites = selectionImages[i].buttonImages;
+                    selectionButtons[i].GetComponent<AnimateDialogue>().active = true;
+                }
             }
         }
         else
@@ -168,12 +186,28 @@ public abstract class Interactable : MonoBehaviour
     //only runs when selection menu is on, then runs corresponding function in inherited scripts
     public virtual void Update()
     {
-        if (graphicRaycaster.hitWorld /*|| (tpc.enabled && selectionButtons[0].activeSelf)*/)
+        //stored for all the other stuff too 
+        distanceFromPlayer = Vector3.Distance(transform.position, _player.transform.position);
+
+        //store current activation state
+        bool isActive = gameObject.activeInHierarchy;
+        //Debug.Log(isActive);
+
+        //if object is active and too far from player, turn off
+        if(isActive && distanceFromPlayer > _worldManager.activationDistance)
+        {
+            _worldManager.allInactiveObjects.Add(gameObject);
+            gameObject.SetActive(false);
+        }
+        
+        //to proceed, need selectionMenu
+        if (selectionMenu == null) return;
+
+        if (graphicRaycaster.hitWorld)
         {
             DeactivateSelectionMenu();
         }
-        //to proceed, need selectionMenu
-        if (selectionMenu == null) return;
+
         //store selectionMenu.enabled
         bool selectionMenuEnabled = selectionMenu.enabled;
 
@@ -223,13 +257,15 @@ public abstract class Interactable : MonoBehaviour
             interactable = true;
         }
 
-        if (!selectionMenuEnabled)
+        if (!selectionMenuEnabled && buttonsOn)
         {
             for (int i = 0; i < selectionCounter; i++)
             {
+                selectionButtons[i].GetComponent<AnimateDialogue>().active = false;
                 selectionButtons[i].SetActive(false);
             }
             playerClicked = false;
+            buttonsOn = false;
         }
     }
 
@@ -264,6 +300,7 @@ public abstract class Interactable : MonoBehaviour
 
         for (int i = 0; i < selectionCounter; i++)
         {
+            selectionButtons[i].GetComponent<AnimateDialogue>().active = false;
             selectionButtons[i].SetActive(false);
         }
 
@@ -306,6 +343,19 @@ public abstract class Interactable : MonoBehaviour
                 selectionButtons.Add(selectionMenu.transform.GetChild(8).gameObject);
                 break;
         }
+    }
+
+    //called when the script or object is disabled
+    public virtual void OnDisable()
+    {
+        //specify this in whichever objects need it
+        StopAllCoroutines();
+    }
+
+    public virtual void OnEnable()
+    {
+        enabledCounter++;
+        //specify this in whichever objects need it
     }
 }
 

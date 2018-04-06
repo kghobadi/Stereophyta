@@ -23,6 +23,7 @@ public class Plant : SoundProducer {
     }
 
     public override void Start () {
+        //this comes before base.Start() for sound sources 
         particleCount = 2;
         base.Start();
         poofParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
@@ -197,5 +198,15 @@ public class Plant : SoundProducer {
             base.Selection_Two();
         }
     }
-    
+
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        if(enabledCounter > 1)
+        {
+            Start();
+            if(!sapling)
+                soundSources[currentNote].transform.localScale *= 0.5f;
+        }
+    }
 }

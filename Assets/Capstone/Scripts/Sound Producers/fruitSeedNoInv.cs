@@ -64,7 +64,9 @@ public class fruitSeedNoInv : Interactable {
 
     }
     
-    void Update () {
+    public override void Update () {
+        base.Update();
+
         seedSource.outputAudioMixerGroup = tpc.plantingGroup;
 
         //if player is holding another object, this can't be interactable
@@ -81,65 +83,66 @@ public class fruitSeedNoInv : Interactable {
 
         if (playerHolding)
         {
-            if (Input.GetMouseButton(1) && tpc.canUseSeed)
+            if (Input.GetMouseButtonDown(1) && tpc.canUseSeed)
             {
-                throwCounter += Time.deltaTime;
-
-                if(throwCounter > tpc.throwMin && throwCounter < tpc.throwMax)
+                bool canPlant = true;
+                Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
+                int i = 0;
+                while (i < hitColliders.Length)
                 {
-                    //rotate player arm joints back for charging throw position
-                    //seed should rotateAround player head
-                    transform.RotateAround(_player.transform.position, _player.transform.right, -1);
+                    if (hitColliders[i].gameObject.tag == "Plant")
+                    {
+                        canPlant = false;
+                    }
+                    i++;
                 }
-                if(throwCounter > tpc.throwMax && tpc.canUseSeed)
+                if (canPlant && tpc.canUseSeed)
                 {
+                    planting = true;
                     playerHolding = false;
-                    inSeedLine = false;
                     tpc.seedLine.Remove(gameObject);
-                    transform.SetParent(null);
-                    yVelocity = tpc.gravity;
-                    //gameObject.AddComponent<TrailRenderer>();
-                    throwing = true;
-                    //rotate player arms back super quick for throw animation
+                    inSeedLine = false;
+                    //tpc.blubAnimator.setBool("planting", true);
                 }
+                //throwCounter += Time.deltaTime;
+
+                //if(throwCounter > tpc.throwMin && throwCounter < tpc.throwMax)
+                //{
+                //    //rotate player arm joints back for charging throw position
+                //    //seed should rotateAround player head
+                //    transform.RotateAround(_player.transform.position, _player.transform.right, -1);
+                //}
+                //if(throwCounter > tpc.throwMax && tpc.canUseSeed)
+                //{
+                //    playerHolding = false;
+                //    inSeedLine = false;
+                //    tpc.seedLine.Remove(gameObject);
+                //    transform.SetParent(null);
+                //    yVelocity = tpc.gravity;
+                //    //gameObject.AddComponent<TrailRenderer>();
+                //    throwing = true;
+                //    //rotate player arms back super quick for throw animation
+                //}
             }
 
-            if (Input.GetMouseButtonUp(1))
-            {
-                if(throwCounter < tpc.throwMin)
-                {
-                    bool canPlant = true;
-                    Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
-                    int i = 0;
-                    while (i < hitColliders.Length)
-                    {
-                        if (hitColliders[i].gameObject.tag == "Plant")
-                        {
-                            canPlant = false;
-                        }
-                        i++;
-                    }
-                    if (canPlant && tpc.canUseSeed)
-                    {
-                        planting = true;
-                        playerHolding = false;
-                        tpc.seedLine.Remove(gameObject);
-                        inSeedLine = false;
-                        //tpc.blubAnimator.setBool("planting", true);
-                    }
-                }
-                if(throwCounter > tpc.throwMin && tpc.canUseSeed)
-                {
-                    playerHolding = false;
-                    inSeedLine = false;
-                    tpc.seedLine.Remove(gameObject);
-                    transform.SetParent(null);
-                    throwing = true;
-                    //gameObject.AddComponent<TrailRenderer>();
-                    yVelocity = tpc.gravity;
-                    //rotate player arms back super quick for throw animation
-                }
-            }
+            //if (Input.GetMouseButtonUp(1))
+            //{
+            //    if (throwCounter < tpc.throwMin)
+            //    {
+
+            //    }
+            //    if (throwCounter > tpc.throwMin && tpc.canUseSeed)
+            //    {
+            //        playerHolding = false;
+            //        inSeedLine = false;
+            //        tpc.seedLine.Remove(gameObject);
+            //        transform.SetParent(null);
+            //        throwing = true;
+            //        //gameObject.AddComponent<TrailRenderer>();
+            //        yVelocity = tpc.gravity;
+            //        //rotate player arms back super quick for throw animation
+            //    }
+            //}
         }
         else if (inSeedLine && !playerHolding && currentSpot!= 0)
         {
@@ -197,10 +200,10 @@ public class fruitSeedNoInv : Interactable {
             PlantSeed();
             
         }
-        else if (throwing)
-        {
-            ThrowSeed();
-        }
+        //else if (throwing)
+        //{
+        //    ThrowSeed();
+        //}
         else
         {
             transform.localEulerAngles += new Vector3(0, 1, 0);
@@ -292,10 +295,9 @@ public class fruitSeedNoInv : Interactable {
 
             adjustedRotation = true;
         }
-        if (!throwToPlant)
-        {
-            tpc.enabled = false;
-        }
+        
+        tpc.enabled = false;
+        
         transform.Translate(0, fallingSpeed * Time.deltaTime, 0);
         if(transform.position.y < tpc.startingHeight) //this will need to check collision with terrain eventually
         {
@@ -320,44 +322,44 @@ public class fruitSeedNoInv : Interactable {
         }
     }
 
-    public void ThrowSeed()
-    {
-        transform.SetParent(null);
+    //public void ThrowSeed()
+    //{
+    //    transform.SetParent(null);
 
-        if (!adjustedRotation)
-        {
-            tpc.canUseSeed = false;
+    //    if (!adjustedRotation)
+    //    {
+    //        tpc.canUseSeed = false;
 
 
-            float mouseX = Input.mousePosition.x;
+    //        float mouseX = Input.mousePosition.x;
 
-            float mouseY = Input.mousePosition.y;
+    //        float mouseY = Input.mousePosition.y;
 
-            //float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
+    //        //float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
 
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 30));
+    //        Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 30));
 
-            Vector3 LookDirection = new Vector3(worldpos.x, _player.transform.position.y, worldpos.z);
+    //        Vector3 LookDirection = new Vector3(worldpos.x, _player.transform.position.y, worldpos.z);
 
-            _player.transform.LookAt(LookDirection);
+    //        _player.transform.LookAt(LookDirection);
 
-            throwForce = _player.transform.forward;
+    //        throwForce = _player.transform.forward;
 
-            adjustedRotation = true;
+    //        adjustedRotation = true;
 
             
-        }
-        fruitBody.isKinematic = false;
-        bCollider.isTrigger = false;
-        interactable = false;
-        yVelocity -= tpc.throwStrengthMultiplier * Time.deltaTime;
-        fruitBody.AddForce(throwForce * (tpc.throwStrength + throwCounter * tpc.throwStrengthMultiplier) + new Vector3(0, yVelocity, 0));
+    //    }
+    //    fruitBody.isKinematic = false;
+    //    bCollider.isTrigger = false;
+    //    interactable = false;
+    //    yVelocity -= tpc.throwStrengthMultiplier * Time.deltaTime;
+    //    fruitBody.AddForce(throwForce * (tpc.throwStrength + throwCounter * tpc.throwStrengthMultiplier) + new Vector3(0, yVelocity, 0));
         
-        //throw seed in an arc, using throwStrength to determine how far it will go
-        //when it collides with the ground, bounce a lil up
-        //set booleans
-        // throwing = false, playerHolding = false, inSeedLine = false;
-    }
+    //    //throw seed in an arc, using throwStrength to determine how far it will go
+    //    //when it collides with the ground, bounce a lil up
+    //    //set booleans
+    //    // throwing = false, playerHolding = false, inSeedLine = false;
+    //}
 
     //allows player to walk through seed  to pick it up
     void OnTriggerEnter(Collider other)
@@ -369,55 +371,55 @@ public class fruitSeedNoInv : Interactable {
         }
     }
 
-    void OnCollisionEnter(Collision collision)
-    {
-        if (throwing)
-        {
-            fruitBody.isKinematic = true;
-            bCollider.isTrigger = true;
-            throwing = false;
-            tpc.canUseSeed = true;
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    if (throwing)
+    //    {
+    //        fruitBody.isKinematic = true;
+    //        bCollider.isTrigger = true;
+    //        throwing = false;
+    //        tpc.canUseSeed = true;
 
-            if (collision.gameObject.tag == "Ground")
-            {
-                //OVERLAP SPHERE TO SEE IF WE CAN PLANT HERE
-                bool canPlant = true;
-                Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
-                int i = 0;
-                while (i < hitColliders.Length)
-                {
-                    if (hitColliders[i].gameObject.tag == "Plant")
-                    {
-                        canPlant = false;
-                    }
-                    i++;
-                }
-                if (canPlant)
-                {
-                    throwToPlant = true;
-                    planting = true;
-                    throwing = false;
-                }
-                else
-                {
-                    throwCounter = 0;
-                    transform.localScale = origScale;
-                    transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
-                    adjustedRotation = false;
-                }
-            }
-            else
-            {
-                throwCounter = 0;
-                transform.localScale = origScale;
-                transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
-                adjustedRotation = false;
-            }
-        }
+    //        if (collision.gameObject.tag == "Ground")
+    //        {
+    //            //OVERLAP SPHERE TO SEE IF WE CAN PLANT HERE
+    //            bool canPlant = true;
+    //            Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
+    //            int i = 0;
+    //            while (i < hitColliders.Length)
+    //            {
+    //                if (hitColliders[i].gameObject.tag == "Plant")
+    //                {
+    //                    canPlant = false;
+    //                }
+    //                i++;
+    //            }
+    //            if (canPlant)
+    //            {
+    //                throwToPlant = true;
+    //                planting = true;
+    //                throwing = false;
+    //            }
+    //            else
+    //            {
+    //                throwCounter = 0;
+    //                transform.localScale = origScale;
+    //                transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
+    //                adjustedRotation = false;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            throwCounter = 0;
+    //            transform.localScale = origScale;
+    //            transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
+    //            adjustedRotation = false;
+    //        }
+    //    }
         
             
-        //Destroy(GetComponent<TrailRenderer>());
-    }
+    //    //Destroy(GetComponent<TrailRenderer>());
+    //}
 
     public void PlaySound()
     {
