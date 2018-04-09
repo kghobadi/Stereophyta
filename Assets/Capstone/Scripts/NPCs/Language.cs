@@ -30,7 +30,7 @@ public struct QuestObjects
     public int foundObjCount, desiredAmount;
 }
 
-public class Language : Interactable
+public class Language : MonoBehaviour
 {
     //list of all English words/phrases that shall be used for translation
     public List<string> englishWords = new List<string>();
@@ -60,8 +60,8 @@ public class Language : Interactable
     AudioSource voice;
 
     //timer for speaking, distance check for quest items
-    public float waitTime = 0.5f, checkRadius;
-    public bool questActive, talking, advance, finishedQuest;
+    public float waitTime = 0, waitTimeTotal = 0.5f, checkRadius;
+    public bool questActive, talking, advance, waitingForPlayer, playerResponded, finishedQuest;
     //number of quest objs fulfilled
     int fullfilledCount = 0;
 
@@ -70,10 +70,14 @@ public class Language : Interactable
     float reminderTimer = 0f, reminderTimerTotal = 2f;
 
     CameraController mainCam;
+    GameObject _player;
+    ThirdPersonController tpc;
 
-    public override void Start()
+    public void Start()
     {
-        base.Start();
+        //player refs
+        _player = GameObject.FindGameObjectWithTag("Player");
+        tpc = _player.GetComponent<ThirdPersonController>();
        
         //some UI refs
         thoughtCloud = GameObject.FindGameObjectWithTag("ThoughtCloud").GetComponent<Image>();
@@ -108,7 +112,6 @@ public class Language : Interactable
         clickReminder.GetComponent<AnimateDialogue>().active = true;
         clickReminder.enabled = false;
         voice = GetComponent<AudioSource>();
-        interactable = true;
 
         //set current dialogue and check if quest line
         currentDialogue = allDialogues[dialogueCounter].wordNumbers;
@@ -124,23 +127,25 @@ public class Language : Interactable
         Gizmos.DrawWireSphere(transform.position, checkRadius);
     }
 
-    public override void handleClickSuccess()
-    {
-        base.handleClickSuccess();
-        StartCoroutine(Speak());
-        
-    }
+  
 
-    public override void Update()
+    public void Update()
     {
-        base.Update();
         //checks for mouse input to advance dialogue
         if (talking)
         {
-            if (Input.GetMouseButtonDown(0) && !advance)
+            //delay for click to process stuff
+            if (!advance)
             {
-                advance = true;
+                waitTime += Time.deltaTime;
+                if (Input.GetMouseButtonDown(0) && waitTime > waitTimeTotal)
+                {
+                    advance = true;
+                    waitTime = 0f;
+                }
             }
+            
+            
         }
         //if dialogue active and the player hasn't advanced
         if (talking && !advance)
@@ -161,6 +166,7 @@ public class Language : Interactable
         
     }
 
+    //this will be called in NPC
     //function called takes an array or list of strings
     public IEnumerator Speak()
     {
@@ -168,8 +174,8 @@ public class Language : Interactable
         if (!finishedQuest)
         {
             //open cloud manual anim
+            _player.transform.LookAt(new Vector3(transform.position.x, _player.transform.position.y, transform.position.z));
             tpc.enabled = false;
-            interactable = false;
             mainCam.zoomedOut = false;
             mainCam.zoomedIn = true;
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
@@ -190,10 +196,6 @@ public class Language : Interactable
                 talking = true;
                 imageDisplay.enabled = true;
             }
-            else
-            {
-                yield return new WaitForSeconds(waitTime);
-            }
 
             // if this is the last picture string && quest line is active
             if (questActive && i == (currentDialogue.Length - 1))
@@ -211,13 +213,7 @@ public class Language : Interactable
             //set to first image in pictures list
             imageDisplay.sprite = pictures[currentIndex].imageArray[0];
 
-            if(i == 0)
-            {
-                yield return new WaitForSeconds(waitTime);
-            }
-
-            //check to see if this string is stored in englishWords
-            advance = false;
+            yield return new WaitForSeconds(0.25f);
 
             //if image array is animated, loop thru it
             if (pictures[currentIndex].imageArray.Length > 1)
@@ -232,6 +228,8 @@ public class Language : Interactable
             //wait to move on until player clicks
             yield return new WaitUntil(() => advance == true);
 
+            advance = false;
+
             //reset temp bools
             imageAnimator.active = false;
 
@@ -240,6 +238,7 @@ public class Language : Interactable
         for (int q = 0; q < allQuestObjects.Length; q++)
         {
             allQuestObjects[q].questImage.enabled = false;
+            //Debug.Log("disable quest objs");
         }
 
         //set new dialogue and restart so character loops through it again
@@ -270,13 +269,29 @@ public class Language : Interactable
 
             //set all relevant bools/states
             thoughtCloud.enabled = false;
-            mainCam.zoomedOut = true;
-            mainCam.zoomedIn = false;
-            tpc.enabled = true;
-            interactable = true;
-            symbol.sprite = walkingSprites[0];
-            symbol.gameObject.GetComponent<AnimateUI>().active = true;
-            //Debug.Log("done speaking");
+
+            //only if they have a quest do we cut away from dialogue without player response 
+            if (questActive)
+            {
+                //zoom out and reactivate player
+                mainCam.zoomedOut = true;
+                mainCam.zoomedIn = false;
+                tpc.enabled = true;
+            }
+
+            //allow player to issue command if NPC quest complete or they are following you
+            else
+            {
+                waitingForPlayer = true;
+                //wait to move on until player selects option
+                yield return new WaitUntil(() => playerResponded == true);
+                //zoom out and reactivate player
+                mainCam.zoomedOut = true;
+                mainCam.zoomedIn = false;
+                tpc.enabled = true;
+                playerResponded = false;
+                waitingForPlayer = false;
+            }
         }
     }
 
@@ -329,7 +344,7 @@ public class Language : Interactable
             }
             else
             {
-                Debug.Log("wrong plant type");
+                //Debug.Log("wrong plant type");
             }
         }
         else if (allQuestObjects[questObjNumber].objectTag == "Rock")

@@ -19,7 +19,7 @@ public class AnimateDialogue : MonoBehaviour {
     }
 
     void Update () {
-        if (active)
+        if (active && thisImage.enabled)
         {
             frameTimer -= Time.deltaTime;
             if (frameTimer < 0)

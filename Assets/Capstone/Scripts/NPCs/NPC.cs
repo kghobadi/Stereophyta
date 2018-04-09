@@ -25,9 +25,11 @@ public class NPC : Interactable {
     protected Vector3 homePosition;
     protected string myPath; // will use this to find relevant transform Containers
 
-    //navmesh ref and musician script ref
+    //navmesh ref and musician, language script ref
     public NavMeshAgent navMeshAgent;
     protected Musician myMusic;
+    protected Language myLanguage;
+    Transform talkingPos;
 
     //will use these to swap out selection menu among different states (starts out as what's set directly thru Interactable)
     public Sprite laborDisplay, followingSelectionMenuDisplay, playingSelectionMenuDisplay;
@@ -59,7 +61,7 @@ public class NPC : Interactable {
     // all NPC states are shared, what they do in those states can be quite different 
     public enum NPCState
     {
-        LABOR, MOVING, FOLLOWING, PLAYING, WAITING, WAVING, DISABLED,
+        LABOR, MOVING, FOLLOWING, PLAYING, TALKING, WAITING, WAVING, DISABLED,
     }
 
     public override void Start () {
@@ -72,6 +74,7 @@ public class NPC : Interactable {
         trailRender = GetComponent<TrailRenderer>();
 
         myMusic = GetComponent<Musician>();
+        myLanguage = GetComponent<Language>();
         myPath = myMusic.musicType.ToString();
 
         animator = GetComponentInChildren<Animator>();
@@ -162,11 +165,47 @@ public class NPC : Interactable {
         //activated only while waiting for player interaction
         if(currentState == NPCState.WAITING)
         {
+            interactable = false;
             navMeshAgent.isStopped = true;
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+            //if player clicks off the menu, say byebye
             if (graphicRaycaster.hitWorld || Vector3.Distance(_player.transform.position,transform.position) > 10 || !selectionMenu.enabled)
             {
+                //tell language to cut
+                myLanguage.playerResponded = true;
+
+                interactable = true;
+                
+                if (lastState == NPCState.FOLLOWING)
+                {
+                    //keep following
+                    currentState = NPCState.FOLLOWING;
+                }
+                //restart labor
+                else
+                {
+                    SetMove();
+                }
+            }
+        }
+
+        if(currentState == NPCState.TALKING)
+        {
+            navMeshAgent.isStopped = true;
+            transform.position = talkingPos.position;
+            transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+            interactable = false;
+            //if this is true, enable player response
+            if (myLanguage.waitingForPlayer)
+            {
+                base.handleClickSuccess();
+                currentState = NPCState.WAITING;
+            }
+            if (myLanguage.questActive && !myLanguage.talking)
+            {
+                interactable = true;
                 SetMove();
+                
             }
         }
 
@@ -180,13 +219,6 @@ public class NPC : Interactable {
             transform.Rotate(new Vector3(0, 5, 0));
         }
 
-        //For something like NPC Circle, can inherit this Update() and say
-        // if(currentState = NPCState.MOVING)
-        //     IrregMovement()
-        // else{ base.Update(); }
-        // this means it should avoid any mix ups with the move state in this Update
-
-        
         //refresh waving 
         if (hasWavedAtPlayer)
         {
@@ -217,9 +249,6 @@ public class NPC : Interactable {
         targestDestination = movementPoints[moveCounter].position;
 
         navMeshAgent.SetDestination(targestDestination);
-        //Debug.Log(targestDestination);
-
-        //hasLooked = false;
 
         currentState = NPCState.MOVING;
     }
@@ -247,8 +276,6 @@ public class NPC : Interactable {
     {
         Debug.Log("looking for new path");
         //empty current pathing points
-        //movementPointsContainer = null;
-        //chosenWaypoint = null;
         movementPoints.Clear();
 
         //temp list for storing waypoints & distance check size
@@ -409,9 +436,9 @@ public class NPC : Interactable {
         animator.SetBool("walking", false);
         yield return new WaitForSeconds(wavingTime);
 
-        if (selectionMenu.enabled && playerClicked)
+        if (myLanguage.talking || !tpc.enabled)
         {
-            currentState = NPCState.WAITING;
+            currentState = NPCState.TALKING;
         }
         else if(currentState == NPCState.FOLLOWING)
         {
@@ -438,7 +465,7 @@ public class NPC : Interactable {
     public virtual void FollowPlayer()
     {
         navMeshAgent.isStopped = false;
-        Debug.Log("following player");
+        //Debug.Log("following player");
         //check place in line
         int currentLineLength = tpc.followers.Count;
         if (currentLineLength != lastLineLength)
@@ -448,7 +475,7 @@ public class NPC : Interactable {
 
         Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
 
-        if (Vector3.Distance(transform.position, spotInLine) > 3f)
+        if (Vector3.Distance(transform.position, spotInLine) > 10f)
         {
             navMeshAgent.SetDestination(spotInLine);
             transform.LookAt(spotInLine);
@@ -477,10 +504,22 @@ public class NPC : Interactable {
     //inherited from Interactable, whenever player clicks on NPC stop moving
     public override void handleClickSuccess()
     {
-        base.handleClickSuccess();
-        lastState = currentState;
-        if(currentState != NPCState.PLAYING)
-            currentState = NPCState.WAITING;
+        //SwitchSelectionButtons();
+        //always activate Language first, then from there we bring up selection menu
+        if (currentState != NPCState.WAVING)
+            lastState = currentState;
+        if (currentState == NPCState.PLAYING)
+        {
+            base.handleClickSuccess();
+        }
+        else
+        {
+            //start talkin'
+            talkingPos = transform;
+            currentState = NPCState.TALKING;
+            myLanguage.StartCoroutine(myLanguage.Speak());
+        }
+       
     }
 
     //For Selections, anything that causes the NPC to move or change state significantly should DeactivateSelectionMenu()
@@ -493,6 +532,7 @@ public class NPC : Interactable {
         //Follow Me!!!
         if (lastState != NPCState.FOLLOWING && lastState != NPCState.PLAYING && !clickedButton)
         {
+            myLanguage.playerResponded = true;
             tpc.followers.Add(gameObject);
             tpc.followerDistances.Add(followDistance);
             tpc.blubAnimator.Play("Wave", 0);
@@ -506,6 +546,7 @@ public class NPC : Interactable {
         //if already following, this is the Play Music command. Remove follower 
         else if(lastState == NPCState.FOLLOWING && !clickedButton)
         {
+            myLanguage.playerResponded = true;
             currentState = NPCState.PLAYING;
             tpc.followers.Remove(gameObject);
             tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
@@ -540,7 +581,8 @@ public class NPC : Interactable {
         //Increase speed
         if (lastState != NPCState.FOLLOWING && lastState != NPCState.PLAYING && !clickedButton)
         {
-            if(navMeshAgent.speed < moveSpeedMax)
+            myLanguage.playerResponded = true;
+            if (navMeshAgent.speed < moveSpeedMax)
                 navMeshAgent.speed += moveSpeedInterval;
             SetMove();
             clickedButton = true;
@@ -548,6 +590,7 @@ public class NPC : Interactable {
         //if already following, this is the Labor command. Remove follower 
         else if(lastState == NPCState.FOLLOWING && !clickedButton)
         {
+            myLanguage.playerResponded = true;
             tpc.followers.Remove(gameObject);
             tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
             tpc.blubAnimator.Play("Wave", 0);
@@ -578,6 +621,7 @@ public class NPC : Interactable {
         //Decrease speed
         if (lastState != NPCState.FOLLOWING && lastState != NPCState.PLAYING)
         {
+            myLanguage.playerResponded = true;
             if (navMeshAgent.speed < moveSpeedMax)
                 navMeshAgent.speed -= moveSpeedInterval;
             SetMove();
@@ -585,8 +629,8 @@ public class NPC : Interactable {
         //If following, Return Home command
         if (lastState == NPCState.FOLLOWING)
         {
+            myLanguage.playerResponded = true;
             GoHome();
-
             DeactivateSelectionMenu();
             SwitchSelectionButtons();
         }
@@ -620,26 +664,27 @@ public class NPC : Interactable {
     public override void SwitchSelectionButtons()
     {
         //Debug.Log("switched buttons");
-        if(currentState!= NPCState.FOLLOWING && currentState != NPCState.PLAYING)
+        if(lastState!= NPCState.FOLLOWING && lastState != NPCState.PLAYING)
         {
             selectionImages = laborSelectionImages;
             selectionMenuDisplay = laborDisplay;
             selectionCounter = 3;
         }
-        else if(currentState == NPCState.FOLLOWING)
+        else if(lastState == NPCState.FOLLOWING)
         {
+            Debug.Log("following images");
             selectionImages = followingSelectionImages;
             selectionMenuDisplay = followingSelectionMenuDisplay;
             selectionCounter = 3;
         }
-        else if(currentState == NPCState.PLAYING && myMusic.isPlaying)
+        else if(lastState == NPCState.PLAYING && myMusic.isPlaying)
         {
             selectionImages = playingSelectionImages;
             selectionImages[1].buttonImages = stopPlayingMusic;
             selectionMenuDisplay = playingSelectionMenuDisplay;
             selectionCounter = 4;
         }
-        else if (currentState == NPCState.PLAYING && !myMusic.isPlaying)
+        else if (lastState == NPCState.PLAYING && !myMusic.isPlaying)
         {
             selectionImages = playingSelectionImages;
             selectionImages[1].buttonImages = startPlayingMusic;
