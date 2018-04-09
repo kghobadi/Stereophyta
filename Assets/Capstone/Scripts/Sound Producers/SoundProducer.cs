@@ -14,7 +14,7 @@ public abstract class SoundProducer : Interactable {
     protected ParticleSystem notesPlaying;
 
     public bool placedInEditor, scalingUp, scalingDown, lerpingColor;
-    public float scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal = 2f;
+    public float scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal = 1f;
     protected Vector3 origScale;
     protected Vector3 startingPos;
 

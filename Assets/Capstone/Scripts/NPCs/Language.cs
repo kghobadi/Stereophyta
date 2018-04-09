@@ -175,11 +175,6 @@ public class Language : Interactable
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
             thoughtCloud.enabled = true;
             //go through cloud opening
-            //for (int t = 0; t < cloudImages.Count; t++)
-            //{
-            //    thoughtCloud.sprite = cloudImages[t];
-            //    yield return new WaitForSeconds(waitTime);
-            //}
             cloudAnimator.active = true;
         }
         else
@@ -210,12 +205,19 @@ public class Language : Interactable
                 SearchForQuestItems();
             }
 
-            //check to see if this string is stored in englishWords
-            advance = false;
+            
             //use the index to translate to other lists
             int currentIndex = currentDialogue[i];
             //set to first image in pictures list
             imageDisplay.sprite = pictures[currentIndex].imageArray[0];
+
+            if(i == 0)
+            {
+                yield return new WaitForSeconds(waitTime);
+            }
+
+            //check to see if this string is stored in englishWords
+            advance = false;
 
             //if image array is animated, loop thru it
             if (pictures[currentIndex].imageArray.Length > 1)
@@ -256,8 +258,6 @@ public class Language : Interactable
         {
             //close out of dialogue
             talking = false;
-            mainCam.zoomedOut = true;
-            mainCam.zoomedIn = false;
             cloudAnimator.active = false;
             imageDisplay.enabled = false;
 
@@ -270,6 +270,8 @@ public class Language : Interactable
 
             //set all relevant bools/states
             thoughtCloud.enabled = false;
+            mainCam.zoomedOut = true;
+            mainCam.zoomedIn = false;
             tpc.enabled = true;
             interactable = true;
             symbol.sprite = walkingSprites[0];
