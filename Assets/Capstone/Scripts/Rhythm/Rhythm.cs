@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Rhythm : MonoBehaviour {
-    int enabledCounter = 0; // used to count # of enables
+    protected int enabledCounter = 0; // used to count # of enables
 
     public virtual void OnTriggerEnter(Collider other)
     {

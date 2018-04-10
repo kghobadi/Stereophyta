@@ -51,8 +51,24 @@ public class ThirdPersonController : MonoBehaviour
     //store this mouse pos
     Vector3 lastPosition;
 
+    //UI walking
+    Image symbol; // 2d sprite renderer icon reference
+    AnimateUI symbolAnimator;
+    List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
+    int currentWalk = 0;
+
     void Start()
     {
+        //walking UI
+        symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
+        symbolAnimator = symbol.GetComponent<AnimateUI>();
+        for (int i = 1; i < 4; i++)
+        {
+            walkingSprites.Add(Resources.Load<Sprite>("CursorSprites/Foot" + i));
+        }
+
+        symbol.sprite = walkingSprites[currentWalk];
+
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         camControl = Camera.main.GetComponent<CameraController>();
@@ -97,7 +113,7 @@ public class ThirdPersonController : MonoBehaviour
                 //if we hit the ground & height is in range, move the character to that position
                 if (hit.transform.gameObject.tag == "Ground")
                 {
-                    targetPosition = hit.point + new Vector3(0, 1, 0);
+                    targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
                     isMoving = true;
                     
                 }
@@ -127,9 +143,21 @@ public class ThirdPersonController : MonoBehaviour
                 isMoving = true;
                 clickTimer = 0;
                 currentSpeed = walkSpeed;
+                //set walk sprite
+                if(currentWalk < (walkingSprites.Count - 1))
+                {
+                    currentWalk++;
+                }
+                else
+                {
+                    currentWalk=0;
+                }
+                symbol.sprite = walkingSprites[currentWalk];
+                symbolAnimator.active = false;
             }
             else
             {
+                symbolAnimator.active = false;
                 isMoving = false;
                 clickTimer = 0;
                 currentSpeed = walkSpeed;
@@ -148,11 +176,14 @@ public class ThirdPersonController : MonoBehaviour
         {
             MovePlayer();
             blubAnimator.SetBool("idle", false);
+            blubAnimator.SetBool("dancing", false);
             headTurnTimer = 0;
 
             blubAnimator.SetBool("touchingPlant", false);
             if (currentSpeed > 12)
             {
+                //animate ui
+                symbolAnimator.active = true;
                 blubAnimator.SetBool("running", true);
                 blubAnimator.SetBool("walking", false);
             }
@@ -165,17 +196,18 @@ public class ThirdPersonController : MonoBehaviour
         //this timer only plays the idle animation if we are not moving. still a little buggy
         else
         {
-            if(headTurnTimer < 5)
-            {
-                blubAnimator.SetBool("idle", true);
-                blubAnimator.SetBool("walking", false);
-                blubAnimator.SetBool("running", false);
-            }
+            blubAnimator.SetBool("walking", false);
+            blubAnimator.SetBool("running", false);
+            
             headTurnTimer += Time.deltaTime;
             if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
             {
-                if (!hasTurnedHead)
-                    StartCoroutine(Idle(1f));
+                blubAnimator.SetBool("idle", false);
+                blubAnimator.SetBool("dancing", true);
+            }
+            else
+            {
+                blubAnimator.SetBool("idle", true);
             }
         }
 
@@ -195,7 +227,7 @@ public class ThirdPersonController : MonoBehaviour
         float currentDist = Vector3.Distance(transform.position, targetPosition);
 
         //this is a bit finnicky with char controller so may need to continuously set it 
-        if (currentDist > 1f)
+        if (currentDist > 0.1f)
         {
             transform.LookAt(targetPosition);
 
@@ -209,32 +241,12 @@ public class ThirdPersonController : MonoBehaviour
 
             player.Move(new Vector3(0, -0.5f, 0));
         }
-        else if (currentDist < 1f && currentDist > 0.1f)
-        {
-            //just use move towards at this point to avoid weird jitters
-            transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z));
-
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed);
-        }
-        else if (currentDist < 0.1f)
-        {
-            transform.position = targetPosition;
+        else
+        { 
             isMoving = false;
         }
 
        
-    }
-
-    //this waits for the idle animation to finish and resets the timers
-    IEnumerator Idle(float time)
-    {
-        hasTurnedHead = true;
-        blubAnimator.SetBool("idle", false);
-        blubAnimator.Play("HeadTurn", 0);
-        yield return new WaitForSeconds(time);
-        headTurnTimer = 0;
-        hasTurnedHead = false;
-        blubAnimator.SetBool("idle", true);
     }
 
     //this function shifts all audio source priorities dynamically

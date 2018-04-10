@@ -6,8 +6,6 @@ public class DrumCollider : Rhythm {
     Vector3 originalScale, targetScale;
     public float scaleMultipler;
 
-    int enabledCounter = 0; // used to count # of enables
-
     void Start () {
         originalScale = transform.localScale;
 	}

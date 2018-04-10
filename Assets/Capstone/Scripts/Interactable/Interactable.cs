@@ -75,9 +75,6 @@ public abstract class Interactable : MonoBehaviour
             symbolAnimator.animationSprites.Add(Resources.Load<Sprite>("CursorSprites/Foot" + i));
         }
 
-        symbol.sprite = walkingSprites[0];
-        symbol.gameObject.GetComponent<AnimateUI>().active = true;
-
         //Canvas refs
         canvasObject = GameObject.FindGameObjectWithTag("MainCanvas");
         graphicRaycaster = canvasObject.GetComponent<CanvasRaycaster>();

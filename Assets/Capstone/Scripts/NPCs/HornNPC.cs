@@ -174,7 +174,7 @@ public class HornNPC : NPC {
                                 //turn off fruit
                                 currentPlants[randomPlant].soundSources[i].transform.localScale *= 0.5f;
                                 currentPlants[randomPlant].soundSources[i].SetActive(false);
-
+                            
                             currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].musicalNotes[i]);
                             
                             
