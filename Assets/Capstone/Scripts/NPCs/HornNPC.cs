@@ -176,30 +176,39 @@ public class HornNPC : NPC {
                                 currentPlants[randomPlant].soundSources[i].SetActive(false);
 
                             currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].musicalNotes[i]);
-
+                            
+                            
                                 yield return new WaitForSeconds(waitingTime);
+                            
+                                
                             }
                         }
 
                     //play poof
 
-                    yield return new WaitForSeconds(waitingTime);
                     currentPlants[randomPlant].poofParticles.Play();
+                    //wait until note stops playing
+                    yield return new WaitUntil(() => currentPlants[randomPlant].audioSource.isPlaying == false);
 
-                        //destroy plant if all seeds are gone 
-                        Destroy(currentPlants[randomPlant].gameObject);
+                    //destroy plant if all seeds are gone 
+                    Destroy(currentPlants[randomPlant].gameObject);
                         currentPlants.Remove(currentPlants[randomPlant]);
                     }
                     else
                     {
-                    //play poof
 
-                    yield return new WaitForSeconds(waitingTime + 2);
-                    currentPlants[randomPlant].poofParticles.Play();
+                    yield return new WaitForSeconds(2);
 
+                    if(currentPlants[randomPlant] != null)
+                    {
+                        //play poof
+                        currentPlants[randomPlant].poofParticles.Play();
+                        yield return new WaitForSeconds(waitingTime);
                         //destroy plant if all seeds are gone 
                         Destroy(currentPlants[randomPlant].gameObject);
                         currentPlants.Remove(currentPlants[randomPlant]);
+                    }
+                    
                     }
                 }
             
