@@ -18,9 +18,13 @@ public class ThirdPersonController : MonoBehaviour
     bool hasTurnedHead;
     //these are used in seed script
     public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
-
+    public GameObject walkingPointer;
     //Camera ref variables
-    AudioSource cameraAudSource;
+    AudioSource cameraAudSource, footStepSource;
+    public AudioClip[] footsteps;
+    public float walkStepTotal = 1f, runStepTotal = 0.5f;
+    float footStepTimer = 0;
+    int currentStep = 0;
     CameraController camControl;
 
     //set publicly to tell this script what raycasts can and can't go thru
@@ -68,6 +72,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         symbol.sprite = walkingSprites[currentWalk];
+        footStepSource = GetComponent<AudioSource>();
 
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
@@ -86,6 +91,7 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
+        footStepSource.outputAudioMixerGroup = plantingGroup;
         //this is used in fruitSeedNoInv to let seed know whether player has a seed already
         if(seedLine.Count == 0)
         {
@@ -113,6 +119,7 @@ public class ThirdPersonController : MonoBehaviour
                 //if we hit the ground & height is in range, move the character to that position
                 if (hit.transform.gameObject.tag == "Ground")
                 {
+                    walkingPointer.transform.position = hit.point;
                     targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
                     isMoving = true;
                     
@@ -124,8 +131,9 @@ public class ThirdPersonController : MonoBehaviour
                     || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
                     || hit.transform.gameObject.tag == "Rock" || hit.transform.gameObject.tag == "NPC"))
                 {
-                        targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                        isMoving = true;
+                    targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
+                    walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
+                    isMoving = true;
                         
                     }
                 else
@@ -138,7 +146,17 @@ public class ThirdPersonController : MonoBehaviour
         //On mouse up, we check clickTimer to see if we are walking to that point or stopping the character from running 
         if (Input.GetMouseButtonUp(0))
         {
-            if(clickTimer < runTime)
+            footStepSource.PlayOneShot(footsteps[currentStep]);
+            //increment footstep audio
+            if (currentStep < (footsteps.Length - 1))
+            {
+                currentStep++;
+            }
+            else
+            {
+                currentStep = 0;
+            }
+            if (clickTimer < runTime)
             {
                 isMoving = true;
                 clickTimer = 0;
@@ -154,6 +172,7 @@ public class ThirdPersonController : MonoBehaviour
                 }
                 symbol.sprite = walkingSprites[currentWalk];
                 symbolAnimator.active = false;
+                walkingPointer.SetActive(true);
             }
             else
             {
@@ -177,25 +196,52 @@ public class ThirdPersonController : MonoBehaviour
             MovePlayer();
             blubAnimator.SetBool("idle", false);
             blubAnimator.SetBool("dancing", false);
+            blubAnimator.SetBool("touchingPlant", false);
+
             headTurnTimer = 0;
 
-            blubAnimator.SetBool("touchingPlant", false);
+            footStepTimer += Time.deltaTime;
             if (currentSpeed > 12)
             {
+                //play footstep sound
+                if(footStepTimer > runStepTotal)
+                {
+                    footStepSource.PlayOneShot(footsteps[currentStep]);
+                    footStepTimer = 0;
+                }
                 //animate ui
+                walkingPointer.SetActive(false);
                 symbolAnimator.active = true;
                 blubAnimator.SetBool("running", true);
                 blubAnimator.SetBool("walking", false);
             }
             else
             {
+                //play footstep sound
+                if (footStepTimer > walkStepTotal)
+                {
+                    footStepSource.PlayOneShot(footsteps[currentStep]);
+                    footStepTimer = 0;
+                }
                 blubAnimator.SetBool("walking", true);
                 blubAnimator.SetBool("running", false);
+            }
+
+            //increment footstep audio
+            if(currentStep < (footsteps.Length - 1))
+            {
+                currentStep++;
+            }
+            else
+            {
+                currentStep = 0;
             }
         }
         //this timer only plays the idle animation if we are not moving. still a little buggy
         else
         {
+            footStepTimer = 0;
+            walkingPointer.SetActive(false);
             blubAnimator.SetBool("walking", false);
             blubAnimator.SetBool("running", false);
             
@@ -227,7 +273,7 @@ public class ThirdPersonController : MonoBehaviour
         float currentDist = Vector3.Distance(transform.position, targetPosition);
 
         //this is a bit finnicky with char controller so may need to continuously set it 
-        if (currentDist > 0.1f)
+        if (currentDist >= 0.1f)
         {
             transform.LookAt(targetPosition);
 
@@ -242,7 +288,8 @@ public class ThirdPersonController : MonoBehaviour
             player.Move(new Vector3(0, -0.5f, 0));
         }
         else
-        { 
+        {
+            Debug.Log("stopped moving");
             isMoving = false;
         }
 

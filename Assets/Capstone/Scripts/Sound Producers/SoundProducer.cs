@@ -213,5 +213,9 @@ public abstract class SoundProducer : Interactable {
         
     }
 
-    
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        soundSources[currentNote].transform.localScale *= 0.5f;
+    }
 }

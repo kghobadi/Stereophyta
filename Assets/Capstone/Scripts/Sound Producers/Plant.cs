@@ -30,14 +30,15 @@ public class Plant : SoundProducer {
         poofParticles.Stop();
         
         //set to sapling stage
-        if (!placedInEditor)
+        if (!placedInEditor && enabledCounter <= 1)
         {
             sapling = true;
             transform.localScale *= saplingScale;
             transform.position = new Vector3(transform.position.x, transform.position.y - (origScale.y / 2) + (transform.localScale.y / 2), transform.position.z);
         }
 
-        if (!sapling)
+        if (!sapling && enabledCounter <= 1)
+           
         {
             soundSources[currentNote].transform.localScale *= 2;
             notesPlaying.transform.position = soundSources[currentNote].transform.position;
@@ -199,14 +200,18 @@ public class Plant : SoundProducer {
         }
     }
 
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        transform.localScale = origScale;
+    }
+
     public override void OnEnable()
     {
         base.OnEnable();
         if(enabledCounter > 1)
         {
             Start();
-            if(!sapling)
-                soundSources[currentNote].transform.localScale *= 0.5f;
         }
     }
 }

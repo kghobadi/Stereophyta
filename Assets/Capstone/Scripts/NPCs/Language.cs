@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 
 [Serializable]
 public struct NumberedImage
@@ -72,6 +73,7 @@ public class Language : MonoBehaviour
     CameraController mainCam;
     GameObject _player;
     ThirdPersonController tpc;
+    public AudioMixerSnapshot currentMixerGroup, talkingMix;
 
     public void Start()
     {
@@ -170,6 +172,8 @@ public class Language : MonoBehaviour
     //function called takes an array or list of strings
     public IEnumerator Speak()
     {
+        currentMixerGroup = tpc.currentAudioMix;
+        talkingMix.TransitionTo(1f);
         //Debug.Log("speaking");
         if (!finishedQuest)
         {
@@ -177,6 +181,7 @@ public class Language : MonoBehaviour
             _player.transform.LookAt(new Vector3(transform.position.x, _player.transform.position.y, transform.position.z));
             tpc.enabled = false;
             mainCam.zoomedOut = false;
+            mainCam.npcTransform = transform;
             mainCam.zoomedIn = true;
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
             thoughtCloud.enabled = true;
@@ -273,6 +278,7 @@ public class Language : MonoBehaviour
             //only if they have a quest do we cut away from dialogue without player response 
             if (questActive)
             {
+                currentMixerGroup.TransitionTo(1f);
                 //zoom out and reactivate player
                 mainCam.zoomedOut = true;
                 mainCam.zoomedIn = false;
@@ -286,6 +292,7 @@ public class Language : MonoBehaviour
                 //wait to move on until player selects option
                 yield return new WaitUntil(() => playerResponded == true);
                 //zoom out and reactivate player
+                currentMixerGroup.TransitionTo(1f);
                 mainCam.zoomedOut = true;
                 mainCam.zoomedIn = false;
                 tpc.enabled = true;

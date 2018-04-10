@@ -118,6 +118,7 @@ public class HornNPC : NPC {
     //Don't play rocks... Need to make drummers labor on rocks more interesting
     public override IEnumerator PerformLabor()
     {
+        interactable = false;
         //wait here a moment
         animator.SetBool("walking", false);
 
@@ -213,7 +214,8 @@ public class HornNPC : NPC {
                 }
             
         }
-        
+
+        interactable = true;
         //set new move pos
         SetMove();
         animator.SetBool("walking", true);

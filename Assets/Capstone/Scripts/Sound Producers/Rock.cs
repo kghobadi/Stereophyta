@@ -16,9 +16,13 @@ public class Rock : SoundProducer {
         particleCount = 1;
         base.Start();
 
-        //increase scale of soundSource
-        soundSources[currentNote].transform.localScale *= 2;
-        notesPlaying.transform.position = soundSources[currentNote].transform.position;
+        if(enabledCounter <= 1)
+        {
+            //increase scale of soundSource
+            soundSources[currentNote].transform.localScale *= 2;
+            notesPlaying.transform.position = soundSources[currentNote].transform.position;
+        }
+        
     }
 
     //public override void OnMouseEnter()
@@ -68,7 +72,12 @@ public class Rock : SoundProducer {
         if (enabledCounter > 1)
         {
             Start();
-            soundSources[currentNote].transform.localScale *= 0.5f;
         }
+    }
+
+    public override void OnDisable()
+    {
+        base.OnDisable();
+        transform.localScale = origScale;
     }
 }
