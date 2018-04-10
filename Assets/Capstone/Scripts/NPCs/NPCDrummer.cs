@@ -226,5 +226,13 @@ public class NPCDrummer : NPC
         beatParticlesModule.startSpeed = particleSpeed;
         beatParticlesModule.startLifetime = particleLifetime;
     }
-    
+
+    public override void OnEnable()
+    {
+        enabledCounter++;
+        if (enabledCounter > 1)
+        {
+            Start();
+        }
+    }
 }

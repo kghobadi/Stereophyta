@@ -33,6 +33,11 @@ public abstract class SoundProducer : Interactable {
         notesPlaying.Stop();
         //poofParticles.Stop();
 
+        //interact sprites
+        for (int i = 1; i < 3; i++)
+        {
+            interactSprites.Add(Resources.Load<Sprite>("CursorSprites/touch " + i));
+        }
         
         origScale = transform.localScale;
         startingPos = transform.position;

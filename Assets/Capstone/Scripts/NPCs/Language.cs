@@ -242,7 +242,7 @@ public class Language : MonoBehaviour
         }
 
         //set new dialogue and restart so character loops through it again
-        if (fullfilledCount == allQuestObjects.Length)
+        if (questActive && fullfilledCount == allQuestObjects.Length)
         {
             //Debug.Log("reset dialogue");
             dialogueCounter++;

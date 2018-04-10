@@ -294,72 +294,17 @@ public class fruitSeedNoInv : Interactable {
             _player.transform.LookAt(LookDirection);
 
             adjustedRotation = true;
+
+            fruitBody.isKinematic = false;
+
+            bCollider.isTrigger = false;
         }
         
         tpc.enabled = false;
         
         transform.Translate(0, fallingSpeed * Time.deltaTime, 0);
-        if(transform.position.y < tpc.startingHeight) //this will need to check collision with terrain eventually
-        {
-            //spawn plant
-            plantClone = Instantiate(plants, transform.position + new Vector3(0, heightAdjustment, 0), Quaternion.identity);
-            plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
-            
-            //set bools
-            planting = false;
-            tpc.enabled = true;
-            tpc.canUseSeed = true;
-            //tpc.isHoldingSomething = false;
-
-            //if(gateScript != null)
-            //{
-            //    gateScript.interactableObjects.Remove(gameObject);
-            //    gateScript.interactionsNecessaryTotal--;
-            //}
-            //destroy
-            Destroy(gameObject);
-
-        }
-    }
-
-    //public void ThrowSeed()
-    //{
-    //    transform.SetParent(null);
-
-    //    if (!adjustedRotation)
-    //    {
-    //        tpc.canUseSeed = false;
-
-
-    //        float mouseX = Input.mousePosition.x;
-
-    //        float mouseY = Input.mousePosition.y;
-
-    //        //float cameraDif = Camera.main.transform.position.y - _player.transform.position.y;
-
-    //        Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 30));
-
-    //        Vector3 LookDirection = new Vector3(worldpos.x, _player.transform.position.y, worldpos.z);
-
-    //        _player.transform.LookAt(LookDirection);
-
-    //        throwForce = _player.transform.forward;
-
-    //        adjustedRotation = true;
-
-            
-    //    }
-    //    fruitBody.isKinematic = false;
-    //    bCollider.isTrigger = false;
-    //    interactable = false;
-    //    yVelocity -= tpc.throwStrengthMultiplier * Time.deltaTime;
-    //    fruitBody.AddForce(throwForce * (tpc.throwStrength + throwCounter * tpc.throwStrengthMultiplier) + new Vector3(0, yVelocity, 0));
         
-    //    //throw seed in an arc, using throwStrength to determine how far it will go
-    //    //when it collides with the ground, bounce a lil up
-    //    //set booleans
-    //    // throwing = false, playerHolding = false, inSeedLine = false;
-    //}
+    }
 
     //allows player to walk through seed  to pick it up
     void OnTriggerEnter(Collider other)
@@ -371,57 +316,29 @@ public class fruitSeedNoInv : Interactable {
         }
     }
 
-    //void OnCollisionEnter(Collision collision)
-    //{
-    //    if (throwing)
-    //    {
-    //        fruitBody.isKinematic = true;
-    //        bCollider.isTrigger = true;
-    //        throwing = false;
-    //        tpc.canUseSeed = true;
+    void OnCollisionEnter(Collision collision)
+    {
+        if (planting)
+        {
+            if(collision.gameObject.tag == "Ground")
+            {
+                //spawn plant
+                plantClone = Instantiate(plants, transform.position + new Vector3(0, heightAdjustment,0), Quaternion.identity);
+                plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
 
-    //        if (collision.gameObject.tag == "Ground")
-    //        {
-    //            //OVERLAP SPHERE TO SEE IF WE CAN PLANT HERE
-    //            bool canPlant = true;
-    //            Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
-    //            int i = 0;
-    //            while (i < hitColliders.Length)
-    //            {
-    //                if (hitColliders[i].gameObject.tag == "Plant")
-    //                {
-    //                    canPlant = false;
-    //                }
-    //                i++;
-    //            }
-    //            if (canPlant)
-    //            {
-    //                throwToPlant = true;
-    //                planting = true;
-    //                throwing = false;
-    //            }
-    //            else
-    //            {
-    //                throwCounter = 0;
-    //                transform.localScale = origScale;
-    //                transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
-    //                adjustedRotation = false;
-    //            }
-    //        }
-    //        else
-    //        {
-    //            throwCounter = 0;
-    //            transform.localScale = origScale;
-    //            transform.position = new Vector3(transform.position.x, tpc.startingHeight + 1, transform.position.z);
-    //            adjustedRotation = false;
-    //        }
-    //    }
-        
+                //set bools
+                planting = false;
+                tpc.enabled = true;
+                tpc.canUseSeed = true;
+
+                //destroy
+                Destroy(gameObject);
+            }
             
-    //    //Destroy(GetComponent<TrailRenderer>());
-    //}
+        }
+    }
 
-    public void PlaySound()
+        public void PlaySound()
     {
         if (!seedSource.isPlaying)
         {

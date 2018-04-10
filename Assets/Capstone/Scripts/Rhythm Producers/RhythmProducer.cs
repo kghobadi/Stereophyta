@@ -13,6 +13,12 @@ public abstract class RhythmProducer : Interactable {
     public virtual void Awake()
     {
         SimpleClock.ThirtySecond += OnThirtySecond;
+
+        //interact sprites
+        for (int i = 1; i < 4; i++)
+        {
+            interactSprites.Add(Resources.Load<Sprite>("CursorSprites/machine " + i));
+        }
     }
 
     public virtual void OnDestroy()

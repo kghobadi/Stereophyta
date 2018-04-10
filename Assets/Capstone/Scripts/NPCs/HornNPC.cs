@@ -150,7 +150,7 @@ public class HornNPC : NPC {
                 //    }
                 
 
-                yield return new WaitForSeconds(waitingTime);
+                yield return new WaitForSeconds(waitingTime + 1);
             }
             
         }
@@ -175,15 +175,16 @@ public class HornNPC : NPC {
                                 currentPlants[randomPlant].soundSources[i].transform.localScale *= 0.5f;
                                 currentPlants[randomPlant].soundSources[i].SetActive(false);
 
-                            currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].musicalNotes[currentPlants[randomPlant].currentNote]);
+                            currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].musicalNotes[i]);
 
                                 yield return new WaitForSeconds(waitingTime);
                             }
                         }
 
-                        //play poof
-                        currentPlants[randomPlant].poofParticles.Play();
-                        yield return new WaitForSeconds(waitingTime);
+                    //play poof
+
+                    yield return new WaitForSeconds(waitingTime);
+                    currentPlants[randomPlant].poofParticles.Play();
 
                         //destroy plant if all seeds are gone 
                         Destroy(currentPlants[randomPlant].gameObject);
@@ -191,9 +192,10 @@ public class HornNPC : NPC {
                     }
                     else
                     {
-                        //play poof
-                        currentPlants[randomPlant].poofParticles.Play();
-                        yield return new WaitForSeconds(waitingTime);
+                    //play poof
+
+                    yield return new WaitForSeconds(waitingTime + 2);
+                    currentPlants[randomPlant].poofParticles.Play();
 
                         //destroy plant if all seeds are gone 
                         Destroy(currentPlants[randomPlant].gameObject);

@@ -6,8 +6,9 @@ public class DrumCollider : Rhythm {
     Vector3 originalScale, targetScale;
     public float scaleMultipler;
 
+    int enabledCounter = 0; // used to count # of enables
 
-	void Start () {
+    void Start () {
         originalScale = transform.localScale;
 	}
 
@@ -42,6 +43,20 @@ public class DrumCollider : Rhythm {
         //{
         //    other.gameObject.GetComponent<Rock>().PlaySound();
         //}
+    }
+
+    private void OnDisable()
+    {
+        transform.localScale = originalScale;
+    }
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        if (enabledCounter > 1)
+        {
+            originalScale = transform.localScale ;
+        }
+        //specify this in whichever objects need it
     }
 
 }

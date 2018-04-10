@@ -21,6 +21,8 @@ public class Musician : MonoBehaviour {
     GameObject _player;
     ThirdPersonController tpc;
 
+    int enabledCounter = 0; // used to count # of enables
+
     public MusicType musicType;
 
     public enum MusicType
@@ -247,4 +249,15 @@ public class Musician : MonoBehaviour {
             }
         }
     }
+
+    public  void OnEnable()
+    {
+        enabledCounter++;
+        if (enabledCounter > 1)
+        {
+            Awake();
+        }
+        //specify this in whichever objects need it
+    }
+
 }
