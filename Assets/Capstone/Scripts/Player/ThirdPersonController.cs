@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -17,16 +18,20 @@ public class ThirdPersonController : MonoBehaviour
     bool hasTurnedHead;
     //these are used in seed script
     public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
-
+    public GameObject walkingPointer;
     //Camera ref variables
-    AudioSource cameraAudSource;
+    AudioSource cameraAudSource, footStepSource;
+    public AudioClip[] footsteps;
+    public float walkStepTotal = 1f, runStepTotal = 0.5f;
+    float footStepTimer = 0;
+    int currentStep = 0;
     CameraController camControl;
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask mask;
 
     //control player actions with interactable objects
-    public bool isHoldingSomething, canUseSeed;
+    public bool isHoldingSomething, canUseSeed, talking;
  
     //Lists for follower line and seed line
     public List<GameObject> followers = new List<GameObject>();
@@ -42,8 +47,33 @@ public class ThirdPersonController : MonoBehaviour
     //Player command menu refs
     public Image playerCommandsMenu;
 
+    //dictionary to sort nearby audio sources by distance 
+    Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
+
+    //listener range
+    public float listeningRadius;
+    //store this mouse pos
+    Vector3 lastPosition;
+
+    //UI walking
+    Image symbol; // 2d sprite renderer icon reference
+    AnimateUI symbolAnimator;
+    List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
+    int currentWalk = 0;
+
     void Start()
     {
+        //walking UI
+        symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
+        symbolAnimator = symbol.GetComponent<AnimateUI>();
+        for (int i = 1; i < 4; i++)
+        {
+            walkingSprites.Add(Resources.Load<Sprite>("CursorSprites/Foot" + i));
+        }
+
+        symbol.sprite = walkingSprites[currentWalk];
+        footStepSource = GetComponent<AudioSource>();
+
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         camControl = Camera.main.GetComponent<CameraController>();
@@ -61,140 +91,244 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
-        //this is used in fruitSeedNoInv to let seed know whether player has a seed already
-        if(seedLine.Count == 0)
+        if (!talking)
         {
-            isHoldingSomething = false;
-        }
-        else
-        {
-            isHoldingSomething = true;
-        }
-
-        //click to move to point
-        if (Input.GetMouseButton(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            clickTimer += Time.deltaTime;
-            if(clickTimer > runTime && currentSpeed < runSpeedMax)
+            footStepSource.outputAudioMixerGroup = plantingGroup;
+            //this is used in fruitSeedNoInv to let seed know whether player has a seed already
+            if (seedLine.Count == 0)
             {
-                currentSpeed += Time.deltaTime * 5;
+                isHoldingSomething = false;
+            }
+            else
+            {
+                isHoldingSomething = true;
             }
 
-            if (Physics.Raycast(ray, out hit, 100, mask))
+            //click to move to point
+            if (Input.GetMouseButton(0))
             {
-                //if we hit the ground & height is in range, move the character to that position
-                if (hit.transform.gameObject.tag == "Ground")
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+
+                clickTimer += Time.deltaTime;
+                if (clickTimer > runTime && currentSpeed < runSpeedMax)
                 {
-                    targetPosition = hit.point + new Vector3(0, 1, 0);
-                    if (targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight - 3))
-                    {
-                        isMoving = true;
-                    }
+                    currentSpeed += Time.deltaTime * 5;
                 }
 
-                //if we hit an interactable object AND we are far from it, the player should auto walk towards it
-                else if (Vector3.Distance(transform.position, hit.transform.position) > 5 &&
-                    (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
-                    || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
-                    || hit.transform.gameObject.tag == "Rock"))
+                if (Physics.Raycast(ray, out hit, 100, mask))
                 {
-                        targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
+                    //if we hit the ground & height is in range, move the character to that position
+                    if (hit.transform.gameObject.tag == "Ground")
+                    {
+                        walkingPointer.transform.position = hit.point;
+                        targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
                         isMoving = true;
-                        
+
                     }
+
+                    //if we hit an interactable object AND we are far from it, the player should auto walk towards it
+                    else if (Vector3.Distance(transform.position, hit.transform.position) > 5 &&
+                        (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
+                        || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
+                        || hit.transform.gameObject.tag == "Rock" || hit.transform.gameObject.tag == "NPC"))
+                    {
+                        targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
+                        walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
+                        isMoving = true;
+
+                    }
+                    else
+                    {
+                        isMoving = false;
+                    }
+                }
+            }
+
+            //On mouse up, we check clickTimer to see if we are walking to that point or stopping the character from running 
+            if (Input.GetMouseButtonUp(0))
+            {
+                footStepSource.PlayOneShot(footsteps[currentStep]);
+                //increment footstep audio
+                if (currentStep < (footsteps.Length - 1))
+                {
+                    currentStep++;
+                }
                 else
                 {
+                    currentStep = 0;
+                }
+                if (clickTimer < runTime)
+                {
+                    isMoving = true;
+                    clickTimer = 0;
+                    currentSpeed = walkSpeed;
+                    //set walk sprite
+                    if (currentWalk < (walkingSprites.Count - 1))
+                    {
+                        currentWalk++;
+                    }
+                    else
+                    {
+                        currentWalk = 0;
+                    }
+                    symbol.sprite = walkingSprites[currentWalk];
+                    symbolAnimator.active = false;
+                    walkingPointer.SetActive(true);
+                }
+                else
+                {
+                    symbolAnimator.active = false;
                     isMoving = false;
+                    clickTimer = 0;
+                    currentSpeed = walkSpeed;
                 }
             }
-        }
 
-        //On mouse up, we check clickTimer to see if we are walking to that point or stopping the character from running 
-        if (Input.GetMouseButtonUp(0))
-        {
-            if(clickTimer < runTime)
+            //Check for spacebar to open PlayerCommand Menu
+            if (Input.GetKeyDown(KeyCode.Space) && playerCommandsMenu.enabled == false)
             {
-                isMoving = true;
-                clickTimer = 0;
-                currentSpeed = walkSpeed;
+                // enable player commands 
+                playerCommandsMenu.enabled = true;
             }
+
+            //Check if we are moving and transition animation controller
+            if (isMoving)
+            {
+                MovePlayer();
+                blubAnimator.SetBool("idle", false);
+                blubAnimator.SetBool("dancing", false);
+                blubAnimator.SetBool("touchingPlant", false);
+
+                headTurnTimer = 0;
+
+                footStepTimer += Time.deltaTime;
+                if (currentSpeed > 12)
+                {
+                    //play footstep sound
+                    if (footStepTimer > runStepTotal)
+                    {
+                        footStepSource.PlayOneShot(footsteps[currentStep]);
+                        footStepTimer = 0;
+                    }
+                    //animate ui
+                    walkingPointer.SetActive(false);
+                    symbolAnimator.active = true;
+                    blubAnimator.SetBool("running", true);
+                    blubAnimator.SetBool("walking", false);
+                }
+                else
+                {
+                    //play footstep sound
+                    if (footStepTimer > walkStepTotal)
+                    {
+                        footStepSource.PlayOneShot(footsteps[currentStep]);
+                        footStepTimer = 0;
+                    }
+                    blubAnimator.SetBool("walking", true);
+                    blubAnimator.SetBool("running", false);
+                }
+
+                //increment footstep audio
+                if (currentStep < (footsteps.Length - 1))
+                {
+                    currentStep++;
+                }
+                else
+                {
+                    currentStep = 0;
+                }
+            }
+            //this timer only plays the idle animation if we are not moving. still a little buggy
             else
             {
-                isMoving = false;
-                clickTimer = 0;
-                currentSpeed = walkSpeed;
-            }
-        }
-
-        //Check for spacebar to open PlayerCommand Menu
-        if (Input.GetKeyDown(KeyCode.Space) && playerCommandsMenu.enabled == false)
-        {
-            // enable player commands 
-            playerCommandsMenu.enabled = true;
-        }
-
-        //Check if we are moving and transition animation controller
-        if (isMoving && targetPosition.y < (startingHeight + 3) && targetPosition.y > (startingHeight-3))
-        {
-            MovePlayer();
-            blubAnimator.SetBool("idle", false);
-            headTurnTimer = 0;
-
-            blubAnimator.SetBool("touchingPlant", false);
-            if (currentSpeed > 12)
-            {
-                blubAnimator.SetBool("running", true);
-                blubAnimator.SetBool("walking", false);
-            }
-            else
-            {
-                blubAnimator.SetBool("walking", true);
-                blubAnimator.SetBool("running", false);
-            }
-        }
-        //this timer only plays the idle animation if we are not moving. still a little buggy
-        else
-        {
-            if(headTurnTimer < 5)
-            {
-                blubAnimator.SetBool("idle", true);
+                footStepTimer = 0;
+                walkingPointer.SetActive(false);
                 blubAnimator.SetBool("walking", false);
                 blubAnimator.SetBool("running", false);
+
+                headTurnTimer += Time.deltaTime;
+                if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
+                {
+                    blubAnimator.SetBool("idle", false);
+                    blubAnimator.SetBool("dancing", true);
+                }
+                else
+                {
+                    blubAnimator.SetBool("idle", true);
+                }
             }
-            headTurnTimer += Time.deltaTime;
-            if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
+
+            //if mouse has moved, refill list & reevaluate priorities
+            if (lastPosition != transform.position)
             {
-                if (!hasTurnedHead)
-                    StartCoroutine(Idle(1f));
+                ResetNearbyAudioSources();
             }
+
+            lastPosition = transform.position;
         }
     }
    
     //Movement function which relies on vector3 movetowards. when we arrive at target, stop moving.
     void MovePlayer()
     {
-        transform.LookAt(targetPosition);
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
-        
-        if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
+        //first calculate rotation and look
+        float currentDist = Vector3.Distance(transform.position, targetPosition);
+
+        //this is a bit finnicky with char controller so may need to continuously set it 
+        if (currentDist >= 0.25f)
         {
-            transform.position = targetPosition;
+            transform.LookAt(targetPosition);
+
+            //then set movement
+            Vector3 movement = new Vector3(0, 0, currentSpeed);
+
+            movement = transform.rotation * movement;
+
+            //Actually move
+            player.Move(movement * Time.deltaTime);
+
+            player.Move(new Vector3(0, -0.5f, 0));
+        }
+        else
+        {
+            Debug.Log("stopped moving");
             isMoving = false;
         }
+
+       
     }
 
-    //this waits for the idle animation to finish and resets the timers
-    IEnumerator Idle(float time)
+    //this function shifts all audio source priorities dynamically
+    void ResetNearbyAudioSources()
     {
-        hasTurnedHead = true;
-        blubAnimator.SetBool("idle", false);
-        blubAnimator.Play("HeadTurn", 0);
-        yield return new WaitForSeconds(time);
-        headTurnTimer = 0;
-        hasTurnedHead = false;
-        blubAnimator.SetBool("idle", true);
+        //empty dictionary
+        soundCreators.Clear();
+        //overlap sphere to find nearby sound creators
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, listeningRadius);
+        int i = 0;
+        while (i < hitColliders.Length)
+        {
+            //check to see if obj is plant or rock
+            if (hitColliders[i].gameObject.tag == "Plant" || hitColliders[i].gameObject.tag == "Rock")
+            {
+                //check distance and add to list
+                float distanceAway = Vector3.Distance(hitColliders[i].transform.position, transform.position);
+                //add to audiosource and distance to dictionary
+                soundCreators.Add(hitColliders[i].gameObject.GetComponent<AudioSource>(), distanceAway);
+
+
+            }
+            i++;
+        }
+
+        int priority = 0;
+        //sort the dictionary by order of ascending distance away
+        foreach (KeyValuePair<AudioSource, float> item in soundCreators.OrderBy(key => key.Value))
+        {
+            // do something with item.Key and item.Value
+            item.Key.priority = priority;
+            priority++;
+        }
     }
 }

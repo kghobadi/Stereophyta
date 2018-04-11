@@ -40,13 +40,14 @@ public class CanvasRaycaster : MonoBehaviour
                 //For every result returned, output the name of the GameObject on the Canvas hit by the Ray
                 foreach (RaycastResult result in results)
                 {
-                    Debug.Log("Hit " + result.gameObject.name);
+                    //Debug.Log("Hit " + result.gameObject.name);
                 }
 
                 //we are only hitting the mouse Cursor, player is clicking somewhere besides the menu
                 if(results.Count <= 1)
                 {
                     hitWorld = true;
+                    //Debug.Log("hit world");
                 }
             }
         }

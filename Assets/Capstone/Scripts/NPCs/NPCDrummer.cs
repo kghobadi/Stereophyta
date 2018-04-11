@@ -8,9 +8,11 @@ public class NPCDrummer : NPC
     public float scaleColliderTime;
     float collisionSpeed, particleSpeed, particleLifetime;
 
+    //so we can set the interactable body collider
     BoxCollider drummerCollider;
     Vector3 originalColliderSize;
- 
+    Vector3 originalColliderPos;
+
     ParticleSystem beatParticles;
     DrumCollider drumCollision;
     public Transform drumBackpack, drumPosContainer;
@@ -18,7 +20,7 @@ public class NPCDrummer : NPC
     public List<GameObject> drumSet = new List<GameObject>();
     List<Transform> drumPositions = new List<Transform>();
 
-    bool setDrumPosition; // use this in update
+    bool startSounds, setDrumPosition; // use this in update
 
     public override void Start()
     {
@@ -49,9 +51,12 @@ public class NPCDrummer : NPC
             }
         }
         
+        //set body collider stuff
         drummerCollider = GetComponent<BoxCollider>();
         originalColliderSize = drummerCollider.size;
+        originalColliderPos = drummerCollider.center;
 
+        startSounds = true;
         currentState = NPCState.PLAYING;
         myMusic.isPlaying = true;
         SwitchSelectionButtons();
@@ -64,21 +69,46 @@ public class NPCDrummer : NPC
 
         if (currentState == NPCState.FOLLOWING)
         {
+            //set rock drum positions
             for (int i = 0; i < drumSet.Count; i++)
             {
                 drumSet[i].transform.localPosition = drumBackpack.localPosition;
                 drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
+            //no drum beat colliding
             drumCollision.gameObject.SetActive(false);
+            //readjust body collider
+            drummerCollider.size = new Vector3(4f, 2.25f, 10f);
+            drummerCollider.center = new Vector3(0, .38f, -2.5f);
+        }
+
+        if (currentState == NPCState.LABOR || currentState == NPCState.MOVING)
+        {
+            //set rock drum positions
+            for (int i = 0; i < drumSet.Count; i++)
+            {
+                drumSet[i].transform.localPosition = drumBackpack.localPosition;
+            }
+            //no drum beat colliding
+            drumCollision.gameObject.SetActive(false);
+            //readjust body collider
+            drummerCollider.size = new Vector3(4f, 2.25f, 10f);
+            drummerCollider.center = new Vector3(0, .38f, -2.5f);
         }
 
         if (currentState == NPCState.PLAYING)
         {
+            //turn on drum beat
             drumCollision.gameObject.SetActive(true);
+            //readjust body collider
+            drummerCollider.size = originalColliderSize;
+            drummerCollider.center = originalColliderPos;
+
             for (int i = 0; i < drumSet.Count; i++)
             {
                 drumSet[i].transform.localPosition = drumPositions[i].localPosition;
-                drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
+                if(!startSounds)
+                    drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
 
             if (myMusic.showRhythm && myMusic.isPlaying)
@@ -91,6 +121,12 @@ public class NPCDrummer : NPC
                 }
             
         }
+    }
+
+    public override void handleClickSuccess()
+    {
+        base.handleClickSuccess();
+        startSounds = false;
     }
 
     //fills up lists of nearby plants and rocks
@@ -162,33 +198,41 @@ public class NPCDrummer : NPC
         switch (myMusic.primaryTempo)
         {
             case 0:
+                collisionSpeed = 16;
+                particleSpeed = 1.875f;
+                particleLifetime = 12f;
+                break;
+            case 1:
+                collisionSpeed = 8f;
+                particleSpeed = 3.75f;
+                particleLifetime = 6f;
+                break;
+            case 2:
                 collisionSpeed = 4f;
                 particleSpeed = 7.5f;
                 particleLifetime = 3f;
                 break;
-            case 1:
+            case 3:
                 collisionSpeed = 2f;
                 particleSpeed = 15f;
                 particleLifetime = 1.5f;
                 break;
-            case 2:
+            case 4:
                 collisionSpeed = 1f;
                 particleSpeed = 30f;
                 particleLifetime = 0.75f;
-                break;
-            case 3:
-                collisionSpeed = 0.5f;
-                particleSpeed = 60f;
-                particleLifetime = 0.375f;
-                break;
-            case 4:
-                collisionSpeed = 0.25f;
-                particleSpeed = 120f;
-                particleLifetime = 0.1875f;
                 break;
         }
         beatParticlesModule.startSpeed = particleSpeed;
         beatParticlesModule.startLifetime = particleLifetime;
     }
-    
+
+    public override void OnEnable()
+    {
+        enabledCounter++;
+        if (enabledCounter > 1)
+        {
+            Start();
+        }
+    }
 }

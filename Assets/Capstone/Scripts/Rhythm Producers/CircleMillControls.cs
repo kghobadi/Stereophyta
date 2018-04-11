@@ -22,6 +22,7 @@ public class CircleMillControls : Interactable {
     CircleWind windCircles;
 
     //lowering sound
+    AudioSource controlsAudio;
     public AudioClip selectLower;
 
     //direction lever boolean (starts as 'positive')
@@ -31,6 +32,14 @@ public class CircleMillControls : Interactable {
     {
         base.Start();
         interactable = true;
+
+        controlsAudio = GetComponent<AudioSource>();
+
+        //interact sprites
+        for (int i = 1; i < 4; i++)
+        {
+            interactSprites.Add(Resources.Load<Sprite>("CursorSprites/machine " + i));
+        }
 
         //mill refs
         circleMill = transform.parent;
@@ -61,19 +70,11 @@ public class CircleMillControls : Interactable {
         windCircles.windSpeed *= -1;
         rotationSpeed *= -1;
 
-        for (int i = 0; i < circleNPCs.Length; i++)
-        {
-            if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
-            {
-                //circleNPCs[i].GetComponent<NPCcircle>().speed *= -1;
-            }
-        }
-
         //plays dif sound and moves lever correctly
         if (dirPositive)
         {
-            if (!soundBoard.isPlaying)
-                soundBoard.PlayOneShot(selectLower);
+            if (!controlsAudio.isPlaying)
+                controlsAudio.PlayOneShot(selectLower);
             dirLever.transform.localEulerAngles = new Vector3(0, -30, 0);
             dirPositive = false;
             //change NPC direction
@@ -81,14 +82,15 @@ public class CircleMillControls : Interactable {
             {
                 if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
                 {
-                    circleNPCs[i].GetComponent<HornNPC>().walkingDirection = false;
+                    if(circleNPCs[i] != null)
+                        circleNPCs[i].GetComponent<HornNPC>().walkingDirection = false;
                 }
             }
         }
         else
         {
-            if (!soundBoard.isPlaying)
-                soundBoard.PlayOneShot(InteractSound);
+            if (!controlsAudio.isPlaying)
+                controlsAudio.PlayOneShot(InteractSound);
             dirLever.transform.localEulerAngles = new Vector3(0, 30, 0);
             dirPositive = true;
             //change NPC direction
@@ -96,7 +98,9 @@ public class CircleMillControls : Interactable {
             {
                 if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
                 {
-                    circleNPCs[i].GetComponent<HornNPC>().walkingDirection = true;
+                    if (circleNPCs[i] != null)
+                        circleNPCs[i].GetComponent<HornNPC>().walkingDirection = true;
+                  
                 }
             }
         }
@@ -120,8 +124,8 @@ public class CircleMillControls : Interactable {
             }
 
 
-            if (!soundBoard.isPlaying)
-                soundBoard.PlayOneShot(InteractSound);
+            if (!controlsAudio.isPlaying)
+                controlsAudio.PlayOneShot(InteractSound);
         }
     }
 
@@ -141,8 +145,8 @@ public class CircleMillControls : Interactable {
                 RhythmIncrease();
             }
 
-            if (!soundBoard.isPlaying)
-                soundBoard.PlayOneShot(selectLower);
+            if (!controlsAudio.isPlaying)
+                controlsAudio.PlayOneShot(selectLower);
         }
     }
 
@@ -159,8 +163,12 @@ public class CircleMillControls : Interactable {
         {
             if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
             {
-                circleNPCs[i].GetComponent<HornNPC>().navMeshAgent.speed += NPCspeedInterval;
-                circleNPCs[i].GetComponent<HornNPC>().animator.speed += animatorSpeedInterval;
+                if (circleNPCs[i] != null)
+                {
+                    circleNPCs[i].GetComponent<HornNPC>().navMeshAgent.speed += NPCspeedInterval;
+                    circleNPCs[i].GetComponent<HornNPC>().animator.speed += animatorSpeedInterval;
+                }
+                   
             }
         }
     }
@@ -176,8 +184,11 @@ public class CircleMillControls : Interactable {
         {
             if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
             {
-                circleNPCs[i].GetComponent<HornNPC>().navMeshAgent.speed -= NPCspeedInterval;
-                circleNPCs[i].GetComponent<HornNPC>().animator.speed -= animatorSpeedInterval;
+                if (circleNPCs[i] != null)
+                {
+                    circleNPCs[i].GetComponent<HornNPC>().navMeshAgent.speed -= NPCspeedInterval;
+                    circleNPCs[i].GetComponent<HornNPC>().animator.speed -= animatorSpeedInterval;
+                }
             }
         }
     }

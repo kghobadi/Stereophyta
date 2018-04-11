@@ -7,7 +7,7 @@ public class Plant : SoundProducer {
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
 
-    ParticleSystem poofParticles;
+    public ParticleSystem poofParticles;
 
     public bool sapling;
     public float saplingScale, waterTimer =0, waterNecessary, regenTimer =0, regenNecessary;
@@ -19,24 +19,26 @@ public class Plant : SoundProducer {
 
     public enum PlantSpecies
     {
-        SPHERESHRUB, CUBETREE, GUITAR, 
+        HORN, PIANO, GUITAR, 
     }
 
     public override void Start () {
+        //this comes before base.Start() for sound sources 
         particleCount = 2;
         base.Start();
         poofParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
         poofParticles.Stop();
         
         //set to sapling stage
-        if (!placedInEditor)
+        if (!placedInEditor )
         {
             sapling = true;
             transform.localScale *= saplingScale;
             transform.position = new Vector3(transform.position.x, transform.position.y - (origScale.y / 2) + (transform.localScale.y / 2), transform.position.z);
         }
 
-        if (!sapling)
+        if (!sapling )
+           
         {
             soundSources[currentNote].transform.localScale *= 2;
             notesPlaying.transform.position = soundSources[currentNote].transform.position;
@@ -198,4 +200,12 @@ public class Plant : SoundProducer {
         }
     }
     
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        if(enabledCounter > 1)
+        {
+            Start();
+        }
+    }
 }

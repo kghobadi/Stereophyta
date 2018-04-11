@@ -2,7 +2,8 @@
 //using System.Collections.Generic;
 //using UnityEngine;
 
-//public class Gate : MonoBehaviour {
+//public class Gate : MonoBehaviour
+//{
 
 //    //Gates are ways of opening up and closing off play areas and guiding players through the world
 
@@ -17,7 +18,7 @@
 //    //   Eventually, we can do this for any object if we architect the game in such a way (NPCs, Animals, Mechanisms)
 //    //   This means Interactable Objects need a ref to Gate, so they can be checked off one by one.
 
-//    public List<GameObject> interactableObjects= new List<GameObject>();
+//    public List<GameObject> interactableObjects = new List<GameObject>();
 
 //    public List<Transform> overlapSphereCenters = new List<Transform>();
 
@@ -33,7 +34,8 @@
 
 //    //public string[] interactableTags; this format will be used later when there are more interactable objects
 
-//    void Start () {
+//    void Start()
+//    {
 //        if (transform.childCount > 1)
 //        {
 //            for (int o = 0; o < transform.childCount; o++)
@@ -206,17 +208,17 @@
 //        }
 //        cutSceneScript = Camera.main.GetComponent<CutScene>();
 //    }
-	
-//	public void CheckAreaComplete()
+
+//    public void CheckAreaComplete()
 //    {
-//        for(int i = 0; i < interactableObjects.Count; i++)
+//        for (int i = 0; i < interactableObjects.Count; i++)
 //        {
 //            if (interactableObjects[i].tag == "Plant")
 //            {
-//                if(interactableObjects[i].GetComponent<Plant>().interactionFulfilled &&
+//                if (interactableObjects[i].GetComponent<Plant>().interactionFulfilled &&
 //                    !interactableObjects[i].GetComponent<Plant>().hasBeenChecked)
 //                {
-//                    interactionCounterTotal+= interactableObjects[i].GetComponent<Plant>().interactionsNecessary;
+//                    interactionCounterTotal += interactableObjects[i].GetComponent<Plant>().interactionsNecessary;
 //                    interactableObjects[i].GetComponent<Plant>().hasBeenChecked = true;
 //                }
 //            }
@@ -271,7 +273,7 @@
 //            }
 //        }
 
-//        if(interactionCounterTotal >= interactionsNecessaryTotal && !areaComplete)  
+//        if (interactionCounterTotal >= interactionsNecessaryTotal && !areaComplete)
 //        {
 //            StartCoroutine(LowerGate());
 //            cutSceneScript.ShowEvent(transform, cameraPos);
@@ -282,7 +284,7 @@
 //    IEnumerator LowerGate()
 //    {
 //        //lowers gate until below 
-//        while(transform.position.y > ((0 - (transform.localScale.y / 2)) - 1))
+//        while (transform.position.y > ((0 - (transform.localScale.y / 2)) - 1))
 //        {
 //            transform.Translate(0, lowerSpeed * Time.deltaTime, 0);
 //            yield return new WaitForEndOfFrame();

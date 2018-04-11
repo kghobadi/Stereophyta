@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Rhythm : MonoBehaviour {
- 
+    protected int enabledCounter = 0; // used to count # of enables
 
     public virtual void OnTriggerEnter(Collider other)
     {
@@ -23,4 +23,10 @@ public class Rhythm : MonoBehaviour {
             other.gameObject.GetComponent<Plant>().PlaySound();
         }
     }
+
+    public virtual void OnEnable()
+    {
+        enabledCounter++;
+    }
+
 }
