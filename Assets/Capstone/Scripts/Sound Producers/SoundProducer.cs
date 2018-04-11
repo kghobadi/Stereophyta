@@ -212,10 +212,15 @@ public abstract class SoundProducer : Interactable {
         }
         
     }
-
+    
     public override void OnDisable()
     {
         base.OnDisable();
-        soundSources[currentNote].transform.localScale *= 0.5f;
+        if (soundSources[currentNote].activeSelf)
+        {
+            soundSources[currentNote].transform.localScale *= 0.5f;
+            soundSources[currentNote].GetComponent<MeshRenderer>().material.color = origColor;
+        }
+        transform.localScale = origScale;
     }
 }

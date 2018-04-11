@@ -75,6 +75,12 @@ public class Language : MonoBehaviour
     ThirdPersonController tpc;
     public AudioMixerSnapshot currentMixerGroup, talkingMix;
 
+    //UI talking
+    Image symbol; // 2d sprite renderer icon reference
+    AnimateUI symbolAnimator;
+    List<Sprite> talkingSprites = new List<Sprite>(); // walking feet cursor
+    int currentTalk = 0;
+
     public void Start()
     {
         //player refs
@@ -102,6 +108,14 @@ public class Language : MonoBehaviour
         for(int i = 0; i < allQuestObjects.Length; i++)
         {
             allQuestObjects[i].questImage.enabled = false;
+        }
+
+        //talking UI
+        symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
+        symbolAnimator = symbol.GetComponent<AnimateUI>();
+        for (int i = 1; i < 4; i++)
+        {
+            talkingSprites.Add(Resources.Load<Sprite>("CursorSprites/talk " + i));
         }
 
         imageAnimator = imageDisplay.gameObject.GetComponent<AnimateDialogue>();
@@ -136,6 +150,8 @@ public class Language : MonoBehaviour
         //checks for mouse input to advance dialogue
         if (talking)
         {
+            symbolAnimator.animationSprites = talkingSprites;
+            symbolAnimator.active = true;
             //delay for click to process stuff
             if (!advance)
             {
@@ -179,7 +195,7 @@ public class Language : MonoBehaviour
         {
             //open cloud manual anim
             _player.transform.LookAt(new Vector3(transform.position.x, _player.transform.position.y, transform.position.z));
-            tpc.enabled = false;
+            tpc.talking = true;
             mainCam.zoomedOut = false;
             mainCam.npcTransform = transform;
             mainCam.zoomedIn = true;
@@ -282,7 +298,7 @@ public class Language : MonoBehaviour
                 //zoom out and reactivate player
                 mainCam.zoomedOut = true;
                 mainCam.zoomedIn = false;
-                tpc.enabled = true;
+                tpc.talking = false;
             }
 
             //allow player to issue command if NPC quest complete or they are following you
@@ -295,7 +311,7 @@ public class Language : MonoBehaviour
                 currentMixerGroup.TransitionTo(1f);
                 mainCam.zoomedOut = true;
                 mainCam.zoomedIn = false;
-                tpc.enabled = true;
+                tpc.talking = false;
                 playerResponded = false;
                 waitingForPlayer = false;
             }

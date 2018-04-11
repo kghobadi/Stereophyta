@@ -30,14 +30,14 @@ public class Plant : SoundProducer {
         poofParticles.Stop();
         
         //set to sapling stage
-        if (!placedInEditor && enabledCounter <= 1)
+        if (!placedInEditor )
         {
             sapling = true;
             transform.localScale *= saplingScale;
             transform.position = new Vector3(transform.position.x, transform.position.y - (origScale.y / 2) + (transform.localScale.y / 2), transform.position.z);
         }
 
-        if (!sapling && enabledCounter <= 1)
+        if (!sapling )
            
         {
             soundSources[currentNote].transform.localScale *= 2;
@@ -199,13 +199,7 @@ public class Plant : SoundProducer {
             base.Selection_Two();
         }
     }
-
-    public override void OnDisable()
-    {
-        base.OnDisable();
-        transform.localScale = origScale;
-    }
-
+    
     public override void OnEnable()
     {
         base.OnEnable();

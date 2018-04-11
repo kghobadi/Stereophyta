@@ -30,6 +30,7 @@ public class PianoMonkNPC : NPC {
     {
         //wait here a moment
         animator.SetBool("walking", false);
+        interactable = false;
         yield return new WaitForSeconds(waitingTime);
 
 
@@ -76,21 +77,31 @@ public class PianoMonkNPC : NPC {
             
                 transform.LookAt(new Vector3(currentPlants[randomPlant].transform.position.x, transform.position.y, currentPlants[randomPlant].transform.position.z));
                 for(int n = 0; n < currentPlants[randomPlant].musicalNotes.Length - 1; n++)
+        {
+            //check if its active
+            if (currentPlants[randomPlant].gameObject.activeSelf)
+            {
+                if (randomShift > 50)
                 {
-                    if (randomShift > 50)
-                    {
-                        currentPlants[randomPlant].Selection_Two(); //ShiftNoteUp
-                        currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].currentSound);
-                    }
-                    else
-                    {
-                        currentPlants[randomPlant].Selection_One(); //ShiftNoteDown
-                        currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].currentSound);
-                    }
-                    yield return new WaitForSeconds(waitingTime);
+                    currentPlants[randomPlant].Selection_Two(); //ShiftNoteUp
+                    currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].currentSound);
                 }
-        
+                else
+                {
+                    currentPlants[randomPlant].Selection_One(); //ShiftNoteDown
+                    currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].currentSound);
+                }
+                yield return new WaitForSeconds(waitingTime);
+            }
+            //set move to avoid bugs 
+            else
+            {
+                SetMove();
+            }
+        }
+
         //set new move pos
+        interactable = true;
         SetMove();
         animator.SetBool("walking", true);
     }

@@ -42,7 +42,7 @@ public abstract class Interactable : MonoBehaviour
     public bool interactable, playerClicked;
 
     // lets us know if object is now held by player
-    protected bool playerHolding, buttonsOn;
+    protected bool playerHolding, buttonsOn, interactableSwitched;
 
     //Selection Wheel Menu variables
     public int selectionCounter; // number of interactable options
@@ -198,6 +198,23 @@ public abstract class Interactable : MonoBehaviour
         //store current activation state
         bool isActive = gameObject.activeInHierarchy;
         //Debug.Log(isActive);
+
+        //while player is talking, nothing is interactable
+        if (tpc.talking )
+        {
+            canClickDistance = 0f;
+            canSeeDistance = 0f;
+            interactable = false;
+            interactableSwitched = true;
+        }
+        //use interactable switched to make everything interactable once more
+        else if(!tpc.talking && interactableSwitched)
+        {
+            interactable = true;
+            interactableSwitched = false;
+            canClickDistance = 10f;
+            canSeeDistance = 15f;
+        }
 
         //if object is active and too far from player, turn off
         if(isActive && distanceFromPlayer > _worldManager.activationDistance)
