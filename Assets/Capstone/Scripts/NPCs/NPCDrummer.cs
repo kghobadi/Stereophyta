@@ -73,6 +73,7 @@ public class NPCDrummer : NPC
             for (int i = 0; i < drumSet.Count; i++)
             {
                 drumSet[i].transform.localPosition = drumBackpack.localPosition;
+                drumSet[i].transform.localEulerAngles = new Vector3(-90, 0, 0);
                 drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
             //no drum beat colliding
@@ -88,6 +89,7 @@ public class NPCDrummer : NPC
             for (int i = 0; i < drumSet.Count; i++)
             {
                 drumSet[i].transform.localPosition = drumBackpack.localPosition;
+                drumSet[i].transform.localEulerAngles = new Vector3(0, 0, 0);
             }
             //no drum beat colliding
             drumCollision.gameObject.SetActive(false);
@@ -107,7 +109,8 @@ public class NPCDrummer : NPC
             for (int i = 0; i < drumSet.Count; i++)
             {
                 drumSet[i].transform.localPosition = drumPositions[i].localPosition;
-                if(!startSounds)
+                drumSet[i].transform.localEulerAngles = new Vector3(0, 0, 0);
+                if (!startSounds)
                     drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
 
