@@ -167,6 +167,7 @@ public class HornNPC : NPC {
 
                     if (!currentPlants[randomPlant].sapling)
                     {
+                    currentPlants[randomPlant].regenNecessary = 100f;
                         //loop through plant branches
                         for (int i = 0; i < currentPlants[randomPlant].soundSources.Count; i++)
                         {
@@ -197,7 +198,7 @@ public class HornNPC : NPC {
                     }
                     else
                     {
-
+                    currentPlants[randomPlant].waterNecessary = 100f;
                     yield return new WaitForSeconds(2);
 
                     if(currentPlants[randomPlant] != null)

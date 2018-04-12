@@ -93,7 +93,6 @@ public class ThirdPersonController : MonoBehaviour
     {
         if (!talking)
         {
-            footStepSource.outputAudioMixerGroup = plantingGroup;
             //this is used in fruitSeedNoInv to let seed know whether player has a seed already
             if (seedLine.Count == 0)
             {
@@ -203,12 +202,22 @@ public class ThirdPersonController : MonoBehaviour
                 headTurnTimer = 0;
 
                 footStepTimer += Time.deltaTime;
+                
                 if (currentSpeed > 12)
                 {
                     //play footstep sound
                     if (footStepTimer > runStepTotal)
                     {
                         footStepSource.PlayOneShot(footsteps[currentStep]);
+                        //increment footstep audio
+                        if (currentStep < (footsteps.Length - 1))
+                        {
+                            currentStep+= Random.Range(0, (footsteps.Length - currentStep));
+                        }
+                        else
+                        {
+                            currentStep = 0;
+                        }
                         footStepTimer = 0;
                     }
                     //animate ui
@@ -223,21 +232,22 @@ public class ThirdPersonController : MonoBehaviour
                     if (footStepTimer > walkStepTotal)
                     {
                         footStepSource.PlayOneShot(footsteps[currentStep]);
+                        //increment footstep audio
+                        if (currentStep < (footsteps.Length - 1))
+                        {
+                            currentStep += Random.Range(0, (footsteps.Length - currentStep));
+                        }
+                        else
+                        {
+                            currentStep = 0;
+                        }
                         footStepTimer = 0;
                     }
                     blubAnimator.SetBool("walking", true);
                     blubAnimator.SetBool("running", false);
                 }
 
-                //increment footstep audio
-                if (currentStep < (footsteps.Length - 1))
-                {
-                    currentStep++;
-                }
-                else
-                {
-                    currentStep = 0;
-                }
+              
             }
             //this timer only plays the idle animation if we are not moving. still a little buggy
             else
