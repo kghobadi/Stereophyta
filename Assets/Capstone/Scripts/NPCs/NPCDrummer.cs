@@ -18,7 +18,7 @@ public class NPCDrummer : NPC
     public Transform drumBackpack, drumPosContainer;
     public int backpackMax;
     public List<GameObject> drumSet = new List<GameObject>();
-    List<Transform> drumPositions = new List<Transform>();
+    public List<Transform> drumPositions = new List<Transform>();
 
     bool startSounds, setDrumPosition; // use this in update
 
@@ -33,23 +33,31 @@ public class NPCDrummer : NPC
         beatParticles.Stop();
         drumCollision = transform.GetChild(2).GetComponent<DrumCollider>();
 
-        // list of positions for deploying rock drums
-        for (int t = 0; t < drumPosContainer.childCount; t++)
-        {
-            drumPositions.Add(drumPosContainer.GetChild(t));
-        }
 
-        backpackMax = drumPositions.Count;
-
-        // if there are rocks in the drummers pack, add them to the list
-        if (drumBackpack.childCount > 0)
+        if(enabledCounter <= 1)
         {
-            for (int i = 0; i < drumBackpack.childCount; i++)
+            // list of positions for deploying rock drums
+            for (int t = 0; t < drumPosContainer.childCount; t++)
             {
-                drumSet.Add(drumBackpack.GetChild(i).gameObject);
-                drumSet[i].transform.localPosition = drumPositions[i].localPosition;
+                drumPositions.Add(drumPosContainer.GetChild(t));
+            }
+
+            backpackMax = drumPositions.Count;
+
+            // if there are rocks in the drummers pack, add them to the list
+            if (drumBackpack.childCount > 0)
+            {
+                for (int i = 0; i < drumBackpack.childCount; i++)
+                {
+                    drumSet.Add(drumBackpack.GetChild(i).gameObject);
+                    drumSet[i].transform.localPosition = drumPositions[i].localPosition;
+                    drumSet[i].GetComponent<Rock>().partOfDrumSet = true;
+                    drumSet[i].GetComponent<Rock>().drumSetPos = drumPositions[i];
+                    drumSet[i].GetComponent<Rock>().myDrummer = this;
+                }
             }
         }
+        
         
         //set body collider stuff
         drummerCollider = GetComponent<BoxCollider>();
@@ -108,8 +116,11 @@ public class NPCDrummer : NPC
 
             for (int i = 0; i < drumSet.Count; i++)
             {
-                drumSet[i].transform.localPosition = drumPositions[i].localPosition;
-                drumSet[i].transform.localEulerAngles = new Vector3(0, 0, 0);
+                if (!drumSet[i].GetComponent<Rock>().playerHolding)
+                {
+                    drumSet[i].transform.localPosition = drumPositions[i].localPosition;
+                    drumSet[i].transform.localEulerAngles = new Vector3(0, 0, 0);
+                }
                 if (!startSounds)
                     drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
@@ -148,6 +159,10 @@ public class NPCDrummer : NPC
                     drumSet.Add(hitColliders[i].gameObject);
                     hitColliders[i].gameObject.transform.SetParent(drumBackpack);
                     hitColliders[i].gameObject.transform.localPosition = drumBackpack.localPosition;
+                    int rockIndex = drumSet.IndexOf(hitColliders[i].gameObject);
+                    hitColliders[i].gameObject.GetComponent<Rock>().partOfDrumSet = true;
+                    hitColliders[i].gameObject.GetComponent<Rock>().drumSetPos = drumPositions[rockIndex];
+                    hitColliders[i].gameObject.GetComponent<Rock>().myDrummer = this;
                 }
                 else
                 {
@@ -189,6 +204,18 @@ public class NPCDrummer : NPC
             }
             yield return new WaitForSeconds(waitingTime);
         }
+
+        //turn on drum beat and play once
+        drumCollision.gameObject.SetActive(true);
+
+        SwitchTempoVisuals();
+        drumCollision.StartCoroutine(drumCollision.LerpScale(collisionSpeed));
+
+        beatParticles.Play();
+        myMusic.showRhythm = false;
+        yield return new WaitForSeconds(waitingTime);
+        drumCollision.gameObject.SetActive(false);
+
         //set new move pos
         SetMove();
         animator.SetBool("walking", true);
