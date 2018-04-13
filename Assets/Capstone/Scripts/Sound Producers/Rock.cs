@@ -118,6 +118,7 @@ public class Rock : SoundProducer
             //set parent back to drumContainer
             drumSetPos.SetParent(originalTranParent);
             transform.SetParent(originalRockParent);
+            transform.Translate(0, -1, 0);
         }
 
         tpc.isHoldingSomething = false;

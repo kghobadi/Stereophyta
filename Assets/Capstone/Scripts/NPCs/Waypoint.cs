@@ -7,10 +7,56 @@ public class Waypoint : MonoBehaviour {
     [SerializeField]
     protected float debugDrawRadius = 1.0f;
     public PathType pathType;
+    MeshRenderer mr;
+    SphereCollider sc;
+    public bool playerSetting, canBePlaced;
 
     public enum PathType
     {
         GUITAR, DRUM, HORN, PIANO
+    }
+
+    void Start()
+    {
+        mr = GetComponent<MeshRenderer>();
+        sc = GetComponent<SphereCollider>();
+    }
+
+    void Update()
+    {
+        if (playerSetting)
+        {
+            mr.enabled = true;
+            sc.enabled = true;
+        }
+        else
+        {
+            mr.enabled = false;
+            sc.enabled = false;
+        }
+    }
+
+    public bool RaycastToGround()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 100.0f))
+        {
+            if(hit.transform.gameObject.tag == "Ground")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public virtual void OnDrawGizmos()

@@ -40,15 +40,14 @@ public class NPC : Interactable {
     protected Vector3 targestDestination;
 
     //movement point container and list -- and home version
-    public bool setInEditor;
+    public bool playerSettingMove;
     public Transform movementPointsContainer;
-    Transform homeContainer;
     public List<Transform> movementPoints = new List<Transform>();
-    List<Transform> homePoints = new List<Transform>();
     Transform chosenWaypoint; // for finding new path
 
     //navMeshSpeeds -- SHOULD JUST LINK THIS TO MYMUSIC.TEMPO
-    public float moveSpeedInterval, moveSpeedMax; 
+    public float moveSpeedInterval, moveSpeedMax;
+    public float holdTimer = 0, holdTimerWait = 0.25f;
 
     //for note up or down
     bool upOrDown, hasLooked, clickedButton;
@@ -80,7 +79,6 @@ public class NPC : Interactable {
 
         navMeshAgent = GetComponent<NavMeshAgent>();
 
-        homePosition = transform.position;
         trailRender = GetComponent<TrailRenderer>();
 
         myMusic = GetComponent<Musician>();
@@ -93,25 +91,13 @@ public class NPC : Interactable {
         //interactable = true;
         followTimer = 0;
 
-        if (!setInEditor)
-        {
-            //loops through children of container and adds them to list
-            for (int i = 0; i < movementPointsContainer.childCount; i++)
+       //loops through children of container and adds them to list
+       for (int i = 0; i < movementPointsContainer.childCount; i++)
             {
                 movementPoints.Add(movementPointsContainer.GetChild(i));
-                homePoints.Add(movementPointsContainer.GetChild(i));
             }
-        }
-        else
-        {
-            //if we do set publicly, still add the points to the homeList
-            for (int i = 0; i < movementPoints.Count; i++)
-            {
-                homePoints.Add(movementPoints[i]);
-            }
-        }
-
-        homeContainer = movementPointsContainer;
+       
+        homePosition = movementPointsContainer.position;
 
         //set target dest to first position in transform array
         targestDestination = movementPoints[moveCounter].position;
@@ -131,6 +117,8 @@ public class NPC : Interactable {
         //what happens if following and else
         if (currentState == NPCState.FOLLOWING)
         {
+            movementPointsContainer.SetParent(transform);
+            movementPointsContainer.localPosition = Vector3.zero;
             followTimer += Time.deltaTime;
             trailRender.enabled = false;
             canSeeDistance = 50;
@@ -239,6 +227,44 @@ public class NPC : Interactable {
             }
         }
 
+        if (playerSettingMove)
+        {
+            tpc.enabled = false;
+            interactable = false;
+
+            holdTimer += Time.deltaTime;
+
+            //on click call raycasts. 
+            if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
+            {
+                int canPlaceCounter = 0;
+                for (int i = 0; i < movementPoints.Count; i++)
+                {
+                    if (movementPoints[i].GetComponent<Waypoint>().RaycastToGround())
+                    {
+                        canPlaceCounter++;
+                    }
+                }
+                if(canPlaceCounter == movementPoints.Count)
+                {
+                    DropWaypoints();
+                }
+            }
+
+            //make movementPointContainer follow mouse pos
+            float mouseX = Input.mousePosition.x;
+
+            float mouseY = Input.mousePosition.y;
+
+            float cameraDif = Camera.main.transform.position.y - transform.position.y;
+
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif));
+
+            Vector3 hoverLocation = new Vector3(worldpos.x, transform.position.y, worldpos.z);
+
+            movementPointsContainer.position = hoverLocation;
+        }
+
     }
 
     //private function which is called by NPC to SetDestination in List of Transforms
@@ -270,94 +296,27 @@ public class NPC : Interactable {
         
         //reset move points
         moveCounter = 0;
-        movementPointsContainer = homeContainer;
-        movementPoints.Clear();
-
-        for(int i = 0; i < homePoints.Count; i++)
-        {
-            movementPoints.Add(homePoints[i]);
-        }
-
+        movementPointsContainer.SetParent(null);
+        movementPointsContainer.position = homePosition;
+        //StartCoroutine(WaveAtPlayer());
         SetMove();
     }
 
-    //Called when setting a follower to Labor in a new area
-    protected void FindNewPath()
+    //Called when setting a follower to Labor in a new are
+    protected void DropWaypoints()
     {
-        Debug.Log("looking for new path");
-        //empty current pathing points
-        movementPoints.Clear();
-
-        //temp list for storing waypoints & distance check size
-        List<GameObject> nearbyWaypoints = new List<GameObject>();
-        float pathFindingDistance = 50f;
-        float closestDistance = 50f;
-
-        //Look for nearby waypoints with correct myMusic/myPath type 
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, pathFindingDistance);
-        int i = 0;
-        while (i < hitColliders.Length)
+        Debug.Log("set new path");
+        playerSettingMove = false;
+        tpc.enabled = true;
+        moveCounter = 0;
+        movementPointsContainer.SetParent(null);
+        holdTimer = 0;
+        for (int i = 0; i < movementPoints.Count; i++)
         {
-            if(hitColliders[i].gameObject.tag == "Waypoint")
-            {
-                if(hitColliders[i].gameObject.GetComponent<Waypoint>().pathType.ToString() == myMusic.musicType.ToString())
-                {
-                    nearbyWaypoints.Add(hitColliders[i].gameObject);
-                    Debug.Log("waypoint added");
-                }
-            }
-            i++;
+            movementPoints[i].GetComponent<Waypoint>().playerSetting = false;
         }
 
-        if(i >= hitColliders.Length)
-        {
-            //if there are waypoints, find the closest one
-            if (nearbyWaypoints.Count > 0)
-            {
-                for (int w = 0; w < nearbyWaypoints.Count; w++)
-                {
-                    float currentDist = Vector3.Distance(transform.position, nearbyWaypoints[w].transform.position);
-                    if (currentDist < closestDistance)
-                    {
-                        closestDistance = currentDist;
-                        chosenWaypoint = nearbyWaypoints[w].transform;
-                    }
-                }
-
-                //using the closest waypoint, reset transform container and the pathing points
-                if (chosenWaypoint != null)
-                {
-                    movementPointsContainer = chosenWaypoint.parent;
-                    //loops through children of container and adds them to list
-                    for (int t = 0; t < movementPointsContainer.childCount; t++)
-                    {
-                        movementPoints.Add(movementPointsContainer.GetChild(t));
-                    }
-
-                    //set movecounter to the right index, set destination
-                    moveCounter = 0;
-                    SetMove();
-                }
-            }
-            //if no nearby paths, continue following 
-            else
-            {
-                Debug.Log("went back to following");
-                //go back to following 
-                tpc.followers.Add(gameObject);
-                tpc.followerDistances.Add(followDistance);
-                tpc.blubAnimator.Play("Wave", 0);
-                CheckPlaceInLine();
-
-                currentState = NPCState.FOLLOWING;
-                animator.SetBool("walking", true);
-
-            }
-
-            //This happens no matter what when the function is over
-            DeactivateSelectionMenu();
-            SwitchSelectionButtons();
-        }
+        SetMove();
     }
 
     //fills up lists of nearby plants and rocks
@@ -612,8 +571,16 @@ public class NPC : Interactable {
             tpc.blubAnimator.Play("Wave", 0);
             followTimer = 0;
 
-            FindNewPath();
-           
+            playerSettingMove = true;
+
+            for (int i = 0; i < movementPoints.Count; i++)
+            {
+                movementPoints[i].GetComponent<Waypoint>().playerSetting = true;
+            }
+
+            DeactivateSelectionMenu();
+            SwitchSelectionButtons();
+
             clickedButton = true;
         }
         //Stop playing music while PLAYING
