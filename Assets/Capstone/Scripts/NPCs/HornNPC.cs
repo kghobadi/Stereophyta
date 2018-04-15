@@ -135,21 +135,6 @@ public class HornNPC : NPC {
                 //spawn plant
                 plantClone = Instantiate(plantPrefab, transform.position + new Vector3(0, heightAdjustment, 0), Quaternion.identity);
                 plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
-            
-                //Need to figure out how to adjust planting position of the plant
-                //bool canPlant = false;
-                //Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
-                //int p = 0;
-
-                //    while (p < hitColliders.Length)
-                //    {
-                //        if (hitColliders[i].gameObject.tag == "Plant")
-                //        {
-                //            canPlant = false;
-                //        }
-                //        p++;
-                //    }
-                
 
                 yield return new WaitForSeconds(waitingTime + 1);
             }
@@ -165,15 +150,23 @@ public class HornNPC : NPC {
                     //choose random plant to play up or down the scale
                     int randomPlant = Random.Range(0, currentPlants.Count);
 
-                    if (!currentPlants[randomPlant].sapling)
+                Vector3 plantPos = new Vector3(currentPlants[randomPlant].transform.position.x, transform.position.y, currentPlants[randomPlant].transform.position.z);
+
+                transform.LookAt(plantPos);
+                if (!currentPlants[randomPlant].sapling)
                     {
+                    transform.LookAt(plantPos);
+                    currentPlants[randomPlant].regenNecessary = 100f;
                         //loop through plant branches
                         for (int i = 0; i < currentPlants[randomPlant].soundSources.Count; i++)
                         {
                             if (currentPlants[randomPlant].soundSources[i].activeSelf)
                             {
-                                //turn off fruit
-                                currentPlants[randomPlant].soundSources[i].transform.localScale *= 0.5f;
+                            Vector3 sourcePos = new Vector3(currentPlants[randomPlant].soundSources[i].transform.position.x, transform.position.y, currentPlants[randomPlant].soundSources[i].transform.position.z);
+                            transform.LookAt(sourcePos);
+
+                            //turn off fruit
+                            currentPlants[randomPlant].soundSources[i].transform.localScale *= 0.5f;
                                 currentPlants[randomPlant].soundSources[i].SetActive(false);
                             
                             currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].musicalNotes[i]);
@@ -197,12 +190,14 @@ public class HornNPC : NPC {
                     }
                     else
                     {
-
+                    currentPlants[randomPlant].waterNecessary = 100f;
+                    transform.LookAt(plantPos);
                     yield return new WaitForSeconds(2);
 
                     if(currentPlants[randomPlant] != null)
                     {
                         //play poof
+                        transform.LookAt(plantPos);
                         currentPlants[randomPlant].poofParticles.Play();
                         yield return new WaitForSeconds(waitingTime);
                         //destroy plant if all seeds are gone 
@@ -216,8 +211,9 @@ public class HornNPC : NPC {
         }
 
         interactable = true;
-        //set new move pos
+        //visit seed pile or set move
         SetMove();
+        
         animator.SetBool("walking", true);
     }
 

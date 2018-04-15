@@ -146,7 +146,7 @@ public class WindMachine : RhythmProducer {
     //Called when player is holding the windMachine and right clicks to drop
     public void DropObject()
     {
-        transform.localPosition -= new Vector3(0, 3, 0);
+        transform.localPosition -= new Vector3(0, 2, 0);
         transform.SetParent(null);
 
         tpc.isHoldingSomething = false;

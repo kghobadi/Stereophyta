@@ -42,7 +42,8 @@ public abstract class Interactable : MonoBehaviour
     public bool interactable, playerClicked;
 
     // lets us know if object is now held by player
-    protected bool playerHolding, buttonsOn, interactableSwitched;
+    public bool playerHolding;
+    protected bool  buttonsOn, interactableSwitched;
 
     //Selection Wheel Menu variables
     public int selectionCounter; // number of interactable options
