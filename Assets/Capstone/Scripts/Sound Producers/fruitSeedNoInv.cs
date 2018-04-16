@@ -71,18 +71,15 @@ public class fruitSeedNoInv : Interactable {
 
         //if player is holding another object, this can't be interactable
         currentSeedCount = tpc.seedLine.Count;
-        if (!inSeedLine && !playerHolding && !planting && !throwing /*&& tpc.seedLine.Count < tpc.seedMax*/) //change this to if(tpc.seedLine.Count < seedMax)
-        {
-            interactable = true;
-        }
-        else
-        {
-            currentSpot = tpc.seedLine.IndexOf(gameObject);
-            interactable = false;
-        }
+       
+       currentSpot = tpc.seedLine.IndexOf(gameObject);
+       interactable = false;
+        
 
+        //input reader for when a player is holding this seed 
         if (playerHolding)
         {
+            //if you right click and nothing is stopping you
             if (Input.GetMouseButtonDown(1) && tpc.canUseSeed)
             {
                 bool canPlant = true;
@@ -102,52 +99,17 @@ public class fruitSeedNoInv : Interactable {
                     playerHolding = false;
                     tpc.seedLine.Remove(gameObject);
                     inSeedLine = false;
-                    //tpc.blubAnimator.setBool("planting", true);
                 }
-                //throwCounter += Time.deltaTime;
-
-                //if(throwCounter > tpc.throwMin && throwCounter < tpc.throwMax)
-                //{
-                //    //rotate player arm joints back for charging throw position
-                //    //seed should rotateAround player head
-                //    transform.RotateAround(_player.transform.position, _player.transform.right, -1);
-                //}
-                //if(throwCounter > tpc.throwMax && tpc.canUseSeed)
-                //{
-                //    playerHolding = false;
-                //    inSeedLine = false;
-                //    tpc.seedLine.Remove(gameObject);
-                //    transform.SetParent(null);
-                //    yVelocity = tpc.gravity;
-                //    //gameObject.AddComponent<TrailRenderer>();
-                //    throwing = true;
-                //    //rotate player arms back super quick for throw animation
-                //}
             }
-
-            //if (Input.GetMouseButtonUp(1))
-            //{
-            //    if (throwCounter < tpc.throwMin)
-            //    {
-
-            //    }
-            //    if (throwCounter > tpc.throwMin && tpc.canUseSeed)
-            //    {
-            //        playerHolding = false;
-            //        inSeedLine = false;
-            //        tpc.seedLine.Remove(gameObject);
-            //        transform.SetParent(null);
-            //        throwing = true;
-            //        //gameObject.AddComponent<TrailRenderer>();
-            //        yVelocity = tpc.gravity;
-            //        //rotate player arms back super quick for throw animation
-            //    }
-            //}
         }
+        //for controlling behavior of all seeds in line
         else if (inSeedLine && !playerHolding && currentSpot!= 0)
         {
-            if(currentSpot == 1)
+            transform.localEulerAngles += new Vector3(0, 1, 0);
+            //seed in first spot (not being held) gets special treatment
+            if (currentSpot == 1)
             {
+                //controls whether a seed is playing a clip or not
                 if (seedSource.isPlaying)
                 {
                     targetPos = _player.transform.localPosition - new Vector3(0, 0, 1) + new Vector3(0, 1, 0);
@@ -162,6 +124,7 @@ public class fruitSeedNoInv : Interactable {
             }
             else
             {
+                //controls whether a seed is playing a clip or not
                 if (seedSource.isPlaying)
                 {
                     notesPlaying.Emit(1);
@@ -171,7 +134,10 @@ public class fruitSeedNoInv : Interactable {
                 {
                     targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
                 }
+                //increment follow speed of seeds
                 followSpeed = followSpeedOrig - (currentSpot /1.5f);
+                
+                //look at targetPos
                 transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
             }
             transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);
@@ -200,16 +166,8 @@ public class fruitSeedNoInv : Interactable {
             PlantSeed();
             
         }
-        //else if (throwing)
-        //{
-        //    ThrowSeed();
-        //}
-        else
-        {
-            transform.localEulerAngles += new Vector3(0, 1, 0);
-        }
 
-
+        //keeping track of changes to seedline
         if (currentSeedCount != lastLineLength && inSeedLine)
         {
             CheckPlaceInLine();
@@ -225,6 +183,7 @@ public class fruitSeedNoInv : Interactable {
         inSeedLine = true;
         if (tpc.seedLine.Count == 1)
         {
+            //move to player holding pos
             transform.SetParent(rightArmObj.transform);
             transform.localPosition = Vector3.zero;
             transform.localEulerAngles = Vector3.zero;
@@ -234,12 +193,15 @@ public class fruitSeedNoInv : Interactable {
         }
         else
         {
+            //reset pos
+            int lineIndex = tpc.seedLine.IndexOf(gameObject);
             transform.position = _player.transform.position;
             transform.localEulerAngles = Vector3.zero;
-            for (int i = 0; i <= tpc.seedLine.IndexOf(gameObject); i++)
+            for (int i = 0; i <= lineIndex; i++)
             {
-                //transform.localPosition += new Vector3(0, 0, -1);
-                transform.localScale *= 0.9f;
+                //only do this as long as spot is less than 10
+                if(i < 10)
+                    transform.localScale *= 0.9f;
             }
         }
     }
@@ -250,6 +212,7 @@ public class fruitSeedNoInv : Interactable {
         inSeedLine = true;
             if (currentSpot != lastSpot && lastSpot != -1)
             {
+            //this is the currently held seed!
                 if (currentSpot == 0)
                 {
                     transform.SetParent(rightArmObj.transform);
@@ -261,7 +224,8 @@ public class fruitSeedNoInv : Interactable {
                 }
                 else
                 {
-                    if (currentSpot < lastSpot)
+                //only do this if they are within 10 places in line
+                if (currentSpot < lastSpot)
                     {
                         transform.localScale *= 1.1f;
                     }
@@ -269,6 +233,8 @@ public class fruitSeedNoInv : Interactable {
                     {
                         transform.localScale *= 0.9f;
                     }
+                
+                    
                 }
         }
         //yield return new WaitForSeconds(0.5f);

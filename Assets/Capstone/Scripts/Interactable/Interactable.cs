@@ -157,7 +157,7 @@ public abstract class Interactable : MonoBehaviour
         SwitchSelectionButtons();
         if(selectionCounter > 1)
         {
-            tpc.enabled = false;
+            tpc.talking = true;
             symbolAnimator.animationSprites.Clear();
             for (int i = 0; i < interactSprites.Count; i++)
             {
@@ -335,7 +335,7 @@ public abstract class Interactable : MonoBehaviour
         }
 
         
-        tpc.enabled = true;
+        tpc.talking = false;
 
         symbolAnimator.animationSprites.Clear();
         for (int i = 0; i < interactSprites.Count; i++)

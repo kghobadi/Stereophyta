@@ -22,7 +22,7 @@ public class NPC : Interactable {
     protected bool hasWavedAtPlayer;
 
     //home pos is starting pos and myPath will be used to find labor routes around the map
-    protected Vector3 homePosition;
+    protected Vector3 homePosition, homeRotation;
     protected string myPath; // will use this to find relevant transform Containers
 
     //navmesh ref and musician, language script ref
@@ -46,7 +46,7 @@ public class NPC : Interactable {
     Transform chosenWaypoint; // for finding new path
 
     //navMeshSpeeds -- SHOULD JUST LINK THIS TO MYMUSIC.TEMPO
-    public float moveSpeedInterval, moveSpeedMax;
+    public float moveSpeedInterval, moveSpeedOriginal;
     public float holdTimer = 0, holdTimerWait = 0.25f;
 
     //for note up or down
@@ -98,11 +98,13 @@ public class NPC : Interactable {
             }
        
         homePosition = movementPointsContainer.position;
+        homeRotation = movementPointsContainer.localEulerAngles;
 
         //set target dest to first position in transform array
         targestDestination = movementPoints[moveCounter].position;
         transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
 
+        moveSpeedOriginal = navMeshAgent.speed;
         navMeshAgent.SetDestination(targestDestination);
         currentState = NPCState.MOVING;
 
@@ -258,7 +260,7 @@ public class NPC : Interactable {
 
             float cameraDif = Camera.main.transform.position.y - transform.position.y;
 
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif));
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif + 10f));
 
             Vector3 hoverLocation = new Vector3(worldpos.x, transform.position.y, worldpos.z);
 
@@ -298,6 +300,7 @@ public class NPC : Interactable {
         moveCounter = 0;
         movementPointsContainer.SetParent(null);
         movementPointsContainer.position = homePosition;
+        movementPointsContainer.localEulerAngles = homeRotation;
         //StartCoroutine(WaveAtPlayer());
         SetMove();
     }
@@ -447,14 +450,24 @@ public class NPC : Interactable {
         }
 
         Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
-
-        if (Vector3.Distance(transform.position, spotInLine) > 10f)
+        
+        if (Vector3.Distance(transform.position, spotInLine) > 25f)
         {
+            animator.SetBool("walking", true);
+            navMeshAgent.SetDestination(spotInLine);
+            navMeshAgent.speed = tpc.currentSpeed + 3;
+            transform.LookAt(spotInLine);
+        }
+        else if (Vector3.Distance(transform.position, spotInLine) > 10f && Vector3.Distance(transform.position, spotInLine) < 25f)
+        {
+            animator.SetBool("walking", true);
+            navMeshAgent.speed = moveSpeedOriginal;
             navMeshAgent.SetDestination(spotInLine);
             transform.LookAt(spotInLine);
         }
         else
         {
+            animator.SetBool("walking", false);
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         }
 
@@ -513,8 +526,10 @@ public class NPC : Interactable {
             tpc.blubAnimator.Play("Wave", 0);
             CheckPlaceInLine();
 
+            moveSpeedOriginal = navMeshAgent.speed;
             currentState = NPCState.FOLLOWING;
             animator.SetBool("walking", true);
+            
 
             clickedButton = true;
         }
@@ -539,6 +554,7 @@ public class NPC : Interactable {
             tpc.blubAnimator.Play("Wave", 0);
             CheckPlaceInLine();
 
+            moveSpeedOriginal = navMeshAgent.speed;
             currentState = NPCState.FOLLOWING;
             animator.SetBool("walking", true);
 
@@ -557,8 +573,12 @@ public class NPC : Interactable {
         if (lastState != NPCState.FOLLOWING && lastState != NPCState.PLAYING && !clickedButton)
         {
             myLanguage.playerResponded = true;
-            if (navMeshAgent.speed < moveSpeedMax)
+            if (myMusic.primaryTempo < 4)
+            {
+                myMusic.primaryTempo++;
                 navMeshAgent.speed += moveSpeedInterval;
+            }
+               
             SetMove();
             clickedButton = true;
         }
@@ -605,8 +625,13 @@ public class NPC : Interactable {
         if (lastState != NPCState.FOLLOWING && lastState != NPCState.PLAYING)
         {
             myLanguage.playerResponded = true;
-            if (navMeshAgent.speed < moveSpeedMax)
+            //Decrease Tempo while PLAYING
+          
+            if (myMusic.primaryTempo > 0)
+            {
+                myMusic.primaryTempo--;
                 navMeshAgent.speed -= moveSpeedInterval;
+            }
             SetMove();
         }
         //If following, Return Home command
@@ -621,7 +646,11 @@ public class NPC : Interactable {
         if(lastState == NPCState.PLAYING)
         {
             if(myMusic.primaryTempo < 4)
+            {
                 myMusic.primaryTempo++;
+                navMeshAgent.speed += moveSpeedInterval;
+            }
+               
         }
     }
     public override void Selection_Four()
