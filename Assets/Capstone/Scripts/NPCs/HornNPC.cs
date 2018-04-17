@@ -34,39 +34,46 @@ public class HornNPC : NPC {
 
     public override void SetMove()
     {
-        //Debug.Log("set move");
-        navMeshAgent.isStopped = false;
-        animator.SetBool("walking", true);
-        if (walkingDirection)
+        if (myLanguage.talking)
         {
-            if (moveCounter < (movementPoints.Count - 1))
-            {
-                moveCounter += 1;
-            }
-            else
-            {
-                moveCounter = 0;
-            }
+            Debug.Log("talking");
+            currentState = NPCState.TALKING;
         }
         else
         {
-            if (moveCounter > 0)
+            //Debug.Log("set move");
+            navMeshAgent.isStopped = false;
+            animator.SetBool("walking", true);
+            if (walkingDirection)
             {
-                moveCounter--;
+                if (moveCounter < (movementPoints.Count - 1))
+                {
+                    moveCounter += 1;
+                }
+                else
+                {
+                    moveCounter = 0;
+                }
             }
             else
             {
-                moveCounter = movementPoints.Count -1;
+                if (moveCounter > 0)
+                {
+                    moveCounter--;
+                }
+                else
+                {
+                    moveCounter = movementPoints.Count - 1;
+                }
             }
+
+            targestDestination = movementPoints[moveCounter].position;
+
+            navMeshAgent.SetDestination(targestDestination);
+
+
+            currentState = NPCState.MOVING;
         }
-        
-        targestDestination = movementPoints[moveCounter].position;
-
-        navMeshAgent.SetDestination(targestDestination);
-    
-
-        currentState = NPCState.MOVING;
-
     }
 
 
@@ -118,7 +125,6 @@ public class HornNPC : NPC {
     //Don't play rocks... Need to make drummers labor on rocks more interesting
     public override IEnumerator PerformLabor()
     {
-        interactable = false;
         //wait here a moment
         animator.SetBool("walking", false);
 
@@ -212,8 +218,7 @@ public class HornNPC : NPC {
             }
             
         }
-
-        interactable = true;
+        
         //visit seed pile or set move
         SetMove();
         

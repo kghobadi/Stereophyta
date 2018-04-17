@@ -62,7 +62,6 @@ public class PianoMonkNPC : NPC {
     {
         //wait here a moment
         animator.SetBool("walking", false);
-        interactable = false;
         yield return new WaitForSeconds(waitingTime);
 
 
@@ -133,7 +132,6 @@ public class PianoMonkNPC : NPC {
         }
 
         //set new move pos
-        interactable = true;
         SetMove();
         animator.SetBool("walking", true);
     }

@@ -53,8 +53,7 @@ public class Waypoint : MonoBehaviour {
                 return false;
             }
         }
-        else
-        {
+        else { 
             return false;
         }
     }
