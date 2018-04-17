@@ -187,11 +187,13 @@ public class NPC : Interactable {
                 else if(lastState == NPCState.PLAYING)
                 {
                     currentState = NPCState.PLAYING;
+                    animator.SetBool("idle", false);
                 }
                 //restart labor
                 else
                 {
                     SetMove();
+                    animator.SetBool("idle", false);
                 }
             }
         }
@@ -217,10 +219,12 @@ public class NPC : Interactable {
                 {
                     myMusic.isPlaying = true;
                     currentState = NPCState.PLAYING;
+                    animator.SetBool("idle", false);
                 }
                 else
                 {
                     SetMove();
+                    animator.SetBool("idle", false);
                 }
             }
         }
@@ -483,20 +487,23 @@ public class NPC : Interactable {
         if (Vector3.Distance(transform.position, spotInLine) > 25f)
         {
             animator.SetBool("walking", true);
+            animator.SetBool("idle", false);
             navMeshAgent.SetDestination(spotInLine);
             navMeshAgent.speed = tpc.currentSpeed + 3;
             transform.LookAt(spotInLine);
         }
-        else if (Vector3.Distance(transform.position, spotInLine) > 10f && Vector3.Distance(transform.position, spotInLine) < 25f)
+        else if (Vector3.Distance(transform.position, spotInLine) > 5f && Vector3.Distance(transform.position, spotInLine) < 25f)
         {
             animator.SetBool("walking", true);
+            animator.SetBool("idle", false);
             navMeshAgent.speed = moveSpeedOriginal;
             navMeshAgent.SetDestination(spotInLine);
             transform.LookAt(spotInLine);
         }
         else
         {
-            animator.SetBool("walking", false);
+            animator.SetBool("idle", true);
+            animator.SetBool("walking", true);
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         }
 
@@ -530,7 +537,10 @@ public class NPC : Interactable {
             }
                 //start talkin'
                 StopAllCoroutines();
-                talkingPos = transform;
+            animator.SetBool("idle", true);
+            animator.SetBool("walking", false);
+            animator.SetBool("waving", false);
+            talkingPos = transform;
                 currentState = NPCState.TALKING;
                 myLanguage.StartCoroutine(myLanguage.Speak());
             

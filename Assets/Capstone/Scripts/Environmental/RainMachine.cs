@@ -36,6 +36,6 @@ public class RainMachine : MonoBehaviour
 
     void InstantiateRain()
     {
-        Instantiate(rain, transform.position + new Vector3(0, 25, 0) + transform.forward * 40, Quaternion.Euler(0, transform.eulerAngles.y, 0));
+        Instantiate(rain, transform.position + new Vector3(0, 50, 0) + transform.forward * 40, Quaternion.Euler(0, transform.eulerAngles.y, 0));
     }
 }

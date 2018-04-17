@@ -140,9 +140,15 @@ public class HornNPC : NPC {
             {
                 //spawn plant
                 plantClone = Instantiate(plantPrefab, transform.position + new Vector3(0, heightAdjustment, 0), Quaternion.identity);
-                plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
-
+               
                 yield return new WaitForSeconds(waitingTime + 1);
+
+                if (plantClone.activeSelf)
+                    plantClone.GetComponent<Plant>().audioSource.outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
+                else
+                {
+                    plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
+                }
             }
             
         }
