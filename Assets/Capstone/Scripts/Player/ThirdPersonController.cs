@@ -20,8 +20,9 @@ public class ThirdPersonController : MonoBehaviour
     public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
     public GameObject walkingPointer;
     //Camera ref variables
-    AudioSource cameraAudSource, footStepSource;
-    public AudioClip[] footsteps;
+    AudioSource cameraAudSource;
+    public AudioSource playerSource;
+    public AudioClip[] footsteps, noNo;
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
     float footStepTimer = 0;
     int currentStep = 0;
@@ -39,6 +40,7 @@ public class ThirdPersonController : MonoBehaviour
     public int followerCountMax;
 
     public List<GameObject> seedLine = new List<GameObject>();
+    public int seedLineMax;
 
     //Store the current audio mixer info so when you plant stuff and drop off followers, they adjust to where player is on map
     public AudioMixerSnapshot currentAudioMix;
@@ -72,7 +74,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         symbol.sprite = walkingSprites[currentWalk];
-        footStepSource = GetComponent<AudioSource>();
+        playerSource = GetComponent<AudioSource>();
 
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
@@ -147,7 +149,7 @@ public class ThirdPersonController : MonoBehaviour
             //On mouse up, we check clickTimer to see if we are walking to that point or stopping the character from running 
             if (Input.GetMouseButtonUp(0))
             {
-                footStepSource.PlayOneShot(footsteps[currentStep]);
+                playerSource.PlayOneShot(footsteps[currentStep]);
                 //increment footstep audio
                 if (currentStep < (footsteps.Length - 1))
                 {
@@ -208,7 +210,7 @@ public class ThirdPersonController : MonoBehaviour
                     //play footstep sound
                     if (footStepTimer > runStepTotal)
                     {
-                        footStepSource.PlayOneShot(footsteps[currentStep]);
+                        playerSource.PlayOneShot(footsteps[currentStep]);
                         //increment footstep audio
                         if (currentStep < (footsteps.Length - 1))
                         {
@@ -231,7 +233,7 @@ public class ThirdPersonController : MonoBehaviour
                     //play footstep sound
                     if (footStepTimer > walkStepTotal)
                     {
-                        footStepSource.PlayOneShot(footsteps[currentStep]);
+                        playerSource.PlayOneShot(footsteps[currentStep]);
                         //increment footstep audio
                         if (currentStep < (footsteps.Length - 1))
                         {

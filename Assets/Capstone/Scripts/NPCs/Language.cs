@@ -68,7 +68,7 @@ public class Language : MonoBehaviour
 
     //pops up when player has not clicked thru dialogue yet
     Image clickReminder;
-    float reminderTimer = 0f, reminderTimerTotal = 2f;
+    float reminderTimerTotal = 2f;
 
     CameraController mainCam;
     GameObject _player;
@@ -161,27 +161,18 @@ public class Language : MonoBehaviour
                     advance = true;
                     waitTime = 0f;
                 }
-            }
-            
-            
-        }
-        //if dialogue active and the player hasn't advanced
-        if (talking && !advance)
-        {
-            //wait a sec, then remind them to click!
-            reminderTimer += Time.deltaTime;
-            if(reminderTimer > reminderTimerTotal)
-            {
-                clickReminder.enabled = true;
+
+                //wait a sec, then remind them to click!
+                if (waitTime > reminderTimerTotal)
+                {
+                    clickReminder.enabled = true;
+                }
             }
         }
-        //turn off reminder
         else
         {
-            reminderTimer = 0f;
-            clickReminder.enabled = false;
+            waitTime = 0f;
         }
-        
     }
 
     //this will be called in NPC
@@ -250,7 +241,7 @@ public class Language : MonoBehaviour
             yield return new WaitUntil(() => advance == true);
 
             advance = false;
-
+            clickReminder.enabled = false;
             //reset temp bools
             imageAnimator.active = false;
 

@@ -34,39 +34,46 @@ public class HornNPC : NPC {
 
     public override void SetMove()
     {
-        //Debug.Log("set move");
-        navMeshAgent.isStopped = false;
-        animator.SetBool("walking", true);
-        if (walkingDirection)
+        if (myLanguage.talking)
         {
-            if (moveCounter < (movementPoints.Count - 1))
-            {
-                moveCounter += 1;
-            }
-            else
-            {
-                moveCounter = 0;
-            }
+            Debug.Log("talking");
+            currentState = NPCState.TALKING;
         }
         else
         {
-            if (moveCounter > 0)
+            //Debug.Log("set move");
+            navMeshAgent.isStopped = false;
+            animator.SetBool("walking", true);
+            if (walkingDirection)
             {
-                moveCounter--;
+                if (moveCounter < (movementPoints.Count - 1))
+                {
+                    moveCounter += 1;
+                }
+                else
+                {
+                    moveCounter = 0;
+                }
             }
             else
             {
-                moveCounter = movementPoints.Count -1;
+                if (moveCounter > 0)
+                {
+                    moveCounter--;
+                }
+                else
+                {
+                    moveCounter = movementPoints.Count - 1;
+                }
             }
+
+            targestDestination = movementPoints[moveCounter].position;
+
+            navMeshAgent.SetDestination(targestDestination);
+
+
+            currentState = NPCState.MOVING;
         }
-        
-        targestDestination = movementPoints[moveCounter].position;
-
-        navMeshAgent.SetDestination(targestDestination);
-    
-
-        currentState = NPCState.MOVING;
-
     }
 
 
@@ -118,7 +125,6 @@ public class HornNPC : NPC {
     //Don't play rocks... Need to make drummers labor on rocks more interesting
     public override IEnumerator PerformLabor()
     {
-        interactable = false;
         //wait here a moment
         animator.SetBool("walking", false);
 
@@ -134,9 +140,15 @@ public class HornNPC : NPC {
             {
                 //spawn plant
                 plantClone = Instantiate(plantPrefab, transform.position + new Vector3(0, heightAdjustment, 0), Quaternion.identity);
-                plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
-
+               
                 yield return new WaitForSeconds(waitingTime + 1);
+
+                if (plantClone.activeSelf)
+                    plantClone.GetComponent<Plant>().audioSource.outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
+                else
+                {
+                    plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
+                }
             }
             
         }
@@ -144,73 +156,75 @@ public class HornNPC : NPC {
         //Sucker if false
         else
         {
-                //for the number of plants exceeding the max
-                for (int p = 0; p < (currentPlants.Count - plantMaximum); p++)
+            //for the number of plants exceeding the max
+            for (int p = 0; p < (currentPlants.Count - plantMaximum); p++)
+            {
+                //if plant exists    
+                if(currentPlants[p] != null)
                 {
-                    //choose random plant to play up or down the scale
-                    int randomPlant = Random.Range(0, currentPlants.Count);
-
-                Vector3 plantPos = new Vector3(currentPlants[randomPlant].transform.position.x, transform.position.y, currentPlants[randomPlant].transform.position.z);
-
-                transform.LookAt(plantPos);
-                if (!currentPlants[randomPlant].sapling)
-                    {
+                    //look at plant pos
+                    Vector3 plantPos = new Vector3(currentPlants[p].transform.position.x, transform.position.y, currentPlants[p].transform.position.z);
                     transform.LookAt(plantPos);
-                    currentPlants[randomPlant].regenNecessary = 100f;
-                        //loop through plant branches
-                        for (int i = 0; i < currentPlants[randomPlant].soundSources.Count; i++)
-                        {
-                            if (currentPlants[randomPlant].soundSources[i].activeSelf)
-                            {
-                            Vector3 sourcePos = new Vector3(currentPlants[randomPlant].soundSources[i].transform.position.x, transform.position.y, currentPlants[randomPlant].soundSources[i].transform.position.z);
-                            transform.LookAt(sourcePos);
 
-                            //turn off fruit
-                            currentPlants[randomPlant].soundSources[i].transform.localScale *= 0.5f;
-                                currentPlants[randomPlant].soundSources[i].SetActive(false);
-                            
-                            currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].musicalNotes[i]);
-                            
-                            
-                                yield return new WaitForSeconds(waitingTime);
-                            
+                    //if this plant is fully grown
+                    if (!currentPlants[p].sapling)
+                    {
+                        transform.LookAt(plantPos);
+                        currentPlants[p].regenNecessary = 100f;
+                        //loop through plant branches
+                        for (int i = 0; i < currentPlants[p].soundSources.Count; i++)
+                        {
+                            //check if plant is still there and if sound source is active
+                            if (currentPlants[p] != null && currentPlants[p].soundSources[i].activeSelf)
+                            {
+                                Vector3 sourcePos = new Vector3(currentPlants[p].soundSources[i].transform.position.x, transform.position.y, currentPlants[p].soundSources[i].transform.position.z);
+                                transform.LookAt(sourcePos);
+
+                                //turn off fruit
+                                currentPlants[p].soundSources[i].transform.localScale *= 0.5f;
+                                currentPlants[p].soundSources[i].SetActive(false);
+
+                                //play seed removal sound !!!
                                 
+                                yield return new WaitForSeconds(waitingTime);
                             }
                         }
 
-                    //play poof
+                        //play poof
+                        currentPlants[p].poofParticles.Play();
+                        //wait until note stops playing
+                        yield return new WaitUntil(() => currentPlants[p].audioSource.isPlaying == false);
 
-                    currentPlants[randomPlant].poofParticles.Play();
-                    //wait until note stops playing
-                    yield return new WaitUntil(() => currentPlants[randomPlant].audioSource.isPlaying == false);
-
-                    //destroy plant if all seeds are gone 
-                    Destroy(currentPlants[randomPlant].gameObject);
-                        currentPlants.Remove(currentPlants[randomPlant]);
+                        //destroy plant if all seeds are gone 
+                        Destroy(currentPlants[p].gameObject);
+                        currentPlants.Remove(currentPlants[p]);
+                        p--; //account for change in list size
                     }
                     else
                     {
-                    currentPlants[randomPlant].waterNecessary = 100f;
-                    transform.LookAt(plantPos);
-                    yield return new WaitForSeconds(2);
-
-                    if(currentPlants[randomPlant] != null)
-                    {
-                        //play poof
+                        currentPlants[p].waterNecessary = 100f;
                         transform.LookAt(plantPos);
-                        currentPlants[randomPlant].poofParticles.Play();
-                        yield return new WaitForSeconds(waitingTime);
-                        //destroy plant if all seeds are gone 
-                        Destroy(currentPlants[randomPlant].gameObject);
-                        currentPlants.Remove(currentPlants[randomPlant]);
-                    }
-                    
+                        yield return new WaitForSeconds(2);
+
+                        if (currentPlants[p] != null)
+                        {
+                            //play poof
+                            transform.LookAt(plantPos);
+                            currentPlants[p].poofParticles.Play();
+                            yield return new WaitForSeconds(waitingTime);
+                            //destroy plant if all seeds are gone 
+                            Destroy(currentPlants[p].gameObject);
+                            currentPlants.Remove(currentPlants[p]);
+                            p--; //account for change in list size
+                        }
+
                     }
                 }
+               
+            }
             
         }
-
-        interactable = true;
+        
         //visit seed pile or set move
         SetMove();
         

@@ -42,7 +42,7 @@ public class Waypoint : MonoBehaviour {
 
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 100.0f))
+        if (Physics.Raycast(transform.position, down, out hit, 10f))
         {
             if(hit.transform.gameObject.tag == "Ground")
             {
@@ -53,8 +53,7 @@ public class Waypoint : MonoBehaviour {
                 return false;
             }
         }
-        else
-        {
+        else { 
             return false;
         }
     }

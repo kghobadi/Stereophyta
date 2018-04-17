@@ -26,11 +26,42 @@ public class PianoMonkNPC : NPC {
        
     }
 
+    //fills up lists of nearby plants and rocks
+    public override void LookForWork()
+    {
+        //hasLooked = true;
+        currentPlants.Clear();
+        currentRocks.Clear();
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
+        int i = 0;
+        while (i < hitColliders.Length)
+        {
+            if (hitColliders[i].gameObject.tag == "Plant")
+            {
+                currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
+
+            }
+            else if (hitColliders[i].gameObject.tag == "Rock")
+            {
+                currentRocks.Add(hitColliders[i].gameObject.GetComponent<Rock>());
+            }
+            i++;
+        }
+        //if there are no nearby plants or rocks, we set move
+        if (currentPlants.Count > 0)
+        {
+            StartCoroutine(PerformLabor());
+        }
+        else
+        {
+            SetMove();
+        }
+    }
+
     public override IEnumerator PerformLabor()
     {
         //wait here a moment
         animator.SetBool("walking", false);
-        interactable = false;
         yield return new WaitForSeconds(waitingTime);
 
 
@@ -101,7 +132,6 @@ public class PianoMonkNPC : NPC {
         }
 
         //set new move pos
-        interactable = true;
         SetMove();
         animator.SetBool("walking", true);
     }

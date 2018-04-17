@@ -22,7 +22,7 @@ public class NPC : Interactable {
     protected bool hasWavedAtPlayer;
 
     //home pos is starting pos and myPath will be used to find labor routes around the map
-    protected Vector3 homePosition;
+    protected Vector3 homePosition, homeRotation;
     protected string myPath; // will use this to find relevant transform Containers
 
     //navmesh ref and musician, language script ref
@@ -46,7 +46,7 @@ public class NPC : Interactable {
     Transform chosenWaypoint; // for finding new path
 
     //navMeshSpeeds -- SHOULD JUST LINK THIS TO MYMUSIC.TEMPO
-    public float moveSpeedInterval, moveSpeedMax;
+    public float moveSpeedInterval, moveSpeedOriginal;
     public float holdTimer = 0, holdTimerWait = 0.25f;
 
     //for note up or down
@@ -98,11 +98,13 @@ public class NPC : Interactable {
             }
        
         homePosition = movementPointsContainer.position;
+        homeRotation = movementPointsContainer.localEulerAngles;
 
         //set target dest to first position in transform array
         targestDestination = movementPoints[moveCounter].position;
         transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
 
+        moveSpeedOriginal = navMeshAgent.speed;
         navMeshAgent.SetDestination(targestDestination);
         currentState = NPCState.MOVING;
 
@@ -117,8 +119,11 @@ public class NPC : Interactable {
         //what happens if following and else
         if (currentState == NPCState.FOLLOWING)
         {
-            movementPointsContainer.SetParent(transform);
-            movementPointsContainer.localPosition = Vector3.zero;
+            if (!playerSettingMove)
+            {
+                movementPointsContainer.SetParent(transform);
+                movementPointsContainer.localPosition = Vector3.zero;
+            }
             followTimer += Time.deltaTime;
             trailRender.enabled = false;
             canSeeDistance = 50;
@@ -179,14 +184,21 @@ public class NPC : Interactable {
                     //keep following
                     currentState = NPCState.FOLLOWING;
                 }
+                else if(lastState == NPCState.PLAYING)
+                {
+                    currentState = NPCState.PLAYING;
+                    animator.SetBool("idle", false);
+                }
                 //restart labor
                 else
                 {
                     SetMove();
+                    animator.SetBool("idle", false);
                 }
             }
         }
 
+        //while NPC is delivering first lines of language
         if(currentState == NPCState.TALKING)
         {
             navMeshAgent.isStopped = true;
@@ -199,14 +211,25 @@ public class NPC : Interactable {
                 base.handleClickSuccess();
                 currentState = NPCState.WAITING;
             }
+            //if they have quest and talking is over
             if (myLanguage.questActive && !myLanguage.talking)
             {
                 interactable = true;
-                SetMove();
-                
+                if(lastState == NPCState.PLAYING)
+                {
+                    myMusic.isPlaying = true;
+                    currentState = NPCState.PLAYING;
+                    animator.SetBool("idle", false);
+                }
+                else
+                {
+                    SetMove();
+                    animator.SetBool("idle", false);
+                }
             }
         }
 
+        //when an NPC is disabled so we dont mess with anything
         if(currentState == NPCState.DISABLED)
         {
             //nothing
@@ -227,9 +250,10 @@ public class NPC : Interactable {
             }
         }
 
+        //while a player is reseting waypoints
         if (playerSettingMove)
         {
-            tpc.enabled = false;
+            tpc.talking = true;
             interactable = false;
 
             holdTimer += Time.deltaTime;
@@ -237,6 +261,7 @@ public class NPC : Interactable {
             //on click call raycasts. 
             if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
             {
+                //check if ground is there
                 int canPlaceCounter = 0;
                 for (int i = 0; i < movementPoints.Count; i++)
                 {
@@ -245,9 +270,15 @@ public class NPC : Interactable {
                         canPlaceCounter++;
                     }
                 }
+                //drop new waypoint path
                 if(canPlaceCounter == movementPoints.Count)
                 {
                     DropWaypoints();
+                }
+                else
+                {
+                    //no no sound effect
+                    myMusic.primarySource.PlayOneShot(tpc.noNo[0], 1f);
                 }
             }
 
@@ -258,7 +289,7 @@ public class NPC : Interactable {
 
             float cameraDif = Camera.main.transform.position.y - transform.position.y;
 
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif));
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif + 15f));
 
             Vector3 hoverLocation = new Vector3(worldpos.x, transform.position.y, worldpos.z);
 
@@ -271,22 +302,30 @@ public class NPC : Interactable {
     //Call this function whenever you want an NPC to enter the Labor/Movement loop
     public virtual void SetMove()
     {
-        //Debug.Log("set move");
-        navMeshAgent.isStopped = false;
-        animator.SetBool("walking", true);
-        if (moveCounter < (movementPoints.Count - 1))
+        if(myLanguage.talking)
         {
-            moveCounter += 1;
+            Debug.Log("talking");
+            currentState = NPCState.TALKING;
         }
         else
         {
-            moveCounter = 0;
+            navMeshAgent.isStopped = false;
+            animator.SetBool("walking", true);
+            if (moveCounter < (movementPoints.Count - 1))
+            {
+                moveCounter += 1;
+            }
+            else
+            {
+                moveCounter = 0;
+            }
+            targestDestination = movementPoints[moveCounter].position;
+
+            navMeshAgent.SetDestination(targestDestination);
+
+            currentState = NPCState.MOVING;
         }
-        targestDestination = movementPoints[moveCounter].position;
-
-        navMeshAgent.SetDestination(targestDestination);
-
-        currentState = NPCState.MOVING;
+        
     }
 
     //Called as a command to NPCs who are FOLLOWING or PLAYING
@@ -298,16 +337,18 @@ public class NPC : Interactable {
         moveCounter = 0;
         movementPointsContainer.SetParent(null);
         movementPointsContainer.position = homePosition;
-        //StartCoroutine(WaveAtPlayer());
-        SetMove();
+        movementPointsContainer.localEulerAngles = homeRotation;
+        currentState = NPCState.MOVING;
+        StartCoroutine(WaveAtPlayer());
     }
 
     //Called when setting a follower to Labor in a new are
     protected void DropWaypoints()
     {
+        //Should play sound effect for successful path set!
         Debug.Log("set new path");
         playerSettingMove = false;
-        tpc.enabled = true;
+        tpc.talking = false;
         moveCounter = 0;
         movementPointsContainer.SetParent(null);
         holdTimer = 0;
@@ -356,7 +397,6 @@ public class NPC : Interactable {
     {
         //wait here a moment
         animator.SetBool("walking", false);
-        interactable = false;
         yield return new WaitForSeconds(waitingTime);
         currentState = NPCState.LABOR;
 
@@ -391,7 +431,6 @@ public class NPC : Interactable {
             yield return new WaitForSeconds(waitingTime);
         }
         //set new move pos
-        interactable = true;
         SetMove();
         animator.SetBool("walking", true);
     }
@@ -399,7 +438,6 @@ public class NPC : Interactable {
     //controls all the animation states necessary for waving
     public virtual IEnumerator WaveAtPlayer()
     {
-        interactable = false;
         lastState = currentState;
         currentState = NPCState.WAVING;
         navMeshAgent.isStopped = true;
@@ -407,8 +445,7 @@ public class NPC : Interactable {
         animator.SetBool("waving", true);
         animator.SetBool("walking", false);
         yield return new WaitForSeconds(wavingTime);
-
-        interactable = true;
+        
         if (myLanguage.talking)
         {
             currentState = NPCState.TALKING;
@@ -438,7 +475,6 @@ public class NPC : Interactable {
     public virtual void FollowPlayer()
     {
         navMeshAgent.isStopped = false;
-        //Debug.Log("following player");
         //check place in line
         int currentLineLength = tpc.followers.Count;
         if (currentLineLength != lastLineLength)
@@ -447,14 +483,27 @@ public class NPC : Interactable {
         }
 
         Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
-
-        if (Vector3.Distance(transform.position, spotInLine) > 10f)
+        
+        if (Vector3.Distance(transform.position, spotInLine) > 25f)
         {
+            animator.SetBool("walking", true);
+            animator.SetBool("idle", false);
+            navMeshAgent.SetDestination(spotInLine);
+            navMeshAgent.speed = tpc.currentSpeed + 3;
+            transform.LookAt(spotInLine);
+        }
+        else if (Vector3.Distance(transform.position, spotInLine) > 5f && Vector3.Distance(transform.position, spotInLine) < 25f)
+        {
+            animator.SetBool("walking", true);
+            animator.SetBool("idle", false);
+            navMeshAgent.speed = moveSpeedOriginal;
             navMeshAgent.SetDestination(spotInLine);
             transform.LookAt(spotInLine);
         }
         else
         {
+            animator.SetBool("idle", true);
+            animator.SetBool("walking", true);
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         }
 
@@ -484,15 +533,17 @@ public class NPC : Interactable {
                 lastState = currentState;
             if (currentState == NPCState.PLAYING)
             {
-                base.handleClickSuccess();
+                myMusic.isPlaying = false;
             }
-            else
-            {
                 //start talkin'
-                talkingPos = transform;
+                StopAllCoroutines();
+            animator.SetBool("idle", true);
+            animator.SetBool("walking", false);
+            animator.SetBool("waving", false);
+            talkingPos = transform;
                 currentState = NPCState.TALKING;
                 myLanguage.StartCoroutine(myLanguage.Speak());
-            }
+            
         }
         
     }
@@ -513,8 +564,10 @@ public class NPC : Interactable {
             tpc.blubAnimator.Play("Wave", 0);
             CheckPlaceInLine();
 
+            moveSpeedOriginal = navMeshAgent.speed;
             currentState = NPCState.FOLLOWING;
             animator.SetBool("walking", true);
+            
 
             clickedButton = true;
         }
@@ -534,11 +587,13 @@ public class NPC : Interactable {
         //if playing music, we can set it back to following
         else if(lastState == NPCState.PLAYING && !clickedButton)
         {
+            myLanguage.playerResponded = true;
             tpc.followers.Add(gameObject);
             tpc.followerDistances.Add(followDistance);
             tpc.blubAnimator.Play("Wave", 0);
             CheckPlaceInLine();
 
+            moveSpeedOriginal = navMeshAgent.speed;
             currentState = NPCState.FOLLOWING;
             animator.SetBool("walking", true);
 
@@ -557,8 +612,12 @@ public class NPC : Interactable {
         if (lastState != NPCState.FOLLOWING && lastState != NPCState.PLAYING && !clickedButton)
         {
             myLanguage.playerResponded = true;
-            if (navMeshAgent.speed < moveSpeedMax)
+            if (myMusic.primaryTempo < 4)
+            {
+                myMusic.primaryTempo++;
                 navMeshAgent.speed += moveSpeedInterval;
+            }
+               
             SetMove();
             clickedButton = true;
         }
@@ -605,8 +664,13 @@ public class NPC : Interactable {
         if (lastState != NPCState.FOLLOWING && lastState != NPCState.PLAYING)
         {
             myLanguage.playerResponded = true;
-            if (navMeshAgent.speed < moveSpeedMax)
+            //Decrease Tempo while PLAYING
+          
+            if (myMusic.primaryTempo > 0)
+            {
+                myMusic.primaryTempo--;
                 navMeshAgent.speed -= moveSpeedInterval;
+            }
             SetMove();
         }
         //If following, Return Home command
@@ -621,7 +685,11 @@ public class NPC : Interactable {
         if(lastState == NPCState.PLAYING)
         {
             if(myMusic.primaryTempo < 4)
+            {
                 myMusic.primaryTempo++;
+                navMeshAgent.speed += moveSpeedInterval;
+            }
+               
         }
     }
     public override void Selection_Four()
@@ -687,7 +755,14 @@ public class NPC : Interactable {
         base.OnEnable();
         if(enabledCounter > 1)
         {
-            SetMove();
+            if(lastState == NPCState.PLAYING)
+            {
+                currentState = NPCState.PLAYING;
+            }
+            else
+            {
+                SetMove();
+            }
         }
     }
 }
