@@ -10,12 +10,13 @@ public class Sun : MonoBehaviour
     public Light sun;
     public bool isMorning, isMidday, isDusk, isNight;
 	public Color morn, mid, dusk, night;
-    public Gradient lightColorMap;
+    public Color ambientMorn, ambientMid, ambientDusk, ambientNight;
+    //public Gradient lightColorMap;
     float totalXRange, interval, middayInterval, duskInterval, nightInterval;
-
 
     void Start()
     {
+        RenderSettings.ambientLight = ambientMorn;
 		sun.color = morn;
         totalXRange = transform.position.x * 2;
         interval = totalXRange / 4;
@@ -36,7 +37,8 @@ public class Sun : MonoBehaviour
 
         if(transform.position.x > middayInterval)
         {
-			sun.color = Color.Lerp(sun.color, morn, Time.deltaTime / 10);
+			sun.color = Color.Lerp(sun.color, mid, Time.deltaTime / 10);
+            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientMid, Time.deltaTime / 10);
 			//sun.intensity = Mathf.Lerp (sun.intensity, 1.5f, Time.deltaTime);
             isMorning = true;
             isNight = false;
@@ -47,7 +49,8 @@ public class Sun : MonoBehaviour
         }
         else if(transform.position.x < middayInterval && transform.position.x > duskInterval)
         {
-			sun.color = Color.Lerp (sun.color, mid, Time.deltaTime / 10);
+            sun.color = Color.Lerp(sun.color, dusk, Time.deltaTime / 10);
+            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientDusk, Time.deltaTime / 10);
             //sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
             isMidday = true;
             isMorning = false;
@@ -56,7 +59,8 @@ public class Sun : MonoBehaviour
         }
         else if (transform.position.x < duskInterval && transform.position.x > nightInterval)
         {
-            sun.color = Color.Lerp(sun.color, mid, Time.deltaTime / 10);
+            sun.color = Color.Lerp(sun.color, night, Time.deltaTime / 10);
+            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientNight, Time.deltaTime / 10);
             //sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
             isMidday = false;
             isMorning = false;
@@ -65,8 +69,6 @@ public class Sun : MonoBehaviour
         }
         else if (transform.position.x < nightInterval)
         {
-			sun.color = Color.Lerp(sun.color, night, Time.deltaTime / 10);
-            //sun.intensity = Mathf.Lerp (sun.intensity, .25f, Time.deltaTime);
             isMorning = false;
             isMidday = false;
             isDusk = false;

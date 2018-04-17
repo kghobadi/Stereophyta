@@ -12,7 +12,7 @@ public class WindMachine : RhythmProducer {
     public float distanceToDestroy;
 
     public AudioClip selectLower;
-    Transform windMachineModel;
+    public Transform windMachineModel;
 
     int originalLayer;
 

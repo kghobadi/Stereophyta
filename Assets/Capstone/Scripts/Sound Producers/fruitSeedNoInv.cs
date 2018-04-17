@@ -10,7 +10,8 @@ public class fruitSeedNoInv : Interactable {
     public AudioClip plantNote;
 
     public GameObject plants;
-    GameObject plantClone;
+    GameObject plantClone, seedMaster;
+    List<GameObject> currentSeedLine = new List<GameObject>();
 
     public int plantingRadius;
     
@@ -51,6 +52,10 @@ public class fruitSeedNoInv : Interactable {
         {
             PickUpSeed();
         }
+        else
+        {
+
+        }
         
     }
 
@@ -70,9 +75,16 @@ public class fruitSeedNoInv : Interactable {
         seedSource.outputAudioMixerGroup = tpc.plantingGroup;
 
         //if player is holding another object, this can't be interactable
-        currentSeedCount = tpc.seedLine.Count;
+        //if (pickedByPlayer)
+        //{
+        //    currentSeedLine = tpc.seedLine;
+        //}
+        //else{
+        //    currentSeedLine = seedMaster.GetComponent<GuitarNPC>().seedLine;
+        //}
+        currentSeedCount = currentSeedLine.Count;
        
-       currentSpot = tpc.seedLine.IndexOf(gameObject);
+       currentSpot = currentSeedLine.IndexOf(gameObject);
        interactable = false;
         
 
@@ -112,15 +124,15 @@ public class fruitSeedNoInv : Interactable {
                 //controls whether a seed is playing a clip or not
                 if (seedSource.isPlaying)
                 {
-                    targetPos = _player.transform.localPosition - new Vector3(0, 0, 1) + new Vector3(0, 1, 0);
+                    targetPos = seedMaster.transform.localPosition - new Vector3(0, 0, 1) + new Vector3(0, 1, 0);
                     notesPlaying.Emit(1);
                 }
                 else
                 {
-                    targetPos = _player.transform.localPosition - new Vector3(0, 0, 1);
+                    targetPos = seedMaster.transform.localPosition - new Vector3(0, 0, 1);
                 }
                 followSpeed = followSpeedOrig;
-                transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+                transform.LookAt(new Vector3(seedMaster.transform.position.x, transform.position.y, seedMaster.transform.position.z));
             }
             else
             {
@@ -128,11 +140,11 @@ public class fruitSeedNoInv : Interactable {
                 if (seedSource.isPlaying)
                 {
                     notesPlaying.Emit(1);
-                    targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1) + new Vector3(0, 1 - (currentSpot / 10), 0);
+                    targetPos = currentSeedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1) + new Vector3(0, 1 - (currentSpot / 10), 0);
                 } 
                 else
                 {
-                    targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
+                    targetPos = currentSeedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
                 }
                 //increment follow speed of seeds
                 followSpeed = followSpeedOrig - (currentSpot /1.5f);
@@ -142,23 +154,6 @@ public class fruitSeedNoInv : Interactable {
             }
             transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);
             
-
-            //childed approach, almost works, but everything becomes rigid and auto moves 
-            //if (currentSpot == 1)
-            //{
-            //    transform.SetParent(_player.transform);
-            //    targetPos = new Vector3(0, 0, -2);
-            //    followSpeed = followSpeedOrig;
-            //    transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
-            //}
-            //else
-            //{
-            //    transform.SetParent(tpc.seedLine[currentSpot - 1].transform);
-            //    targetPos = new Vector3(0, 0, -1);
-            //    followSpeed = followSpeedOrig - (currentSpot / 1.5f);
-            //    transform.LookAt(new Vector3(transform.parent.position.x, transform.position.y, transform.parent.position.z));
-            //}
-            //transform.localPosition = Vector3.MoveTowards(transform.localPosition, targetPos, followSpeed * Time.deltaTime);
         }
 
         else if (planting)
@@ -173,15 +168,26 @@ public class fruitSeedNoInv : Interactable {
             CheckPlaceInLine();
         }
 
-        lastLineLength = tpc.seedLine.Count;
-        lastSpot = tpc.seedLine.IndexOf(gameObject);
+        lastLineLength = currentSeedLine.Count;
+        lastSpot = currentSeedLine.IndexOf(gameObject);
     }
 
     public void PickUpSeed()
     {
-        tpc.seedLine.Add(this.gameObject);
+        if (pickedByPlayer)
+        {
+            seedMaster = _player;
+            currentSeedLine = tpc.seedLine;
+        }
+        else
+        {
+            //seedMaster = NPC
+            //currentSeedLine = npc.seedline
+        }
+        
+        currentSeedLine.Add(this.gameObject);
         inSeedLine = true;
-        if (tpc.seedLine.Count == 1)
+        if (currentSeedLine.Count == 1 && pickedByPlayer)
         {
             //move to player holding pos
             transform.SetParent(rightArmObj.transform);
@@ -194,8 +200,8 @@ public class fruitSeedNoInv : Interactable {
         else
         {
             //reset pos
-            int lineIndex = tpc.seedLine.IndexOf(gameObject);
-            transform.position = _player.transform.position;
+            int lineIndex = currentSeedLine.IndexOf(gameObject);
+            transform.position = seedMaster.transform.position;
             transform.localEulerAngles = Vector3.zero;
             for (int i = 0; i <= lineIndex; i++)
             {

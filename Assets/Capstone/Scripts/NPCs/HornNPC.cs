@@ -191,14 +191,21 @@ public class HornNPC : NPC {
                         }
 
                         //play poof
-                        currentPlants[p].poofParticles.Play();
-                        //wait until note stops playing
-                        yield return new WaitUntil(() => currentPlants[p].audioSource.isPlaying == false);
-
-                        //destroy plant if all seeds are gone 
-                        Destroy(currentPlants[p].gameObject);
-                        currentPlants.Remove(currentPlants[p]);
-                        p--; //account for change in list size
+                        if (currentPlants[p] != null)
+                        {
+                            currentPlants[p].poofParticles.Play();
+                            //wait until note stops playing
+                            yield return new WaitUntil(() => currentPlants[p].audioSource.isPlaying == false);
+                            //play poof
+                            if (currentPlants[p] != null)
+                            {
+                                //destroy plant if all seeds are gone 
+                                Destroy(currentPlants[p].gameObject);
+                                currentPlants.Remove(currentPlants[p]);
+                                p--; //account for change in list size
+                            }
+                        }
+                        
                     }
                     else
                     {
