@@ -755,7 +755,14 @@ public class NPC : Interactable {
         base.OnEnable();
         if(enabledCounter > 1)
         {
-            SetMove();
+            if(lastState == NPCState.PLAYING)
+            {
+                currentState = NPCState.PLAYING;
+            }
+            else
+            {
+                SetMove();
+            }
         }
     }
 }
