@@ -25,6 +25,10 @@ public class Musician : MonoBehaviour {
 
     public MusicType musicType;
 
+    //for seed container and whatnot
+    public Transform seedPack;
+    public List<Transform> seedSpots = new List<Transform>();
+
     public enum MusicType
     {
         GUITAR, DRUM, HORN, PIANO
@@ -51,7 +55,13 @@ public class Musician : MonoBehaviour {
             currentTertiaryClip = Random.Range(0, tertiarySounds.Length);
             tertiarySource.clip = tertiarySounds[currentTertiaryClip];
         }
-        
+
+        //set up seed pack
+        for (int i = 0; i < seedPack.childCount; i++)
+        {
+            seedSpots.Add(seedPack.GetChild(i));
+        }
+
         //start tempo at random interval
         primaryTempo = Random.Range(0, 5);
         noteChangeCounter = 0;

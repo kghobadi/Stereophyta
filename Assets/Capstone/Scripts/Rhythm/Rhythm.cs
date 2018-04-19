@@ -9,7 +9,7 @@ public class Rhythm : MonoBehaviour {
     {
         if(other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<Plant>().PlaySound();
+            other.gameObject.GetComponent<NewPlant>().PlaySound();
         }
         if (other.gameObject.tag == "Seed")
         {
@@ -20,7 +20,7 @@ public class Rhythm : MonoBehaviour {
     {
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<Plant>().PlaySound();
+            other.gameObject.GetComponent<NewPlant>().PlaySound();
         }
     }
 

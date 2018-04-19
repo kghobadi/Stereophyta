@@ -15,6 +15,10 @@ public class NewPlant : SoundProducer {
     public bool active;
     public Sprite[] stopPlayingMusic, startPlayingMusic;
 
+    //for being picked by NPC
+    public Musician seedPicker;
+    public int seedSpotNumber;
+
     public enum PlantSpecies
     {
         HORN, PIANO, GUITAR, 
@@ -54,31 +58,19 @@ public class NewPlant : SoundProducer {
         
     }
 
-    public override void handleClickSuccess()
-    {
-       
-        base.handleClickSuccess();
-        
-       
-    }
-    public override void OnMouseExit()
-    {
-        base.OnMouseExit();
-        
-    }
-    
-    
-
     //Take Fruit Seed
     public override void Selection_Three()
     {
-        base.Selection_Three();
-        TakeFruitSeed();
+        if (interactable)
+        {
+            base.Selection_Three();
+            TakeFruitSeed();
+        }
     }
 
     void TakeFruitSeed()
     {
-        if (playerClick)
+        if (playerClick || playerClicked)
         {
             if (tpc.seedLine.Count < tpc.seedLineMax)
             {
@@ -88,9 +80,7 @@ public class NewPlant : SoundProducer {
                 fruitSeedClone.GetComponent<fruitSeedNoInv>().plantNote = musicalNotes[currentNote];
 
                 //destroy plant
-                poofParticles.Play();
-                DeactivateSelectionMenu();
-                Destroy(gameObject);
+                StartCoroutine(DestroyPlant());
             }
 
             else
@@ -106,13 +96,16 @@ public class NewPlant : SoundProducer {
         {
             //instantiate seed and add it to player seed line
             fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
-            fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = false;
-            fruitSeedClone.GetComponent<fruitSeedNoInv>().plantNote = musicalNotes[currentNote];
+            fruitSeedNoInv newFruitSeed = fruitSeedClone.GetComponent<fruitSeedNoInv>();
+
+            //relay spot info to seed
+            newFruitSeed.pickedByPlayer = false;
+            newFruitSeed.seedPicker = seedPicker;
+            newFruitSeed.seedSpotNumber = seedSpotNumber;
+            newFruitSeed.plantNote = musicalNotes[currentNote];
 
             //destroy plant
-            poofParticles.Play();
-            DeactivateSelectionMenu();
-            Destroy(gameObject);
+            StartCoroutine(DestroyPlant());
         }
         
     }
@@ -165,7 +158,8 @@ public class NewPlant : SoundProducer {
                 closedLid.SetActive(false);
                 selectionImages[0].buttonImages = stopPlayingMusic;
             }
-            DeactivateSelectionMenu();
+            if(playerClick || playerClicked)
+                DeactivateSelectionMenu();
         }
     }
 
@@ -182,6 +176,17 @@ public class NewPlant : SoundProducer {
             TakeFruitSeed();
         }
 
+    }
+
+    IEnumerator DestroyPlant()
+    {
+        //destroy plant
+        interactable = false;
+        poofParticles.Play();
+        if(playerClick || playerClicked)
+            DeactivateSelectionMenu();
+        yield return new WaitForSeconds(0.2f);
+        Destroy(gameObject);
     }
     
     public override void OnEnable()

@@ -17,7 +17,9 @@ public class WindMachine : RhythmProducer {
     int originalLayer;
 
     //Rotation var -- not being used currently
-    public bool rotating;
+    public bool playerRotating;
+
+    public float holdTimer = 0, holdTimerWait = 0.25f;
 
     //Rhythm lever vars
     public int timeScaleMax;
@@ -51,6 +53,35 @@ public class WindMachine : RhythmProducer {
             }
         }
 
+        //make windmachine look at mouse pos
+        if (playerRotating)
+        {
+            tpc.talking = true;
+            interactable = false;
+
+            holdTimer += Time.deltaTime;
+
+            float mouseX = Input.mousePosition.x;
+
+            float mouseY = Input.mousePosition.y;
+
+            float cameraDif = Camera.main.transform.position.y - transform.position.y;
+
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif + 5f));
+
+            Vector3 hoverLocation = new Vector3(worldpos.x, transform.position.y, worldpos.z);
+
+            windMachineModel.transform.LookAt(hoverLocation);
+
+            //on click call raycasts. 
+            if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
+            {
+                tpc.talking = false;
+                interactable = true;
+                playerRotating = false;
+            }
+        }
+
         //if player is nearby, generate wind rhythm at timeInterval (look in Rhythm Producer)
         if (Vector3.Distance(_player.transform.position, transform.position) < 100)
         {
@@ -61,12 +92,7 @@ public class WindMachine : RhythmProducer {
                 showRhythm = false;
             }
         }
-
-        //Rotation state
-        //if (rotating)
-        //{
-        //   use this once you can hold down selection menu buttons for continuous actions
-        //}
+        
     }
 
     public override void AudioRhythm()
@@ -111,7 +137,9 @@ public class WindMachine : RhythmProducer {
         base.Selection_Two();
 
         //rotating = true;
-        windMachineModel.transform.localEulerAngles -= new Vector3(0, 90, 0);
+        windMachineModel.transform.localEulerAngles = Vector3.zero;
+        playerRotating = true;
+        DeactivateSelectionMenu();
 
         if (!soundBoard.isPlaying)
             soundBoard.PlayOneShot(InteractSound);
@@ -125,7 +153,7 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed += 2;
             timeScale += 1;
-            if (!soundBoard.isPlaying)
+            if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(InteractSound);
         }
     }
@@ -138,7 +166,7 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed -= 2;
             timeScale -= 1;
-            if (!soundBoard.isPlaying)
+            if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(selectLower);
         }
     }

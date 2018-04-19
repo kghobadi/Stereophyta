@@ -5,32 +5,133 @@ using UnityEngine.UI;
 using UnityEngine.AI;
 
 public class GuitarNPC : NPC {
-    protected List<NewPlant> newPlants = new List<NewPlant>();
-    protected List<WindMachine> windMachines = new List<WindMachine>();
-    public List<GameObject> seedLine = new List<GameObject>();
+    protected List<NewPlant> currentFlowers = new List<NewPlant>();
+    protected List<NewPlant> flowersToTake = new List<NewPlant>();
+    protected List<NewPlant> flowerGroup1 = new List<NewPlant>();
+    protected List<NewPlant> flowerGroup2 = new List<NewPlant>();
+    protected List<NewPlant> flowerGroup3 = new List<NewPlant>();
+    public WindMachine windMachine;
 
-    //fills up lists of nearby plants and rocks
+
+    //fills up lists of nearby guitar plants and windmachines
     public override void LookForWork()
     {
-        windMachines.Clear();
-        newPlants.Clear();
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
-        int i = 0;
-        while (i < hitColliders.Length)
+        //clear flower lists
+        currentFlowers.Clear();
+        flowersToTake.Clear();
+        flowerGroup1.Clear();
+        flowerGroup2.Clear();
+        flowerGroup3.Clear();
+
+        //loop through waypoints and scan each one 
+        for (int i = 0; i < movementPoints.Count; i++)
         {
-            if (hitColliders[i].gameObject.tag == "Plant")
+            Collider[] hitColliders = Physics.OverlapSphere(movementPoints[i].transform.position, visionDistance);
+            
+            //loop through collider and check each obj
+            for(int v = 0; v < hitColliders.Length; v++)
             {
-                if(hitColliders[i].gameObject.GetComponent<NewPlant>().plantSpecieName.ToString() == "GUITAR")
-                    newPlants.Add(hitColliders[i].gameObject.GetComponent<NewPlant>());
+                if (hitColliders[v].gameObject.tag == "Plant")
+                {
+                    if (hitColliders[v].gameObject.GetComponent<NewPlant>().plantSpecieName.ToString() == "GUITAR")
+                    {
+                        //checks which waypoint this is looking at 
+                        switch (i)
+                        {
+                            case 0:
+                                flowerGroup1.Add(hitColliders[v].gameObject.GetComponent<NewPlant>());
+                                break;
+                            case 1:
+                                flowerGroup2.Add(hitColliders[v].gameObject.GetComponent<NewPlant>());
+                                break;
+                            case 2:
+                                flowerGroup3.Add(hitColliders[v].gameObject.GetComponent<NewPlant>());
+                                break;
+                        }
+                    }
+                        
+                }
             }
-            if(hitColliders[i].gameObject.tag == "WindMachines")
-            {
-                windMachines.Add(hitColliders[i].gameObject.GetComponent<WindMachine>());
-            }
-            i++;
         }
-        //if there are no nearby plants or rocks, we set move
-        if (newPlants.Count > 0 || windMachines.Count > 0)
+
+        //which is the current group we're at?
+        switch (moveCounter)
+        {
+            case 0:
+                currentFlowers = flowerGroup1;
+                break;
+            case 1:
+                currentFlowers = flowerGroup2;
+                break;
+            case 2:
+                currentFlowers = flowerGroup3;
+                break;
+        }
+
+        //this only happens if the player isn't interacting with the device
+        if (!windMachine.playerRotating && !windMachine.playerHolding)
+        {
+
+            //change wind machine
+            int randomTempo = Random.Range(0, 100);
+
+
+            //tempo setting chances
+            //if tempo is already fast
+            if (windMachine.timeScale > 2)
+            {
+                //increase chance low
+                if (randomTempo < 40)
+                {
+                    windMachine.Selection_Three();
+                }
+                //decrease chance high
+                else
+                {
+                    windMachine.Selection_Four();
+                }
+            }
+            else if (windMachine.timeScale == 2)
+            {
+                //increase 
+                if (randomTempo < 50)
+                {
+                    windMachine.Selection_Three();
+                }
+                //decrease 
+                else
+                {
+                    windMachine.Selection_Four();
+                }
+            }
+            else if (windMachine.timeScale < 2)
+            {
+                //increase chance high
+                if (randomTempo < 60)
+                {
+                    windMachine.Selection_Three();
+                }
+                //decrease chance low
+                else
+                {
+                    windMachine.Selection_Four();
+                }
+            }
+
+
+            //change wind machine rotation
+            int randomRotate = Random.Range(0, 100);
+
+            if (randomRotate < 40)
+            {
+                //rotate windmachine to play the flowers in current group
+                windMachine.windMachineModel.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
+                    windMachine.windMachineModel.transform.position.y, movementPoints[moveCounter].transform.position.z));
+            }
+        }
+
+        //if there are no nearby guitar flowers
+        if (currentFlowers.Count > 0)
         {
             StartCoroutine(PerformLabor());
         }
@@ -48,103 +149,57 @@ public class GuitarNPC : NPC {
         yield return new WaitForSeconds(waitingTime);
         currentState = NPCState.LABOR;
 
-        //for int i = 0; i < seedLine.Count; i++
-        //plant new flowers 
-
-        //loop through newPlants
-        for (int i = 0; i < newPlants.Count; i++)
+        int flowerChangeCounter = 3;
+        //loop through currentFlowers
+        for (int i = 0; i < currentFlowers.Count; i++)
         {
-            int randomShift = Random.Range(0, 100);
-            //chance to switch plant on or off
-            if (newPlants[i].active)
+            if(flowerChangeCounter > 0)
             {
-                //switches off 
-                if (randomShift < 20)
+                int randomShift = Random.Range(0, currentFlowers.Count);
+                //chance to switch plant on or off
+                if (currentFlowers[randomShift].active)
                 {
-                    newPlants[i].Selection_One();
+                    //switches off 
+                    currentFlowers[randomShift].Selection_One();
+                    flowersToTake.Add(currentFlowers[randomShift]);
+                    currentFlowers.Remove(currentFlowers[randomShift]);
+                    flowerChangeCounter--;
                 }
-                else if(randomShift > 80)
+                //keep looping until we find one that is active 
+                else
                 {
-                    newPlants[i].Selection_Two();
+                    //switchs on that flower
+                    currentFlowers[randomShift].Selection_One();
+                    i--;
                 }
-            }
-            else
-            {
-                //switches on
-                if (randomShift < 20)
-                {
-                    newPlants[i].Selection_One();
-                }
-                else if(randomShift > 20)
-                {
-                    newPlants[i].Selection_Two();
-                }
+                yield return new WaitForSeconds(waitingTime);
             }
             
-            yield return new WaitForSeconds(waitingTime);
         }
-
-        //loop through windMachines
-        for (int i = 0; i < windMachines.Count; i++)
+       
+        //plant new flowers 
+        if(myMusic.seedSpots[0].childCount > 0)
         {
-            int randomRotate = Random.Range(0, 100);
-            int randomTempo = Random.Range(0, 100);
-            //chance to rotate windmachine left or right
-            if (randomRotate < 50)
+            for (int i = 0; i < myMusic.seedSpots.Count; i++)
             {
-                windMachines[i].windMachineModel.transform.localEulerAngles -= new Vector3(0, 60, 0);
-                Debug.Log("turned left");
-            }
-            else
-            {
-                windMachines[i].windMachineModel.transform.localEulerAngles += new Vector3(0, 60, 0);
-                Debug.Log("turned right");
-            }
-
-            //tempo setting chances
-            //if tempo is already fast
-            if(windMachines[i].timeScale > 2)
-            {
-                //increase chance low
-                if (randomTempo < 40)
+                if (myMusic.seedSpots[i].childCount > 0)
                 {
-                    windMachines[i].Selection_Three();
-                }
-                //decrease chance high
-                else
-                {
-                    windMachines[i].Selection_Four();
+                    myMusic.seedSpots[i].GetComponentInChildren<fruitSeedNoInv>().planting = true;
                 }
             }
-            else if (windMachines[i].timeScale == 2)
-            {
-                //increase 
-                if (randomTempo < 50)
-                {
-                    windMachines[i].Selection_Three();
-                }
-                //decrease 
-                else
-                {
-                    windMachines[i].Selection_Four();
-                }
-            }
-            else if (windMachines[i].timeScale < 2)
-            {
-                //increase chance high
-                if (randomTempo < 60)
-                {
-                    windMachines[i].Selection_Three();
-                }
-                //decrease chance low
-                else
-                {
-                    windMachines[i].Selection_Four();
-                }
-            }
-
-            yield return new WaitForSeconds(waitingTime);
         }
+            
+        //take inactive flower seeds
+        for(int i = 0; i < flowersToTake.Count; i++)
+        {
+            flowersToTake[i].seedPicker = myMusic;
+            flowersToTake[i].seedSpotNumber = i;
+            flowersToTake[i].Selection_Three();
+        }
+
+
+        yield return new WaitForSeconds(waitingTime);
+        
 
         //set new move pos
         SetMove();
