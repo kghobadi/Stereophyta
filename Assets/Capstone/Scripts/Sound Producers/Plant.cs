@@ -40,7 +40,7 @@ public class Plant : SoundProducer {
         if (!sapling )
            
         {
-            soundSources[currentNote].transform.localScale *= 2;
+			soundSources [currentNote].GetComponent<Animator> ().SetBool ("grown", true);
             notesPlaying.transform.position = soundSources[currentNote].transform.position;
         }
     }
@@ -102,56 +102,44 @@ public class Plant : SoundProducer {
     public override void Selection_Three()
     {
         base.Selection_Three();
-        if (tpc.seedLine.Count < tpc.seedLineMax)
+		soundSources [currentNote].GetComponent<Animator> ().SetBool ("grown", false);
+        soundSources[currentNote].SetActive(false);
+
+        //instantiate seed and add it to player seed line
+        fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
+        fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = true;
+        fruitSeedClone.GetComponent<fruitSeedNoInv>().plantNote = musicalNotes[currentNote];
+
+        //checks if all seeds are gone. if so, destroy, otherwise randomly shift notes
+        int seedsGone = 0;
+        for (int i = 0; i < soundSources.Count; i++)
         {
-            soundSources[currentNote].transform.localScale *= 0.5f;
-            soundSources[currentNote].SetActive(false);
-
-            //instantiate seed and add it to player seed line
-            fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
-            fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = true;
-            fruitSeedClone.GetComponent<fruitSeedNoInv>().plantNote = musicalNotes[currentNote];
-
-            //checks if all seeds are gone. if so, destroy, otherwise randomly shift notes
-            int seedsGone = 0;
-            for (int i = 0; i < soundSources.Count; i++)
+            if (!soundSources[i].activeSelf)
             {
-                if (!soundSources[i].activeSelf)
-                {
-                    seedsGone++;
-                }
+                seedsGone++;
             }
-            if (seedsGone == soundSources.Count)
+        }
+        if (seedsGone == soundSources.Count)
+        {
+            poofParticles.Play();
+            DeactivateSelectionMenu();
+            Destroy(gameObject);
+        }
+        else
+        {
+            //shiftnoteup or shiftnotedown
+            float randomShift = Random.Range(0f, 100f);
+            if (randomShift < 50f)
             {
-                poofParticles.Play();
-                DeactivateSelectionMenu();
-                Destroy(gameObject);
+                //down
+                Selection_One();
             }
             else
             {
-                //shiftnoteup or shiftnotedown
-                float randomShift = Random.Range(0f, 100f);
-                if (randomShift < 50f)
-                {
-                    //down
-                    Selection_One();
-                }
-                else
-                {
-                    //up
-                    Selection_Two();
-                }
+                //up
+                Selection_Two();
             }
         }
-
-        else
-        {
-            //player shakes head and says no
-            //seeds do a little jump
-            // int randomNo = Random.Range(0, tpc.noNo.Length);
-            audioSource.PlayOneShot(tpc.noNo[0], 1f);
-        }
-        
     }
 
     public void GrowFruitSeed()
@@ -174,18 +162,20 @@ public class Plant : SoundProducer {
 
     public void PlaySound()
     {
-        if (/*!plantAudio.isPlaying &&*/ !scalingUp && !scalingDown)
+		if (!audioSource.isPlaying)
         {
             if (!sapling)
             {
                 audioSource.PlayOneShot(currentSound);
-                scalingUp = true;
+				soundSources [currentNote].GetComponent<Animator> ().SetTrigger ("playing");
+                //scalingUp = true;
             }
             else
             {
                 if (!audioSource.isPlaying)
                 {
                     audioSource.PlayOneShot(currentSound);
+					soundSources [currentNote].GetComponent<Animator> ().SetTrigger ("playing");
                     notesPlaying.Emit(10);
                 }
             }

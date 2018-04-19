@@ -12,9 +12,8 @@ public class WindMachine : RhythmProducer {
     public float distanceToDestroy;
 
     public AudioClip selectLower;
-    public Transform windMachineModel;
 
-    int originalLayer;
+    Animator windFanAnimator;
 
     //Rotation var -- not being used currently
     public bool playerRotating;
@@ -30,10 +29,8 @@ public class WindMachine : RhythmProducer {
         base.Start();
 
         interactable = true;
-        windMachineModel = transform.GetChild(0);
 
-        originalLayer = gameObject.layer;
-        windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.eulerAngles + new Vector3(0, 90, 0)), windMachineModel);
+        windFanAnimator = GetComponent<Animator>();
 
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
@@ -71,7 +68,7 @@ public class WindMachine : RhythmProducer {
 
             Vector3 hoverLocation = new Vector3(worldpos.x, transform.position.y, worldpos.z);
 
-            windMachineModel.transform.LookAt(hoverLocation);
+            transform.LookAt(hoverLocation);
 
             //on click call raycasts. 
             if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
@@ -88,7 +85,8 @@ public class WindMachine : RhythmProducer {
             if (showRhythm)
             {
                 //instantiate wind, show particles, etc.
-                windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.eulerAngles + new Vector3(0, 90, 0)), windMachineModel);
+                windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.localEulerAngles + new Vector3(0,90,0)));
+                windClone.GetComponent<PuzzleWind>()._windGen = this;
                 showRhythm = false;
             }
         }
@@ -123,7 +121,6 @@ public class WindMachine : RhythmProducer {
 
         transform.localPosition = Vector3.zero;
         transform.localEulerAngles = Vector3.zero;
-        gameObject.layer = originalLayer;
 
         tpc.isHoldingSomething = true;
         playerHolding = true;
@@ -137,7 +134,7 @@ public class WindMachine : RhythmProducer {
         base.Selection_Two();
 
         //rotating = true;
-        windMachineModel.transform.localEulerAngles = Vector3.zero;
+        transform.localEulerAngles = Vector3.zero;
         playerRotating = true;
         DeactivateSelectionMenu();
 
@@ -153,6 +150,8 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed += 2;
             timeScale += 1;
+            windFanAnimator.speed *= 2;
+
             if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(InteractSound);
         }
@@ -166,6 +165,8 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed -= 2;
             timeScale -= 1;
+            windFanAnimator.speed *= 0.5f;
+
             if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(selectLower);
         }

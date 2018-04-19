@@ -6,13 +6,11 @@ public class PuzzleWind : Rhythm
 {
 
     float currentSpeed;
-    WindMachine _windGen;
+    public WindMachine _windGen;
 
     void Start()
     {
-        _windGen = GetComponentInParent<WindMachine>();
         currentSpeed = _windGen.windSpeed;
-        transform.SetParent(null);
     }
 
     void Update()

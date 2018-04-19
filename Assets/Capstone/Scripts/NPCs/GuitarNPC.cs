@@ -71,62 +71,61 @@ public class GuitarNPC : NPC {
         //this only happens if the player isn't interacting with the device
         if (!windMachine.playerRotating && !windMachine.playerHolding)
         {
-
-            //change wind machine
-            int randomTempo = Random.Range(0, 100);
-
-
-            //tempo setting chances
-            //if tempo is already fast
-            if (windMachine.timeScale > 2)
-            {
-                //increase chance low
-                if (randomTempo < 40)
-                {
-                    windMachine.Selection_Three();
-                }
-                //decrease chance high
-                else
-                {
-                    windMachine.Selection_Four();
-                }
-            }
-            else if (windMachine.timeScale == 2)
-            {
-                //increase 
-                if (randomTempo < 50)
-                {
-                    windMachine.Selection_Three();
-                }
-                //decrease 
-                else
-                {
-                    windMachine.Selection_Four();
-                }
-            }
-            else if (windMachine.timeScale < 2)
-            {
-                //increase chance high
-                if (randomTempo < 60)
-                {
-                    windMachine.Selection_Three();
-                }
-                //decrease chance low
-                else
-                {
-                    windMachine.Selection_Four();
-                }
-            }
-
-
             //change wind machine rotation
             int randomRotate = Random.Range(0, 100);
 
             if (randomRotate < 40)
             {
                 //rotate windmachine to play the flowers in current group
-                windMachine.windMachineModel.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
-                    windMachine.windMachineModel.transform.position.y, movementPoints[moveCounter].transform.position.z));
+                windMachine.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
+                    windMachine.transform.position.y, movementPoints[moveCounter].transform.position.z));
+                Debug.Log(windMachine.transform.localEulerAngles);
+            }
+        }
+
+        //change wind machine
+        int randomTempo = Random.Range(0, 100);
+
+
+        //tempo setting chances
+        //if tempo is already fast
+        if (windMachine.timeScale > 2)
+        {
+            //increase chance low
+            if (randomTempo < 25)
+            {
+                windMachine.Selection_Three();
+            }
+            //decrease chance high
+            else
+            {
+                windMachine.Selection_Four();
+            }
+        }
+        else if (windMachine.timeScale == 2)
+        {
+            //increase 
+            if (randomTempo < 50)
+            {
+                windMachine.Selection_Three();
+            }
+            //decrease 
+            else
+            {
+                windMachine.Selection_Four();
+            }
+        }
+        else if (windMachine.timeScale < 2)
+        {
+            //increase chance high
+            if (randomTempo < 75)
+            {
+                windMachine.Selection_Three();
+            }
+            //decrease chance low
+            else
+            {
+                windMachine.Selection_Four();
             }
         }
 

@@ -35,8 +35,9 @@ public class NewPlant : SoundProducer {
         closedLid.SetActive(false);
         int randomRotate = Random.Range(0, 360);
         transform.localEulerAngles = new Vector3(0, randomRotate, 0);
-        soundSources[currentNote].transform.localScale *= 2;
-        notesPlaying.transform.position = soundSources[currentNote].transform.position;
+        soundSources[currentNote].GetComponent<Animator>().SetBool("grown", true);
+        if(notesPlaying != null)
+            notesPlaying.transform.position = soundSources[currentNote].transform.position;
         
     }
     public override void OnMouseEnter()
@@ -74,6 +75,7 @@ public class NewPlant : SoundProducer {
         {
             if (tpc.seedLine.Count < tpc.seedLineMax)
             {
+                soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
                 //instantiate seed and add it to player seed line
                 fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
                 fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = true;
@@ -94,6 +96,7 @@ public class NewPlant : SoundProducer {
         //NPC took it
         else
         {
+            soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
             //instantiate seed and add it to player seed line
             fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
             fruitSeedNoInv newFruitSeed = fruitSeedClone.GetComponent<fruitSeedNoInv>();
@@ -114,23 +117,27 @@ public class NewPlant : SoundProducer {
     {
         if(plantSpecieName == PlantSpecies.GUITAR)
         {
-            if (active && !scalingUp && !scalingDown)
+            if (active && !audioSource.isPlaying)
             {
                 audioSource.PlayOneShot(currentSound);
-                scalingUp = true;
-                notesPlaying.Emit(10);
+                soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
+                if (notesPlaying != null)
+                    notesPlaying.Emit(10);
             }
         }
         // for horn plant, do the clip switching and Play();
         else
         {
-            if (!audioSource.isPlaying && !scalingUp && !scalingDown)
+            if (!audioSource.isPlaying )
             {
                 audioSource.PlayOneShot(currentSound);
-                scalingUp = true;
-                notesPlaying.Emit(10);
+                soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
+                if (notesPlaying != null)
+                    notesPlaying.Emit(10);
             }
         }
+
+
     }
 
     //shift note down
