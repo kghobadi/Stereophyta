@@ -149,7 +149,7 @@ public class HornNPC : NPC {
                 yield return new WaitForSeconds(waitingTime + 1);
 
                 if (plantClone.activeSelf)
-                    plantClone.GetComponent<Plant>().audioSource.outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
+                    plantClone.GetComponent<HornPlant>().audioSource.outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
                 else
                 {
                     plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
@@ -172,10 +172,8 @@ public class HornNPC : NPC {
                     transform.LookAt(plantPos);
 
                     //if this plant is fully grown
-                    if (!currentPlants[p].sapling)
-                    {
+                  
                         transform.LookAt(plantPos);
-                        currentPlants[p].regenNecessary = 100f;
                         //loop through plant branches
                         for (int i = 0; i < currentPlants[p].soundSources.Count; i++)
                         {
@@ -211,26 +209,8 @@ public class HornNPC : NPC {
                             }
                         }
                         
-                    }
-                    else
-                    {
-                        currentPlants[p].waterNecessary = 100f;
-                        transform.LookAt(plantPos);
-                        yield return new WaitForSeconds(2);
-
-                        if (currentPlants[p] != null)
-                        {
-                            //play poof
-                            transform.LookAt(plantPos);
-                            currentPlants[p].poofParticles.Play();
-                            yield return new WaitForSeconds(waitingTime);
-                            //destroy plant if all seeds are gone 
-                            Destroy(currentPlants[p].gameObject);
-                            currentPlants.Remove(currentPlants[p]);
-                            p--; //account for change in list size
-                        }
-
-                    }
+                    
+                    
                 }
                
             }
