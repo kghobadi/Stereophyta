@@ -2,27 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewPlant : SoundProducer {
+public class GuitarPlant : SoundProducer {
 
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
     public GameObject closedLid;
 
     public ParticleSystem poofParticles;
-
-    public PlantSpecies plantSpecieName;
-
+    
     public bool active;
     public Sprite[] stopPlayingMusic, startPlayingMusic;
 
     //for being picked by NPC
     public Musician seedPicker;
     public int seedSpotNumber;
-
-    public enum PlantSpecies
-    {
-        HORN, PIANO, GUITAR, 
-    }
+    
 
     public override void Start () {
         //this comes before base.Start() for sound sources 
@@ -50,7 +44,7 @@ public class NewPlant : SoundProducer {
 
     public override void OnMouseOver()
     {
-        if (interactable && !lerpingColor )
+        if (interactable)
         {
             base.OnMouseOver();
             _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
@@ -59,15 +53,6 @@ public class NewPlant : SoundProducer {
         
     }
 
-    //Take Fruit Seed
-    public override void Selection_Three()
-    {
-        if (interactable)
-        {
-            base.Selection_Three();
-            TakeFruitSeed();
-        }
-    }
 
     void TakeFruitSeed()
     {
@@ -115,8 +100,6 @@ public class NewPlant : SoundProducer {
     
     public void PlaySound()
     {
-        if(plantSpecieName == PlantSpecies.GUITAR)
-        {
             if (active && !audioSource.isPlaying)
             {
                 audioSource.PlayOneShot(currentSound);
@@ -124,32 +107,12 @@ public class NewPlant : SoundProducer {
                 if (notesPlaying != null)
                     notesPlaying.Emit(10);
             }
-        }
-        // for horn plant, do the clip switching and Play();
-        else
-        {
-            if (!audioSource.isPlaying )
-            {
-                audioSource.PlayOneShot(currentSound);
-                soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
-                if (notesPlaying != null)
-                    notesPlaying.Emit(10);
-            }
-        }
-
-
     }
 
     //shift note down
     public override void Selection_One()
     {
-        //shift note down
-        if (plantSpecieName != PlantSpecies.GUITAR)
-        {
-            base.Selection_One();
-        }
-        else
-        {
+       
             //command to activate or deactivate flower
             SwitchSelectionButtons();
             if (active)
@@ -167,22 +130,13 @@ public class NewPlant : SoundProducer {
             }
             if(playerClick || playerClicked)
                 DeactivateSelectionMenu();
-        }
+        
     }
 
     //shift note up
     public override void Selection_Two()
     {
-        //shift note up
-        if (plantSpecieName != PlantSpecies.GUITAR)
-        {
-            base.Selection_Two();
-        }
-        else
-        {
-            TakeFruitSeed();
-        }
-
+        TakeFruitSeed();
     }
 
     IEnumerator DestroyPlant()

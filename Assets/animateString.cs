@@ -11,12 +11,12 @@ public class animateString : MonoBehaviour {
 	public GameObject target;
 	public GameObject parts;
 
-    NewPlant plantScript;
+    GuitarPlant plantScript;
 
 	// Use this for initialization
 	void Start () {
 		animateLine = GetComponent<LineRenderer>();
-        plantScript = GetComponentInParent<NewPlant>();
+        plantScript = GetComponentInParent<GuitarPlant>();
 		animatePlant = GetComponent<Animator> ();
 		timer = 0;
 	}

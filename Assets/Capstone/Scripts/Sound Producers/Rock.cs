@@ -44,18 +44,11 @@ public class Rock : SoundProducer
 
     public void PlaySound()
     {
-        if (/*!plantAudio.isPlaying &&*/ !scalingUp && !scalingDown)
+        if (!audioSource.isPlaying)
         {
             audioSource.PlayOneShot(currentSound);
-            scalingUp = true;
-        }
-        else
-        {
-            if (!audioSource.isPlaying)
-            {
-                audioSource.PlayOneShot(currentSound);
-                notesPlaying.Play();
-            }
+            //animation!
+            notesPlaying.Play();
         }
 
     }

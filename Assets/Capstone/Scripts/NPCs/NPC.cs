@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 public class NPC : Interactable {
     //list to store Plant & Rock scripts
-    protected List<Plant> currentPlants = new List<Plant>();
+    //protected List<Plant> currentPlants = new List<Plant>();
     protected List<Rock> currentRocks = new List<Rock>();
     
     //visual vars
@@ -364,32 +364,32 @@ public class NPC : Interactable {
     public virtual void LookForWork()
     {
         //hasLooked = true;
-        currentPlants.Clear();
-        currentRocks.Clear();
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
-        int i = 0;
-        while (i < hitColliders.Length)
-        {
-            if (hitColliders[i].gameObject.tag == "Plant")
-            {
-                currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
+        //currentPlants.Clear();
+        //currentRocks.Clear();
+        //Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
+        //int i = 0;
+        //while (i < hitColliders.Length)
+        //{
+        //    if (hitColliders[i].gameObject.tag == "Plant")
+        //    {
+        //        currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
 
-            }
-            else if (hitColliders[i].gameObject.tag == "Rock")
-            {
-                currentRocks.Add(hitColliders[i].gameObject.GetComponent<Rock>());
-            }
-            i++;
-        }
-        //if there are no nearby plants or rocks, we set move
-        if (currentRocks.Count > 0 || currentPlants.Count > 0)
-        {
-            StartCoroutine(PerformLabor());
-        }
-        else
-        {
-            SetMove();
-        }
+        //    }
+        //    else if (hitColliders[i].gameObject.tag == "Rock")
+        //    {
+        //        currentRocks.Add(hitColliders[i].gameObject.GetComponent<Rock>());
+        //    }
+        //    i++;
+        //}
+        ////if there are no nearby plants or rocks, we set move
+        //if (currentRocks.Count > 0 || currentPlants.Count > 0)
+        //{
+        //    StartCoroutine(PerformLabor());
+        //}
+        //else
+        //{
+        //    SetMove();
+        //}
     }
 
     //All NPCs perform some form of Labor. This means changing rhythm or sound producers around them
@@ -400,21 +400,21 @@ public class NPC : Interactable {
         yield return new WaitForSeconds(waitingTime);
         currentState = NPCState.LABOR;
 
-        for (int i = 0; i < currentPlants.Count; i++)
-        {
-            int randomShift = Random.Range(0, 100);
-            if (randomShift > 50)
-            {
-                currentPlants[i].Selection_Two(); //ShiftNoteUp
-                currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
-            }
-            else
-            {
-                currentPlants[i].Selection_One(); //ShiftNoteDown
-                currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
-            }
-            yield return new WaitForSeconds(waitingTime);
-        }
+        //for (int i = 0; i < currentPlants.Count; i++)
+        //{
+        //    int randomShift = Random.Range(0, 100);
+        //    if (randomShift > 50)
+        //    {
+        //        currentPlants[i].Selection_Two(); //ShiftNoteUp
+        //        currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
+        //    }
+        //    else
+        //    {
+        //        currentPlants[i].Selection_One(); //ShiftNoteDown
+        //        currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
+        //    }
+        //    yield return new WaitForSeconds(waitingTime);
+        //}
         for (int i = 0; i < currentRocks.Count; i++)
         {
             int randomShift = Random.Range(0, 100);

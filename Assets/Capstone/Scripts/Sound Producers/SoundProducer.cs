@@ -12,14 +12,9 @@ public abstract class SoundProducer : Interactable {
     public AudioSource audioSource;
 
     protected ParticleSystem notesPlaying;
-
-    public bool placedInEditor, scalingUp, scalingDown, lerpingColor;
-    public float scaleSpeed, growthMultiplier, lerpTimer, lerpTimerTotal = 1f;
+    
     protected Vector3 origScale;
     protected Vector3 startingPos;
-
-    public Color lerpedColor;
-    protected Color origColor;
 
     protected bool playerClick;
 
@@ -43,9 +38,6 @@ public abstract class SoundProducer : Interactable {
         origScale = transform.localScale;
         startingPos = transform.position;
 
-        lerpingColor = false;
-        lerpTimer = lerpTimerTotal;
-
         //counts up through plant children, adding these to the list of Branches for later.
         if (transform.childCount > particleCount)
         {
@@ -58,51 +50,11 @@ public abstract class SoundProducer : Interactable {
         //randomize note at start
         currentNote = Random.Range(0, musicalNotes.Length);
         currentSound = musicalNotes[currentNote];
-        origColor = soundSources[currentNote].GetComponentInChildren<MeshRenderer>().material.color;
     }
 	
 	public override void Update () {
         base.Update();
-
-        //when PlaySound() is called, plant scales up then back down
-        /* if (scalingUp)
-        {
-            notesPlaying.Emit(1);
-            if (transform.localScale.x < origScale.x * growthMultiplier)
-                transform.localScale += new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
-            else
-            {
-                scalingUp = false;
-                scalingDown = true;
-            }
-        }
-        if (scalingDown)
-        {
-            notesPlaying.Emit(1);
-            if (transform.localScale.x > origScale.x)
-                transform.localScale -= new Vector3(scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime, scaleSpeed * Time.deltaTime);
-            else
-            {
-                scalingDown = false;
-            }
-        }
-        */
-
-        //lerps the color of a single branch whenever ShiftNote() functions are called
-        if (lerpingColor)
-        {
-            lerpTimer -= Time.deltaTime;
-            if (lerpTimer > 0)
-            {
-				soundSources[currentNote].GetComponentInChildren<MeshRenderer>().material.color = Color.Lerp(soundSources[currentNote].GetComponentInChildren<MeshRenderer>().material.color, lerpedColor, Time.deltaTime * 10);
-            }
-            else
-            {
-				soundSources[currentNote].GetComponentInChildren<MeshRenderer>().material.color = origColor;
-                lerpingColor = false;
-                lerpTimer = lerpTimerTotal;
-            }
-        }
+        
 
         if(playerClicked)
         {
@@ -115,7 +67,7 @@ public abstract class SoundProducer : Interactable {
     {
         if (playerClicked)
         {
-            base.Selection_Two();
+            base.Selection_One();
 
         }
 
@@ -124,7 +76,6 @@ public abstract class SoundProducer : Interactable {
         if (soundSources[currentNote].activeSelf)
         {
 			soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
-			soundSources[currentNote].GetComponentInChildren<MeshRenderer>().material.color = origColor;
         }
 
         bool canPlayNote = false;
@@ -146,13 +97,8 @@ public abstract class SoundProducer : Interactable {
 
         // chooses new note and enlarges branch
         currentSound = musicalNotes[currentNote];
-		soundSources[currentNote].GetComponent<Animator>().SetBool("grown", true);
-
-        lerpTimer = lerpTimerTotal;
-        if (!lerpingColor)
-        {
-            lerpingColor = true;
-        }
+        audioSource.clip = currentSound;
+        soundSources[currentNote].GetComponent<Animator>().SetBool("grown", true);
 
         if (notesPlaying != null)
             notesPlaying.transform.position = soundSources[currentNote].transform.position;
@@ -170,12 +116,11 @@ public abstract class SoundProducer : Interactable {
     {
         if (playerClicked)
         {
-            base.Selection_One();
+            base.Selection_Two();
         }
         if (soundSources[currentNote].activeSelf)
         {
 			soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
-			soundSources[currentNote].GetComponentInChildren<MeshRenderer>().material.color = origColor;
         }
 
         bool canPlayNote = false;
@@ -196,14 +141,9 @@ public abstract class SoundProducer : Interactable {
         }
         // chooses new note and enlarges Branch
         currentSound = musicalNotes[currentNote];
+        audioSource.clip = currentSound;
 		soundSources[currentNote].GetComponent<Animator>().SetBool("grown", true);
 
-        lerpTimer = lerpTimerTotal;
-        if (!lerpingColor)
-        {
-            lerpingColor = true;
-        }
-        
         if (notesPlaying != null)
             notesPlaying.transform.position = soundSources[currentNote].transform.position;
 
@@ -222,7 +162,6 @@ public abstract class SoundProducer : Interactable {
         if (soundSources[currentNote].activeSelf)
         {
             soundSources[currentNote].transform.localScale *= 0.5f;
-			soundSources[currentNote].GetComponentInChildren<MeshRenderer>().material.color = origColor;
         }
         transform.localScale = origScale;
     }

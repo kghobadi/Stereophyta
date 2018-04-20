@@ -7,6 +7,7 @@ public class PianoMonkNPC : NPC {
     //Piano Monks will play piano trees all the way up and down the scale
     //If sapling counter > saplingsNecessary, uses Divine Light to grow all nearby plants
     //They do not play rocks
+    List<PianoPlant> currentPlants = new List<PianoPlant>();
 
     public int saplingsNecessary;
     int saplingCount = 0;
@@ -38,8 +39,10 @@ public class PianoMonkNPC : NPC {
         {
             if (hitColliders[i].gameObject.tag == "Plant")
             {
-                currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
-
+                if(hitColliders[i].gameObject.GetComponent<Plant>().plantSpecieName.ToString() == "PIANO")
+                {
+                    currentPlants.Add(hitColliders[i].gameObject.GetComponent<PianoPlant>());
+                }
             }
             else if (hitColliders[i].gameObject.tag == "Rock")
             {
@@ -68,38 +71,39 @@ public class PianoMonkNPC : NPC {
         //DIVINE LIGHT -- if x # of plants are still saplings
         // Grow all the plants and do cool animation
         //loop through all the plants
-        for (int i = 0; i < currentPlants.Count; i++)
-        {
-            if (currentPlants[i].sapling)
-            {
-                saplingCount++;
-                plantsToGrow.Add(currentPlants[i]);
-            }
+        //for (int i = 0; i < currentPlants.Count; i++)
+        //{
+        //    if (currentPlants[i].sapling)
+        //    {
+        //        saplingCount++;
+        //        plantsToGrow.Add(currentPlants[i]);
+        //    }
                 
-        }
-        //Debug.Log(plantsToGrow.Count);
-        if(saplingCount > saplingsNecessary)
-        {
-            //do divine Light effect and animation!!
+        //}
 
-            //loop through plantsToGrow and grow them
-            for(int p = 0; p < plantsToGrow.Count; p++)
-            {
-                plantsToGrow[p].GrowPlant();
-            }
+        ////Debug.Log(plantsToGrow.Count);
+        //if(saplingCount > saplingsNecessary)
+        //{
+        //    //do divine Light effect and animation!!
 
-            yield return new WaitForSeconds(waitingTime * 3);
+        //    //loop through plantsToGrow and grow them
+        //    for(int p = 0; p < plantsToGrow.Count; p++)
+        //    {
+        //        plantsToGrow[p].GrowPlant();
+        //    }
 
-            //reset sapling count and clear plantsToGrow
-            saplingCount = 0;
-            plantsToGrow.Clear();
-        }
-        else
-        {
-            //reset sapling count and clear plantsToGrow
-            saplingCount = 0;
-            plantsToGrow.Clear();
-        }
+        //    yield return new WaitForSeconds(waitingTime * 3);
+
+        //    //reset sapling count and clear plantsToGrow
+        //    saplingCount = 0;
+        //    plantsToGrow.Clear();
+        //}
+        //else
+        //{
+        //    //reset sapling count and clear plantsToGrow
+        //    saplingCount = 0;
+        //    plantsToGrow.Clear();
+        //}
 
         //choose random plant to play up or down the scale
         int randomPlant = Random.Range(0, currentPlants.Count);

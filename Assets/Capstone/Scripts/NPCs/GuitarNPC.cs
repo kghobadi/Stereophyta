@@ -5,11 +5,11 @@ using UnityEngine.UI;
 using UnityEngine.AI;
 
 public class GuitarNPC : NPC {
-    protected List<NewPlant> currentFlowers = new List<NewPlant>();
-    protected List<NewPlant> flowersToTake = new List<NewPlant>();
-    protected List<NewPlant> flowerGroup1 = new List<NewPlant>();
-    protected List<NewPlant> flowerGroup2 = new List<NewPlant>();
-    protected List<NewPlant> flowerGroup3 = new List<NewPlant>();
+    protected List<GuitarPlant> currentFlowers = new List<GuitarPlant>();
+    protected List<GuitarPlant> flowersToTake = new List<GuitarPlant>();
+    protected List<GuitarPlant> flowerGroup1 = new List<GuitarPlant>();
+    protected List<GuitarPlant> flowerGroup2 = new List<GuitarPlant>();
+    protected List<GuitarPlant> flowerGroup3 = new List<GuitarPlant>();
     public WindMachine windMachine;
 
 
@@ -33,23 +33,26 @@ public class GuitarNPC : NPC {
             {
                 if (hitColliders[v].gameObject.tag == "Plant")
                 {
-                    if (hitColliders[v].gameObject.GetComponent<NewPlant>().plantSpecieName.ToString() == "GUITAR")
+                    string plantType = hitColliders[v].gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+                    if(plantType == "GUITAR")
                     {
-                        //checks which waypoint this is looking at 
-                        switch (i)
+                        if (hitColliders[v].gameObject.GetComponent<GuitarPlant>())
                         {
-                            case 0:
-                                flowerGroup1.Add(hitColliders[v].gameObject.GetComponent<NewPlant>());
-                                break;
-                            case 1:
-                                flowerGroup2.Add(hitColliders[v].gameObject.GetComponent<NewPlant>());
-                                break;
-                            case 2:
-                                flowerGroup3.Add(hitColliders[v].gameObject.GetComponent<NewPlant>());
-                                break;
+                            //checks which waypoint this is looking at 
+                            switch (i)
+                            {
+                                case 0:
+                                    flowerGroup1.Add(hitColliders[v].gameObject.GetComponent<GuitarPlant>());
+                                    break;
+                                case 1:
+                                    flowerGroup2.Add(hitColliders[v].gameObject.GetComponent<GuitarPlant>());
+                                    break;
+                                case 2:
+                                    flowerGroup3.Add(hitColliders[v].gameObject.GetComponent<GuitarPlant>());
+                                    break;
+                            }
                         }
                     }
-                        
                 }
             }
         }

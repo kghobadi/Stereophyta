@@ -98,6 +98,16 @@ public class fruitSeedNoInv : Interactable {
        currentSpot = currentSeedLine.IndexOf(gameObject);
        interactable = false;
 
+        //Input map for Mousewheel scroll to change seeds
+        //if scroll up 
+        // move all seed positions in line up
+        // set seed which player is holding to end of line 
+        // then CheckPlaceInLine()
+        //if scroll down 
+        // move all seed positions backward in line
+        // seed in back of line becomes currently held 
+        // then CheckPlaceInLine()
+
 
         //input reader for when a player is holding this seed 
         if (playerHolding)

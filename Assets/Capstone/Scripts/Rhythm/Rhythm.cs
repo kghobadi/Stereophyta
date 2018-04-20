@@ -7,9 +7,22 @@ public class Rhythm : MonoBehaviour {
 
     public virtual void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "Plant")
+        if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<NewPlant>().PlaySound();
+            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+
+            if (plantType == "GUITAR")
+            {
+                other.gameObject.GetComponent<GuitarPlant>().PlaySound();
+            }
+            else if (plantType == "HORN")
+            {
+                other.gameObject.GetComponent<HornPlant>().PlaySound();
+            }
+            else if (plantType == "PIANO")
+            {
+                other.gameObject.GetComponent<PianoPlant>().PlaySound();
+            }
         }
         if (other.gameObject.tag == "Seed")
         {
@@ -20,7 +33,20 @@ public class Rhythm : MonoBehaviour {
     {
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<NewPlant>().PlaySound();
+            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+
+            if (plantType == "GUITAR")
+            {
+                other.gameObject.GetComponent<GuitarPlant>().PlaySound();
+            }
+            else if (plantType == "HORN")
+            {
+                other.gameObject.GetComponent<HornPlant>().PlaySound();
+            }
+            else if (plantType == "PIANO")
+            {
+                other.gameObject.GetComponent<PianoPlant>().PlaySound();
+            }
         }
     }
 

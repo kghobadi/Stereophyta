@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class HornNPC : NPC {
 
+    List<HornPlant> currentPlants = new List<HornPlant>();
+
     //which direction is it walking
     public bool walkingDirection = true;
 
@@ -88,9 +90,12 @@ public class HornNPC : NPC {
             {
                 if (hitColliders[i].gameObject.tag == "Plant")
                 {
-                    currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
-
+                if (hitColliders[i].gameObject.GetComponent<Plant>().plantSpecieName.ToString() == "HORN")
+                {
+                    currentPlants.Add(hitColliders[i].gameObject.GetComponent<HornPlant>());
                 }
+
+            }
             i++;
         }
         if (planterOrSucker)
