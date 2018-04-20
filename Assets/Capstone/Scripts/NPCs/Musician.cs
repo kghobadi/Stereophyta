@@ -260,7 +260,7 @@ public class Musician : MonoBehaviour {
         }
     }
 
-    public  void OnEnable()
+    public void OnEnable()
     {
         enabledCounter++;
         if (enabledCounter > 1)

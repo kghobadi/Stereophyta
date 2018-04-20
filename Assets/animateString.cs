@@ -3,62 +3,51 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class animateString : MonoBehaviour {
+    //line renderer ref 
 	private LineRenderer animateLine;
+    //sides of flower branch
 	public GameObject point1, point2;
+    //animator
 	private Animator animatePlant;
-	public int linePoints;
-	public float timer;
+
+    //assigns the line renderer point to the spring joint
 	public GameObject target;
 	public GameObject parts;
 
-    GuitarPlant plantScript;
-
-	// Use this for initialization
+    //ref to parent's plant script
+    public GuitarPlant plantScript;
+    
 	void Start () {
+        //grab refs
 		animateLine = GetComponent<LineRenderer>();
-        plantScript = GetComponentInParent<GuitarPlant>();
-		animatePlant = GetComponent<Animator> ();
-		timer = 0;
+		animatePlant = GetComponentInParent<Animator> ();
 	}
 	
-	// Update is called once per frame
 	void Update () {
 		//animateLine.positionCount = linePoints;
 		if (plantScript.audioSource.isPlaying) {
-			animatePlant.SetBool ("Stopped", false);
-			animatePlant.SetBool ("Playing", true);
-			target.GetComponent<Rigidbody>().AddForce(new Vector3(0, 5000, 0));
+			target.GetComponent<Rigidbody>().AddForce(new Vector3(0, 1000, 0));
 			if (!parts.GetComponent<ParticleSystem> ().isPlaying) {
 				parts.GetComponent<ParticleSystem> ().Play ();
 			}
+        } 
 
-		} else {
-			animatePlant.SetBool ("Stopped", true);
-			animatePlant.SetBool ("Playing", false);
-
-		}
-
-		if (Input.GetKeyDown (KeyCode.Space)) {
-			animatePlant.SetBool ("Closing", true);
-			animatePlant.SetBool ("Opening", false);
-		}
-		if (Input.GetKeyDown (KeyCode.W)) {
-			animatePlant.SetBool ("Opening", true);
-			animatePlant.SetBool ("Closing", false);
-		}
-
-		timer += Time.deltaTime;
-
-		if(timer >= 0.05f) {
-			parts.transform.localPosition = new Vector3 (-1.8f, 0, -2);
-			timer = 0;
-		} else {
-			parts.transform.localPosition = new Vector3 (1.8f, 0, -2);
-
-		}
-
-		animateLine.SetPosition (0, point1.transform.position);
-		animateLine.SetPosition (animateLine.positionCount/2, target.transform.position);
-		animateLine.SetPosition (animateLine.positionCount - 1, point2.transform.position);
+        //if it's grown
+        if(animatePlant.GetBool("grown") == true)
+        {
+            if(!animateLine.enabled)
+                animateLine.enabled = true;
+            //this draws the line between the two poles of the flower
+            animateLine.SetPosition(0, point1.transform.position);
+            animateLine.SetPosition(animateLine.positionCount / 2, target.transform.position);
+            animateLine.SetPosition(animateLine.positionCount - 1, point2.transform.position);
+        }
+        //closed turn off line
+        else
+        {
+            if (animateLine.enabled)
+                animateLine.enabled = false;
+        }
+        
 	}
 }

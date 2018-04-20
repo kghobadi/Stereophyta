@@ -4,13 +4,9 @@ using UnityEngine;
 
 public class PianoPlant : SoundProducer {
 
+    //stores seed instant prefab and clone
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
-
-    public ParticleSystem poofParticles;
-    
-    public float waitPullFruit, pullMin, pullMax, pullDistance;
-    Vector3 startingMousePos, releaseMousePos;
 
     public override void Start () {
         //this comes before base.Start() for sound sources 
@@ -21,24 +17,6 @@ public class PianoPlant : SoundProducer {
 
         soundSources [currentNote].GetComponent<Animator> ().SetBool ("grown", true);
         notesPlaying.transform.position = soundSources[currentNote].transform.position;
-        
-    }
-    public override void OnMouseEnter()
-    {
-        base.OnMouseEnter();
-        tpc.blubAnimator.Play("ListenToPlant", 0);
-      
-        
-    }
-
-    public override void OnMouseOver()
-    {
-        if (interactable)
-        {
-            base.OnMouseOver();
-            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
-            
-        }
         
     }
 
@@ -112,14 +90,4 @@ public class PianoPlant : SoundProducer {
         }
     }
 
-   
-    
-    public override void OnEnable()
-    {
-        base.OnEnable();
-        if(enabledCounter > 1)
-        {
-            Start();
-        }
-    }
 }

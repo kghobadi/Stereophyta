@@ -4,43 +4,24 @@ using UnityEngine;
 
 public class HornPlant : SoundProducer {
 
+    //var for seed object and instant clone
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
 
-    public ParticleSystem poofParticles;
-    
-    public float waitPullFruit, pullMin, pullMax, pullDistance;
-    Vector3 startingMousePos, releaseMousePos;
+    //for being picked by NPC
+    public Musician seedPicker;
+    public int seedSpotNumber;
 
     public override void Start () {
         //this comes before base.Start() for sound sources 
         particleCount = 2;
         base.Start();
-        poofParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
-        poofParticles.Stop();
 
+        //set active sound source to grown and move notesplaying based on that
         soundSources [currentNote].GetComponent<Animator> ().SetBool ("grown", true);
         notesPlaying.transform.position = soundSources[currentNote].transform.position;
-        
     }
-    public override void OnMouseEnter()
-    {
-        base.OnMouseEnter();
-        tpc.blubAnimator.Play("ListenToPlant", 0);
-      
-        
-    }
-
-    public override void OnMouseOver()
-    {
-        if (interactable)
-        {
-            base.OnMouseOver();
-            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
-            
-        }
-        
-    }
+    
 
     //Take Fruit Seed
     public override void Selection_One()
@@ -86,37 +67,25 @@ public class HornPlant : SoundProducer {
 
     }
 
-    //shift note down
+    //shift note up
     public override void Selection_Two()
     {
-            base.Selection_One();
-        
+        //shift note up stored in selection one
+        base.Selection_One();
     }
 
-    //shift note up
+    //shift note down
     public override void Selection_Three()
     {
-       
-            base.Selection_Two();
-        
+        //shift note down stored in selection two
+        base.Selection_Two();
     }
 
     public void PlaySound()
     {
-            audioSource.Play();
+            audioSource.Play(); 
             soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
             if (notesPlaying != null)
                 notesPlaying.Emit(10);
-    }
-
-   
-    
-    public override void OnEnable()
-    {
-        base.OnEnable();
-        if(enabledCounter > 1)
-        {
-            Start();
-        }
     }
 }

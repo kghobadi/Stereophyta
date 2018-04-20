@@ -50,9 +50,24 @@ public class Rhythm : MonoBehaviour {
         }
     }
 
+    public virtual void OnTriggerExit(Collider other)
+    {
+        if(other.gameObject.tag == "Plant")
+        {
+            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+
+            //for horns, need to tell audioSource to stop playing
+            if (plantType == "HORN")
+            {
+                other.gameObject.GetComponent<HornPlant>().audioSource.Stop();
+            }
+        }
+    }
+
     public virtual void OnEnable()
     {
         enabledCounter++;
+        
     }
 
 }

@@ -4,63 +4,45 @@ using UnityEngine;
 
 public class GuitarPlant : SoundProducer {
 
+    //var for seed object and instant clone
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
-    public GameObject closedLid;
-
-    public ParticleSystem poofParticles;
     
+    //checks whether the flower is open or closed
     public bool active;
+
+    //for changing the button based on active state
     public Sprite[] stopPlayingMusic, startPlayingMusic;
 
     //for being picked by NPC
     public Musician seedPicker;
     public int seedSpotNumber;
-    
+
+    public Animator guitarAnimator;
 
     public override void Start () {
         //this comes before base.Start() for sound sources 
-        particleCount = 3;
         base.Start();
-        poofParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
-        poofParticles.Stop();
 
+        //starts as active
         active = true;
-        closedLid.SetActive(false);
+
+        //randomly rotate the plant on y axis
         int randomRotate = Random.Range(0, 360);
         transform.localEulerAngles = new Vector3(0, randomRotate, 0);
-        soundSources[currentNote].GetComponent<Animator>().SetBool("grown", true);
-        if(notesPlaying != null)
-            notesPlaying.transform.position = soundSources[currentNote].transform.position;
-        
-    }
-    public override void OnMouseEnter()
-    {
-        base.OnMouseEnter();
-        tpc.blubAnimator.Play("ListenToPlant", 0);
-      
-        
+
+        //set flower to grown 
+        guitarAnimator.SetBool("grown", true);
     }
 
-    public override void OnMouseOver()
-    {
-        if (interactable)
-        {
-            base.OnMouseOver();
-            _player.transform.LookAt(new Vector3(soundSources[currentNote].transform.position.x, _player.transform.position.y, soundSources[currentNote].transform.position.z));
-            
-        }
-        
-    }
-
-
+    //can be done by player or by NPC
     void TakeFruitSeed()
     {
         if (playerClick || playerClicked)
         {
             if (tpc.seedLine.Count < tpc.seedLineMax)
             {
-                soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
+                guitarAnimator.SetBool("grown", false);
                 //instantiate seed and add it to player seed line
                 fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
                 fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = true;
@@ -81,7 +63,7 @@ public class GuitarPlant : SoundProducer {
         //NPC took it
         else
         {
-            soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
+            guitarAnimator.SetBool("grown", false);
             //instantiate seed and add it to player seed line
             fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
             fruitSeedNoInv newFruitSeed = fruitSeedClone.GetComponent<fruitSeedNoInv>();
@@ -98,34 +80,36 @@ public class GuitarPlant : SoundProducer {
         
     }
     
+    //called by a rhythm object
     public void PlaySound()
     {
             if (active && !audioSource.isPlaying)
             {
                 audioSource.PlayOneShot(currentSound);
-                soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
+            guitarAnimator.SetTrigger("playing");
                 if (notesPlaying != null)
                     notesPlaying.Emit(10);
             }
     }
 
-    //shift note down
+    //command to activate or deactivate flower
     public override void Selection_One()
     {
-       
-            //command to activate or deactivate flower
+            //reset selection button
             SwitchSelectionButtons();
+        //turn off if active
             if (active)
             {
-                active = false;
-                closedLid.SetActive(true);
+            guitarAnimator.SetBool("grown", false);
+            active = false;
                 selectionImages[0].buttonImages = startPlayingMusic;
             }
+            //turn on if inactive
             else
             {
-                active = true;
+            guitarAnimator.SetBool("grown", true);
+            active = true;
                 audioSource.PlayOneShot(currentSound);
-                closedLid.SetActive(false);
                 selectionImages[0].buttonImages = stopPlayingMusic;
             }
             if(playerClick || playerClicked)
@@ -149,13 +133,15 @@ public class GuitarPlant : SoundProducer {
         yield return new WaitForSeconds(0.2f);
         Destroy(gameObject);
     }
-    
-    public override void OnEnable()
+
+    public override void OnDisable()
     {
-        base.OnEnable();
-        if(enabledCounter > 1)
+        StopAllCoroutines();
+        //turn off current soundsource
+        if (soundSources[currentNote].activeSelf)
         {
-            Start();
+            guitarAnimator.SetBool("grown", false);
         }
     }
+
 }

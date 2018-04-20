@@ -386,6 +386,10 @@ public abstract class Interactable : MonoBehaviour
     public virtual void OnEnable()
     {
         enabledCounter++;
+        if (enabledCounter > 1)
+        {
+            Start();
+        }
         //specify this in whichever objects need it
     }
 }

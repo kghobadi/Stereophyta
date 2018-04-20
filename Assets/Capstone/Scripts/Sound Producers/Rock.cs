@@ -53,15 +53,6 @@ public class Rock : SoundProducer
 
     }
 
-    public override void OnEnable()
-    {
-        base.OnEnable();
-        if (enabledCounter > 1)
-        {
-            Start();
-        }
-    }
-
     public override void Selection_Three()
     {
         if (playerClicked)
