@@ -90,6 +90,11 @@ public class fruitSeedNoInv : Interactable {
         else
         {
             seedSource.outputAudioMixerGroup = seedPicker.primarySource.outputAudioMixerGroup;
+            //controls whether a seed is playing a clip or not
+            if (seedSource.isPlaying)
+            {
+                notesPlaying.Emit(1);
+            }
         }
 
        

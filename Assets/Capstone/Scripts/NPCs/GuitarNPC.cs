@@ -12,6 +12,13 @@ public class GuitarNPC : NPC {
     protected List<GuitarPlant> flowerGroup3 = new List<GuitarPlant>();
     public WindMachine windMachine;
 
+    public override void Start()
+    {
+        base.Start();
+
+        windMachine.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
+                   windMachine.transform.position.y, movementPoints[moveCounter].transform.position.z));
+    }
 
     //fills up lists of nearby guitar plants and windmachines
     public override void LookForWork()
@@ -196,7 +203,7 @@ public class GuitarNPC : NPC {
         {
             flowersToTake[i].seedPicker = myMusic;
             flowersToTake[i].seedSpotNumber = i;
-            flowersToTake[i].Selection_Three();
+            flowersToTake[i].Selection_Two();
         }
 
 

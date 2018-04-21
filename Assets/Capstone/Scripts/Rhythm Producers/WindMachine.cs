@@ -8,12 +8,13 @@ public class WindMachine : RhythmProducer {
     public GameObject wind;
     GameObject windClone;
     
-    public float windSpeed;
+    public float windSpeed, rotationSpeed;
     public float distanceToDestroy;
 
     public AudioClip selectLower;
 
     Animator windFanAnimator;
+    public Transform fanObj;
 
     //Rotation var -- not being used currently
     public bool playerRotating;
@@ -22,6 +23,7 @@ public class WindMachine : RhythmProducer {
 
     //Rhythm lever vars
     public int timeScaleMax;
+    public float drawDist;
 
     bool increasing;
 
@@ -29,8 +31,8 @@ public class WindMachine : RhythmProducer {
         base.Start();
 
         interactable = true;
-
-        windFanAnimator = GetComponent<Animator>();
+        rotationSpeed = 1;
+        
 
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
@@ -49,6 +51,8 @@ public class WindMachine : RhythmProducer {
                 DropObject();
             }
         }
+
+        fanObj.transform.Rotate(0, 0, rotationSpeed);
 
         //make windmachine look at mouse pos
         if (playerRotating)
@@ -85,7 +89,7 @@ public class WindMachine : RhythmProducer {
             if (showRhythm)
             {
                 //instantiate wind, show particles, etc.
-                windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.localEulerAngles + new Vector3(0,90,0)));
+                windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.eulerAngles - new Vector3(0,90,0)));
                 windClone.GetComponent<PuzzleWind>()._windGen = this;
                 showRhythm = false;
             }
@@ -150,7 +154,7 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed += 2;
             timeScale += 1;
-            windFanAnimator.speed *= 2;
+            rotationSpeed *= 2;
 
             if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(InteractSound);
@@ -165,7 +169,7 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed -= 2;
             timeScale -= 1;
-            windFanAnimator.speed *= 0.5f;
+            rotationSpeed *= 0.5f;
 
             if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(selectLower);
