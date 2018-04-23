@@ -12,7 +12,7 @@ public class CircleMillControls : Interactable {
     Transform circleMill;
 
     //array of circleNPCs which fills up at start
-    public GameObject hornPlanter;
+    public HornNPC hornPlanter;
 
     //rhythm vars
     public int rhythmState, rhythmStateMax;
@@ -25,6 +25,7 @@ public class CircleMillControls : Interactable {
     AudioSource controlsAudio;
     public AudioClip selectLower;
 
+    CameraController camControl;
     Vector3 zoomedOutPosO, zoomedOutRotO;
 
     //direction lever boolean (starts as 'positive')
@@ -36,8 +37,9 @@ public class CircleMillControls : Interactable {
         interactable = true;
 
         controlsAudio = GetComponent<AudioSource>();
-        zoomedOutPosO = cammy.GetComponent<CameraController>().zoomedOutPos;
-        zoomedOutRotO = cammy.GetComponent<CameraController>().zoomedOutRot;
+        camControl = cammy.GetComponent<CameraController>();
+        zoomedOutPosO = camControl.zoomedOutPos;
+        zoomedOutRotO = camControl.zoomedOutRot;
 
         //interact sprites
         for (int i = 1; i < 4; i++)
@@ -62,13 +64,13 @@ public class CircleMillControls : Interactable {
 
         if(Vector3.Distance(_player.transform.position, transform.position) < 30)
         {
-            cammy.GetComponent<CameraController>().zoomedOutPos = new Vector3(-10, 30, -10);
-            cammy.GetComponent<CameraController>().zoomedOutRot = new Vector3(65, 45, 0);
+            camControl.zoomedOutPos = new Vector3(-10, 30, -10);
+            camControl.zoomedOutRot = new Vector3(65, 45, 0);
         }
         else
         {
-            cammy.GetComponent<CameraController>().zoomedOutPos = zoomedOutPosO;
-            cammy.GetComponent<CameraController>().zoomedOutRot = zoomedOutRotO;
+            camControl.zoomedOutPos = zoomedOutPosO;
+            camControl.zoomedOutRot = zoomedOutRotO;
         }
 
         //rotates the wind turbine
@@ -94,7 +96,7 @@ public class CircleMillControls : Interactable {
                 if (Vector3.Distance(hornPlanter.transform.position, transform.position) < windRadius)
                 {
                     if(hornPlanter != null)
-                    hornPlanter.GetComponent<HornNPC>().walkingDirection = false;
+                    hornPlanter.walkingDirection = true;
                 }
             
         }
@@ -108,7 +110,7 @@ public class CircleMillControls : Interactable {
                 if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
                 {
                     if (hornPlanter != null)
-                    hornPlanter.GetComponent<HornNPC>().walkingDirection = true;
+                    hornPlanter.walkingDirection = false;
                   
                 }
             }
@@ -173,8 +175,8 @@ public class CircleMillControls : Interactable {
             {
                 if (hornPlanter != null)
                 {
-                hornPlanter.GetComponent<HornNPC>().navMeshAgent.speed += NPCspeedInterval;
-                hornPlanter.GetComponent<HornNPC>().animator.speed += animatorSpeedInterval;
+                hornPlanter.navMeshAgent.speed += NPCspeedInterval;
+                hornPlanter.animator.speed += animatorSpeedInterval;
                 }
                    
             }
@@ -191,8 +193,8 @@ public class CircleMillControls : Interactable {
         {
             if (hornPlanter != null)
             {
-                hornPlanter.GetComponent<HornNPC>().navMeshAgent.speed += NPCspeedInterval;
-                hornPlanter.GetComponent<HornNPC>().animator.speed += animatorSpeedInterval;
+                hornPlanter.navMeshAgent.speed += NPCspeedInterval;
+                hornPlanter.animator.speed += animatorSpeedInterval;
             }
 
         }
@@ -210,8 +212,8 @@ public class CircleMillControls : Interactable {
             {
                 if (hornPlanter != null)
                 {
-                hornPlanter.GetComponent<HornNPC>().navMeshAgent.speed -= NPCspeedInterval;
-                hornPlanter.GetComponent<HornNPC>().animator.speed -= animatorSpeedInterval;
+                hornPlanter.navMeshAgent.speed -= NPCspeedInterval;
+                hornPlanter.animator.speed -= animatorSpeedInterval;
                 }
             }
     }
@@ -228,8 +230,8 @@ public class CircleMillControls : Interactable {
         {
             if (hornPlanter != null)
             {
-                hornPlanter.GetComponent<HornNPC>().navMeshAgent.speed -= NPCspeedInterval;
-                hornPlanter.GetComponent<HornNPC>().animator.speed -= animatorSpeedInterval;
+                hornPlanter.navMeshAgent.speed -= NPCspeedInterval;
+                hornPlanter.animator.speed -= animatorSpeedInterval;
             }
         }
     }
