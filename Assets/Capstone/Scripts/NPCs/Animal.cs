@@ -7,7 +7,6 @@ using UnityEngine.AI;
 public class Animal : Interactable {
     //visual vars
     public Animator animator;
-    TrailRenderer trailRender;
 
     //list of plants I can eat
     protected List<HornPlant> currentPlants = new List<HornPlant>();
@@ -41,8 +40,10 @@ public class Animal : Interactable {
 
     public float holdTimer = 0, holdTimerWait = 0.25f;
 
+    public ParticleSystem sinWaveNotes;
+
     //for note up or down
-    bool clickedButton;
+    bool clickedButton, timeToEat;
 
     AudioSource myVoice;
 
@@ -53,7 +54,7 @@ public class Animal : Interactable {
     // all NPC states are shared, what they do in those states can be quite different 
     public enum NPCState
     {
-        EATING, MOVING, FOLLOWING, GREETING, DISABLED,
+        EATING, MOVING, WALKINGTOFOOD, FOLLOWING, GREETING, DISABLED,
     }
 
     public override void Start () {
@@ -67,8 +68,7 @@ public class Animal : Interactable {
         }
 
         navMeshAgent = GetComponent<NavMeshAgent>();
-
-        trailRender = GetComponent<TrailRenderer>();
+        sinWaveNotes.Stop();
 
         animator = GetComponentInChildren<Animator>();
         animator.SetBool("walking", true);
@@ -106,7 +106,6 @@ public class Animal : Interactable {
             followTimer += Time.deltaTime;
             if (followTimer < followTimeMin)
             {
-                trailRender.enabled = false;
                 canSeeDistance = 50;
                 canClickDistance = 30;
                 FollowPlayer();
@@ -119,7 +118,6 @@ public class Animal : Interactable {
         }
         else
         {
-            trailRender.enabled = true;
             canSeeDistance = 15;
             canClickDistance = 10;
         }
@@ -141,6 +139,20 @@ public class Animal : Interactable {
                 navMeshAgent.isStopped = true;
                 currentState = NPCState.EATING;
                 LookForFood();
+            }
+        }
+
+        if(currentState == NPCState.WALKINGTOFOOD)
+        {
+            navMeshAgent.isStopped = false;
+            animator.SetBool("walking", true);
+            transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
+           
+            // for some reason must use this distance check instead of navMeshAgent.remainingDistance
+            if (Vector3.Distance(transform.position, targestDestination) < 5f)
+            {
+                navMeshAgent.isStopped = true;
+                timeToEat = true;
             }
         }
 
@@ -169,6 +181,7 @@ public class Animal : Interactable {
             navMeshAgent.isStopped = false;
             animator.SetBool("walking", true);
         animator.SetBool("idle", false);
+        animator.SetBool("eating", false);
         if (moveCounter < (movementPoints.Count - 1))
             {
                 moveCounter += 1;
@@ -233,76 +246,84 @@ public class Animal : Interactable {
     //All NPCs perform some form of Labor. This means changing rhythm or sound producers around them
     public virtual IEnumerator Eat()
     {
-        //wait here a moment
-        animator.SetBool("walking", false);
-        animator.SetBool("eating", true);
-        yield return new WaitForSeconds(waitingTime);
-        currentState = NPCState.EATING;
-
         //for the number of plants exceeding the max
         for (int p = 0; p < (currentPlants.Count - plantMaximum); p++)
         {
             //if plant exists    
             if (currentPlants[p] != null)
             {
-                //look at plant pos
-                Vector3 plantPos = new Vector3(currentPlants[p].transform.position.x, transform.position.y, currentPlants[p].transform.position.z);
-                transform.LookAt(plantPos);
+                timeToEat = false;
+                targestDestination = currentPlants[p].transform.position + new Vector3(0, 0, 4);
+                navMeshAgent.SetDestination(targestDestination);
+                currentState = NPCState.WALKINGTOFOOD;
+            }
 
-                //if this plant is fully grown
+            yield return new WaitUntil(() => timeToEat == true);
 
-                transform.LookAt(plantPos);
-                //loop through plant branches
-                for (int i = 0; i < currentPlants[p].soundSources.Count; i++)
-                {
-                    //check if plant is still there and if sound source is active
-                    if (currentPlants[p] != null && currentPlants[p].soundSources[i].activeSelf)
-                    {
-                        Vector3 sourcePos = new Vector3(currentPlants[p].soundSources[i].transform.position.x, transform.position.y, currentPlants[p].soundSources[i].transform.position.z);
-                        transform.LookAt(sourcePos);
-
-                        //turn off fruit
-                        currentPlants[p].soundSources[i].transform.localScale *= 0.5f;
-                        currentPlants[p].soundSources[i].SetActive(false);
-
-                        //shift note up
-                        currentPlants[p].Selection_Two();
-
-                        //play seed removal sound !!!
-
-                        yield return new WaitForSeconds(waitingTime);
-
-                        //play the note I just ate!!!
-                        int randomBlow = Random.Range(0, 100);
-                        if(randomBlow > 75)
-                        {
-                            animator.SetTrigger("blow horn");
-                            myVoice.PlayOneShot(currentPlants[p].musicalNotes[i]);
-                            yield return new WaitForSeconds(2);
-                        }
-                    }
-                }
-
-                //play poof
+                //if plant exists    
                 if (currentPlants[p] != null)
                 {
-                    currentPlants[p].poofParticles.Play();
-                    //wait until note stops playing
-                    yield return new WaitUntil(() => currentPlants[p].audioSource.isPlaying == false);
+
+                    currentState = NPCState.EATING;
+                    //wait here a moment
+                    animator.SetBool("walking", false);
+                    animator.SetBool("idle", false);
+                    animator.SetBool("eating", true);
+
+                    //look at plant pos
+                    Vector3 plantPos = new Vector3(currentPlants[p].transform.position.x, transform.position.y, currentPlants[p].transform.position.z);
+                    transform.LookAt(plantPos);
+
+                    //if this plant is fully grown
+
+                    transform.LookAt(plantPos);
+                    //loop through plant branches
+                    for (int i = 0; i < currentPlants[p].soundSources.Count; i++)
+                    {
+                        //check if plant is still there and if sound source is active
+                        if (currentPlants[p] != null && currentPlants[p].soundSources[i].activeSelf)
+                        {
+                            Vector3 sourcePos = new Vector3(currentPlants[p].soundSources[i].transform.position.x, transform.position.y, currentPlants[p].soundSources[i].transform.position.z);
+                            transform.LookAt(sourcePos);
+
+                            //turn off fruit
+                            currentPlants[p].soundSources[i].transform.localScale *= 0.5f;
+                            currentPlants[p].soundSources[i].SetActive(false);
+
+                            //shift note up
+                            if (i < currentPlants[p].soundSources.Count - 1)
+                                currentPlants[p].Selection_Two();
+
+                            //play seed removal sound !!!
+
+                            yield return new WaitForSeconds(waitingTime);
+
+                            //play the note I just ate!!!
+                            int randomBlow = Random.Range(0, 100);
+                            if (randomBlow > 75)
+                            {
+                                animator.SetTrigger("blow horn");
+                                myVoice.PlayOneShot(currentPlants[p].musicalNotes[i]);
+                            sinWaveNotes.Play();
+                                yield return new WaitForSeconds(2);
+                            }
+                        }
+                    }
+
                     //play poof
                     if (currentPlants[p] != null)
                     {
-                        //destroy plant if all seeds are gone 
-                        Destroy(currentPlants[p].gameObject);
+                        currentPlants[p].StartCoroutine(currentPlants[p].DestroyPlant());
                         currentPlants.Remove(currentPlants[p]);
                         p--; //account for change in list size
+
                     }
                 }
-            }
+            
+           
         }
 
         //set new move pos
-        animator.SetBool("eating", false);
         SetMove();
     }
 
@@ -315,13 +336,20 @@ public class Animal : Interactable {
         transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         animator.SetTrigger("blow horn");
         myVoice.PlayOneShot(myVoice.clip);
+        sinWaveNotes.Play();
         yield return new WaitForSeconds(greetingTime);
         
         if(currentState == NPCState.FOLLOWING)
         {
             navMeshAgent.isStopped = false;
         }
-        else
+        else if (lastState == NPCState.WALKINGTOFOOD)
+        {
+            //starts walking again
+            navMeshAgent.isStopped = false;
+            currentState = NPCState.WALKINGTOFOOD;
+        }
+        else 
         {
             //starts walking again
             navMeshAgent.isStopped = false;
@@ -351,12 +379,15 @@ public class Animal : Interactable {
         yield return new WaitForSeconds(1);
 
         myVoice.PlayOneShot(myVoice.clip);
+        sinWaveNotes.Play();
 
         animator.SetBool("eating", false);
         animator.SetBool("idle", false);
         animator.SetTrigger("blow horn");
 
         transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+
+        yield return new WaitForSeconds(1);
 
         currentState = NPCState.FOLLOWING;
     }

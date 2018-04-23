@@ -46,6 +46,8 @@ public class HornNPC : NPC {
         {
             //Debug.Log("set move");
             navMeshAgent.isStopped = false;
+            animator.SetBool("working", false);
+            animator.SetBool("idle", false);
             animator.SetBool("walking", true);
             if (walkingDirection)
             {
@@ -228,7 +230,7 @@ public class HornNPC : NPC {
                     currentPlants[i].seedPicker = myMusic;
                     for (int s = 0; s < myMusic.seedSpots.Count; s++)
                     {
-                        if (myMusic.seedSpots[s].transform.childCount == 0)
+                        if (myMusic.seedSpots[s].transform.childCount == 0 && currentPlants[i] != null)
                         {
                             currentPlants[i].seedSpotNumber = s;
                             currentPlants[i].Selection_One();
@@ -237,7 +239,9 @@ public class HornNPC : NPC {
                             yield return new WaitForSeconds(waitingTime);
                         }
                     }
+
                 }
+
             }
         }
 

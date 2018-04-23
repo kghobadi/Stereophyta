@@ -105,14 +105,14 @@ public class HornPlant : SoundProducer {
         
     }
 
-    IEnumerator DestroyPlant()
+    public IEnumerator DestroyPlant()
     {
         //destroy plant
         interactable = false;
         poofParticles.Play();
         if (playerClick || playerClicked)
             DeactivateSelectionMenu();
-        yield return new WaitUntil(() => audioSource.isPlaying == false);
+        yield return new WaitForSeconds(1);
         Destroy(gameObject);
     }
 

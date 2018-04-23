@@ -304,7 +304,6 @@ public class ThirdPersonController : MonoBehaviour
         }
         else
         {
-            Debug.Log("stopped moving");
             isMoving = false;
         }
 

@@ -24,7 +24,7 @@ public class Rhythm : MonoBehaviour {
                 other.gameObject.GetComponent<PianoPlant>().PlaySound();
             }
         }
-        if (other.gameObject.tag == "Seed")
+        else if (other.gameObject.tag == "Seed")
         {
             other.gameObject.GetComponent<fruitSeedNoInv>().PlaySound();
         }

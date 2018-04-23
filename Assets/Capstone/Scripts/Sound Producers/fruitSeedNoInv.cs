@@ -19,7 +19,7 @@ public class fruitSeedNoInv : Interactable {
     int originalLayer;
 
     public bool planting;
-    bool inSeedLine, adjustedRotation;
+    bool inSeedLine, adjustedRotation, movedInLine;
 
     //for npcs only
     public Musician seedPicker;
@@ -83,36 +83,52 @@ public class fruitSeedNoInv : Interactable {
     public override void Update () {
         base.Update();
 
+       
+
+       
+       currentSeedCount = currentSeedLine.Count;
+       currentSpot = currentSeedLine.IndexOf(gameObject);
+       interactable = false;
+
         if (pickedByPlayer)
         {
             seedSource.outputAudioMixerGroup = tpc.plantingGroup;
+
+            //Input map for Mousewheel scroll to change seeds
+            //if scroll up 
+            if (Input.GetAxis("Mouse ScrollWheel") > 0 && !movedInLine)
+            {
+                // set seed which player is holding to end of line 
+                GameObject seedToMove = tpc.seedLine[0];
+                tpc.seedLine.Remove(seedToMove);
+
+                CheckPlaceInLine();
+
+                seedToMove.GetComponent<fruitSeedNoInv>().PickUpSeed();
+                movedInLine = true;
+            }
+            //if scroll down 
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0 && !movedInLine)
+            {
+                GameObject seedToMove = tpc.seedLine[tpc.seedLine.Count - 1];
+                // move all seed positions backward in line 
+                tpc.seedLine.Remove(seedToMove);
+                tpc.seedLine.Insert(0, seedToMove);
+                CheckPlaceInLine();
+                movedInLine = true;
+            }
         }
         else
         {
             seedSource.outputAudioMixerGroup = seedPicker.primarySource.outputAudioMixerGroup;
-            //controls whether a seed is playing a clip or not
-            if (seedSource.isPlaying)
-            {
-                notesPlaying.Emit(1);
-            }
+
         }
 
-       
-       currentSeedCount = currentSeedLine.Count;
-       
-       currentSpot = currentSeedLine.IndexOf(gameObject);
-       interactable = false;
-
-        //Input map for Mousewheel scroll to change seeds
-        //if scroll up 
-        // move all seed positions in line up
-        // set seed which player is holding to end of line 
-        // then CheckPlaceInLine()
-        //if scroll down 
-        // move all seed positions backward in line
-        // seed in back of line becomes currently held 
-        // then CheckPlaceInLine()
-
+        //controls whether a seed is playing a clip or not
+        if (seedSource.isPlaying)
+        {
+            notesPlaying.Emit(1);
+        }
 
         //input reader for when a player is holding this seed 
         if (playerHolding)
@@ -152,7 +168,6 @@ public class fruitSeedNoInv : Interactable {
                 if (seedSource.isPlaying)
                 {
                     targetPos = seedMaster.transform.localPosition - new Vector3(0, 0, 1) + new Vector3(0, 1, 0);
-                    notesPlaying.Emit(1);
                 }
                 else
                 {
@@ -168,7 +183,6 @@ public class fruitSeedNoInv : Interactable {
                 //controls whether a seed is playing a clip or not
                 if (seedSource.isPlaying)
                 {
-                    notesPlaying.Emit(1);
                     targetPos = currentSeedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1) + new Vector3(0, 1 - (currentSpot / 10), 0);
                 }
                 else
@@ -210,7 +224,7 @@ public class fruitSeedNoInv : Interactable {
             currentSeedLine = tpc.seedLine;
         }
         
-        currentSeedLine.Add(this.gameObject);
+        currentSeedLine.Add(gameObject);
         inSeedLine = true;
         if (currentSeedLine.Count == 1)
         {
@@ -244,7 +258,7 @@ public class fruitSeedNoInv : Interactable {
     {
         
         inSeedLine = true;
-        if (currentSpot != lastSpot && lastSpot != -1)
+        if (currentSpot != lastSpot)
         {
             
                 //this is the currently held seed!
@@ -352,11 +366,12 @@ public class fruitSeedNoInv : Interactable {
         }
     }
 
-        public void PlaySound()
+    public void PlaySound()
     {
         if (!seedSource.isPlaying)
         {
             seedSource.PlayOneShot(plantNote);
+            Debug.Log("seed playing");
         }
     }
 
