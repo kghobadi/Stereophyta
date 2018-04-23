@@ -98,9 +98,11 @@ public class HornPlant : SoundProducer {
         {
             audioSource.Play();
             soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
-        }
+
             if (notesPlaying != null)
-                notesPlaying.Emit(1);
+                notesPlaying.Play();
+        }
+        
     }
 
     IEnumerator DestroyPlant()
@@ -110,7 +112,7 @@ public class HornPlant : SoundProducer {
         poofParticles.Play();
         if (playerClick || playerClicked)
             DeactivateSelectionMenu();
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitUntil(() => audioSource.isPlaying == false);
         Destroy(gameObject);
     }
 

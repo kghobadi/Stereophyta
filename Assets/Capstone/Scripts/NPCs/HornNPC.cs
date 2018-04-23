@@ -117,8 +117,9 @@ public class HornNPC : NPC {
         currentState = NPCState.LABOR;
         //wait here a moment
         animator.SetBool("walking", false);
+        animator.SetBool("working", true);
 
-        if(moveCounter == 0)
+        if (moveCounter == 0)
         {
             transform.LookAt(new Vector3 (circleMill.transform.position.x, transform.position.y, circleMill.transform.position.z));
             yield return new WaitForSeconds(2);
@@ -222,28 +223,30 @@ public class HornNPC : NPC {
             for(int i = 0; i < currentPlants.Count; i++)
             {
                 //take seed from each plant in list
-                currentPlants[i].seedPicker = myMusic;
-                for(int s = 0; s < myMusic.seedSpots.Count; s++)
+                if(currentPlants[i] != null)
                 {
-                    if(myMusic.seedSpots[s].transform.childCount == 0)
+                    currentPlants[i].seedPicker = myMusic;
+                    for (int s = 0; s < myMusic.seedSpots.Count; s++)
                     {
-                        currentPlants[i].seedSpotNumber = s;
-                        currentPlants[i].Selection_One();
-                        currentSeedCount++;
+                        if (myMusic.seedSpots[s].transform.childCount == 0)
+                        {
+                            currentPlants[i].seedSpotNumber = s;
+                            currentPlants[i].Selection_One();
+                            currentSeedCount++;
 
-                        yield return new WaitForSeconds(waitingTime);
+                            yield return new WaitForSeconds(waitingTime);
+                        }
                     }
                 }
-                //use ripple effect
             }
         }
-        
-       
-            
+
+
+        animator.SetBool("working", false);
+        animator.SetBool("walking", true);
         //visit seed pile or set move
         SetMove();
         
-        animator.SetBool("walking", true);
     }
 
 

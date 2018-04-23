@@ -93,7 +93,7 @@ public class CircleMillControls : Interactable {
             dirLever.transform.localEulerAngles = new Vector3(0, -30, 0);
             dirPositive = false;
             //change NPC direction
-                if (Vector3.Distance(hornPlanter.transform.position, transform.position) < windRadius)
+                if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
                 {
                     if(hornPlanter != null)
                     hornPlanter.walkingDirection = true;

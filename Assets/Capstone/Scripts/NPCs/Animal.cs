@@ -60,7 +60,7 @@ public class Animal : Interactable {
         //should this be interactable?
         base.Start();
         
-        //interact sprites
+        //interact sprites -- change this to feeding sprites
         for (int i = 1; i < 4; i++)
         {
             interactSprites.Add(Resources.Load<Sprite>("CursorSprites/talk " + i));
@@ -168,7 +168,8 @@ public class Animal : Interactable {
     {
             navMeshAgent.isStopped = false;
             animator.SetBool("walking", true);
-            if (moveCounter < (movementPoints.Count - 1))
+        animator.SetBool("idle", false);
+        if (moveCounter < (movementPoints.Count - 1))
             {
                 moveCounter += 1;
             }
@@ -264,19 +265,21 @@ public class Animal : Interactable {
                         currentPlants[p].soundSources[i].transform.localScale *= 0.5f;
                         currentPlants[p].soundSources[i].SetActive(false);
 
+                        //shift note up
+                        currentPlants[p].Selection_Two();
+
                         //play seed removal sound !!!
 
                         yield return new WaitForSeconds(waitingTime);
 
                         //play the note I just ate!!!
                         int randomBlow = Random.Range(0, 100);
-                        if(randomBlow > 60)
+                        if(randomBlow > 75)
                         {
                             animator.SetTrigger("blow horn");
                             myVoice.PlayOneShot(currentPlants[p].musicalNotes[i]);
+                            yield return new WaitForSeconds(2);
                         }
-
-                        yield return new WaitForSeconds(waitingTime);
                     }
                 }
 
