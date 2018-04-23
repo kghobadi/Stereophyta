@@ -7,6 +7,7 @@ public class HornNPC : NPC {
     List<HornPlant> currentPlants = new List<HornPlant>();
     public CircleMillControls circleMill;
 
+    public ParticleSystem handRipples;
     //which direction is it walking
     public bool walkingDirection;
 
@@ -25,7 +26,7 @@ public class HornNPC : NPC {
     {
         if(currentState == NPCState.LABOR)
         {
-            //nothing
+            handRipples.Emit(1);
         }
         else
         {
@@ -113,11 +114,15 @@ public class HornNPC : NPC {
     //Don't play rocks... Need to make drummers labor on rocks more interesting
     public override IEnumerator PerformLabor()
     {
+        currentState = NPCState.LABOR;
         //wait here a moment
         animator.SetBool("walking", false);
 
         if(moveCounter == 0)
         {
+            transform.LookAt(new Vector3 (circleMill.transform.position.x, transform.position.y, circleMill.transform.position.z));
+            yield return new WaitForSeconds(2);
+
             //change wind machine
             int randomRotate = Random.Range(0, 100);
 
@@ -172,6 +177,7 @@ public class HornNPC : NPC {
                     circleMill.Selection_Three();
                 }
             }
+            
         }
 
         //if I have seeds and there are not too many plants
@@ -199,7 +205,7 @@ public class HornNPC : NPC {
                             //play this seeds note
                             myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().seedSource.PlayOneShot
                                 (myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().plantNote);
-                            myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().notesPlaying.Play();
+                            myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().notesPlaying.Emit(10);
                         }
                     }
                 }
