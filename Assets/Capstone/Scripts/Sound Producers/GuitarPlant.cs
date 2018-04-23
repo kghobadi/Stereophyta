@@ -27,57 +27,43 @@ public class GuitarPlant : SoundProducer {
         //starts as active
         active = true;
 
+        
+
         //randomly rotate the plant on y axis
         int randomRotate = Random.Range(0, 360);
         transform.localEulerAngles = new Vector3(0, randomRotate, 0);
+        
+        StartCoroutine(GrowPlant());
 
-        //set flower to grown 
-        guitarAnimator.SetBool("grown", true);
+        
     }
 
     //can be done by player or by NPC
     void TakeFruitSeed()
     {
+        guitarAnimator.SetBool("grown", false);
+        //instantiate seed and add it to player seed line
+        fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
+        fruitSeedNoInv newFruitSeed = fruitSeedClone.GetComponent<fruitSeedNoInv>();
+
+        newFruitSeed.plantNote = musicalNotes[currentNote];
+
         if (playerClick || playerClicked)
         {
-            if (tpc.seedLine.Count < tpc.seedLineMax)
-            {
-                guitarAnimator.SetBool("grown", false);
-                //instantiate seed and add it to player seed line
-                fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
-                fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = true;
-                fruitSeedClone.GetComponent<fruitSeedNoInv>().plantNote = musicalNotes[currentNote];
-
-                //destroy plant
-                StartCoroutine(DestroyPlant());
-            }
-
-            else
-            {
-                //player shakes head and says no
-                //seeds do a little jump
-                // int randomNo = Random.Range(0, tpc.noNo.Length);
-                audioSource.PlayOneShot(tpc.noNo[0], 1f);
-            }
+                newFruitSeed.pickedByPlayer = true;
         }
         //NPC took it
         else
         {
-            guitarAnimator.SetBool("grown", false);
-            //instantiate seed and add it to player seed line
-            fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
-            fruitSeedNoInv newFruitSeed = fruitSeedClone.GetComponent<fruitSeedNoInv>();
-
             //relay spot info to seed
             newFruitSeed.pickedByPlayer = false;
             newFruitSeed.seedPicker = seedPicker;
             newFruitSeed.seedSpotNumber = seedSpotNumber;
-            newFruitSeed.plantNote = musicalNotes[currentNote];
-
-            //destroy plant
-            StartCoroutine(DestroyPlant());
         }
-        
+
+        //destroy plant
+        StartCoroutine(DestroyPlant());
+
     }
     
     //called by a rhythm object
@@ -137,6 +123,8 @@ public class GuitarPlant : SoundProducer {
     public override void OnDisable()
     {
         StopAllCoroutines();
+
+        transform.localScale = origScale;
         //turn off current soundsource
         if (soundSources[currentNote].activeSelf)
         {
@@ -144,4 +132,17 @@ public class GuitarPlant : SoundProducer {
         }
     }
 
+    IEnumerator GrowPlant()
+    {
+        interactable = false;
+        transform.localScale *= 0.1f;
+        while (transform.localScale.x < origScale.x)
+        {
+            transform.localScale *= 1.1f;
+            yield return new WaitForEndOfFrame();
+        }
+        interactable = true;
+        //set flower to grown 
+        guitarAnimator.SetBool("grown", true);
+    }
 }

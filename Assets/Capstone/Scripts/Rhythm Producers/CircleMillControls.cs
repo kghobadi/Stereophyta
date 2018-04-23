@@ -12,7 +12,7 @@ public class CircleMillControls : Interactable {
     Transform circleMill;
 
     //array of circleNPCs which fills up at start
-    GameObject[] circleNPCs;
+    public GameObject hornPlanter;
 
     //rhythm vars
     public int rhythmState, rhythmStateMax;
@@ -25,6 +25,8 @@ public class CircleMillControls : Interactable {
     AudioSource controlsAudio;
     public AudioClip selectLower;
 
+    Vector3 zoomedOutPosO, zoomedOutRotO;
+
     //direction lever boolean (starts as 'positive')
     public bool dirPositive = true;
 
@@ -34,6 +36,8 @@ public class CircleMillControls : Interactable {
         interactable = true;
 
         controlsAudio = GetComponent<AudioSource>();
+        zoomedOutPosO = cammy.GetComponent<CameraController>().zoomedOutPos;
+        zoomedOutRotO = cammy.GetComponent<CameraController>().zoomedOutRot;
 
         //interact sprites
         for (int i = 1; i < 4; i++)
@@ -44,9 +48,7 @@ public class CircleMillControls : Interactable {
         //mill refs
         circleMill = transform.parent;
         windCircles = circleMill.GetChild(0).GetComponent<CircleWind>();
-
-        // this will need more logic to work correctly
-        circleNPCs = GameObject.FindGameObjectsWithTag("NPC");
+        
 
         //set rhythm states
         rhythmState = 2;
@@ -57,6 +59,17 @@ public class CircleMillControls : Interactable {
     public override void Update()
     {
         base.Update();
+
+        if(Vector3.Distance(_player.transform.position, transform.position) < 30)
+        {
+            cammy.GetComponent<CameraController>().zoomedOutPos = new Vector3(-10, 30, -10);
+            cammy.GetComponent<CameraController>().zoomedOutRot = new Vector3(65, 45, 0);
+        }
+        else
+        {
+            cammy.GetComponent<CameraController>().zoomedOutPos = zoomedOutPosO;
+            cammy.GetComponent<CameraController>().zoomedOutRot = zoomedOutRotO;
+        }
 
         //rotates the wind turbine
         windTurbine.transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
@@ -78,14 +91,12 @@ public class CircleMillControls : Interactable {
             dirLever.transform.localEulerAngles = new Vector3(0, -30, 0);
             dirPositive = false;
             //change NPC direction
-            for (int i = 0; i < circleNPCs.Length; i++)
-            {
-                if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                if (Vector3.Distance(hornPlanter.transform.position, transform.position) < windRadius)
                 {
-                    if(circleNPCs[i] != null)
-                        circleNPCs[i].GetComponent<HornNPC>().walkingDirection = false;
+                    if(hornPlanter != null)
+                    hornPlanter.GetComponent<HornNPC>().walkingDirection = false;
                 }
-            }
+            
         }
         else
         {
@@ -94,16 +105,14 @@ public class CircleMillControls : Interactable {
             dirLever.transform.localEulerAngles = new Vector3(0, 30, 0);
             dirPositive = true;
             //change NPC direction
-            for (int i = 0; i < circleNPCs.Length; i++)
-            {
-                if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+                if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
                 {
-                    if (circleNPCs[i] != null)
-                        circleNPCs[i].GetComponent<HornNPC>().walkingDirection = true;
+                    if (hornPlanter != null)
+                    hornPlanter.GetComponent<HornNPC>().walkingDirection = true;
                   
                 }
             }
-        }
+        
     }
 
     //Increase rhythm
@@ -116,11 +125,11 @@ public class CircleMillControls : Interactable {
 
             if (dirPositive)
             {
-                RhythmIncrease();
+                PositiveRhythmIncrease();
             }
             else
             {
-                RhythmDecrease();
+                NegativeRhythmIncrease();
             }
 
 
@@ -138,11 +147,11 @@ public class CircleMillControls : Interactable {
             rhythmState--;
             if (dirPositive)
             {
-                RhythmDecrease();
+                PositiveRhythmDecrease();
             }
             else
             {
-                RhythmIncrease();
+                NegativeRhythmDecrease();
             }
 
             if (!controlsAudio.isPlaying)
@@ -152,43 +161,75 @@ public class CircleMillControls : Interactable {
 
     //These rhythm functions are stored separately because they can be called in dif. ways based on if dirPositive = true or not
 
-    void RhythmIncrease()
+    void PositiveRhythmIncrease()
     {
         windCircles.windSpeed += rhythmInterval;
         rotationSpeed += rhythmInterval;
         rhythmLever.transform.localEulerAngles += new Vector3(30, 0, 0);
 
         //adjusts NPC circle men speeds
-        for (int i = 0; i < circleNPCs.Length; i++)
-        {
-            if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+       
+            if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
             {
-                if (circleNPCs[i] != null)
+                if (hornPlanter != null)
                 {
-                    circleNPCs[i].GetComponent<HornNPC>().navMeshAgent.speed += NPCspeedInterval;
-                    circleNPCs[i].GetComponent<HornNPC>().animator.speed += animatorSpeedInterval;
+                hornPlanter.GetComponent<HornNPC>().navMeshAgent.speed += NPCspeedInterval;
+                hornPlanter.GetComponent<HornNPC>().animator.speed += animatorSpeedInterval;
                 }
                    
             }
+        
+    }
+
+    void NegativeRhythmIncrease()
+    {
+        windCircles.windSpeed -= rhythmInterval;
+        rotationSpeed -= rhythmInterval;
+        rhythmLever.transform.localEulerAngles += new Vector3(30, 0, 0);
+
+        if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
+        {
+            if (hornPlanter != null)
+            {
+                hornPlanter.GetComponent<HornNPC>().navMeshAgent.speed += NPCspeedInterval;
+                hornPlanter.GetComponent<HornNPC>().animator.speed += animatorSpeedInterval;
+            }
+
         }
     }
 
-    void RhythmDecrease()
+    void PositiveRhythmDecrease()
     {
         windCircles.windSpeed -= rhythmInterval;
         rotationSpeed -= rhythmInterval;
         rhythmLever.transform.localEulerAngles -= new Vector3(30, 0, 0);
 
         //adjusts NPC circle men speeds
-        for (int i = 0; i < circleNPCs.Length; i++)
-        {
-            if (Vector3.Distance(circleNPCs[i].gameObject.transform.position, transform.position) < windRadius)
+      
+            if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
             {
-                if (circleNPCs[i] != null)
+                if (hornPlanter != null)
                 {
-                    circleNPCs[i].GetComponent<HornNPC>().navMeshAgent.speed -= NPCspeedInterval;
-                    circleNPCs[i].GetComponent<HornNPC>().animator.speed -= animatorSpeedInterval;
+                hornPlanter.GetComponent<HornNPC>().navMeshAgent.speed -= NPCspeedInterval;
+                hornPlanter.GetComponent<HornNPC>().animator.speed -= animatorSpeedInterval;
                 }
+            }
+    }
+
+    void NegativeRhythmDecrease()
+    {
+        windCircles.windSpeed += rhythmInterval;
+        rotationSpeed += rhythmInterval;
+        rhythmLever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+
+        //adjusts NPC circle men speeds
+
+        if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
+        {
+            if (hornPlanter != null)
+            {
+                hornPlanter.GetComponent<HornNPC>().navMeshAgent.speed -= NPCspeedInterval;
+                hornPlanter.GetComponent<HornNPC>().animator.speed -= animatorSpeedInterval;
             }
         }
     }

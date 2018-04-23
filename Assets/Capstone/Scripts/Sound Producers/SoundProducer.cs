@@ -55,6 +55,7 @@ public abstract class SoundProducer : Interactable {
         //randomize note at start
         currentNote = Random.Range(0, musicalNotes.Length);
         currentSound = musicalNotes[currentNote];
+        audioSource.clip = currentSound;
 
         //make sure particle systems are attached
         if (notesPlaying != null)

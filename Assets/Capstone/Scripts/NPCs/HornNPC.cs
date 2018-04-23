@@ -5,15 +5,15 @@ using UnityEngine;
 public class HornNPC : NPC {
 
     List<HornPlant> currentPlants = new List<HornPlant>();
+    public CircleMillControls circleMill;
 
     //which direction is it walking
-    public bool walkingDirection = true;
-
-    //is this a planter or sucker NPC
-    public bool planterOrSucker;
+    public bool walkingDirection;
 
     //max # of plants at waypoint
     public int plantMaximum;
+
+    public int currentSeedCount = 0;
 
     //for planters
     public GameObject plantPrefab; //switch out when planter goes to a pile of seeds
@@ -98,9 +98,8 @@ public class HornNPC : NPC {
             }
             i++;
         }
-        if (planterOrSucker)
-        {
-            if (currentPlants.Count < plantMaximum)
+            
+            if (currentPlants.Count > 0 || currentSeedCount > 0)
             {
                 StartCoroutine(PerformLabor());
             }
@@ -108,24 +107,8 @@ public class HornNPC : NPC {
             {
                 SetMove();
             }
-        }
-        else
-        {
-            if (currentPlants.Count > plantMaximum)
-            {
-                StartCoroutine(PerformLabor());
-            }
-            else
-            {
-                SetMove();
-            }
-        }
+        
     }
-
-    //2 possibilities:
-    //Planter finds seeds from seed pile then plants them in orbit
-    //Sucker hoovers seeds off trees then spits them out at transform of seed pile
-    //Seed pile should be interactable and have a counter for number of seeds
 
     //Don't play rocks... Need to make drummers labor on rocks more interesting
     public override IEnumerator PerformLabor()
@@ -133,94 +116,130 @@ public class HornNPC : NPC {
         //wait here a moment
         animator.SetBool("walking", false);
 
-        //Planter if true
-        if (planterOrSucker)
+        if(moveCounter == 0)
         {
-           
-                //random # of plants
-                int randomPlantAmount = Random.Range(1, plantMaximum - currentPlants.Count);
+            //change wind machine
+            int randomRotate = Random.Range(0, 100);
 
-            //loop to plant
-            for (int i = 0; i < randomPlantAmount; i++)
+            if(randomRotate > 60)
             {
-                //spawn plant
-                plantClone = Instantiate(plantPrefab, transform.position + new Vector3(0, heightAdjustment, 0), Quaternion.identity);
-               
-                yield return new WaitForSeconds(waitingTime + 1);
+                circleMill.Selection_One();
+            }
 
-                if (plantClone.activeSelf)
-                    plantClone.GetComponent<HornPlant>().audioSource.outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
+
+            //change wind machine
+            int randomTempo = Random.Range(0, 100);
+
+
+            //tempo setting chances
+            //if tempo is already fast
+            if (circleMill.rhythmState > 2)
+            {
+                //increase chance low
+                if (randomTempo < 25)
+                {
+                    circleMill.Selection_Two();
+                }
+                //decrease chance high
                 else
                 {
-                    plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = myMusic.primarySource.outputAudioMixerGroup;
+                    circleMill.Selection_Three();
                 }
             }
+            else if (circleMill.rhythmState == 2)
+            {
+                //increase 
+                if (randomTempo < 50)
+                {
+                    circleMill.Selection_Two();
+                }
+                //decrease 
+                else
+                {
+                    circleMill.Selection_Three();
+                }
+            }
+            else if (circleMill.rhythmState < 2)
+            {
+                //increase chance high
+                if (randomTempo < 75)
+                {
+                    circleMill.Selection_Two();
+                }
+                //decrease chance low
+                else
+                {
+                    circleMill.Selection_Three();
+                }
+            }
+        }
+
+        //if I have seeds and there are not too many plants
+        if (currentPlants.Count < plantMaximum && currentSeedCount > 0)
+        {
+            bool plantedSeed = false;
+
+            for (int p = 0; p < myMusic.seedSpots.Count; p++)
+            {
+                if (!plantedSeed)
+                {
+                    if(myMusic.seedSpots[p].transform.childCount> 0)
+                    {
+
+                        int randomSeed = Random.Range(0, 100);
+
+                        if(randomSeed < 50)
+                        {
+                            myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().planting = true;
+                            currentSeedCount--;
+                            plantedSeed = true;
+                        }
+                        else
+                        {
+                            //play this seeds note
+                            myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().seedSource.PlayOneShot
+                                (myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().plantNote);
+                            myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().notesPlaying.Play();
+                        }
+                    }
+                }
+            }
+                yield return new WaitForSeconds(waitingTime);
+            
+            //use ripple effect
             
         }
 
-        //Sucker if false
-        else
+        //if there are plants and I do not have enough seeds
+        if (currentSeedCount < myMusic.seedSpots.Count)
         {
-            //for the number of plants exceeding the max
-            for (int p = 0; p < (currentPlants.Count - plantMaximum); p++)
+            for(int i = 0; i < currentPlants.Count; i++)
             {
-                //if plant exists    
-                if(currentPlants[p] != null)
+                //take seed from each plant in list
+                currentPlants[i].seedPicker = myMusic;
+                for(int s = 0; s < myMusic.seedSpots.Count; s++)
                 {
-                    //look at plant pos
-                    Vector3 plantPos = new Vector3(currentPlants[p].transform.position.x, transform.position.y, currentPlants[p].transform.position.z);
-                    transform.LookAt(plantPos);
+                    if(myMusic.seedSpots[s].transform.childCount == 0)
+                    {
+                        currentPlants[i].seedSpotNumber = s;
+                        currentPlants[i].Selection_One();
+                        currentSeedCount++;
 
-                    //if this plant is fully grown
-                  
-                        transform.LookAt(plantPos);
-                        //loop through plant branches
-                        for (int i = 0; i < currentPlants[p].soundSources.Count; i++)
-                        {
-                            //check if plant is still there and if sound source is active
-                            if (currentPlants[p] != null && currentPlants[p].soundSources[i].activeSelf)
-                            {
-                                Vector3 sourcePos = new Vector3(currentPlants[p].soundSources[i].transform.position.x, transform.position.y, currentPlants[p].soundSources[i].transform.position.z);
-                                transform.LookAt(sourcePos);
-
-                                //turn off fruit
-                                currentPlants[p].soundSources[i].transform.localScale *= 0.5f;
-                                currentPlants[p].soundSources[i].SetActive(false);
-
-                                //play seed removal sound !!!
-                                
-                                yield return new WaitForSeconds(waitingTime);
-                            }
-                        }
-
-                        //play poof
-                        if (currentPlants[p] != null)
-                        {
-                            currentPlants[p].poofParticles.Play();
-                            //wait until note stops playing
-                            yield return new WaitUntil(() => currentPlants[p].audioSource.isPlaying == false);
-                            //play poof
-                            if (currentPlants[p] != null)
-                            {
-                                //destroy plant if all seeds are gone 
-                                Destroy(currentPlants[p].gameObject);
-                                currentPlants.Remove(currentPlants[p]);
-                                p--; //account for change in list size
-                            }
-                        }
-                        
-                    
-                    
+                        yield return new WaitForSeconds(waitingTime);
+                    }
                 }
-               
+                //use ripple effect
             }
-            
         }
         
+       
+            
         //visit seed pile or set move
         SetMove();
         
         animator.SetBool("walking", true);
     }
+
+
 
 }

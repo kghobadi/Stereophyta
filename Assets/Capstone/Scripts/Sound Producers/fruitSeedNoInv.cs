@@ -7,7 +7,7 @@ public class fruitSeedNoInv : Interactable {
 
     public bool pickedByPlayer = false;
 
-    AudioSource seedSource;
+    public AudioSource seedSource;
     public AudioClip plantNote;
 
     public GameObject plants, seedMaster;
@@ -37,7 +37,7 @@ public class fruitSeedNoInv : Interactable {
 
     Vector3 targetPos, origScale, throwForce;
 
-    ParticleSystem notesPlaying;
+    public ParticleSystem notesPlaying;
     
 
     public override void Start () {
@@ -326,6 +326,8 @@ public class fruitSeedNoInv : Interactable {
         {
             if(collision.gameObject.tag == "Ground")
             {
+                //Play planting dirt splatter effect
+
                 //spawn plant
                 plantClone = Instantiate(plants, transform.position + new Vector3(0, heightAdjustment,0), Quaternion.identity);
 

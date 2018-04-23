@@ -503,7 +503,7 @@ public class NPC : Interactable {
         else
         {
             animator.SetBool("idle", true);
-            animator.SetBool("walking", true);
+            animator.SetBool("walking", false);
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         }
 
