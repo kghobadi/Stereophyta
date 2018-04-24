@@ -11,7 +11,6 @@ public class NPC : Interactable {
     
     //visual vars
     public Animator animator;
-    TrailRenderer trailRender;
 
     //following in player line variables
     public float followDistance, currentFollowDistance, followTimer, followTimeMin;
@@ -79,8 +78,6 @@ public class NPC : Interactable {
 
         navMeshAgent = GetComponent<NavMeshAgent>();
 
-        trailRender = GetComponent<TrailRenderer>();
-
         myMusic = GetComponent<Musician>();
         myLanguage = GetComponent<Language>();
         myPath = myMusic.musicType.ToString();
@@ -125,14 +122,12 @@ public class NPC : Interactable {
                 movementPointsContainer.localPosition = Vector3.zero;
             }
             followTimer += Time.deltaTime;
-            trailRender.enabled = false;
             canSeeDistance = 50;
             canClickDistance = 30;
             FollowPlayer();
         }
         else
         {
-            trailRender.enabled = true;
             canSeeDistance = 15;
             canClickDistance = 10;
         }
@@ -365,32 +360,31 @@ public class NPC : Interactable {
     public virtual void LookForWork()
     {
         //hasLooked = true;
-        //currentPlants.Clear();
-        //currentRocks.Clear();
-        //Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
-        //int i = 0;
-        //while (i < hitColliders.Length)
-        //{
-        //    if (hitColliders[i].gameObject.tag == "Plant")
-        //    {
-        //        currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
+        currentRocks.Clear();
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
+        int i = 0;
+        while (i < hitColliders.Length)
+        {
+            //if (hitColliders[i].gameObject.tag == "Plant")
+            //{
+            //    currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
 
-        //    }
-        //    else if (hitColliders[i].gameObject.tag == "Rock")
-        //    {
-        //        currentRocks.Add(hitColliders[i].gameObject.GetComponent<Rock>());
-        //    }
-        //    i++;
-        //}
-        ////if there are no nearby plants or rocks, we set move
-        //if (currentRocks.Count > 0 || currentPlants.Count > 0)
-        //{
-        //    StartCoroutine(PerformLabor());
-        //}
-        //else
-        //{
-        //    SetMove();
-        //}
+            //}
+            if (hitColliders[i].gameObject.tag == "Rock")
+            {
+                currentRocks.Add(hitColliders[i].gameObject.GetComponent<Rock>());
+            }
+            i++;
+        }
+        //if there are no nearby plants or rocks, we set move
+        if (currentRocks.Count > 0 /*|| currentPlants.Count > 0*/)
+        {
+            StartCoroutine(PerformLabor());
+        }
+        else
+        {
+            SetMove();
+        }
     }
 
     //All NPCs perform some form of Labor. This means changing rhythm or sound producers around them
