@@ -11,6 +11,7 @@ public class HornPlant : SoundProducer {
     //for being picked by NPC
     public Musician seedPicker;
     public int seedSpotNumber;
+    public int seedsGone;
 
     public override void Start () {
         //this comes before base.Start() for sound sources 
@@ -47,7 +48,7 @@ public class HornPlant : SoundProducer {
         }
 
         //checks if all seeds are gone. if so, destroy, otherwise randomly shift notes
-        int seedsGone = 0;
+        seedsGone = 0;
         for (int i = 0; i < soundSources.Count; i++)
         {
             if (!soundSources[i].activeSelf)

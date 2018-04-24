@@ -112,7 +112,7 @@ public class Animal : Interactable {
             }
             else
             {
-                GoHome();
+                StartCoroutine(GreetPlayer());
             }
             
         }
@@ -149,7 +149,7 @@ public class Animal : Interactable {
             transform.LookAt(new Vector3(targestDestination.x, transform.position.y, targestDestination.z));
            
             // for some reason must use this distance check instead of navMeshAgent.remainingDistance
-            if (Vector3.Distance(transform.position, targestDestination) < 5f)
+            if (Vector3.Distance(transform.position, targestDestination) < 7f)
             {
                 navMeshAgent.isStopped = true;
                 timeToEat = true;
@@ -199,19 +199,19 @@ public class Animal : Interactable {
         
     }
 
-    //Called as a command to NPCs who are FOLLOWING or PLAYING
-    public virtual void GoHome()
-    {
-        Debug.Log("going home");
+    ////Called as a command to NPCs who are FOLLOWING or PLAYING
+    //public virtual void GoHome()
+    //{
+    //    Debug.Log("going home");
         
-        //reset move points
-        moveCounter = 0;
-        movementPointsContainer.SetParent(null);
-        movementPointsContainer.position = homePosition;
-        movementPointsContainer.localEulerAngles = homeRotation;
-        currentState = NPCState.MOVING;
-        StartCoroutine(GreetPlayer());
-    }
+    //    //reset move points
+    //    moveCounter = 0;
+    //    movementPointsContainer.SetParent(null);
+    //    movementPointsContainer.position = homePosition;
+    //    movementPointsContainer.localEulerAngles = homeRotation;
+    //    currentState = NPCState.MOVING;
+    //    StartCoroutine(GreetPlayer());
+    //}
 
     //fills up lists of nearby plants and rocks
     public virtual void LookForFood()
@@ -247,13 +247,13 @@ public class Animal : Interactable {
     public virtual IEnumerator Eat()
     {
         //for the number of plants exceeding the max
-        for (int p = 0; p < (currentPlants.Count - plantMaximum); p++)
+        for (int p = 0; p < (currentPlants.Count); p++)
         {
             //if plant exists    
             if (currentPlants[p] != null)
             {
                 timeToEat = false;
-                targestDestination = currentPlants[p].transform.position + new Vector3(0, 0, 4);
+                targestDestination = currentPlants[p].transform.position ;
                 navMeshAgent.SetDestination(targestDestination);
                 currentState = NPCState.WALKINGTOFOOD;
             }
@@ -273,10 +273,9 @@ public class Animal : Interactable {
                     //look at plant pos
                     Vector3 plantPos = new Vector3(currentPlants[p].transform.position.x, transform.position.y, currentPlants[p].transform.position.z);
                     transform.LookAt(plantPos);
-
-                    //if this plant is fully grown
-
-                    transform.LookAt(plantPos);
+                
+                if(currentPlants[p].seedsGone < currentPlants[p].soundSources.Count - 2)
+                {
                     //loop through plant branches
                     for (int i = 0; i < currentPlants[p].soundSources.Count; i++)
                     {
@@ -287,8 +286,8 @@ public class Animal : Interactable {
                             transform.LookAt(sourcePos);
 
                             //turn off fruit
-                            currentPlants[p].soundSources[i].transform.localScale *= 0.5f;
                             currentPlants[p].soundSources[i].SetActive(false);
+                            myVoice.clip = currentPlants[p].musicalNotes[i];
 
                             //shift note up
                             if (i < currentPlants[p].soundSources.Count - 1)
@@ -300,23 +299,22 @@ public class Animal : Interactable {
 
                             //play the note I just ate!!!
                             int randomBlow = Random.Range(0, 100);
-                            if (randomBlow > 75)
+                            if (randomBlow > 40)
                             {
                                 animator.SetTrigger("blow horn");
-                                myVoice.PlayOneShot(currentPlants[p].musicalNotes[i]);
-                            sinWaveNotes.Play();
-                                yield return new WaitForSeconds(2);
+                                myVoice.PlayOneShot(myVoice.clip);
+                                sinWaveNotes.Play();
+                                yield return new WaitForSeconds(1);
                             }
                         }
                     }
+                    
+                }
 
                     //play poof
                     if (currentPlants[p] != null)
                     {
                         currentPlants[p].StartCoroutine(currentPlants[p].DestroyPlant());
-                        currentPlants.Remove(currentPlants[p]);
-                        p--; //account for change in list size
-
                     }
                 }
             
@@ -348,6 +346,10 @@ public class Animal : Interactable {
             //starts walking again
             navMeshAgent.isStopped = false;
             currentState = NPCState.WALKINGTOFOOD;
+        }
+        else if (lastState == NPCState.FOLLOWING)
+        {
+            SetMove();
         }
         else 
         {

@@ -22,15 +22,23 @@ public class HornNPC : NPC {
     public float heightAdjustment;
     public float plantingRadius;
 
+    float emitTimer = 0f, emitTimeTotal = 0.5f;
+
     public override void Update()
     {
         if(currentState == NPCState.LABOR)
         {
-            handRipples.Emit(1);
+            emitTimer += Time.deltaTime;
+            if(emitTimer > emitTimeTotal)
+            {
+                handRipples.Emit(1);
+                emitTimer = 0f;
+            }
         }
         else
         {
             base.Update();
+            emitTimer = 0f;
         }
         
     }
@@ -227,14 +235,16 @@ public class HornNPC : NPC {
                 //take seed from each plant in list
                 if(currentPlants[i] != null)
                 {
+                    bool hasPickedSeed = false;
                     currentPlants[i].seedPicker = myMusic;
                     for (int s = 0; s < myMusic.seedSpots.Count; s++)
                     {
-                        if (myMusic.seedSpots[s].transform.childCount == 0 && currentPlants[i] != null)
+                        if (myMusic.seedSpots[s].transform.childCount == 0 && currentPlants[i] != null && !hasPickedSeed)
                         {
                             currentPlants[i].seedSpotNumber = s;
                             currentPlants[i].Selection_One();
                             currentSeedCount++;
+                            hasPickedSeed = true;
 
                             yield return new WaitForSeconds(waitingTime);
                         }

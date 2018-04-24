@@ -193,6 +193,26 @@ public class ThirdPersonController : MonoBehaviour
                 playerCommandsMenu.enabled = true;
             }
 
+            //Input map for Mousewheel scroll to change seeds
+            //if scroll up 
+            if (Input.GetAxis("Mouse ScrollWheel") > 0 && seedLine.Count > 1)
+            {
+                GameObject seedToMove = seedLine[0];
+                seedLine.Remove(seedToMove);
+                seedLine.Insert(seedLine.Count, seedToMove);
+
+            }
+            //if scroll down 
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0 && seedLine.Count > 1)
+            {
+                GameObject seedToMove = seedLine[seedLine.Count - 1];
+                int index = seedLine.Count - 1;
+                // move all seed positions backward in line 
+                seedLine.RemoveAt(index);
+                seedLine.Insert(0, seedToMove);
+
+            }
+
             //Check if we are moving and transition animation controller
             if (isMoving)
             {
