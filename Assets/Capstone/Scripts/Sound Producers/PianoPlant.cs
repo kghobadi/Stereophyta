@@ -7,12 +7,22 @@ public class PianoPlant : SoundProducer {
     //stores seed instant prefab and clone
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
+    Animator trunkAnimator;
+
+    //for being picked by NPC
+    public Musician seedPicker;
+    public int seedSpotNumber;
+    public int seedsGone;
 
     public override void Start () {
         //this comes before base.Start() for sound sources 
         particleCount = 2;
         base.Start();
-        poofParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
+
+        trunkAnimator = GetComponent<Animator>();
+        trunkAnimator.SetBool("normal", true);
+
+        notesPlaying.Stop();
         poofParticles.Stop();
 
         soundSources [currentNote].GetComponent<Animator> ().SetBool ("grown", true);
@@ -28,11 +38,23 @@ public class PianoPlant : SoundProducer {
 
         //instantiate seed and add it to player seed line
         fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
-        fruitSeedClone.GetComponent<fruitSeedNoInv>().pickedByPlayer = true;
-        fruitSeedClone.GetComponent<fruitSeedNoInv>().plantNote = musicalNotes[currentNote];
+        fruitSeedNoInv newFruitSeed = fruitSeedClone.GetComponent<fruitSeedNoInv>();
+        newFruitSeed.plantNote = musicalNotes[currentNote];
+
+        if (playerClick || playerClicked)
+        {
+            newFruitSeed.pickedByPlayer = true;
+        }
+        else
+        {
+            //relay spot info to seed
+            newFruitSeed.pickedByPlayer = false;
+            newFruitSeed.seedPicker = seedPicker;
+            newFruitSeed.seedSpotNumber = seedSpotNumber;
+        }
 
         //checks if all seeds are gone. if so, destroy, otherwise randomly shift notes
-        int seedsGone = 0;
+        seedsGone = 0;
         for (int i = 0; i < soundSources.Count; i++)
         {
             if (!soundSources[i].activeSelf)
@@ -42,9 +64,8 @@ public class PianoPlant : SoundProducer {
         }
         if (seedsGone == soundSources.Count)
         {
-            poofParticles.Play();
-            DeactivateSelectionMenu();
-            Destroy(gameObject);
+            //destroy plant
+            StartCoroutine(DestroyPlant());
         }
         else
         {
@@ -64,19 +85,18 @@ public class PianoPlant : SoundProducer {
 
     }
 
-    //shift note down
+    //shift note up
     public override void Selection_Two()
     {
-            base.Selection_One();
-        
+        //shift note up stored in selection one
+        base.Selection_One();
     }
 
-    //shift note up
+    //shift note down
     public override void Selection_Three()
     {
-       
-            base.Selection_Two();
-        
+        //shift note down stored in selection two
+        base.Selection_Two();
     }
 
     public void PlaySound()
@@ -84,10 +104,22 @@ public class PianoPlant : SoundProducer {
         if (!audioSource.isPlaying)
         {
             audioSource.PlayOneShot(currentSound);
+            trunkAnimator.SetTrigger("playing");
             soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
             if (notesPlaying != null)
-                notesPlaying.Emit(10);
+                notesPlaying.Play();
         }
+    }
+
+    public IEnumerator DestroyPlant()
+    {
+        //destroy plant
+        interactable = false;
+        poofParticles.Play();
+        if (playerClick || playerClicked)
+            DeactivateSelectionMenu();
+        yield return new WaitForSeconds(0.25f);
+        Destroy(gameObject);
     }
 
 }

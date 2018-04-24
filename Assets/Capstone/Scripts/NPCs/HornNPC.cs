@@ -155,11 +155,13 @@ public class HornNPC : NPC {
                 if (randomTempo < 25)
                 {
                     circleMill.Selection_Two();
+                    movementPointsContainer.transform.localScale *= 1.3f;
                 }
                 //decrease chance high
                 else
                 {
                     circleMill.Selection_Three();
+                    movementPointsContainer.transform.localScale *= 0.7f;
                 }
             }
             else if (circleMill.rhythmState == 2)
@@ -168,11 +170,13 @@ public class HornNPC : NPC {
                 if (randomTempo < 50)
                 {
                     circleMill.Selection_Two();
+                    movementPointsContainer.transform.localScale *= 1.2f;
                 }
                 //decrease 
                 else
                 {
                     circleMill.Selection_Three();
+                    movementPointsContainer.transform.localScale *= 0.8f;
                 }
             }
             else if (circleMill.rhythmState < 2)
@@ -181,11 +185,13 @@ public class HornNPC : NPC {
                 if (randomTempo < 75)
                 {
                     circleMill.Selection_Two();
+                    movementPointsContainer.transform.localScale *= 1.1f;
                 }
                 //decrease chance low
                 else
                 {
                     circleMill.Selection_Three();
+                    movementPointsContainer.transform.localScale *= 0.9f;
                 }
             }
             

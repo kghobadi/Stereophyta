@@ -12,12 +12,17 @@ public class GuitarNPC : NPC {
     protected List<GuitarPlant> flowerGroup3 = new List<GuitarPlant>();
     public WindMachine windMachine;
 
+    public ParticleSystem triRipple, triBeam;
+
     public override void Start()
     {
         base.Start();
 
         windMachine.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
                    windMachine.transform.position.y, movementPoints[moveCounter].transform.position.z));
+
+        triBeam.Stop();
+        triRipple.Stop();
     }
 
     //fills up lists of nearby guitar plants and windmachines
@@ -64,6 +69,8 @@ public class GuitarNPC : NPC {
             }
         }
 
+        
+
         //which is the current group we're at?
         switch (moveCounter)
         {
@@ -78,6 +85,11 @@ public class GuitarNPC : NPC {
                 break;
         }
 
+        StartCoroutine(ChangeWind());
+    }
+
+    IEnumerator ChangeWind()
+    {
         //this only happens if the player isn't interacting with the device
         if (!windMachine.playerRotating && !windMachine.playerHolding)
         {
@@ -89,7 +101,10 @@ public class GuitarNPC : NPC {
                 //rotate windmachine to play the flowers in current group
                 windMachine.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
                     windMachine.transform.position.y, movementPoints[moveCounter].transform.position.z));
-                Debug.Log(windMachine.transform.localEulerAngles);
+                //Debug.Log(windMachine.transform.localEulerAngles);
+                transform.LookAt(new Vector3(windMachine.transform.position.x, transform.position.y, windMachine.transform.position.z));
+                triBeam.Play();
+                yield return new WaitForSeconds(1);
             }
         }
 
@@ -139,6 +154,11 @@ public class GuitarNPC : NPC {
             }
         }
 
+        transform.LookAt(new Vector3(windMachine.transform.position.x, transform.position.y, windMachine.transform.position.z));
+        triBeam.Play();
+        yield return new WaitForSeconds(1);
+
+        currentState = NPCState.LABOR;
         //if there are no nearby guitar flowers
         if (currentFlowers.Count > 0)
         {
@@ -155,8 +175,7 @@ public class GuitarNPC : NPC {
     {
         //wait here a moment
         animator.SetBool("walking", false);
-        yield return new WaitForSeconds(waitingTime);
-        currentState = NPCState.LABOR;
+        triRipple.Play();
 
         int flowerChangeCounter = 3;
         //loop through currentFlowers
@@ -208,8 +227,8 @@ public class GuitarNPC : NPC {
 
 
         yield return new WaitForSeconds(waitingTime);
-        
 
+        triRipple.Stop();
         //set new move pos
         SetMove();
         animator.SetBool("walking", true);

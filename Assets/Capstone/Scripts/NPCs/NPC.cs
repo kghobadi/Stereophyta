@@ -62,7 +62,7 @@ public class NPC : Interactable {
     // all NPC states are shared, what they do in those states can be quite different 
     public enum NPCState
     {
-        LABOR, MOVING, FOLLOWING, PLAYING, TALKING, WAITING, WAVING, DISABLED,
+        LABOR, MOVING, FOLLOWING, PLAYING, TALKING, WAITING, WAVING, DISABLED, LOOKING
     }
 
     public override void Start () {
@@ -158,7 +158,8 @@ public class NPC : Interactable {
             if (Vector3.Distance(transform.position, targestDestination) < 3f)
             {
                 navMeshAgent.isStopped = true;
-                currentState = NPCState.LABOR;
+
+                currentState = NPCState.LOOKING;
                 //if (!hasLooked)
                 LookForWork();
             }

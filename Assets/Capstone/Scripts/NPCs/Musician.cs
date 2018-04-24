@@ -57,9 +57,12 @@ public class Musician : MonoBehaviour {
         }
 
         //set up seed pack
-        for (int i = 0; i < seedPack.childCount; i++)
+        if(seedPack != null)
         {
-            seedSpots.Add(seedPack.GetChild(i));
+            for (int i = 0; i < seedPack.childCount; i++)
+            {
+                seedSpots.Add(seedPack.GetChild(i));
+            }
         }
 
         //start tempo at random interval

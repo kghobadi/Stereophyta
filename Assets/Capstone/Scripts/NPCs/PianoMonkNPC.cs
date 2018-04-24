@@ -9,10 +9,15 @@ public class PianoMonkNPC : NPC {
     //They do not play rocks
     List<PianoPlant> currentPlants = new List<PianoPlant>();
 
-    public int saplingsNecessary;
-    int saplingCount = 0;
-
     List<Plant> plantsToGrow = new List<Plant>();
+
+    public ParticleSystem squareRipples;
+
+    public override void Start()
+    {
+        base.Start();
+        squareRipples.Stop();
+    }
 
     public override void Update()
     {
@@ -65,45 +70,8 @@ public class PianoMonkNPC : NPC {
     {
         //wait here a moment
         animator.SetBool("walking", false);
+        squareRipples.Play();
         yield return new WaitForSeconds(waitingTime);
-
-
-        //DIVINE LIGHT -- if x # of plants are still saplings
-        // Grow all the plants and do cool animation
-        //loop through all the plants
-        //for (int i = 0; i < currentPlants.Count; i++)
-        //{
-        //    if (currentPlants[i].sapling)
-        //    {
-        //        saplingCount++;
-        //        plantsToGrow.Add(currentPlants[i]);
-        //    }
-                
-        //}
-
-        ////Debug.Log(plantsToGrow.Count);
-        //if(saplingCount > saplingsNecessary)
-        //{
-        //    //do divine Light effect and animation!!
-
-        //    //loop through plantsToGrow and grow them
-        //    for(int p = 0; p < plantsToGrow.Count; p++)
-        //    {
-        //        plantsToGrow[p].GrowPlant();
-        //    }
-
-        //    yield return new WaitForSeconds(waitingTime * 3);
-
-        //    //reset sapling count and clear plantsToGrow
-        //    saplingCount = 0;
-        //    plantsToGrow.Clear();
-        //}
-        //else
-        //{
-        //    //reset sapling count and clear plantsToGrow
-        //    saplingCount = 0;
-        //    plantsToGrow.Clear();
-        //}
 
         //choose random plant to play up or down the scale
         int randomPlant = Random.Range(0, currentPlants.Count);
@@ -135,6 +103,7 @@ public class PianoMonkNPC : NPC {
             }
         }
 
+        squareRipples.Stop();
         //set new move pos
         SetMove();
         animator.SetBool("walking", true);
