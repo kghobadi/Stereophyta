@@ -287,11 +287,19 @@ public class Animal : Interactable {
 
                             //turn off fruit
                             currentPlants[p].soundSources[i].SetActive(false);
+                            currentPlants[p].seedsGone++;
                             myVoice.clip = currentPlants[p].musicalNotes[i];
 
                             //shift note up
-                            if (i < currentPlants[p].soundSources.Count - 1)
+                            if (i < 6 && currentPlants[p].seedsGone < 6)
                                 currentPlants[p].Selection_Two();
+                            else
+                            {
+                                if (currentPlants[p] != null)
+                                {
+                                    currentPlants[p].StartCoroutine(currentPlants[p].DestroyPlant());
+                                }
+                            }
 
                             //play seed removal sound !!!
 
@@ -452,12 +460,10 @@ public class Animal : Interactable {
         //if player has a seed
         if (currentState != NPCState.FOLLOWING && tpc.seedLine.Count > 0)
         {
-            //always activate Language first, then from there we bring up selection menu
-            if (currentState != NPCState.GREETING && currentState != NPCState.EATING)
-                lastState = currentState;
-        
             //eat my seed
             StopAllCoroutines();
+
+            followTimer = 0;
 
             StartCoroutine(EatPlayerSeed());
         }

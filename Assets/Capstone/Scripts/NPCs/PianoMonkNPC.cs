@@ -91,7 +91,7 @@ public class PianoMonkNPC : NPC {
                 }
                 else
                 {
-                    currentPlants[randomPlant].Selection_One(); //ShiftNoteDown
+                    currentPlants[randomPlant].Selection_Three(); //ShiftNoteDown
                     currentPlants[randomPlant].audioSource.PlayOneShot(currentPlants[randomPlant].currentSound);
                 }
                 yield return new WaitForSeconds(waitingTime);

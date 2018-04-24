@@ -67,7 +67,7 @@ public class CircleMillControls : Interactable {
             camControl.zoomedOutPos = new Vector3(-10, 30, -10);
             camControl.zoomedOutRot = new Vector3(65, 45, 0);
         }
-        else
+        else if (Vector3.Distance(_player.transform.position, transform.position) > 35)
         {
             camControl.zoomedOutPos = zoomedOutPosO;
             camControl.zoomedOutRot = zoomedOutRotO;

@@ -110,4 +110,12 @@ public class Rock : SoundProducer
         interactable = true;
     }
 
+    public override void OnDisable()
+    {
+        base.OnDisable();
+
+        //increase scale of soundSource
+        soundSources[currentNote].transform.localScale *= 0.5f;
+    }
+
 }

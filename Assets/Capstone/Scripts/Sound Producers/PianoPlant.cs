@@ -22,9 +22,6 @@ public class PianoPlant : SoundProducer {
         trunkAnimator = GetComponent<Animator>();
         trunkAnimator.SetBool("normal", true);
 
-        notesPlaying.Stop();
-        poofParticles.Stop();
-
         soundSources [currentNote].GetComponent<Animator> ().SetBool ("grown", true);
         notesPlaying.transform.position = soundSources[currentNote].transform.position;
         
@@ -90,6 +87,12 @@ public class PianoPlant : SoundProducer {
     {
         //shift note up stored in selection one
         base.Selection_One();
+        notesPlaying.transform.localPosition -= new Vector3(0, 1, 0);
+        notesPlaying.transform.localEulerAngles = soundSources[currentNote].transform.localEulerAngles;
+        soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
+        trunkAnimator.SetTrigger("playing");
+        if (notesPlaying != null)
+            notesPlaying.Play();
     }
 
     //shift note down
@@ -97,6 +100,12 @@ public class PianoPlant : SoundProducer {
     {
         //shift note down stored in selection two
         base.Selection_Two();
+        notesPlaying.transform.localPosition -= new Vector3(0, 1, 0);
+        notesPlaying.transform.localEulerAngles = soundSources[currentNote].transform.localEulerAngles;
+        soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
+        trunkAnimator.SetTrigger("playing");
+        if (notesPlaying != null)
+            notesPlaying.Play();
     }
 
     public void PlaySound()
