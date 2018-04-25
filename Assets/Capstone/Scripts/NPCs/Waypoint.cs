@@ -10,6 +10,7 @@ public class Waypoint : MonoBehaviour {
     MeshRenderer mr;
     SphereCollider sc;
     public bool playerSetting, canBePlaced;
+    bool hasBeenSet = false;
 
     public enum PathType
     {
@@ -26,13 +27,20 @@ public class Waypoint : MonoBehaviour {
     {
         if (playerSetting)
         {
+            hasBeenSet = false;
             mr.enabled = true;
             sc.enabled = true;
         }
         else
         {
-            mr.enabled = false;
-            sc.enabled = false;
+            if (!hasBeenSet)
+            {
+                AdjustHeight();
+                mr.enabled = false;
+                sc.enabled = false;
+                hasBeenSet = true;
+            }
+            
         }
     }
 
@@ -55,6 +63,21 @@ public class Waypoint : MonoBehaviour {
         }
         else { 
             return false;
+        }
+    }
+
+    void AdjustHeight()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, down, out hit, 15f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                transform.position = hit.point + new Vector3(0, 1.5f, 0);
+            }
         }
     }
 

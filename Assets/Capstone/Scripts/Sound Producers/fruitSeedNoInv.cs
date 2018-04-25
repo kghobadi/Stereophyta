@@ -93,19 +93,25 @@ public class fruitSeedNoInv : Interactable {
             
             currentSeedCount = tpc.seedLine.Count;
             currentSpot = tpc.seedLine.IndexOf(gameObject);
-            
+            //controls whether a seed is playing a clip or not
+            if (seedSource.isPlaying)
+            {
+                notesPlaying.Emit(1);
+            }
+
         }
         else
         {
             seedSource.outputAudioMixerGroup = seedPicker.primarySource.outputAudioMixerGroup;
+            //controls whether a seed is playing a clip or not
+            if (seedSource.isPlaying)
+            {
+                notesPlaying.Emit(1);
+            }
 
         }
 
-        //controls whether a seed is playing a clip or not
-        if (seedSource.isPlaying)
-        {
-            notesPlaying.Emit(1);
-        }
+       
 
         //input reader for when a player is holding this seed 
         if (playerHolding)
@@ -130,6 +136,10 @@ public class fruitSeedNoInv : Interactable {
                     playerHolding = false;
                     tpc.seedLine.Remove(gameObject);
                     inSeedLine = false;
+                }
+                else
+                {
+                    seedSource.PlayOneShot(tpc.noNo[0]);
                 }
             }
         }

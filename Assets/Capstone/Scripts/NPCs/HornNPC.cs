@@ -9,7 +9,7 @@ public class HornNPC : NPC {
 
     public ParticleSystem handRipples;
     //which direction is it walking
-    public bool walkingDirection = false;
+    public bool walkingDirection = true;
 
     //max # of plants at waypoint
     public int plantMaximum;

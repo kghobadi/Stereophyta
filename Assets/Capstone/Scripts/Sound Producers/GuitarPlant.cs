@@ -84,20 +84,26 @@ public class GuitarPlant : SoundProducer {
             //reset selection button
             SwitchSelectionButtons();
         //turn off if active
-            if (active)
+        if(guitarAnimator != null)
+        {
+            bool hasChanged = false;
+            if (active && !hasChanged)
             {
-            guitarAnimator.SetBool("grown", false);
-            active = false;
+                guitarAnimator.SetBool("grown", false);
+                active = false;
                 selectionImages[0].buttonImages = startPlayingMusic;
+                hasChanged = true;
             }
             //turn on if inactive
-            else
+            else if (!active && !hasChanged)
             {
-            guitarAnimator.SetBool("grown", true);
-            active = true;
+                guitarAnimator.SetBool("grown", true);
+                active = true;
                 audioSource.PlayOneShot(currentSound);
                 selectionImages[0].buttonImages = stopPlayingMusic;
+                hasChanged = true;
             }
+        }
             if(playerClick || playerClicked)
                 DeactivateSelectionMenu();
         

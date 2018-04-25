@@ -7,9 +7,6 @@ using UnityEngine.AI;
 public class GuitarNPC : NPC {
     protected List<GuitarPlant> currentFlowers = new List<GuitarPlant>();
     protected List<GuitarPlant> flowersToTake = new List<GuitarPlant>();
-    protected List<GuitarPlant> flowerGroup1 = new List<GuitarPlant>();
-    protected List<GuitarPlant> flowerGroup2 = new List<GuitarPlant>();
-    protected List<GuitarPlant> flowerGroup3 = new List<GuitarPlant>();
     public WindMachine windMachine;
 
     public ParticleSystem triRipple, triBeam;
@@ -31,14 +28,9 @@ public class GuitarNPC : NPC {
         //clear flower lists
         currentFlowers.Clear();
         flowersToTake.Clear();
-        flowerGroup1.Clear();
-        flowerGroup2.Clear();
-        flowerGroup3.Clear();
 
-        //loop through waypoints and scan each one 
-        for (int i = 0; i < movementPoints.Count; i++)
-        {
-            Collider[] hitColliders = Physics.OverlapSphere(movementPoints[i].transform.position, visionDistance);
+
+        Collider[] hitColliders = Physics.OverlapSphere(movementPoints[moveCounter].transform.position, visionDistance);
             
             //loop through collider and check each obj
             for(int v = 0; v < hitColliders.Length; v++)
@@ -50,40 +42,13 @@ public class GuitarNPC : NPC {
                     {
                         if (hitColliders[v].gameObject.GetComponent<GuitarPlant>())
                         {
-                            //checks which waypoint this is looking at 
-                            switch (i)
-                            {
-                                case 0:
-                                    flowerGroup1.Add(hitColliders[v].gameObject.GetComponent<GuitarPlant>());
-                                    break;
-                                case 1:
-                                    flowerGroup2.Add(hitColliders[v].gameObject.GetComponent<GuitarPlant>());
-                                    break;
-                                case 2:
-                                    flowerGroup3.Add(hitColliders[v].gameObject.GetComponent<GuitarPlant>());
-                                    break;
-                            }
-                        }
+                           currentFlowers.Add(hitColliders[v].gameObject.GetComponent<GuitarPlant>());
+                    }
                     }
                 }
             }
-        }
-
         
-
-        //which is the current group we're at?
-        switch (moveCounter)
-        {
-            case 0:
-                currentFlowers = flowerGroup1;
-                break;
-            case 1:
-                currentFlowers = flowerGroup2;
-                break;
-            case 2:
-                currentFlowers = flowerGroup3;
-                break;
-        }
+        Debug.Log(currentFlowers.Count);
 
         StartCoroutine(ChangeWind());
     }
@@ -160,14 +125,9 @@ public class GuitarNPC : NPC {
 
         currentState = NPCState.LABOR;
         //if there are no nearby guitar flowers
-        if (currentFlowers.Count > 0)
-        {
+        
             StartCoroutine(PerformLabor());
-        }
-        else
-        {
-            SetMove();
-        }
+            Debug.Log("started labor");
     }
 
     //All NPCs perform some form of Labor. This means changing rhythm or sound producers around them

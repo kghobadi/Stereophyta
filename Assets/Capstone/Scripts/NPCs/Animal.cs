@@ -46,6 +46,7 @@ public class Animal : Interactable {
     bool clickedButton, timeToEat;
 
     AudioSource myVoice;
+    public AudioClip[] slurps;
 
     //the state var
     public NPCState currentState;
@@ -302,6 +303,8 @@ public class Animal : Interactable {
                             }
 
                             //play seed removal sound !!!
+                            int randomSlurp = Random.Range(0, slurps.Length);
+                            myVoice.PlayOneShot(slurps[randomSlurp], 0.25f);
 
                             yield return new WaitForSeconds(waitingTime);
 

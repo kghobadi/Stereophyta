@@ -17,7 +17,7 @@ public class WindGen : RhythmProducer {
             {
                 //base.Update(); only call this if there is a sound produced when rhythm is produced
                 //instantiate wind, show particles, etc.
-                windClone = Instantiate(wind, transform.position, new Quaternion(0, 0, 0, 0));
+                windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.eulerAngles));
                 windClone.GetComponent<MovingWind>()._windGen = this;
                 showRhythm = false;
             }

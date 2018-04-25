@@ -27,6 +27,7 @@ public class Rhythm : MonoBehaviour {
         else if (other.gameObject.tag == "Seed")
         {
             other.gameObject.GetComponent<fruitSeedNoInv>().PlaySound();
+            Debug.Log("seed playing");
         }
     }
     public virtual void OnTriggerStay(Collider other)

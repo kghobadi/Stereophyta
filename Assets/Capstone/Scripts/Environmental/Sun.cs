@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Audio;
 
 public class Sun : MonoBehaviour
 {
@@ -14,8 +15,15 @@ public class Sun : MonoBehaviour
     //public Gradient lightColorMap;
     float totalXRange, interval, middayInterval, duskInterval, nightInterval;
 
+    public Texture lightCookie;
+    GameObject _player;
+    ThirdPersonController tpc;
+    public AudioMixerGroup forestGroup;
+
     void Start()
     {
+        _player = GameObject.FindGameObjectWithTag("Player");
+        tpc = _player.GetComponent<ThirdPersonController>();
         RenderSettings.ambientLight = ambientMorn;
 		sun.color = morn;
         totalXRange = transform.position.x * 2;
@@ -34,6 +42,15 @@ public class Sun : MonoBehaviour
      
         transform.RotateAround(Vector3.zero, Vector3.forward, rotationSpeed * Time.deltaTime);
         
+        if(tpc.plantingGroup == forestGroup)
+        {
+            sun.cookie = lightCookie;
+        }
+        else
+        {
+            sun.cookie = null;
+        }
+
 
         if(transform.position.x > middayInterval)
         {
