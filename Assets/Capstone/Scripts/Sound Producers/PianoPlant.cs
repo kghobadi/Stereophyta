@@ -19,6 +19,8 @@ public class PianoPlant : SoundProducer {
         particleCount = 2;
         base.Start();
 
+        StartCoroutine(GrowPlant());
+
         trunkAnimator = GetComponent<Animator>();
         trunkAnimator.SetBool("normal", true);
 
@@ -130,5 +132,32 @@ public class PianoPlant : SoundProducer {
         yield return new WaitForSeconds(0.25f);
         Destroy(gameObject);
     }
+
+    IEnumerator GrowPlant()
+    {
+        interactable = false;
+        transform.localScale *= 0.1f;
+        while (transform.localScale.x < origScale.x)
+        {
+            transform.localScale *= 1.1f;
+            yield return new WaitForEndOfFrame();
+        }
+        interactable = true;
+        //set active sound source to grown and move notesplaying based on that
+        soundSources[currentNote].GetComponent<Animator>().SetBool("grown", true);
+        notesPlaying.transform.position = soundSources[currentNote].transform.position;
+    }
+    public override void OnDisable()
+    {
+        StopAllCoroutines();
+
+        transform.localScale = origScale;
+        //turn off current soundsource
+        if (soundSources[currentNote].activeSelf)
+        {
+            soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
+        }
+    }
+
 
 }
