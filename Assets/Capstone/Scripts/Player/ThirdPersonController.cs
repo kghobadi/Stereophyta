@@ -308,7 +308,7 @@ public class ThirdPersonController : MonoBehaviour
         float currentDist = Vector3.Distance(transform.position, targetPosition);
 
         //this is a bit finnicky with char controller so may need to continuously set it 
-        if (currentDist >= 0.25f)
+        if (currentDist >= 0.3f)
         {
             transform.LookAt(targetPosition);
 

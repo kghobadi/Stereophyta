@@ -41,6 +41,7 @@ public class NPC : Interactable {
     //movement point container and list -- and home version
     public bool playerSettingMove;
     public Transform movementPointsContainer;
+    Vector3 origPCscale;
     public List<Transform> movementPoints = new List<Transform>();
     Transform chosenWaypoint; // for finding new path
 
@@ -96,6 +97,7 @@ public class NPC : Interactable {
        
         homePosition = movementPointsContainer.position;
         homeRotation = movementPointsContainer.localEulerAngles;
+        origPCscale = movementPointsContainer.localScale;
 
         //set target dest to first position in transform array
         targestDestination = movementPoints[moveCounter].position;
@@ -120,6 +122,7 @@ public class NPC : Interactable {
             {
                 movementPointsContainer.SetParent(transform);
                 movementPointsContainer.localPosition = Vector3.zero;
+                movementPointsContainer.localScale = origPCscale;
             }
             followTimer += Time.deltaTime;
             canSeeDistance = 50;

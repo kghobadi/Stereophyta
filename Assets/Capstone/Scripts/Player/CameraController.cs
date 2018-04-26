@@ -12,6 +12,8 @@ public class CameraController : MonoBehaviour
     public bool zoomedOut = true, zoomedIn;
     //camera ref
     Camera mainCam;
+    WorldManager worldMan;
+    float origActDistance;
 
     public Transform npcTransform;
     
@@ -19,6 +21,8 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
+        worldMan = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        origActDistance = worldMan.activationDistance;
         mainCam = GetComponent<Camera>();
     }
 
@@ -33,6 +37,7 @@ public class CameraController : MonoBehaviour
             transform.localEulerAngles = zoomedOutRot;
             mainCam.fieldOfView = zoomedOutFOV;
             mainCam.nearClipPlane = zoomedOutClip;
+            worldMan.activationDistance = origActDistance;
         }
         if (zoomedIn)
         {
@@ -42,6 +47,7 @@ public class CameraController : MonoBehaviour
             transform.localEulerAngles = zoomedInRot;
             mainCam.nearClipPlane = zoomedInClip;
             mainCam.fieldOfView = zoomedInFOV;
+            worldMan.activationDistance = 150;
         }
            
 

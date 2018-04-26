@@ -18,6 +18,22 @@ public class MovingWind : Rhythm {
         {
             Destroy(gameObject);
         }
-	}
 
+        AdjustHeight();
+    }
+
+    void AdjustHeight()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, down, out hit, 25f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                transform.position = hit.point + new Vector3(0, 5f, 0);
+            }
+        }
+    }
 }

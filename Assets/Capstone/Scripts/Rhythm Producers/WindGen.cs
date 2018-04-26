@@ -20,6 +20,8 @@ public class WindGen : RhythmProducer {
                 windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.eulerAngles));
                 windClone.GetComponent<MovingWind>()._windGen = this;
                 showRhythm = false;
+
+               
             }
         }
 	}

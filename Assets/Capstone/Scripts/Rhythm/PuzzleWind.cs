@@ -21,10 +21,27 @@ public class PuzzleWind : Rhythm
         {
             Destroy(gameObject);
         }
+
+        AdjustHeight();
     }
 
     public override void OnTriggerStay(Collider other)
     {
         // dont use Stay
+    }
+
+    void AdjustHeight()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, down, out hit, 15f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                transform.position = hit.point + new Vector3(0, 3f, 0);
+            }
+        }
     }
 }
