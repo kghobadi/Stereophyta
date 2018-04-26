@@ -44,29 +44,13 @@ public class Rock : SoundProducer
 
     public void PlaySound()
     {
-        if (/*!plantAudio.isPlaying &&*/ !scalingUp && !scalingDown)
+        if (!audioSource.isPlaying)
         {
             audioSource.PlayOneShot(currentSound);
-            scalingUp = true;
-        }
-        else
-        {
-            if (!audioSource.isPlaying)
-            {
-                audioSource.PlayOneShot(currentSound);
-                notesPlaying.Play();
-            }
+            //animation!
+            notesPlaying.Play();
         }
 
-    }
-
-    public override void OnEnable()
-    {
-        base.OnEnable();
-        if (enabledCounter > 1)
-        {
-            Start();
-        }
     }
 
     public override void Selection_Three()
@@ -124,6 +108,14 @@ public class Rock : SoundProducer
         tpc.isHoldingSomething = false;
         playerHolding = false;
         interactable = true;
+    }
+
+    public override void OnDisable()
+    {
+        base.OnDisable();
+
+        //increase scale of soundSource
+        soundSources[currentNote].transform.localScale *= 0.5f;
     }
 
 }

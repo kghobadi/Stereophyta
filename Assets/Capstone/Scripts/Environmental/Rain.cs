@@ -70,32 +70,32 @@ public class Rain : MonoBehaviour
 
     }
 
-    void OnTriggerStay(Collider other)
-    {
-        if (other.gameObject.tag == "Plant")
-        {
-            currentPlant = other.gameObject.GetComponent<Plant>();
-            if (currentPlant.sapling)
-            {
-                currentPlant.waterTimer += Time.deltaTime;
-                if(currentPlant.waterTimer > currentPlant.waterNecessary)
-                {
-                    currentPlant.GrowPlant();
-                    currentPlant.waterTimer = 0;
-                }
-            }
+    //void OnTriggerStay(Collider other)
+    //{
+    //    if (other.gameObject.tag == "Plant")
+    //    {
+    //        currentPlant = other.gameObject.GetComponent<Plant>();
+    //        if (currentPlant.sapling)
+    //        {
+    //            currentPlant.waterTimer += Time.deltaTime;
+    //            if(currentPlant.waterTimer > currentPlant.waterNecessary)
+    //            {
+    //                currentPlant.GrowPlant();
+    //                currentPlant.waterTimer = 0;
+    //            }
+    //        }
 
-            if (!currentPlant.sapling ) //also check if its missing fruitSeeds
-            {
-                currentPlant.regenTimer += Time.deltaTime;
-                if (currentPlant.regenTimer > currentPlant.regenNecessary)
-                {
-                    currentPlant.GrowFruitSeed();
-                    currentPlant.regenTimer = 0;
-                }
-            }
-        }
-    }
+    //        if (!currentPlant.sapling ) //also check if its missing fruitSeeds
+    //        {
+    //            currentPlant.regenTimer += Time.deltaTime;
+    //            if (currentPlant.regenTimer > currentPlant.regenNecessary)
+    //            {
+    //                currentPlant.GrowFruitSeed();
+    //                currentPlant.regenTimer = 0;
+    //            }
+    //        }
+    //    }
+    //}
 
     public void RainType()
     {

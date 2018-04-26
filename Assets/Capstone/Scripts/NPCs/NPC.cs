@@ -6,12 +6,11 @@ using UnityEngine.AI;
 
 public class NPC : Interactable {
     //list to store Plant & Rock scripts
-    protected List<Plant> currentPlants = new List<Plant>();
+    //protected List<Plant> currentPlants = new List<Plant>();
     protected List<Rock> currentRocks = new List<Rock>();
     
     //visual vars
     public Animator animator;
-    TrailRenderer trailRender;
 
     //following in player line variables
     public float followDistance, currentFollowDistance, followTimer, followTimeMin;
@@ -42,6 +41,7 @@ public class NPC : Interactable {
     //movement point container and list -- and home version
     public bool playerSettingMove;
     public Transform movementPointsContainer;
+    Vector3 origPCscale;
     public List<Transform> movementPoints = new List<Transform>();
     Transform chosenWaypoint; // for finding new path
 
@@ -62,7 +62,7 @@ public class NPC : Interactable {
     // all NPC states are shared, what they do in those states can be quite different 
     public enum NPCState
     {
-        LABOR, MOVING, FOLLOWING, PLAYING, TALKING, WAITING, WAVING, DISABLED,
+        LABOR, MOVING, FOLLOWING, PLAYING, TALKING, WAITING, WAVING, DISABLED, LOOKING
     }
 
     public override void Start () {
@@ -78,8 +78,6 @@ public class NPC : Interactable {
         }
 
         navMeshAgent = GetComponent<NavMeshAgent>();
-
-        trailRender = GetComponent<TrailRenderer>();
 
         myMusic = GetComponent<Musician>();
         myLanguage = GetComponent<Language>();
@@ -99,6 +97,7 @@ public class NPC : Interactable {
        
         homePosition = movementPointsContainer.position;
         homeRotation = movementPointsContainer.localEulerAngles;
+        origPCscale = movementPointsContainer.localScale;
 
         //set target dest to first position in transform array
         targestDestination = movementPoints[moveCounter].position;
@@ -123,16 +122,15 @@ public class NPC : Interactable {
             {
                 movementPointsContainer.SetParent(transform);
                 movementPointsContainer.localPosition = Vector3.zero;
+                movementPointsContainer.localScale = origPCscale;
             }
             followTimer += Time.deltaTime;
-            trailRender.enabled = false;
             canSeeDistance = 50;
             canClickDistance = 30;
             FollowPlayer();
         }
         else
         {
-            trailRender.enabled = true;
             canSeeDistance = 15;
             canClickDistance = 10;
         }
@@ -158,7 +156,8 @@ public class NPC : Interactable {
             if (Vector3.Distance(transform.position, targestDestination) < 3f)
             {
                 navMeshAgent.isStopped = true;
-                currentState = NPCState.LABOR;
+
+                currentState = NPCState.LOOKING;
                 //if (!hasLooked)
                 LookForWork();
             }
@@ -364,25 +363,24 @@ public class NPC : Interactable {
     public virtual void LookForWork()
     {
         //hasLooked = true;
-        currentPlants.Clear();
         currentRocks.Clear();
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
         int i = 0;
         while (i < hitColliders.Length)
         {
-            if (hitColliders[i].gameObject.tag == "Plant")
-            {
-                currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
+            //if (hitColliders[i].gameObject.tag == "Plant")
+            //{
+            //    currentPlants.Add(hitColliders[i].gameObject.GetComponent<Plant>());
 
-            }
-            else if (hitColliders[i].gameObject.tag == "Rock")
+            //}
+            if (hitColliders[i].gameObject.tag == "Rock")
             {
                 currentRocks.Add(hitColliders[i].gameObject.GetComponent<Rock>());
             }
             i++;
         }
         //if there are no nearby plants or rocks, we set move
-        if (currentRocks.Count > 0 || currentPlants.Count > 0)
+        if (currentRocks.Count > 0 /*|| currentPlants.Count > 0*/)
         {
             StartCoroutine(PerformLabor());
         }
@@ -400,21 +398,21 @@ public class NPC : Interactable {
         yield return new WaitForSeconds(waitingTime);
         currentState = NPCState.LABOR;
 
-        for (int i = 0; i < currentPlants.Count; i++)
-        {
-            int randomShift = Random.Range(0, 100);
-            if (randomShift > 50)
-            {
-                currentPlants[i].Selection_Two(); //ShiftNoteUp
-                currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
-            }
-            else
-            {
-                currentPlants[i].Selection_One(); //ShiftNoteDown
-                currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
-            }
-            yield return new WaitForSeconds(waitingTime);
-        }
+        //for (int i = 0; i < currentPlants.Count; i++)
+        //{
+        //    int randomShift = Random.Range(0, 100);
+        //    if (randomShift > 50)
+        //    {
+        //        currentPlants[i].Selection_Two(); //ShiftNoteUp
+        //        currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
+        //    }
+        //    else
+        //    {
+        //        currentPlants[i].Selection_One(); //ShiftNoteDown
+        //        currentPlants[i].audioSource.PlayOneShot(currentPlants[i].currentSound);
+        //    }
+        //    yield return new WaitForSeconds(waitingTime);
+        //}
         for (int i = 0; i < currentRocks.Count; i++)
         {
             int randomShift = Random.Range(0, 100);
@@ -503,7 +501,7 @@ public class NPC : Interactable {
         else
         {
             animator.SetBool("idle", true);
-            animator.SetBool("walking", true);
+            animator.SetBool("walking", false);
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         }
 

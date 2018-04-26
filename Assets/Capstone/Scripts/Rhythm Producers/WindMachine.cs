@@ -8,19 +8,22 @@ public class WindMachine : RhythmProducer {
     public GameObject wind;
     GameObject windClone;
     
-    public float windSpeed;
+    public float windSpeed, rotationSpeed;
     public float distanceToDestroy;
 
     public AudioClip selectLower;
-    Transform windMachineModel;
 
-    int originalLayer;
+    Animator windFanAnimator;
+    public Transform fanObj;
 
     //Rotation var -- not being used currently
-    public bool rotating;
+    public bool playerRotating;
+
+    public float holdTimer = 0, holdTimerWait = 0.25f;
 
     //Rhythm lever vars
     public int timeScaleMax;
+    public float drawDist;
 
     bool increasing;
 
@@ -28,10 +31,8 @@ public class WindMachine : RhythmProducer {
         base.Start();
 
         interactable = true;
-        windMachineModel = transform.GetChild(0);
-
-        originalLayer = gameObject.layer;
-        windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.eulerAngles + new Vector3(0, 90, 0)), windMachineModel);
+        rotationSpeed = 1;
+        
 
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
@@ -51,22 +52,49 @@ public class WindMachine : RhythmProducer {
             }
         }
 
+        fanObj.transform.Rotate(0, 0, rotationSpeed);
+
+        //make windmachine look at mouse pos
+        if (playerRotating)
+        {
+            tpc.talking = true;
+            interactable = false;
+
+            holdTimer += Time.deltaTime;
+
+            float mouseX = Input.mousePosition.x;
+
+            float mouseY = Input.mousePosition.y;
+
+            float cameraDif = Camera.main.transform.position.y - transform.position.y;
+
+            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif + 5f));
+
+            Vector3 hoverLocation = new Vector3(worldpos.x, transform.position.y, worldpos.z);
+
+            transform.LookAt(hoverLocation);
+
+            //on click call raycasts. 
+            if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
+            {
+                tpc.talking = false;
+                interactable = true;
+                playerRotating = false;
+            }
+        }
+
         //if player is nearby, generate wind rhythm at timeInterval (look in Rhythm Producer)
         if (Vector3.Distance(_player.transform.position, transform.position) < 100)
         {
             if (showRhythm)
             {
                 //instantiate wind, show particles, etc.
-                windClone = Instantiate(wind, transform.position, Quaternion.Euler(windMachineModel.eulerAngles + new Vector3(0, 90, 0)), windMachineModel);
+                windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.eulerAngles - new Vector3(0,90,0)));
+                windClone.GetComponent<PuzzleWind>()._windGen = this;
                 showRhythm = false;
             }
         }
-
-        //Rotation state
-        //if (rotating)
-        //{
-        //   use this once you can hold down selection menu buttons for continuous actions
-        //}
+        
     }
 
     public override void AudioRhythm()
@@ -97,7 +125,6 @@ public class WindMachine : RhythmProducer {
 
         transform.localPosition = Vector3.zero;
         transform.localEulerAngles = Vector3.zero;
-        gameObject.layer = originalLayer;
 
         tpc.isHoldingSomething = true;
         playerHolding = true;
@@ -111,7 +138,9 @@ public class WindMachine : RhythmProducer {
         base.Selection_Two();
 
         //rotating = true;
-        windMachineModel.transform.localEulerAngles -= new Vector3(0, 90, 0);
+        transform.localEulerAngles = Vector3.zero;
+        playerRotating = true;
+        DeactivateSelectionMenu();
 
         if (!soundBoard.isPlaying)
             soundBoard.PlayOneShot(InteractSound);
@@ -125,7 +154,9 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed += 2;
             timeScale += 1;
-            if (!soundBoard.isPlaying)
+            rotationSpeed *= 2;
+
+            if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(InteractSound);
         }
     }
@@ -138,7 +169,9 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed -= 2;
             timeScale -= 1;
-            if (!soundBoard.isPlaying)
+            rotationSpeed *= 0.5f;
+
+            if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(selectLower);
         }
     }

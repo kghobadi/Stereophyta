@@ -7,26 +7,68 @@ public class Rhythm : MonoBehaviour {
 
     public virtual void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "Plant")
+        if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<Plant>().PlaySound();
+            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+
+            if (plantType == "GUITAR")
+            {
+                other.gameObject.GetComponent<GuitarPlant>().PlaySound();
+            }
+            else if (plantType == "HORN")
+            {
+                other.gameObject.GetComponent<HornPlant>().PlaySound();
+            }
+            else if (plantType == "PIANO")
+            {
+                other.gameObject.GetComponent<PianoPlant>().PlaySound();
+            }
         }
-        if (other.gameObject.tag == "Seed")
+        else if (other.gameObject.tag == "Seed")
         {
             other.gameObject.GetComponent<fruitSeedNoInv>().PlaySound();
+            Debug.Log("seed playing");
         }
     }
     public virtual void OnTriggerStay(Collider other)
     {
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<Plant>().PlaySound();
+            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+
+            if (plantType == "GUITAR")
+            {
+                other.gameObject.GetComponent<GuitarPlant>().PlaySound();
+            }
+            else if (plantType == "HORN")
+            {
+                other.gameObject.GetComponent<HornPlant>().PlaySound();
+            }
+            else if (plantType == "PIANO")
+            {
+                other.gameObject.GetComponent<PianoPlant>().PlaySound();
+            }
+        }
+    }
+
+    public virtual void OnTriggerExit(Collider other)
+    {
+        if(other.gameObject.tag == "Plant")
+        {
+            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+
+            //for horns, need to tell audioSource to stop playing
+            if (plantType == "HORN")
+            {
+                other.gameObject.GetComponent<HornPlant>().audioSource.Stop();
+            }
         }
     }
 
     public virtual void OnEnable()
     {
         enabledCounter++;
+        
     }
 
 }

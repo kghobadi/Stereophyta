@@ -1,19 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿//using System.Collections;
+//using System.Collections.Generic;
+//using UnityEngine;
 
-public class DrumParticles : MonoBehaviour {
+//public class DrumParticles : MonoBehaviour {
 
-    Plant currentPlant;
+//    Plant currentPlant;
 
 
-    void OnParticleCollision(GameObject hit)
-    {
-        if (hit.tag == "Plant")
-        {
-            currentPlant = hit.GetComponent<Plant>();
-            currentPlant.PlaySound();
-        }
-    }
+//    void OnParticleCollision(GameObject hit)
+//    {
+//        if (hit.tag == "Plant")
+//        {
+//            currentPlant = hit.GetComponent<Plant>();
+//            currentPlant.PlaySound();
+//        }
+//    }
 
-}
+//}
