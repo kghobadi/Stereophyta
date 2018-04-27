@@ -62,16 +62,16 @@ public class CircleMillControls : Interactable {
     {
         base.Update();
 
-        if(Vector3.Distance(_player.transform.position, transform.position) < 30)
-        {
-            camControl.zoomedOutPos = new Vector3(-10, 30, -10);
-            camControl.zoomedOutRot = new Vector3(65, 45, 0);
-        }
-        else if (Vector3.Distance(_player.transform.position, transform.position) > 35)
-        {
-            camControl.zoomedOutPos = zoomedOutPosO;
-            camControl.zoomedOutRot = zoomedOutRotO;
-        }
+        //if(Vector3.Distance(_player.transform.position, transform.position) < 30)
+        //{
+        //    camControl.zoomedOutPos = new Vector3(-10, 30, -10);
+        //    camControl.zoomedOutRot = new Vector3(65, 45, 0);
+        //}
+        //else if (Vector3.Distance(_player.transform.position, transform.position) > 35)
+        //{
+        //    camControl.zoomedOutPos = zoomedOutPosO;
+        //    camControl.zoomedOutRot = zoomedOutRotO;
+        //}
 
         //rotates the wind turbine
         windTurbine.transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);

@@ -97,7 +97,7 @@ public class HornPlant : SoundProducer {
     {
         if (!audioSource.isPlaying)
         {
-            audioSource.Play();
+            audioSource.PlayOneShot(currentSound);
             soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
 
             if (notesPlaying != null)
