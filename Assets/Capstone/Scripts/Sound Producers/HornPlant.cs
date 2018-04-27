@@ -35,7 +35,7 @@ public class HornPlant : SoundProducer {
         fruitSeedNoInv newFruitSeed = fruitSeedClone.GetComponent<fruitSeedNoInv>();
         newFruitSeed.plantNote = musicalNotes[currentNote];
 
-        if (playerClick || playerClicked)
+        if (playerClicked)
         {
             newFruitSeed.pickedByPlayer = true;
         }

@@ -53,14 +53,8 @@ public class Rock : SoundProducer
 
     }
 
-    public override void Selection_Three()
+    public override void Selection_One()
     {
-        if (playerClicked)
-        {
-            base.Selection_Three();
-
-        }
-
         playerHolding = true;
 
         //not part of drumset
@@ -87,6 +81,21 @@ public class Rock : SoundProducer
         interactable = false;
     }
 
+    //shift note up
+    public override void Selection_Two()
+    {
+        //shift note up stored in selection one
+        base.Selection_One();
+    }
+
+    //shift note down
+    public override void Selection_Three()
+    {
+        //shift note down stored in selection two
+        base.Selection_Two();
+    }
+
+   
 
     //Called when player is holding the windMachine and right clicks to drop
     public void DropObject()

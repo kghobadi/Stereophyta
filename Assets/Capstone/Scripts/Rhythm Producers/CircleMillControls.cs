@@ -62,16 +62,17 @@ public class CircleMillControls : Interactable {
     {
         base.Update();
 
-        //if(Vector3.Distance(_player.transform.position, transform.position) < 30)
-        //{
-        //    camControl.zoomedOutPos = new Vector3(-10, 30, -10);
-        //    camControl.zoomedOutRot = new Vector3(65, 45, 0);
-        //}
-        //else if (Vector3.Distance(_player.transform.position, transform.position) > 35)
-        //{
-        //    camControl.zoomedOutPos = zoomedOutPosO;
-        //    camControl.zoomedOutRot = zoomedOutRotO;
-        //}
+
+        if((tpc.talking || selectionMenu.enabled) && playerClicked)
+        {
+            camControl.zoomedOutPos = new Vector3(-10, 30, -10);
+            camControl.zoomedOutRot = new Vector3(65, 45, 0);
+        }
+        else
+        {
+            camControl.zoomedOutPos = zoomedOutPosO;
+            camControl.zoomedOutRot = zoomedOutRotO;
+        }
 
         //rotates the wind turbine
         windTurbine.transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
@@ -89,7 +90,7 @@ public class CircleMillControls : Interactable {
         if (dirPositive)
         {
             if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(selectLower);
+                controlsAudio.PlayOneShot(selectLower, 1f);
             dirLever.transform.localEulerAngles = new Vector3(0, -30, 0);
             dirPositive = false;
             //change NPC direction
@@ -103,7 +104,7 @@ public class CircleMillControls : Interactable {
         else
         {
             if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(InteractSound);
+                controlsAudio.PlayOneShot(InteractSound, 1f);
             dirLever.transform.localEulerAngles = new Vector3(0, 30, 0);
             dirPositive = true;
             //change NPC direction
@@ -136,7 +137,7 @@ public class CircleMillControls : Interactable {
 
 
             if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(InteractSound);
+                controlsAudio.PlayOneShot(InteractSound, 1f);
         }
     }
 
@@ -157,7 +158,7 @@ public class CircleMillControls : Interactable {
             }
 
             if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(selectLower);
+                controlsAudio.PlayOneShot(selectLower, 1f);
         }
     }
 
