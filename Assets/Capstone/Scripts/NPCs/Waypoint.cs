@@ -48,6 +48,8 @@ public class Waypoint : MonoBehaviour {
     {
         Vector3 down = transform.TransformDirection(Vector3.down) * 10;
 
+        Vector3 up = transform.TransformDirection(Vector3.up) * 10;
+
         RaycastHit hit;
 
         if (Physics.Raycast(transform.position, down, out hit, 10f))
@@ -58,7 +60,24 @@ public class Waypoint : MonoBehaviour {
             }
             else
             {
-                return false;
+                RaycastHit upHit;
+
+                if (Physics.Raycast(transform.position, up, out upHit, 10f))
+                {
+                    if (hit.transform.gameObject.tag == "Ground")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
         else { 
@@ -70,6 +89,8 @@ public class Waypoint : MonoBehaviour {
     {
         Vector3 down = transform.TransformDirection(Vector3.down) * 10;
 
+        Vector3 up = transform.TransformDirection(Vector3.up) * 10;
+
         RaycastHit hit;
 
         if (Physics.Raycast(transform.position, down, out hit, 15f))
@@ -77,6 +98,18 @@ public class Waypoint : MonoBehaviour {
             if (hit.transform.gameObject.tag == "Ground")
             {
                 transform.position = hit.point + new Vector3(0, 1.5f, 0);
+            }
+            else
+            {
+                RaycastHit upHit;
+
+                if (Physics.Raycast(transform.position, up, out upHit, 10f))
+                {
+                    if (hit.transform.gameObject.tag == "Ground")
+                    {
+                        transform.position = hit.point + new Vector3(0, 1.5f, 0);
+                    }
+                }
             }
         }
     }

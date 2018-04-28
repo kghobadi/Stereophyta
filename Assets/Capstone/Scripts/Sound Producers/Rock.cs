@@ -85,14 +85,18 @@ public class Rock : SoundProducer
     public override void Selection_Two()
     {
         //shift note up stored in selection one
+        soundSources[currentNote].transform.localScale *= 0.5f;
         base.Selection_One();
+        soundSources[currentNote].transform.localScale *= 2;
     }
 
     //shift note down
     public override void Selection_Three()
     {
         //shift note down stored in selection two
+        soundSources[currentNote].transform.localScale *= 0.5f;
         base.Selection_Two();
+        soundSources[currentNote].transform.localScale *= 2;
     }
 
    

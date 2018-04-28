@@ -487,7 +487,7 @@ public class NPC : Interactable {
             animator.SetBool("walking", true);
             animator.SetBool("idle", false);
             navMeshAgent.SetDestination(spotInLine);
-            navMeshAgent.speed = tpc.currentSpeed + 3;
+            navMeshAgent.speed = tpc.currentSpeed + 5;
             transform.LookAt(spotInLine);
         }
         else if (Vector3.Distance(transform.position, spotInLine) > 5f && Vector3.Distance(transform.position, spotInLine) < 25f)
