@@ -6,24 +6,27 @@ using UnityEngine.Audio;
 public class RainSplash : Rhythm {
 
     AudioSource splashAudio;
-    public int currentSound;
     public AudioClip[] splashSounds;
+    public AudioClip[] longNotes, shortNotes;
 
     Vector3 originalPosition;
     ParticleSystem splashEffect;
+    ThirdPersonController tpc;
 
 	void Start () {
+        splashAudio = GetComponent<AudioSource>();
         originalPosition = transform.localPosition;
         splashEffect = GetComponent<ParticleSystem>();
         splashEffect.Stop();
-        int randomSplash = Random.Range(0, splashSounds.Length);
-        currentSound = randomSplash;
+        tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
 	}
     
     public IEnumerator Splash()
     {
         splashEffect.Play();
-        splashAudio.PlayOneShot(splashSounds[currentSound]);
+        splashAudio.outputAudioMixerGroup = tpc.plantingGroup; 
+        int randomSplash = Random.Range(0, splashSounds.Length);
+        splashAudio.PlayOneShot(splashSounds[randomSplash]);
         yield return new WaitForSeconds(0.25f);
         splashEffect.Stop();
         transform.localPosition = originalPosition;
@@ -32,8 +35,6 @@ public class RainSplash : Rhythm {
     public override void OnTriggerEnter(Collider other)
     {
         base.OnTriggerEnter(other);
-        splashAudio.outputAudioMixerGroup = other.GetComponent<AudioSource>().outputAudioMixerGroup;
-
         if (other.gameObject.tag == "Rock")
         {
             other.gameObject.GetComponent<Rock>().PlaySound();

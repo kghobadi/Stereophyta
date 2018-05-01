@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Rain : MonoBehaviour
 {
+    GameObject _player;
 
     ParticleSystem rainEffect;
 
@@ -81,12 +82,15 @@ public class Rain : MonoBehaviour
     void Start()
     {
         timeScale = Random.Range(0, 5);
+        
+        _player = GameObject.FindGameObjectWithTag("Player");
 
         for (int i = 1; i < 17; i++)
         {
             rainSplashes.Add(transform.GetChild(i).gameObject);
         }
 
+        SwitchTimeScale();
         rainEffect = GetComponent<ParticleSystem>();
         collisionEvents = new List<ParticleCollisionEvent>();
 
@@ -112,18 +116,11 @@ public class Rain : MonoBehaviour
         {
             if(i < 16)
             {
-                if (other.tag == "Ground" || other.tag == "Plant" || other.tag == "Rock")
+                if (other.tag == "Ground")
                 {
                     Vector3 pos = collisionEvents[i].intersection;
                     rainSplashes[i].transform.position = pos;
                     RainSplash thisSplash = rainSplashes[i].GetComponent<RainSplash>();
-                    if (i < thisSplash.splashSounds.Length)
-                        thisSplash.currentSound = i;
-                    else
-                    {
-                        int randomSplash = Random.Range(0, thisSplash.splashSounds.Length);
-                        thisSplash.currentSound = randomSplash;
-                    }
                     thisSplash.StartCoroutine(thisSplash.Splash());
                 }
             }
@@ -135,7 +132,7 @@ public class Rain : MonoBehaviour
     void Update()
     {
         RandomTravel();
-        if (showRhythm)
+        if (showRhythm && Vector3.Distance(transform.position, _player.transform.position) < 150)
         {
             rainEffect.Play();
             showRhythm = false;
@@ -148,6 +145,21 @@ public class Rain : MonoBehaviour
         {
             //can mess with speeds here to vary it up even more!
 
+        }
+        //for slower rhythms
+        if(timeScale < 2)
+        {
+            for(int i = 0; i < rainSplashes.Count; i++)
+            {
+                rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().longNotes;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < rainSplashes.Count; i++)
+            {
+                rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().shortNotes;
+            }
         }
     }
 
