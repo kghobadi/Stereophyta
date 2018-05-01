@@ -79,8 +79,8 @@ public abstract class RhythmProducer : Interactable {
         //may need to qualify this with and if statement in override
         AudioRhythm();
 
-        if(rhythmIndicator!= null)
-            rhythmIndicator.clip = indicatorAnimations[timeScale];
+        //if(rhythmIndicator!= null)
+        //    rhythmIndicator.clip = indicatorAnimations[timeScale];
 
     }
 

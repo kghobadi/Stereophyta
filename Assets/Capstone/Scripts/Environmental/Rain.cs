@@ -144,22 +144,36 @@ public class Rain : MonoBehaviour
         switch (timeScale)
         {
             //can mess with speeds here to vary it up even more!
-
-        }
-        //for slower rhythms
-        if(timeScale < 2)
-        {
-            for(int i = 0; i < rainSplashes.Count; i++)
-            {
-                rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().longNotes;
-            }
-        }
-        else
-        {
-            for (int i = 0; i < rainSplashes.Count; i++)
-            {
-                rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().shortNotes;
-            }
+            case 0:
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().oneNotes;
+                }
+                break;
+            case 1:
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().twoNotes;
+                }
+                break;
+            case 2:
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().threeNotes;
+                }
+                break;
+            case 3:
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().fourNotes;
+                }
+                break;
+            case 4:
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().fiveNotes;
+                }
+                break;
         }
     }
 

@@ -7,7 +7,7 @@ public class RainSplash : Rhythm {
 
     AudioSource splashAudio;
     public AudioClip[] splashSounds;
-    public AudioClip[] longNotes, shortNotes;
+    public AudioClip[] oneNotes, twoNotes, threeNotes, fourNotes, fiveNotes;
 
     Vector3 originalPosition;
     ParticleSystem splashEffect;
@@ -24,9 +24,9 @@ public class RainSplash : Rhythm {
     public IEnumerator Splash()
     {
         splashEffect.Play();
-        splashAudio.outputAudioMixerGroup = tpc.plantingGroup; 
+        //splashAudio.outputAudioMixerGroup = tpc.plantingGroup; 
         int randomSplash = Random.Range(0, splashSounds.Length);
-        splashAudio.PlayOneShot(splashSounds[randomSplash]);
+        splashAudio.PlayOneShot(splashSounds[randomSplash], 0.25f);
         yield return new WaitForSeconds(0.25f);
         splashEffect.Stop();
         transform.localPosition = originalPosition;

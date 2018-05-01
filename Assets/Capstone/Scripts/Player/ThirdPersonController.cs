@@ -319,15 +319,19 @@ public class ThirdPersonController : MonoBehaviour
     void MovePlayer()
     {
         //first calculate rotation and look
+        targetPosition = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
+
         float currentDist = Vector3.Distance(transform.position, targetPosition);
 
         //this is a bit finnicky with char controller so may need to continuously set it 
-        if (currentDist >= 0.3f)
+        if (currentDist >= 0.5f)
         {
             transform.LookAt(targetPosition);
 
             //then set movement
             Vector3 movement = new Vector3(0, 0, currentSpeed);
+
+            transform.localEulerAngles = new Vector3(0, transform.localEulerAngles.y, transform.localEulerAngles.z);
 
             movement = transform.rotation * movement;
 
