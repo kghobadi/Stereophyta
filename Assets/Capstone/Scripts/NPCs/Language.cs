@@ -33,6 +33,8 @@ public struct QuestObjects
 
 public class Language : MonoBehaviour
 {
+    Camera cammy;
+    RectTransform canvasRect;
     //list of all English words/phrases that shall be used for translation
     public List<string> englishWords = new List<string>();
     //private lists for storing dialogue cloud stuff
@@ -58,7 +60,11 @@ public class Language : MonoBehaviour
     Image imageDisplay, thoughtCloud;
     AnimateDialogue imageAnimator, cloudAnimator;
     //any effects which emit from speaking character
-    AudioSource voice;
+    public AudioSource voice;
+
+    //ref to sprite face, its animator and position
+    public GameObject faceSprite;
+    public Animation facialExpressor;
 
     //timer for speaking, distance check for quest items
     public float waitTime = 0, waitTimeTotal = 0.5f, checkRadius;
@@ -83,6 +89,10 @@ public class Language : MonoBehaviour
 
     public void Start()
     {
+        //camera and canvas
+        cammy = Camera.main.GetComponent<Camera>();
+        canvasRect = GameObject.FindGameObjectWithTag("MainCanvas").GetComponent<RectTransform>();
+
         //player refs
         _player = GameObject.FindGameObjectWithTag("Player");
         tpc = _player.GetComponent<ThirdPersonController>();
@@ -191,8 +201,8 @@ public class Language : MonoBehaviour
             mainCam.npcTransform = transform;
             mainCam.zoomedIn = true;
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+            CorrectUIPos(faceSprite.transform, thoughtCloud.GetComponent<RectTransform>(), -150, 0);
             thoughtCloud.enabled = true;
-            //go through cloud opening
             cloudAnimator.active = true;
         }
         else
@@ -399,5 +409,17 @@ public class Language : MonoBehaviour
                 allQuestObjects[questObjNumber].questImage.gameObject.GetComponent<AnimateDialogue>().active = true;
             }
         }
+    }
+
+    //move UI to where signpost is on screen
+    void CorrectUIPos(Transform worldObject, RectTransform uiObject, float xAdjust, float yAdjust)
+    {
+        Vector2 ViewportPosition = cammy.GetComponent<Camera>().WorldToViewportPoint(worldObject.position);
+        Vector2 WorldObject_ScreenPosition = new Vector2(
+        ((ViewportPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f) + xAdjust),
+        ((ViewportPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f) + yAdjust));
+
+        //now you can set the position of the ui element
+        uiObject.anchoredPosition = WorldObject_ScreenPosition;
     }
 }

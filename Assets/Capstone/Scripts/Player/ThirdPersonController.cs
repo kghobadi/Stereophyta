@@ -134,9 +134,23 @@ public class ThirdPersonController : MonoBehaviour
                         || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
                         || hit.transform.gameObject.tag == "Rock" || hit.transform.gameObject.tag == "NPC"))
                     {
-                        targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                        walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
-                        isMoving = true;
+                        if(hit.transform.gameObject.tag == "NPC" && hit.transform.gameObject.GetComponent<Language>().questActive)
+                        {
+                            targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
+                            walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
+                            isMoving = true;
+                        }
+                        else if(hit.transform.gameObject.tag == "NPC" && !hit.transform.gameObject.GetComponent<Language>().questActive)
+                        {
+                            //nothing
+                        }
+                        else
+                        {
+                            targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
+                            walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
+                            isMoving = true;
+                        }
+                        
 
                     }
                     else

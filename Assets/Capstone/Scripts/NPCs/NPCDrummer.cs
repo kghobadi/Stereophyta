@@ -19,12 +19,21 @@ public class NPCDrummer : NPC
     public int backpackMax;
     public List<GameObject> drumSet = new List<GameObject>();
     public List<Transform> drumPositions = new List<Transform>();
+    public GameObject setUpSpot;
+    //set publicly to tell this script what raycasts can and can't go thru
+    public LayerMask mask;
+
+    public Animation rhythmIndicator;
+    public AnimationClip[] indicatorAnimations;
 
     bool startSounds, setDrumPosition; // use this in update
 
     public override void Start()
     {
+        lastState = NPCState.PLAYING;
         base.Start();
+        homePosition = transform.position;
+        setUpSpot.SetActive(false);
         moveCounter = 0;
         animator.SetBool("walking", false);
         animator.speed = 0.75f;
@@ -67,13 +76,69 @@ public class NPCDrummer : NPC
         startSounds = true;
         currentState = NPCState.PLAYING;
         myMusic.isPlaying = true;
-        SwitchSelectionButtons();
+
 
     }
 
     public override void Update()
     {
-        base.Update();
+        if (playerSettingMove)
+        {
+            setUpSpot.SetActive(true);
+            tpc.talking = true;
+            interactable = false;
+
+            holdTimer += Time.deltaTime;
+
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, 100, mask))
+            {
+                setUpSpot.transform.position = hit.point;
+
+                //on click call raycasts. 
+                if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
+                {
+                    //if we hit the ground & height is in range, move the character to that position
+                    if (hit.transform.gameObject.tag == "Ground")
+                    {
+                        targestDestination = new Vector3(hit.point.x, transform.position.y, hit.point.z);
+                        navMeshAgent.SetDestination(targestDestination);
+
+                        playerSettingMove = false;
+                        tpc.talking = false;
+                        holdTimer = 0;
+                        setUpSpot.SetActive(false);
+
+                        currentState = NPCState.MOVING;
+
+                        StartCoroutine(WaveAtPlayer());
+                    }
+
+                }
+            }
+            
+        }
+        else if (currentState == NPCState.MOVING)
+        {
+            navMeshAgent.isStopped = false;
+            animator.SetBool("walking", true);
+            animator.SetBool("idle", false);
+            // for some reason must use this distance check instead of navMeshAgent.remainingDistance
+            if (Vector3.Distance(transform.position, targestDestination) < 3f)
+                {
+                    navMeshAgent.isStopped = true;
+                myMusic.isPlaying = true;
+                currentState = NPCState.PLAYING;
+                }
+            
+        }
+        else
+        {
+            base.Update();
+        }
+        
 
         if (currentState == NPCState.FOLLOWING)
         {
@@ -91,23 +156,9 @@ public class NPCDrummer : NPC
             drummerCollider.center = new Vector3(0, .38f, -2.5f);
         }
 
-        if (currentState == NPCState.LABOR || currentState == NPCState.MOVING)
-        {
-            //set rock drum positions
-            for (int i = 0; i < drumSet.Count; i++)
-            {
-                drumSet[i].transform.localPosition = drumBackpack.localPosition;
-                drumSet[i].transform.localEulerAngles = new Vector3(0, 0, 0);
-            }
-            //no drum beat colliding
-            drumCollision.gameObject.SetActive(false);
-            //readjust body collider
-            drummerCollider.size = new Vector3(4f, 2.25f, 10f);
-            drummerCollider.center = new Vector3(0, .38f, -2.5f);
-        }
-
         if (currentState == NPCState.PLAYING)
         {
+            animator.SetBool("walking", false);
             //turn on drum beat
             drumCollision.gameObject.SetActive(true);
             //readjust body collider
@@ -137,88 +188,36 @@ public class NPCDrummer : NPC
         }
     }
 
+   
+
+public override void OnMouseOver()
+{
+    base.OnMouseOver();
+    rhythmIndicator.gameObject.SetActive(true);
+}
+
+public override void OnMouseExit()
+{
+    base.OnMouseExit();
+    rhythmIndicator.gameObject.SetActive(false);
+}
+
+//Called as a command to NPCs who are FOLLOWING or PLAYING
+public override void GoHome()
+    {
+        Debug.Log("going home");
+
+        targestDestination = new Vector3(homePosition.x, transform.position.y, homePosition.z);
+        navMeshAgent.SetDestination(targestDestination);
+
+        currentState = NPCState.MOVING;
+        StartCoroutine(WaveAtPlayer());
+    }
+
     public override void handleClickSuccess()
     {
         base.handleClickSuccess();
         startSounds = false;
-    }
-
-    //fills up lists of nearby plants and rocks
-    public override void LookForWork()
-    {
-        //hasLooked = true;
-        currentRocks.Clear();
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionDistance);
-        int i = 0;
-        while (i < hitColliders.Length)
-        {
-            if (hitColliders[i].gameObject.tag == "Rock" && !drumSet.Contains(hitColliders[i].gameObject))
-            {
-                if(drumSet.Count < backpackMax)
-                {
-                    drumSet.Add(hitColliders[i].gameObject);
-                    hitColliders[i].gameObject.transform.SetParent(drumBackpack);
-                    hitColliders[i].gameObject.transform.localPosition = drumBackpack.localPosition;
-                    int rockIndex = drumSet.IndexOf(hitColliders[i].gameObject);
-                    hitColliders[i].gameObject.GetComponent<Rock>().partOfDrumSet = true;
-                    hitColliders[i].gameObject.GetComponent<Rock>().drumSetPos = drumPositions[rockIndex];
-                    hitColliders[i].gameObject.GetComponent<Rock>().myDrummer = this;
-                }
-                else
-                {
-                    currentRocks.Add(hitColliders[i].gameObject.GetComponent<Rock>());
-                }
-            }
-            i++;
-        }
-
-        //if there are no nearby plants or rocks, we set move
-        if (currentRocks.Count > 0)
-        {
-            StartCoroutine(PerformLabor());
-        }
-        else
-        {
-            SetMove();
-        }
-    }
-
-    public override IEnumerator PerformLabor()
-    {
-        //wait here a moment
-        animator.SetBool("walking", false);
-        yield return new WaitForSeconds(waitingTime);
-        
-        //slap the fuck outta that rock
-        for (int i = 0; i < currentRocks.Count; i++)
-        {
-            int randomShift = Random.Range(0, 100);
-            transform.LookAt(new Vector3(currentRocks[i].transform.position.x, transform.position.y, currentRocks[i].transform.position.z));
-            if (randomShift > 50)
-            {
-                currentRocks[i].Selection_Two(); //ShiftNoteUp
-            }
-            else
-            {
-                currentRocks[i].Selection_One(); //ShiftNoteDown
-            }
-            yield return new WaitForSeconds(waitingTime);
-        }
-
-        //turn on drum beat and play once
-        drumCollision.gameObject.SetActive(true);
-
-        SwitchTempoVisuals();
-        drumCollision.StartCoroutine(drumCollision.LerpScale(collisionSpeed));
-
-        beatParticles.Play();
-        myMusic.showRhythm = false;
-        yield return new WaitForSeconds(waitingTime);
-        drumCollision.gameObject.SetActive(false);
-
-        //set new move pos
-        SetMove();
-        animator.SetBool("walking", true);
     }
 
     void SwitchTempoVisuals()
@@ -255,6 +254,155 @@ public class NPCDrummer : NPC
         }
         beatParticlesModule.startSpeed = particleSpeed;
         beatParticlesModule.startLifetime = particleLifetime;
+    }
+
+    //For Selections, anything that causes the NPC to move or change state significantly should DeactivateSelectionMenu()
+    //If anything moves between the primary selection states -- LABOR LOOP - FOLLOWING - PLAYING, call SwitchSelectionButtons()
+    //REMEMBER -- anywhere we increase or decrease speed, we should also change animator speed
+    // Find a way to tie primaryTempo to moveSpeed vars and animator speed
+    public override void Selection_One()
+    {
+        menuScript.clickTimer = 0f;
+        //Follow Me!!!
+        if (lastState != NPCState.FOLLOWING && !clickedButton)
+        {
+            myLanguage.playerResponded = true;
+            tpc.followers.Add(gameObject);
+            tpc.followerDistances.Add(followDistance);
+            tpc.blubAnimator.Play("Wave", 0);
+            CheckPlaceInLine();
+
+            moveSpeedOriginal = navMeshAgent.speed;
+            currentState = NPCState.FOLLOWING;
+            animator.SetBool("walking", true);
+
+
+            clickedButton = true;
+        }
+        //if already following, this is the Play Music command. Remove follower 
+        else if (lastState == NPCState.FOLLOWING && !clickedButton)
+        {
+            myLanguage.playerResponded = true;
+            tpc.followers.Remove(gameObject);
+            tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
+            tpc.blubAnimator.Play("Wave", 0);
+            followTimer = 0;
+
+            playerSettingMove = true;
+            clickedButton = true;
+        }
+
+        // all 3 possibilities require this 
+        DeactivateSelectionMenu();
+        SwitchSelectionButtons();
+    }
+    public override void Selection_Two()
+    {
+        menuScript.clickTimer = 0f;
+        //if already following, this is the Labor command. Remove follower 
+        if (lastState == NPCState.FOLLOWING && !clickedButton)
+        {
+            myLanguage.playerResponded = true;
+            GoHome();
+            DeactivateSelectionMenu();
+            SwitchSelectionButtons();
+        }
+        //Stop playing music while PLAYING
+        else if (lastState == NPCState.PLAYING && myMusic.isPlaying && !clickedButton)
+        {
+            myMusic.isPlaying = false;
+            clickedButton = true;
+            selectionImages[1].buttonImages = startPlayingMusic;
+        }
+        //Start playing music while PLAYING
+        else if (lastState == NPCState.PLAYING && !myMusic.isPlaying && !clickedButton)
+        {
+            myMusic.isPlaying = true;
+            clickedButton = true;
+            selectionImages[1].buttonImages = stopPlayingMusic;
+        }
+    }
+
+    //Increase Tempo while PLAYING
+    public override void Selection_Three()
+    {
+        menuScript.clickTimer = 0f;
+        
+            if (myMusic.primaryTempo < 4)
+            {
+                myMusic.primaryTempo++;
+                navMeshAgent.speed += moveSpeedInterval;
+            }
+        else
+        {
+            myLanguage.voice.PlayOneShot(tpc.noNo[0]);
+        }
+
+
+        rhythmIndicator.clip = indicatorAnimations[myMusic.primaryTempo];
+    }
+
+    //Decrease Tempo while PLAYING
+    public override void Selection_Four()
+    {
+        menuScript.clickTimer = 0f;
+        
+            if (myMusic.primaryTempo > 0)
+        {
+            myMusic.primaryTempo--;
+            navMeshAgent.speed -= moveSpeedInterval;
+        }
+        else
+        {
+            myLanguage.voice.PlayOneShot(tpc.noNo[0]);
+        }
+
+
+        rhythmIndicator.clip = indicatorAnimations[myMusic.primaryTempo];
+    }
+
+
+    //Switch out all the image displays for the menu based on NPC state
+    public override void SwitchSelectionButtons()
+    {
+        if (lastState == NPCState.FOLLOWING)
+        {
+            selectionImages = followingSelectionImages;
+            selectionCounter = 2;
+        }
+        else if (lastState != NPCState.FOLLOWING && myMusic.isPlaying)
+        {
+            selectionImages = laborSelectionImages;
+            selectionImages[1].buttonImages = stopPlayingMusic;
+            selectionCounter = 4;
+        }
+        else if (lastState != NPCState.FOLLOWING && !myMusic.isPlaying)
+        {
+            selectionImages = laborSelectionImages;
+            selectionImages[1].buttonImages = startPlayingMusic;
+            selectionCounter = 4;
+        }
+
+        selectionButtons.Clear();
+
+        switch (selectionCounter)
+        {
+            case 2:
+                selectionButtons.Add(selectionMenu.transform.GetChild(0).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(1).gameObject);
+                break;
+            case 3:
+                selectionButtons.Add(selectionMenu.transform.GetChild(2).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(3).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(4).gameObject);
+                break;
+            case 4:
+                selectionButtons.Add(selectionMenu.transform.GetChild(5).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(6).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(7).gameObject);
+                selectionButtons.Add(selectionMenu.transform.GetChild(8).gameObject);
+                break;
+        }
     }
 
 }

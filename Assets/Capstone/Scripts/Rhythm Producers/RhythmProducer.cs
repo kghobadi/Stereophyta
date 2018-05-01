@@ -6,6 +6,9 @@ public abstract class RhythmProducer : Interactable {
     public AudioClip[] basicBeats;
     protected AudioSource beatSource;
 
+    public Animation rhythmIndicator;
+    public AnimationClip[] indicatorAnimations;
+
     protected bool playedAudio, showRhythm;
 
     public int timeScale;
@@ -13,7 +16,8 @@ public abstract class RhythmProducer : Interactable {
     public virtual void Awake()
     {
         SimpleClock.ThirtySecond += OnThirtySecond;
-
+        if(rhythmIndicator != null)
+            rhythmIndicator.gameObject.SetActive(false);
         //interact sprites
         for (int i = 1; i < 4; i++)
         {
@@ -68,13 +72,29 @@ public abstract class RhythmProducer : Interactable {
         }
 
     }
+
     // Update is called once per frame
     public override void Update () {
         base.Update();
         //may need to qualify this with and if statement in override
         AudioRhythm();
-        
-	}
+
+        if(rhythmIndicator!= null)
+            rhythmIndicator.clip = indicatorAnimations[timeScale];
+
+    }
+
+    public override void OnMouseOver()
+    {
+        base.OnMouseOver();
+        rhythmIndicator.gameObject.SetActive(true);
+    }
+
+    public override void OnMouseExit()
+    {
+        base.OnMouseExit();
+        rhythmIndicator.gameObject.SetActive(false);
+    }
 
     public virtual void AudioRhythm()
     {
