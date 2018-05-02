@@ -134,13 +134,8 @@ public class HornPlant : SoundProducer {
 
     public override void OnDisable()
     {
-        StopAllCoroutines();
+        base.OnDisable();
 
         transform.localScale = origScale;
-        //turn off current soundsource
-        if (soundSources[currentNote].activeSelf)
-        {
-            soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
-        }
     }
 }

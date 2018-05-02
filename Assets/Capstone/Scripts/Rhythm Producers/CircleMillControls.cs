@@ -180,7 +180,7 @@ public class CircleMillControls : Interactable {
             if (!controlsAudio.isPlaying)
                 controlsAudio.PlayOneShot(selectLower, 1f);
         }
-        rhythmIndicator.clip = indicatorAnimations[rhythmState];
+        //rhythmIndicator.clip = indicatorAnimations[rhythmState];
     }
 
     //These rhythm functions are stored separately because they can be called in dif. ways based on if dirPositive = true or not

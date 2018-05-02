@@ -272,43 +272,37 @@ public class NPC : Interactable {
             interactable = false;
 
             holdTimer += Time.deltaTime;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
 
-            //on click call raycasts. 
-            if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
+            if (Physics.Raycast(ray, out hit, 100, tpc.mask))
             {
-                //check if ground is there
-                int canPlaceCounter = 0;
-                for (int i = 0; i < movementPoints.Count; i++)
+                movementPointsContainer.position = new Vector3(hit.point.x, transform.position.y, hit.point.z);
+                //on click call raycasts. 
+                if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
                 {
-                    if (movementPoints[i].GetComponent<Waypoint>().RaycastToGround())
+                    //check if ground is there
+                    int canPlaceCounter = 0;
+                    for (int i = 0; i < movementPoints.Count; i++)
                     {
-                        canPlaceCounter++;
+                        if (movementPoints[i].GetComponent<Waypoint>().RaycastToGround())
+                        {
+                            canPlaceCounter++;
+                        }
+                    }
+                    //drop new waypoint path
+                    if (canPlaceCounter == movementPoints.Count)
+                    {
+                        DropWaypoints();
+                    }
+                    else
+                    {
+                        //no no sound effect
+                        myMusic.primarySource.PlayOneShot(tpc.noNo[0], 1f);
                     }
                 }
-                //drop new waypoint path
-                if(canPlaceCounter == movementPoints.Count)
-                {
-                    DropWaypoints();
-                }
-                else
-                {
-                    //no no sound effect
-                    myMusic.primarySource.PlayOneShot(tpc.noNo[0], 1f);
-                }
             }
-
-            //make movementPointContainer follow mouse pos
-            float mouseX = Input.mousePosition.x;
-
-            float mouseY = Input.mousePosition.y;
-
-            float cameraDif = Camera.main.transform.position.y - transform.position.y;
-
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif + 15f));
-
-            Vector3 hoverLocation = new Vector3(worldpos.x, transform.position.y, worldpos.z);
-
-            movementPointsContainer.position = hoverLocation;
+           
         }
 
     }

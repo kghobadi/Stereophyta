@@ -107,13 +107,14 @@ public class NPCDrummer : NPC
                         navMeshAgent.SetDestination(targestDestination);
 
                         playerSettingMove = false;
-                        tpc.talking = false;
                         holdTimer = 0;
                         setUpSpot.SetActive(false);
 
                         currentState = NPCState.MOVING;
 
                         StartCoroutine(WaveAtPlayer());
+
+                        tpc.talking = false;
                     }
 
                 }
@@ -122,12 +123,14 @@ public class NPCDrummer : NPC
         }
         else if (currentState == NPCState.MOVING)
         {
+            interactable = false;
             navMeshAgent.isStopped = false;
             animator.SetBool("walking", true);
             animator.SetBool("idle", false);
             // for some reason must use this distance check instead of navMeshAgent.remainingDistance
             if (Vector3.Distance(transform.position, targestDestination) < 3f)
                 {
+                interactable = true;
                     navMeshAgent.isStopped = true;
                 myMusic.isPlaying = true;
                 currentState = NPCState.PLAYING;
@@ -169,7 +172,7 @@ public class NPCDrummer : NPC
             {
                 if (!drumSet[i].GetComponent<Rock>().playerHolding)
                 {
-                    drumSet[i].transform.localPosition = drumPositions[i].localPosition;
+                    drumSet[i].transform.localPosition = new Vector3(drumPositions[i].localPosition.x, -2, drumPositions[i].localPosition.z);
                     drumSet[i].transform.localEulerAngles = new Vector3(0, 0, 0);
                 }
                 if (!startSounds)
@@ -338,8 +341,8 @@ public override void GoHome()
             myLanguage.voice.PlayOneShot(tpc.noNo[0]);
         }
 
-
-        rhythmIndicator.clip = indicatorAnimations[myMusic.primaryTempo];
+            //if(rhythmIndicator!= null)
+            //    rhythmIndicator.clip = indicatorAnimations[myMusic.primaryTempo];
     }
 
     //Decrease Tempo while PLAYING
@@ -358,7 +361,7 @@ public override void GoHome()
         }
 
 
-        rhythmIndicator.clip = indicatorAnimations[myMusic.primaryTempo];
+        //rhythmIndicator.clip = indicatorAnimations[myMusic.primaryTempo];
     }
 
 

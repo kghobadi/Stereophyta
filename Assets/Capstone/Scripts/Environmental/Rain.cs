@@ -22,14 +22,9 @@ public class Rain : MonoBehaviour
 
     public List<GameObject> rainSplashes;
 
-    protected bool playedAudio, showRhythm;
+    protected bool playedAudio, showRhythm, onClock;
 
     public int timeScale;
-
-    public virtual void Awake()
-    {
-        SimpleClock.ThirtySecond += OnThirtySecond;
-    }
 
     public virtual void OnDestroy()
     {
@@ -132,7 +127,17 @@ public class Rain : MonoBehaviour
     void Update()
     {
         RandomTravel();
-        if (showRhythm && Vector3.Distance(transform.position, _player.transform.position) < 150)
+        if(Vector3.Distance(transform.position, _player.transform.position) < 150 && !onClock)
+        {
+            SimpleClock.ThirtySecond += OnThirtySecond;
+            onClock = true;
+        }
+        else if(Vector3.Distance(transform.position, _player.transform.position) > 155 && onClock)
+        {
+            SimpleClock.ThirtySecond -= OnThirtySecond;
+            onClock = false;
+        }
+        if (showRhythm )
         {
             rainEffect.Play();
             showRhythm = false;

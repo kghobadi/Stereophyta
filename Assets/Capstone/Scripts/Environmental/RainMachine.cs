@@ -5,7 +5,7 @@ using UnityEngine;
 public class RainMachine : MonoBehaviour
 {
     public float rotateSpeed = 10;
-    public int cloudInterval = 10;
+    public int cloudInterval;
     public GameObject rain;
 
     float timer;
