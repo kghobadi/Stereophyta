@@ -149,7 +149,9 @@ public class Rain : MonoBehaviour
         switch (timeScale)
         {
             //can mess with speeds here to vary it up even more!
+            //should also vary number of particles emitted since faster rhythms are overburdened
             case 0:
+                
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
                     rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().oneNotes;

@@ -42,8 +42,12 @@ public class CircleMillControls : Interactable {
 
         controlsAudio = GetComponent<AudioSource>();
         camControl = cammy.GetComponent<CameraController>();
-        zoomedOutPosO = camControl.zoomedOutPos;
-        zoomedOutRotO = camControl.zoomedOutRot;
+        if(camControl != null)
+        {
+            zoomedOutPosO = camControl.zoomedOutPos;
+            zoomedOutRotO = camControl.zoomedOutRot;
+        }
+        
 
         //interact sprites
         for (int i = 1; i < 4; i++)
@@ -69,15 +73,21 @@ public class CircleMillControls : Interactable {
 
         if((tpc.talking || selectionMenu.enabled) && playerClicked)
         {
-            camControl.zoomedOutPos = new Vector3(-10, 30, -10);
-            camControl.zoomedOutRot = new Vector3(65, 45, 0);
+            if (camControl != null)
+            {
+                camControl.zoomedOutPos = new Vector3(-10, 30, -10);
+                camControl.zoomedOutRot = new Vector3(65, 45, 0);
+            }
 
             rhythmIndicator.gameObject.SetActive(true);
         }
         else
         {
-            camControl.zoomedOutPos = zoomedOutPosO;
-            camControl.zoomedOutRot = zoomedOutRotO;
+            if (camControl != null)
+            {
+                camControl.zoomedOutPos = zoomedOutPosO;
+                camControl.zoomedOutRot = zoomedOutRotO;
+            }
 
             rhythmIndicator.gameObject.SetActive(false);
         }
