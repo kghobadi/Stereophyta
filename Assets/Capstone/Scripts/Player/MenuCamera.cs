@@ -16,9 +16,11 @@ public class MenuCamera : MonoBehaviour
     Camera mainCam;
     WorldManager worldMan;
     float origActDistance;
+    float alphaVal;
 
     public Transform npcTransform;
     public float moveSpeed = 5;
+    public Image fadeToBlack;
 
     void Start()
     {
@@ -51,8 +53,15 @@ public class MenuCamera : MonoBehaviour
 
             if (Vector3.Distance(transform.position, targetPos) > 5)
             {
-                moveSpeed += Time.deltaTime;
-                transform.position = Vector3.MoveTowards(transform.position, realPlayer.transform.position, moveSpeed * Time.deltaTime);
+                moveSpeed += 5 * Time.deltaTime;
+                transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+
+                alphaVal += 0.2f * Time.deltaTime;
+
+                fadeToBlack.color = new Color(0f, 0f, 0f, alphaVal);
+
+                //alphaVal = Mathf.Clamp01(alphaVal);
+
             }
             else
             {

@@ -13,6 +13,7 @@ public class PanMap : MonoBehaviour {
 
     void Start()
     {
+        pointCounter = Random.Range(0, cameraPoints.Count);
         SetPoint();
     }
 

@@ -85,7 +85,7 @@ public class Rain : MonoBehaviour
             rainSplashes.Add(transform.GetChild(i).gameObject);
         }
 
-        SwitchTimeScale();
+        
         rainEffect = GetComponent<ParticleSystem>();
         collisionEvents = new List<ParticleCollisionEvent>();
 
@@ -98,6 +98,7 @@ public class Rain : MonoBehaviour
         cloud.eulerAngles = new Vector3(0, Random.Range(0, 360), 0);
 
         rainSource = GetComponent<AudioSource>();
+        SwitchTimeScale();
     }
     
 
@@ -146,36 +147,48 @@ public class Rain : MonoBehaviour
 
     void SwitchTimeScale()
     {
+        ParticleSystem.MainModule mainRain = rainEffect.main;
+        ParticleSystem.EmissionModule rainEmitter = rainEffect.emission;
+
         switch (timeScale)
         {
             //can mess with speeds here to vary it up even more!
             //should also vary number of particles emitted since faster rhythms are overburdened
             case 0:
-                
+                mainRain.simulationSpeed = 0.5f;
+                rainEmitter.rateOverTime = 12;
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
                     rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().oneNotes;
                 }
                 break;
             case 1:
+                mainRain.simulationSpeed = 1f;
+                rainEmitter.rateOverTime = 10;
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
                     rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().twoNotes;
                 }
                 break;
             case 2:
+                mainRain.simulationSpeed = 2f;
+                rainEmitter.rateOverTime = 8;
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
                     rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().threeNotes;
                 }
                 break;
             case 3:
+                mainRain.simulationSpeed = 2f;
+                rainEmitter.rateOverTime = 6;
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
                     rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().fourNotes;
                 }
                 break;
             case 4:
+                mainRain.simulationSpeed = 2f;
+                rainEmitter.rateOverTime = 4;
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
                     rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().fiveNotes;

@@ -187,6 +187,30 @@ public class NPCDrummer : NPC
                     beatParticles.Play();
                     myMusic.showRhythm = false;
                 }
+
+            GameObject[] rainObjects = GameObject.FindGameObjectsWithTag("Rain");
+            if(rainObjects.Length > 0)
+            {
+                bool nearRain = false;
+                for(int i = 0; i < rainObjects.Length; i++)
+                {
+                    if(Vector3.Distance(transform.position, rainObjects[i].transform.position) < 150)
+                    {
+                        myMusic.isPlaying = false;
+                        clickedButton = true;
+                        selectionImages[1].buttonImages = startPlayingMusic;
+                        SwitchSelectionButtons();
+                        nearRain = true;
+                    }
+                }
+                if (!nearRain)
+                {
+                    myMusic.isPlaying = true;
+                    clickedButton = true;
+                    selectionImages[1].buttonImages = stopPlayingMusic;
+                    SwitchSelectionButtons();
+                }
+            }
             
         }
     }
@@ -316,6 +340,7 @@ public override void GoHome()
             myMusic.isPlaying = false;
             clickedButton = true;
             selectionImages[1].buttonImages = startPlayingMusic;
+            SwitchSelectionButtons();
         }
         //Start playing music while PLAYING
         else if (lastState == NPCState.PLAYING && !myMusic.isPlaying && !clickedButton)
@@ -323,6 +348,7 @@ public override void GoHome()
             myMusic.isPlaying = true;
             clickedButton = true;
             selectionImages[1].buttonImages = stopPlayingMusic;
+            SwitchSelectionButtons();
         }
     }
 
