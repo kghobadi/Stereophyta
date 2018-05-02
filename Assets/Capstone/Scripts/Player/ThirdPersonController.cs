@@ -41,6 +41,7 @@ public class ThirdPersonController : MonoBehaviour
 
     public List<GameObject> seedLine = new List<GameObject>();
     public int seedLineMax;
+    float scrollTimer, scrollTimerTotal = 0.1f;
 
     //Store the current audio mixer info so when you plant stuff and drop off followers, they adjust to where player is on map
     public AudioMixerSnapshot currentAudioMix;
@@ -207,24 +208,26 @@ public class ThirdPersonController : MonoBehaviour
                 playerCommandsMenu.enabled = true;
             }
 
+            scrollTimer -= Time.deltaTime;
             //Input map for Mousewheel scroll to change seeds
             //if scroll up 
-            if (Input.GetAxis("Mouse ScrollWheel") > 0 && seedLine.Count > 1)
+            if (Input.GetAxis("Mouse ScrollWheel") > 0 && seedLine.Count > 1 && scrollTimer <0)
             {
                 GameObject seedToMove = seedLine[0];
                 seedLine.Remove(seedToMove);
                 seedLine.Insert(seedLine.Count, seedToMove);
 
+                scrollTimer = scrollTimerTotal;
             }
             //if scroll down 
-            else if (Input.GetAxis("Mouse ScrollWheel") < 0 && seedLine.Count > 1)
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0 && seedLine.Count > 1 && scrollTimer < 0)
             {
                 GameObject seedToMove = seedLine[seedLine.Count - 1];
                 int index = seedLine.Count - 1;
                 // move all seed positions backward in line 
                 seedLine.RemoveAt(index);
                 seedLine.Insert(0, seedToMove);
-
+                scrollTimer = scrollTimerTotal;
             }
 
             //Check if we are moving and transition animation controller
@@ -359,7 +362,10 @@ public class ThirdPersonController : MonoBehaviour
         while (i < hitColliders.Length)
         {
             //check to see if obj is plant or rock
-            if (hitColliders[i].gameObject.tag == "Plant" || hitColliders[i].gameObject.tag == "Rock")
+            if (hitColliders[i].gameObject.tag == "Plant" || hitColliders[i].gameObject.tag == "Rock" || 
+                hitColliders[i].gameObject.tag == "NPC" || hitColliders[i].gameObject.tag == "RainSplash" 
+                || hitColliders[i].gameObject.tag == "Ambient" || hitColliders[i].gameObject.tag == "Animal" 
+                || hitColliders[i].gameObject.tag == "Seed")
             {
                 //check distance and add to list
                 float distanceAway = Vector3.Distance(hitColliders[i].transform.position, transform.position);

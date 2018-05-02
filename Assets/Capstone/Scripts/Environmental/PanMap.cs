@@ -7,7 +7,7 @@ public class PanMap : MonoBehaviour {
     public MenuCamera camScript;
     public List<Transform> cameraPoints = new List<Transform>();
     Vector3 nextPoint;
-    public int pointCounter = -1;
+    public int pointCounter = 0;
     public float moveSpeed;
     public bool moving = true;
 
@@ -39,7 +39,7 @@ public class PanMap : MonoBehaviour {
 
     void SetPoint()
     {
-        if(pointCounter < cameraPoints.Count)
+        if(pointCounter < (cameraPoints.Count-1))
         {
             pointCounter++;
         }

@@ -48,9 +48,9 @@ public class GuitarPlant : SoundProducer {
 
         newFruitSeed.plantNote = musicalNotes[currentNote];
 
-        if (playerClick || playerClicked)
+        if (playerClick)
         {
-                newFruitSeed.pickedByPlayer = true;
+             newFruitSeed.pickedByPlayer = true;
         }
         //NPC took it
         else
@@ -120,7 +120,7 @@ public class GuitarPlant : SoundProducer {
         //destroy plant
         interactable = false;
         poofParticles.Play();
-        if(playerClick || playerClicked)
+        if(playerClick)
             DeactivateSelectionMenu();
         yield return new WaitForSeconds(0.2f);
         Destroy(gameObject);
