@@ -23,8 +23,8 @@ public class NPCDrummer : NPC
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask mask;
 
-    public Animation rhythmIndicator;
-    public AnimationClip[] indicatorAnimations;
+    public Animator rhythmIndicator;
+    float disappearTimer, disappearTimerTotal = 1f;
 
     bool startSounds, setDrumPosition; // use this in update
 
@@ -77,7 +77,8 @@ public class NPCDrummer : NPC
         currentState = NPCState.PLAYING;
         myMusic.isPlaying = true;
 
-
+        disappearTimer = disappearTimerTotal;
+        rhythmIndicator.gameObject.SetActive(false);
     }
 
     public override void Update()
@@ -197,40 +198,52 @@ public class NPCDrummer : NPC
                     if(Vector3.Distance(transform.position, rainObjects[i].transform.position) < 150)
                     {
                         myMusic.isPlaying = false;
-                        clickedButton = true;
-                        selectionImages[1].buttonImages = startPlayingMusic;
-                        SwitchSelectionButtons();
                         nearRain = true;
                     }
                 }
-                if (!nearRain)
+                if (!nearRain && !playerClicked)
                 {
                     myMusic.isPlaying = true;
-                    clickedButton = true;
-                    selectionImages[1].buttonImages = stopPlayingMusic;
-                    SwitchSelectionButtons();
                 }
             }
             
         }
+
+        if (selectionMenu.enabled && playerClicked)
+        {
+            rhythmIndicator.gameObject.SetActive(true);
+            disappearTimer = disappearTimerTotal;
+        }
+
+        if (rhythmIndicator.gameObject.activeSelf)
+        {
+            disappearTimer -= Time.deltaTime;
+            if (disappearTimer < 0)
+            {
+                rhythmIndicator.gameObject.SetActive(false);
+                disappearTimer = disappearTimerTotal;
+            }
+        }
+
     }
 
-   
 
-public override void OnMouseOver()
-{
-    base.OnMouseOver();
-    rhythmIndicator.gameObject.SetActive(true);
-}
 
-public override void OnMouseExit()
-{
-    base.OnMouseExit();
-    rhythmIndicator.gameObject.SetActive(false);
-}
+    public override void OnMouseOver()
+    {
+        base.OnMouseOver();
+        disappearTimer = disappearTimerTotal;
+        rhythmIndicator.gameObject.SetActive(true);
+    }
 
-//Called as a command to NPCs who are FOLLOWING or PLAYING
-public override void GoHome()
+    public override void OnMouseExit()
+    {
+        base.OnMouseExit();
+        rhythmIndicator.gameObject.SetActive(false);
+    }
+
+    //Called as a command to NPCs who are FOLLOWING or PLAYING
+    public override void GoHome()
     {
         Debug.Log("going home");
 
@@ -257,26 +270,31 @@ public override void GoHome()
                 collisionSpeed = 16;
                 particleSpeed = 1.875f;
                 particleLifetime = 12f;
+                rhythmIndicator.speed = 0.5f;
                 break;
             case 1:
                 collisionSpeed = 8f;
                 particleSpeed = 3.75f;
                 particleLifetime = 6f;
+                rhythmIndicator.speed = 0.75f;
                 break;
             case 2:
                 collisionSpeed = 4f;
                 particleSpeed = 7.5f;
                 particleLifetime = 3f;
+                rhythmIndicator.speed = 1f;
                 break;
             case 3:
                 collisionSpeed = 2f;
                 particleSpeed = 15f;
                 particleLifetime = 1.5f;
+                rhythmIndicator.speed = 1.25f;
                 break;
             case 4:
                 collisionSpeed = 1f;
                 particleSpeed = 30f;
                 particleLifetime = 0.75f;
+                rhythmIndicator.speed = 1.5f;
                 break;
         }
         beatParticlesModule.startSpeed = particleSpeed;
@@ -331,25 +349,23 @@ public override void GoHome()
         {
             myLanguage.playerResponded = true;
             GoHome();
+            clickedButton = true;
             DeactivateSelectionMenu();
-            SwitchSelectionButtons();
         }
         //Stop playing music while PLAYING
         else if (lastState == NPCState.PLAYING && myMusic.isPlaying && !clickedButton)
         {
             myMusic.isPlaying = false;
             clickedButton = true;
-            selectionImages[1].buttonImages = startPlayingMusic;
-            SwitchSelectionButtons();
         }
         //Start playing music while PLAYING
         else if (lastState == NPCState.PLAYING && !myMusic.isPlaying && !clickedButton)
         {
             myMusic.isPlaying = true;
             clickedButton = true;
-            selectionImages[1].buttonImages = stopPlayingMusic;
-            SwitchSelectionButtons();
         }
+
+        SwitchSelectionButtons();
     }
 
     //Increase Tempo while PLAYING
@@ -367,8 +383,7 @@ public override void GoHome()
             myLanguage.voice.PlayOneShot(tpc.noNo[0]);
         }
 
-            //if(rhythmIndicator!= null)
-            //    rhythmIndicator.clip = indicatorAnimations[myMusic.primaryTempo];
+         
     }
 
     //Decrease Tempo while PLAYING
@@ -385,27 +400,25 @@ public override void GoHome()
         {
             myLanguage.voice.PlayOneShot(tpc.noNo[0]);
         }
-
-
-        //rhythmIndicator.clip = indicatorAnimations[myMusic.primaryTempo];
+            
     }
 
 
     //Switch out all the image displays for the menu based on NPC state
     public override void SwitchSelectionButtons()
     {
-        if (lastState == NPCState.FOLLOWING)
+        if (lastState == NPCState.FOLLOWING || lastState == NPCState.MOVING)
         {
             selectionImages = followingSelectionImages;
             selectionCounter = 2;
         }
-        else if (lastState != NPCState.FOLLOWING && myMusic.isPlaying)
+        else if (lastState == NPCState.PLAYING && myMusic.isPlaying)
         {
             selectionImages = laborSelectionImages;
             selectionImages[1].buttonImages = stopPlayingMusic;
             selectionCounter = 4;
         }
-        else if (lastState != NPCState.FOLLOWING && !myMusic.isPlaying)
+        else if (lastState == NPCState.PLAYING && !myMusic.isPlaying)
         {
             selectionImages = laborSelectionImages;
             selectionImages[1].buttonImages = startPlayingMusic;

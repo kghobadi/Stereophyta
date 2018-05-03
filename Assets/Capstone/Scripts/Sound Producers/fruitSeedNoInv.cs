@@ -99,7 +99,98 @@ public class fruitSeedNoInv : Interactable {
                 notesPlaying.Emit(1);
             }
 
+            //input reader for when a player is holding this seed 
+            if (playerHolding)
+            {
+                //if you right click and nothing is stopping you
+                if (Input.GetMouseButtonDown(1) && tpc.canUseSeed)
+                {
+                    bool canPlant = true;
+                    Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
+                    int i = 0;
+                    while (i < hitColliders.Length)
+                    {
+                        if (hitColliders[i].gameObject.tag == "Plant")
+                        {
+                            canPlant = false;
+                        }
+                        i++;
+                    }
+                    if (canPlant && tpc.canUseSeed)
+                    {
+                        planting = true;
+                        playerHolding = false;
+                        tpc.seedLine.Remove(gameObject);
+                        inSeedLine = false;
+                    }
+                    else
+                    {
+                        seedSource.PlayOneShot(tpc.noNo[0]);
+                    }
+                }
+            }
+
+            //for controlling behavior of all seeds in line
+            else if (inSeedLine && !playerHolding && currentSpot != 0)
+            {
+                transform.localEulerAngles += new Vector3(0, 1, 0);
+                //seed in first spot (not being held) gets special treatment
+                if (currentSpot == 1 && pickedByPlayer)
+                {
+                    //controls whether a seed is playing a clip or not
+                    if (seedSource.isPlaying)
+                    {
+                        targetPos = seedMaster.transform.localPosition - new Vector3(0, 0, 1) + new Vector3(0, 1, 0);
+                    }
+                    else
+                    {
+                        targetPos = seedMaster.transform.localPosition - new Vector3(0, 0, 1);
+                    }
+                    followSpeed = followSpeedOrig;
+                    transform.LookAt(new Vector3(seedMaster.transform.position.x, transform.position.y, seedMaster.transform.position.z));
+                }
+
+                //behavior for all seeds after 1st or 2nd
+                else
+                {
+                    //controls whether a seed is playing a clip or not
+                    if (seedSource.isPlaying)
+                    {
+                        targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1) + new Vector3(0, 1 - (currentSpot / 10), 0);
+                    }
+                    else
+                    {
+                        targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
+                    }
+                    //increment follow speed of seeds
+                    followSpeed = followSpeedOrig - (currentSpot / 1.5f);
+
+
+                    //look at targetPos
+                    transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
+                }
+                transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);
+
+            }
+
+            //if (tpc.seedLine[0] == null)
+            //{
+            //    tpc.seedLine.RemoveAt(0);
+            //}
+            
+            //keeping track of changes to seedline
+            if ((currentSeedCount != lastLineLength || (currentSpot != lastSpot)) && inSeedLine && pickedByPlayer)
+            {
+                CheckPlaceInLine();
+            }
+
+            lastLineLength = tpc.seedLine.Count;
+            lastSpot = tpc.seedLine.IndexOf(gameObject);
+            movedInLine = false;
+
         }
+
+        //picked by NPC
         else
         {
             seedSource.outputAudioMixerGroup = seedPicker.primarySource.outputAudioMixerGroup;
@@ -111,97 +202,12 @@ public class fruitSeedNoInv : Interactable {
 
         }
 
-       
 
-        //input reader for when a player is holding this seed 
-        if (playerHolding)
-        {
-            //if you right click and nothing is stopping you
-            if (Input.GetMouseButtonDown(1) && tpc.canUseSeed)
-            {
-                bool canPlant = true;
-                Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
-                int i = 0;
-                while (i < hitColliders.Length)
-                {
-                    if (hitColliders[i].gameObject.tag == "Plant")
-                    {
-                        canPlant = false;
-                    }
-                    i++;
-                }
-                if (canPlant && tpc.canUseSeed)
-                {
-                    planting = true;
-                    playerHolding = false;
-                    tpc.seedLine.Remove(gameObject);
-                    inSeedLine = false;
-                }
-                else
-                {
-                    seedSource.PlayOneShot(tpc.noNo[0]);
-                }
-            }
-        }
-    
-        //for controlling behavior of all seeds in line
-        else if (inSeedLine && !playerHolding && currentSpot != 0)
-        {
-            transform.localEulerAngles += new Vector3(0, 1, 0);
-            //seed in first spot (not being held) gets special treatment
-            if (currentSpot == 1 && pickedByPlayer)
-            {
-                //controls whether a seed is playing a clip or not
-                if (seedSource.isPlaying)
-                {
-                    targetPos = seedMaster.transform.localPosition - new Vector3(0, 0, 1) + new Vector3(0, 1, 0);
-                }
-                else
-                {
-                    targetPos = seedMaster.transform.localPosition - new Vector3(0, 0, 1);
-                }
-                followSpeed = followSpeedOrig;
-                transform.LookAt(new Vector3(seedMaster.transform.position.x, transform.position.y, seedMaster.transform.position.z));
-            }
-            
-            //behavior for all seeds after 1st or 2nd
-            else
-            {
-                //controls whether a seed is playing a clip or not
-                if (seedSource.isPlaying)
-                {
-                    targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1) + new Vector3(0, 1 - (currentSpot / 10), 0);
-                }
-                else
-                {
-                    targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
-                }
-                //increment follow speed of seeds
-                followSpeed = followSpeedOrig - (currentSpot / 1.5f);
-               
-
-                //look at targetPos
-                transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
-            }
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);
-            
-        }
-
-        else if (planting)
+        if (planting)
         {
             PlantSeed();
-            
-        }
 
-        //keeping track of changes to seedline
-        if ((currentSeedCount != lastLineLength ||  (currentSpot != lastSpot)) && inSeedLine && pickedByPlayer)
-        {
-            CheckPlaceInLine();
         }
-
-        lastLineLength = tpc.seedLine.Count;
-        lastSpot = tpc.seedLine.IndexOf(gameObject);
-        movedInLine = false;
     }
 
     public void PickUpSeed()

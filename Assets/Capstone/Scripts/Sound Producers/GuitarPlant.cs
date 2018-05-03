@@ -7,9 +7,9 @@ public class GuitarPlant : SoundProducer {
     //var for seed object and instant clone
     public GameObject fruitSeed;
     GameObject fruitSeedClone;
-    
+
     //checks whether the flower is open or closed
-    public bool active;
+    public bool active, canTake = true;
 
     //for changing the button based on active state
     public Sprite[] stopPlayingMusic, startPlayingMusic;
@@ -41,6 +41,7 @@ public class GuitarPlant : SoundProducer {
     //can be done by player or by NPC
     void TakeFruitSeed()
     {
+        interactable = false;
         guitarAnimator.SetBool("grown", false);
         //instantiate seed and add it to player seed line
         fruitSeedClone = Instantiate(fruitSeed, transform.position, Quaternion.identity);
@@ -62,6 +63,7 @@ public class GuitarPlant : SoundProducer {
         }
 
         //destroy plant
+        canTake = false;
         StartCoroutine(DestroyPlant());
 
     }
@@ -76,6 +78,15 @@ public class GuitarPlant : SoundProducer {
                 if (notesPlaying != null)
                     notesPlaying.Emit(10);
             }
+    }
+
+    public override void handleClickSuccess()
+    {
+        if (interactable && canTake)
+        {
+            base.handleClickSuccess();
+        }
+        
     }
 
     //command to activate or deactivate flower
@@ -112,7 +123,8 @@ public class GuitarPlant : SoundProducer {
     //shift note up
     public override void Selection_Two()
     {
-        TakeFruitSeed();
+        if(canTake)
+            TakeFruitSeed();
     }
 
     IEnumerator DestroyPlant()
@@ -120,9 +132,9 @@ public class GuitarPlant : SoundProducer {
         //destroy plant
         interactable = false;
         poofParticles.Play();
-        if(playerClick)
+        if(playerClicked)
             DeactivateSelectionMenu();
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.4f);
         Destroy(gameObject);
     }
 

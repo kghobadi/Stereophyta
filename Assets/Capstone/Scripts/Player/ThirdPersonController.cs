@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ThirdPersonController : MonoBehaviour
 {
@@ -40,7 +41,6 @@ public class ThirdPersonController : MonoBehaviour
     public int followerCountMax;
 
     public List<GameObject> seedLine = new List<GameObject>();
-    public int seedLineMax;
     float scrollTimer, scrollTimerTotal = 0.1f;
 
     //Store the current audio mixer info so when you plant stuff and drop off followers, they adjust to where player is on map
@@ -201,11 +201,10 @@ public class ThirdPersonController : MonoBehaviour
                 }
             }
 
-            //Check for spacebar to open PlayerCommand Menu
-            if (Input.GetKeyDown(KeyCode.Space) && playerCommandsMenu.enabled == false)
+            //Restart game
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                // enable player commands 
-                playerCommandsMenu.enabled = true;
+                SceneManager.LoadScene("Menu");
             }
 
             scrollTimer -= Time.deltaTime;
