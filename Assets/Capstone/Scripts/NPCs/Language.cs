@@ -162,6 +162,7 @@ public class Language : MonoBehaviour
         {
             symbolAnimator.animationSprites = talkingSprites;
             symbolAnimator.active = true;
+            CorrectUIPos(faceSprite.transform, thoughtCloud.GetComponent<RectTransform>(), -150, 0);
             //delay for click to process stuff
             if (!advance)
             {
@@ -201,7 +202,7 @@ public class Language : MonoBehaviour
             mainCam.npcTransform = transform;
             mainCam.zoomedIn = true;
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
-            CorrectUIPos(faceSprite.transform, thoughtCloud.GetComponent<RectTransform>(), -150, 0);
+            
             thoughtCloud.enabled = true;
             cloudAnimator.active = true;
         }

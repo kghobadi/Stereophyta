@@ -209,7 +209,7 @@ public class NPCDrummer : NPC
             
         }
 
-        if (selectionMenu.enabled && playerClicked)
+        if (selectionMenu.enabled && playerClicked && currentState == NPCState.PLAYING)
         {
             rhythmIndicator.gameObject.SetActive(true);
             disappearTimer = disappearTimerTotal;
@@ -232,8 +232,12 @@ public class NPCDrummer : NPC
     public override void OnMouseOver()
     {
         base.OnMouseOver();
-        disappearTimer = disappearTimerTotal;
-        rhythmIndicator.gameObject.SetActive(true);
+        if(currentState == NPCState.PLAYING)
+        {
+            disappearTimer = disappearTimerTotal;
+            rhythmIndicator.gameObject.SetActive(true);
+        }
+        
     }
 
     public override void OnMouseExit()

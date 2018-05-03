@@ -48,6 +48,7 @@ public class NPC : Interactable {
     //navMeshSpeeds -- SHOULD JUST LINK THIS TO MYMUSIC.TEMPO
     public float moveSpeedInterval, moveSpeedOriginal;
     public float holdTimer = 0, holdTimerWait = 0.25f;
+    int setCounter = 0; 
 
     //for note up or down
     protected bool upOrDown, playerHasChosen, clickedButton;
@@ -298,9 +299,18 @@ public class NPC : Interactable {
                     else
                     {
                         //no no sound effect
+                        setCounter++;
                         myMusic.primarySource.PlayOneShot(tpc.noNo[0], 1f);
                     }
                 }
+            }
+
+            if(setCounter > 2)
+            {
+                tpc.talking = false;
+                interactable = true;
+                playerSettingMove = false;
+                setCounter = 0;
             }
            
         }
@@ -319,6 +329,7 @@ public class NPC : Interactable {
         else
         {
             navMeshAgent.isStopped = false;
+            animator.SetBool("idle", false);
             animator.SetBool("walking", true);
             if (moveCounter < (movementPoints.Count - 1))
             {

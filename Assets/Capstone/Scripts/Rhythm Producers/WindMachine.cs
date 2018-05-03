@@ -52,6 +52,7 @@ public class WindMachine : RhythmProducer {
             if (Input.GetMouseButtonDown(1))
             {
                 DropObject();
+                
             }
         }
 
@@ -159,6 +160,7 @@ public class WindMachine : RhythmProducer {
         transform.localPosition = Vector3.zero;
         transform.localEulerAngles = Vector3.zero;
 
+        tpc.canUseSeed = false;
         tpc.isHoldingSomething = true;
         playerHolding = true;
         interactable = false;
@@ -218,6 +220,7 @@ public class WindMachine : RhythmProducer {
         transform.SetParent(null);
 
         tpc.isHoldingSomething = false;
+        tpc.canUseSeed = true;
         playerHolding = false;
         interactable = true;
     }

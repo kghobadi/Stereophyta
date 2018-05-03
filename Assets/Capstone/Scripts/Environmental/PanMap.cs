@@ -22,7 +22,7 @@ public class PanMap : MonoBehaviour {
         {
             if (Vector3.Distance(transform.position, nextPoint) > 1)
             {
-                transform.position = Vector3.MoveTowards(transform.position, nextPoint, moveSpeed * Time.deltaTime);
+                transform.position = Vector3.Lerp(transform.position, nextPoint, moveSpeed * Time.deltaTime);
             }
             else
             {
