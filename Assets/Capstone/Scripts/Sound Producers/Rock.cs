@@ -53,14 +53,8 @@ public class Rock : SoundProducer
 
     }
 
-    public override void Selection_Three()
+    public override void Selection_One()
     {
-        if (playerClicked)
-        {
-            base.Selection_Three();
-
-        }
-
         playerHolding = true;
 
         //not part of drumset
@@ -83,10 +77,30 @@ public class Rock : SoundProducer
         DeactivateSelectionMenu();
 
         tpc.isHoldingSomething = true;
+        tpc.canUseSeed = false;
         playerHolding = true;
         interactable = false;
     }
 
+    //shift note up
+    public override void Selection_Two()
+    {
+        //shift note up stored in selection one
+        soundSources[currentNote].transform.localScale *= 0.5f;
+        base.Selection_One();
+        soundSources[currentNote].transform.localScale *= 2;
+    }
+
+    //shift note down
+    public override void Selection_Three()
+    {
+        //shift note down stored in selection two
+        soundSources[currentNote].transform.localScale *= 0.5f;
+        base.Selection_Two();
+        soundSources[currentNote].transform.localScale *= 2;
+    }
+
+   
 
     //Called when player is holding the windMachine and right clicks to drop
     public void DropObject()
@@ -105,6 +119,7 @@ public class Rock : SoundProducer
             transform.Translate(0, -1, 0);
         }
 
+        tpc.canUseSeed = true;
         tpc.isHoldingSomething = false;
         playerHolding = false;
         interactable = true;

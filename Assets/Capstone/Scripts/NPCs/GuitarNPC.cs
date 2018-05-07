@@ -22,6 +22,15 @@ public class GuitarNPC : NPC {
         triRipple.Stop();
     }
 
+    public override void Update()
+    {
+        base.Update();
+        if (myLanguage.talking)
+        {
+            triRipple.Stop();
+        }
+    }
+
     //fills up lists of nearby guitar plants and windmachines
     public override void LookForWork()
     {

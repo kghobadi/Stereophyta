@@ -210,19 +210,20 @@ public class HornNPC : NPC {
                     {
 
                         int randomSeed = Random.Range(0, 100);
-
-                        if(randomSeed < 50)
-                        {
-                            myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().planting = true;
-                            currentSeedCount--;
-                            plantedSeed = true;
-                        }
-                        else
-                        {
-                            //play this seeds note
-                            myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().seedSource.PlayOneShot
-                                (myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().plantNote);
-                            myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>().notesPlaying.Emit(10);
+                        fruitSeedNoInv theSeed = myMusic.seedSpots[p].GetComponentInChildren<fruitSeedNoInv>();
+                        if(theSeed != null) {
+                            if (randomSeed < 50)
+                            {
+                                theSeed.planting = true;
+                                currentSeedCount--;
+                                plantedSeed = true;
+                            }
+                            else
+                            {
+                                //play this seeds note
+                                theSeed.seedSource.PlayOneShot(theSeed.plantNote);
+                                theSeed.notesPlaying.Emit(10);
+                            }
                         }
                     }
                 }

@@ -32,7 +32,10 @@ public class WindMachine : RhythmProducer {
 
         interactable = true;
         rotationSpeed = 1;
-        
+
+
+        disappearTimer = disappearTimerTotal;
+        rhythmIndicator.gameObject.SetActive(false);
 
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
@@ -49,6 +52,7 @@ public class WindMachine : RhythmProducer {
             if (Input.GetMouseButtonDown(1))
             {
                 DropObject();
+                
             }
         }
 
@@ -94,7 +98,37 @@ public class WindMachine : RhythmProducer {
                 showRhythm = false;
             }
         }
-        
+
+        if ((tpc.talking || selectionMenu.enabled) && playerClicked)
+        {
+            rhythmIndicator.gameObject.SetActive(true);
+            disappearTimer = disappearTimerTotal;
+        }
+
+        if (rhythmIndicator.gameObject.activeSelf)
+        {
+            disappearTimer -= Time.deltaTime;
+            if (disappearTimer < 0)
+            {
+                rhythmIndicator.gameObject.SetActive(false);
+                disappearTimer = disappearTimerTotal;
+            }
+        }
+
+    }
+
+
+    public override void OnMouseOver()
+    {
+        base.OnMouseOver();
+        disappearTimer = disappearTimerTotal;
+        rhythmIndicator.gameObject.SetActive(true);
+    }
+
+    public override void OnMouseExit()
+    {
+        base.OnMouseExit();
+        rhythmIndicator.gameObject.SetActive(false);
     }
 
     public override void AudioRhythm()
@@ -126,6 +160,7 @@ public class WindMachine : RhythmProducer {
         transform.localPosition = Vector3.zero;
         transform.localEulerAngles = Vector3.zero;
 
+        tpc.canUseSeed = false;
         tpc.isHoldingSomething = true;
         playerHolding = true;
         interactable = false;
@@ -155,6 +190,7 @@ public class WindMachine : RhythmProducer {
             windSpeed += 2;
             timeScale += 1;
             rotationSpeed *= 2;
+            rhythmIndicator.speed += 0.25f;
 
             if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(InteractSound);
@@ -170,6 +206,7 @@ public class WindMachine : RhythmProducer {
             windSpeed -= 2;
             timeScale -= 1;
             rotationSpeed *= 0.5f;
+            rhythmIndicator.speed -= 0.25f;
 
             if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(selectLower);
@@ -183,6 +220,7 @@ public class WindMachine : RhythmProducer {
         transform.SetParent(null);
 
         tpc.isHoldingSomething = false;
+        tpc.canUseSeed = true;
         playerHolding = false;
         interactable = true;
     }

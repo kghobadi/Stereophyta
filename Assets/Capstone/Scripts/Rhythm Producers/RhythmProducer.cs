@@ -6,14 +6,18 @@ public abstract class RhythmProducer : Interactable {
     public AudioClip[] basicBeats;
     protected AudioSource beatSource;
 
+    public Animator rhythmIndicator;
+
     protected bool playedAudio, showRhythm;
 
     public int timeScale;
 
+    protected float disappearTimer, disappearTimerTotal = 1f;
+
     public virtual void Awake()
     {
+        
         SimpleClock.ThirtySecond += OnThirtySecond;
-
         //interact sprites
         for (int i = 1; i < 4; i++)
         {
@@ -68,13 +72,17 @@ public abstract class RhythmProducer : Interactable {
         }
 
     }
+
     // Update is called once per frame
     public override void Update () {
         base.Update();
         //may need to qualify this with and if statement in override
         AudioRhythm();
-        
-	}
+
+      
+
+    }
+
 
     public virtual void AudioRhythm()
     {
@@ -99,18 +107,23 @@ public abstract class RhythmProducer : Interactable {
         switch (timeScale)
         {
             case 0:
+                rhythmIndicator.speed = 0.5f;
                 beatSource.PlayScheduled(SimpleClock.AtNextMeasure());
                 break;
             case 1:
+                rhythmIndicator.speed = 0.75f;
                 beatSource.PlayScheduled(SimpleClock.AtNextQuarter());
                 break;
             case 2:
+                rhythmIndicator.speed = 1f;
                 beatSource.PlayScheduled(SimpleClock.AtNextEighth());
                 break;
             case 3:
+                rhythmIndicator.speed = 1.25f;
                 beatSource.PlayScheduled(SimpleClock.AtNextSixteenth());
                 break;
             case 4:
+                rhythmIndicator.speed = 1.5f;
                 beatSource.PlayScheduled(SimpleClock.AtNextThirtySecond());
                 break;
         }

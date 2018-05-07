@@ -5,11 +5,8 @@ using UnityEngine;
 public class Rain : MonoBehaviour
 {
     GameObject _player;
-    ThirdPersonController tpc;
 
     ParticleSystem rainEffect;
-
-    private GameObject bed;
 
     BoxCollider rainTrigger;
 
@@ -21,14 +18,76 @@ public class Rain : MonoBehaviour
 
     AudioSource rainSource;
 
-    Plant currentPlant;
+    public List<ParticleCollisionEvent> collisionEvents;
+
+    public List<GameObject> rainSplashes;
+
+    protected bool playedAudio, showRhythm, onClock;
+
+    public int timeScale;
+
+    public virtual void OnDestroy()
+    {
+        SimpleClock.ThirtySecond -= OnThirtySecond;
+    }
+
+    public virtual void OnThirtySecond(BeatArgs e)
+    {
+        switch (timeScale)
+        {
+            case 0:
+                if (e.TickMask[TickValue.Measure])
+                {
+                    // rhythm creation / beat visual
+                    showRhythm = true;
+                }
+                break;
+            case 1:
+                if (e.TickMask[TickValue.Quarter])
+                {
+                    // rhythm creation / beat visual
+                    showRhythm = true;
+                }
+                break;
+            case 2:
+                if (e.TickMask[TickValue.Eighth])
+                {
+                    // rhythm creation / beat visual
+                    showRhythm = true;
+                }
+                break;
+            case 3:
+                if (e.TickMask[TickValue.Sixteenth])
+                {
+                    // rhythm creation / beat visual
+                    showRhythm = true;
+                }
+                break;
+            case 4:
+                if (e.TickMask[TickValue.ThirtySecond])
+                {
+                    // rhythm creation / beat visual
+                    showRhythm = true;
+                }
+                break;
+        }
+
+    }
 
     void Start()
     {
+        timeScale = Random.Range(0, 5);
+        
         _player = GameObject.FindGameObjectWithTag("Player");
-        tpc = _player.GetComponent<ThirdPersonController>();
 
+        for (int i = 1; i < 17; i++)
+        {
+            rainSplashes.Add(transform.GetChild(i).gameObject);
+        }
+
+        
         rainEffect = GetComponent<ParticleSystem>();
+        collisionEvents = new List<ParticleCollisionEvent>();
 
         lifeTime = Random.Range(40, 100);
         moveSpeed = Random.Range(2.5f, 6.0f);
@@ -39,9 +98,106 @@ public class Rain : MonoBehaviour
         cloud.eulerAngles = new Vector3(0, Random.Range(0, 360), 0);
 
         rainSource = GetComponent<AudioSource>();
+        SwitchTimeScale();
     }
     
+
+    void OnParticleCollision(GameObject other)
+    {
+        int numCollisionEvents = rainEffect.GetCollisionEvents(other, collisionEvents);
+        
+        int i = 0;
+
+        while (i < numCollisionEvents)
+        {
+            if(i < 16)
+            {
+                if (other.tag == "Ground")
+                {
+                    Vector3 pos = collisionEvents[i].intersection;
+                    rainSplashes[i].transform.position = pos;
+                    RainSplash thisSplash = rainSplashes[i].GetComponent<RainSplash>();
+                    thisSplash.StartCoroutine(thisSplash.Splash());
+                }
+            }
+            
+            i++;
+        }
+    }
+
     void Update()
+    {
+        RandomTravel();
+        if(Vector3.Distance(transform.position, _player.transform.position) < 150 && !onClock)
+        {
+            SimpleClock.ThirtySecond += OnThirtySecond;
+            onClock = true;
+        }
+        else if(Vector3.Distance(transform.position, _player.transform.position) > 155 && onClock)
+        {
+            SimpleClock.ThirtySecond -= OnThirtySecond;
+            onClock = false;
+        }
+        if (showRhythm )
+        {
+            rainEffect.Play();
+            showRhythm = false;
+        }
+    }
+
+    void SwitchTimeScale()
+    {
+        ParticleSystem.MainModule mainRain = rainEffect.main;
+        ParticleSystem.EmissionModule rainEmitter = rainEffect.emission;
+
+        switch (timeScale)
+        {
+            //can mess with speeds here to vary it up even more!
+            //should also vary number of particles emitted since faster rhythms are overburdened
+            case 0:
+                mainRain.simulationSpeed = 0.5f;
+                rainEmitter.rateOverTime = 12;
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().oneNotes;
+                }
+                break;
+            case 1:
+                mainRain.simulationSpeed = 1f;
+                rainEmitter.rateOverTime = 10;
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().twoNotes;
+                }
+                break;
+            case 2:
+                mainRain.simulationSpeed = 2f;
+                rainEmitter.rateOverTime = 8;
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().threeNotes;
+                }
+                break;
+            case 3:
+                mainRain.simulationSpeed = 2f;
+                rainEmitter.rateOverTime = 6;
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().fourNotes;
+                }
+                break;
+            case 4:
+                mainRain.simulationSpeed = 2f;
+                rainEmitter.rateOverTime = 4;
+                for (int i = 0; i < rainSplashes.Count; i++)
+                {
+                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().fiveNotes;
+                }
+                break;
+        }
+    }
+
+    void RandomTravel()
     {
         timer += Time.deltaTime;
 
@@ -66,43 +222,6 @@ public class Rain : MonoBehaviour
 
         if ((randomRotateDirection > 0 && transform.localScale.x < 2) || (randomRotateDirection < 0 && transform.localScale.x > 0.4f))
             transform.localScale += Vector3.one * Time.deltaTime * moveSpeed * 0.0025f * randomRotateDirection;
-
-
-    }
-
-    //void OnTriggerStay(Collider other)
-    //{
-    //    if (other.gameObject.tag == "Plant")
-    //    {
-    //        currentPlant = other.gameObject.GetComponent<Plant>();
-    //        if (currentPlant.sapling)
-    //        {
-    //            currentPlant.waterTimer += Time.deltaTime;
-    //            if(currentPlant.waterTimer > currentPlant.waterNecessary)
-    //            {
-    //                currentPlant.GrowPlant();
-    //                currentPlant.waterTimer = 0;
-    //            }
-    //        }
-
-    //        if (!currentPlant.sapling ) //also check if its missing fruitSeeds
-    //        {
-    //            currentPlant.regenTimer += Time.deltaTime;
-    //            if (currentPlant.regenTimer > currentPlant.regenNecessary)
-    //            {
-    //                currentPlant.GrowFruitSeed();
-    //                currentPlant.regenTimer = 0;
-    //            }
-    //        }
-    //    }
-    //}
-
-    public void RainType()
-    {
-        ParticleSystem.MainModule rainModule = rainEffect.main;
-        ParticleSystem.EmissionModule rainEmitter = rainEffect.emission;
-       
-        rainEffect.Play();
     }
 
 }

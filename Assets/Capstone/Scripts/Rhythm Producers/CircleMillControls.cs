@@ -31,15 +31,24 @@ public class CircleMillControls : Interactable {
     //direction lever boolean (starts as 'positive')
     public bool dirPositive = true;
 
+    public Animator rhythmIndicator;
+    float disappearTimer, disappearTimerTotal = 1f;
+
     public override void Start()
     {
         base.Start();
         interactable = true;
+        rhythmIndicator.gameObject.SetActive(false);
+        disappearTimer = disappearTimerTotal;
 
         controlsAudio = GetComponent<AudioSource>();
         camControl = cammy.GetComponent<CameraController>();
-        zoomedOutPosO = camControl.zoomedOutPos;
-        zoomedOutRotO = camControl.zoomedOutRot;
+        if(camControl != null)
+        {
+            zoomedOutPosO = camControl.zoomedOutPos;
+            zoomedOutRotO = camControl.zoomedOutRot;
+        }
+        
 
         //interact sprites
         for (int i = 1; i < 4; i++)
@@ -56,25 +65,64 @@ public class CircleMillControls : Interactable {
         rhythmState = 2;
         rotationSpeed = 30f;
         rhythmLever.transform.localEulerAngles = new Vector3(0, 0, 0);
+        rhythmIndicator.speed = 1f;
     }
 
     public override void Update()
     {
         base.Update();
 
-        if(Vector3.Distance(_player.transform.position, transform.position) < 30)
+
+        if((tpc.talking || selectionMenu.enabled) && playerClicked)
         {
-            camControl.zoomedOutPos = new Vector3(-10, 30, -10);
-            camControl.zoomedOutRot = new Vector3(65, 45, 0);
+            if (camControl != null)
+            {
+                camControl.zoomedOutPos = new Vector3(-10, 30, -10);
+                camControl.zoomedOutRot = new Vector3(65, 45, 0);
+            }
+
+            rhythmIndicator.gameObject.SetActive(true);
+            disappearTimer = disappearTimerTotal;
         }
-        else if (Vector3.Distance(_player.transform.position, transform.position) > 35)
+        else
         {
-            camControl.zoomedOutPos = zoomedOutPosO;
-            camControl.zoomedOutRot = zoomedOutRotO;
+            if (camControl != null)
+            {
+                camControl.zoomedOutPos = zoomedOutPosO;
+                camControl.zoomedOutRot = zoomedOutRotO;
+            }
+        }
+
+        if (rhythmIndicator.gameObject.activeSelf)
+        {
+            disappearTimer -= Time.deltaTime;
+            if (disappearTimer < 0)
+            {
+                rhythmIndicator.gameObject.SetActive(false);
+                disappearTimer = disappearTimerTotal;
+            }
         }
 
         //rotates the wind turbine
         windTurbine.transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+    }
+    public override void OnMouseEnter()
+    {
+        base.OnMouseEnter();
+        rhythmIndicator.gameObject.SetActive(true);
+    }
+
+    public override void OnMouseOver()
+    {
+        base.OnMouseOver();
+        disappearTimer = disappearTimerTotal;
+        rhythmIndicator.gameObject.SetActive(true);
+    }
+
+    public override void OnMouseExit()
+    {
+        base.OnMouseExit();
+        rhythmIndicator.gameObject.SetActive(false);
     }
 
     //Switch Wind Direction
@@ -89,8 +137,8 @@ public class CircleMillControls : Interactable {
         if (dirPositive)
         {
             if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(selectLower);
-            dirLever.transform.localEulerAngles = new Vector3(0, -30, 0);
+                controlsAudio.PlayOneShot(selectLower, 1f);
+            dirLever.transform.localEulerAngles = new Vector3(0, 0, -60);
             dirPositive = false;
             //change NPC direction
                 if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
@@ -103,8 +151,8 @@ public class CircleMillControls : Interactable {
         else
         {
             if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(InteractSound);
-            dirLever.transform.localEulerAngles = new Vector3(0, 30, 0);
+                controlsAudio.PlayOneShot(InteractSound, 1f);
+            dirLever.transform.localEulerAngles = new Vector3(0, 0, 60);
             dirPositive = true;
             //change NPC direction
                 if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
@@ -136,8 +184,9 @@ public class CircleMillControls : Interactable {
 
 
             if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(InteractSound);
+                controlsAudio.PlayOneShot(InteractSound, 1f);
         }
+        rhythmIndicator.speed += 0.25f;
     }
 
     //Decrease Rhythm
@@ -157,8 +206,9 @@ public class CircleMillControls : Interactable {
             }
 
             if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(selectLower);
+                controlsAudio.PlayOneShot(selectLower, 1f);
         }
+        rhythmIndicator.speed -= 0.25f;
     }
 
     //These rhythm functions are stored separately because they can be called in dif. ways based on if dirPositive = true or not
@@ -167,7 +217,7 @@ public class CircleMillControls : Interactable {
     {
         windCircles.windSpeed += rhythmInterval;
         rotationSpeed += rhythmInterval;
-        rhythmLever.transform.localEulerAngles += new Vector3(30, 0, 0);
+        rhythmLever.transform.localEulerAngles -= new Vector3(0, 0, 30);
 
         //adjusts NPC circle men speeds
        
@@ -187,7 +237,7 @@ public class CircleMillControls : Interactable {
     {
         windCircles.windSpeed -= rhythmInterval;
         rotationSpeed -= rhythmInterval;
-        rhythmLever.transform.localEulerAngles += new Vector3(30, 0, 0);
+        rhythmLever.transform.localEulerAngles -= new Vector3(0, 0, 30);
 
         if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
         {
@@ -204,7 +254,7 @@ public class CircleMillControls : Interactable {
     {
         windCircles.windSpeed -= rhythmInterval;
         rotationSpeed -= rhythmInterval;
-        rhythmLever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+        rhythmLever.transform.localEulerAngles += new Vector3(0, 0, 30);
 
         //adjusts NPC circle men speeds
       
@@ -222,7 +272,7 @@ public class CircleMillControls : Interactable {
     {
         windCircles.windSpeed += rhythmInterval;
         rotationSpeed += rhythmInterval;
-        rhythmLever.transform.localEulerAngles -= new Vector3(30, 0, 0);
+        rhythmLever.transform.localEulerAngles += new Vector3(0, 0, 30);
 
         //adjusts NPC circle men speeds
 

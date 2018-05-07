@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ThirdPersonController : MonoBehaviour
 {
@@ -40,7 +41,7 @@ public class ThirdPersonController : MonoBehaviour
     public int followerCountMax;
 
     public List<GameObject> seedLine = new List<GameObject>();
-    public int seedLineMax;
+    float scrollTimer, scrollTimerTotal = 0.1f;
 
     //Store the current audio mixer info so when you plant stuff and drop off followers, they adjust to where player is on map
     public AudioMixerSnapshot currentAudioMix;
@@ -134,9 +135,23 @@ public class ThirdPersonController : MonoBehaviour
                         || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
                         || hit.transform.gameObject.tag == "Rock" || hit.transform.gameObject.tag == "NPC"))
                     {
-                        targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                        walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
-                        isMoving = true;
+                        if(hit.transform.gameObject.tag == "NPC" && hit.transform.gameObject.GetComponent<Language>().questActive)
+                        {
+                            targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
+                            walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
+                            isMoving = true;
+                        }
+                        else if(hit.transform.gameObject.tag == "NPC" && !hit.transform.gameObject.GetComponent<Language>().questActive)
+                        {
+                            //nothing
+                        }
+                        else
+                        {
+                            targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
+                            walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
+                            isMoving = true;
+                        }
+                        
 
                     }
                     else
@@ -186,31 +201,32 @@ public class ThirdPersonController : MonoBehaviour
                 }
             }
 
-            //Check for spacebar to open PlayerCommand Menu
-            if (Input.GetKeyDown(KeyCode.Space) && playerCommandsMenu.enabled == false)
+            //Restart game
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                // enable player commands 
-                playerCommandsMenu.enabled = true;
+                SceneManager.LoadScene("Menu");
             }
 
+            scrollTimer -= Time.deltaTime;
             //Input map for Mousewheel scroll to change seeds
             //if scroll up 
-            if (Input.GetAxis("Mouse ScrollWheel") > 0 && seedLine.Count > 1)
+            if (Input.GetAxis("Mouse ScrollWheel") > 0 && seedLine.Count > 1 && scrollTimer <0)
             {
                 GameObject seedToMove = seedLine[0];
                 seedLine.Remove(seedToMove);
                 seedLine.Insert(seedLine.Count, seedToMove);
 
+                scrollTimer = scrollTimerTotal;
             }
             //if scroll down 
-            else if (Input.GetAxis("Mouse ScrollWheel") < 0 && seedLine.Count > 1)
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0 && seedLine.Count > 1 && scrollTimer < 0)
             {
                 GameObject seedToMove = seedLine[seedLine.Count - 1];
                 int index = seedLine.Count - 1;
                 // move all seed positions backward in line 
                 seedLine.RemoveAt(index);
                 seedLine.Insert(0, seedToMove);
-
+                scrollTimer = scrollTimerTotal;
             }
 
             //Check if we are moving and transition animation controller
@@ -305,15 +321,19 @@ public class ThirdPersonController : MonoBehaviour
     void MovePlayer()
     {
         //first calculate rotation and look
+        targetPosition = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
+
         float currentDist = Vector3.Distance(transform.position, targetPosition);
 
         //this is a bit finnicky with char controller so may need to continuously set it 
-        if (currentDist >= 0.3f)
+        if (currentDist >= 0.5f)
         {
             transform.LookAt(targetPosition);
 
             //then set movement
             Vector3 movement = new Vector3(0, 0, currentSpeed);
+
+            transform.localEulerAngles = new Vector3(0, transform.localEulerAngles.y, transform.localEulerAngles.z);
 
             movement = transform.rotation * movement;
 
@@ -341,7 +361,10 @@ public class ThirdPersonController : MonoBehaviour
         while (i < hitColliders.Length)
         {
             //check to see if obj is plant or rock
-            if (hitColliders[i].gameObject.tag == "Plant" || hitColliders[i].gameObject.tag == "Rock")
+            if (hitColliders[i].gameObject.tag == "Plant" || hitColliders[i].gameObject.tag == "Rock" || 
+                hitColliders[i].gameObject.tag == "NPC" || hitColliders[i].gameObject.tag == "RainSplash" 
+                || hitColliders[i].gameObject.tag == "Ambient" || hitColliders[i].gameObject.tag == "Animal" 
+                || hitColliders[i].gameObject.tag == "Seed")
             {
                 //check distance and add to list
                 float distanceAway = Vector3.Distance(hitColliders[i].transform.position, transform.position);

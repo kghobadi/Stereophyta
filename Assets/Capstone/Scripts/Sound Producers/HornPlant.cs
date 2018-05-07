@@ -35,7 +35,7 @@ public class HornPlant : SoundProducer {
         fruitSeedNoInv newFruitSeed = fruitSeedClone.GetComponent<fruitSeedNoInv>();
         newFruitSeed.plantNote = musicalNotes[currentNote];
 
-        if (playerClick || playerClicked)
+        if (playerClicked)
         {
             newFruitSeed.pickedByPlayer = true;
         }
@@ -97,7 +97,7 @@ public class HornPlant : SoundProducer {
     {
         if (!audioSource.isPlaying)
         {
-            audioSource.Play();
+            audioSource.PlayOneShot(currentSound);
             soundSources[currentNote].GetComponent<Animator>().SetTrigger("playing");
 
             if (notesPlaying != null)
@@ -134,13 +134,8 @@ public class HornPlant : SoundProducer {
 
     public override void OnDisable()
     {
-        StopAllCoroutines();
+        base.OnDisable();
 
         transform.localScale = origScale;
-        //turn off current soundsource
-        if (soundSources[currentNote].activeSelf)
-        {
-            soundSources[currentNote].GetComponent<Animator>().SetBool("grown", false);
-        }
     }
 }

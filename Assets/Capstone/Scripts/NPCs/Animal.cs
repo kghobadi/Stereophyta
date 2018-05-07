@@ -200,19 +200,65 @@ public class Animal : Interactable {
         
     }
 
-    ////Called as a command to NPCs who are FOLLOWING or PLAYING
-    //public virtual void GoHome()
-    //{
-    //    Debug.Log("going home");
+    //Called when setting a follower to Labor in a new area
+    void FindNewPath()
+    {
+        //empty current pathing points
+        chosenWaypoint = null;
+       
+        //temp list for storing waypoints & distance check size
+        List < GameObject > nearbyWaypoints = new List<GameObject>();
+        float pathFindingDistance = 50f;
+        float closestDistance = 50f;
         
-    //    //reset move points
-    //    moveCounter = 0;
-    //    movementPointsContainer.SetParent(null);
-    //    movementPointsContainer.position = homePosition;
-    //    movementPointsContainer.localEulerAngles = homeRotation;
-    //    currentState = NPCState.MOVING;
-    //    StartCoroutine(GreetPlayer());
-    //}
+        //Look for nearby waypoints with correct myMusic/myPath type 
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, pathFindingDistance);
+        int i = 0;
+        while (i < hitColliders.Length)
+        {
+            if (hitColliders[i].gameObject.tag == "Waypoint")
+            {
+                if (hitColliders[i].gameObject.GetComponent<Waypoint>().pathType.ToString() == "HORN")
+                    nearbyWaypoints.Add(hitColliders[i].gameObject);
+            }
+        }
+        //if there are waypoints, find the closest one
+        if (nearbyWaypoints.Count > 0)
+        {
+            for (int w = 0; w < nearbyWaypoints.Count; w++)
+            {
+                float currentDist = Vector3.Distance(transform.position, nearbyWaypoints[w].transform.position);
+                if (currentDist < closestDistance)
+                {
+                    closestDistance = currentDist;
+                    chosenWaypoint = nearbyWaypoints[w].transform;
+                }
+            }
+           
+            //using the closest waypoint, reset transform container and the pathing points
+            if (chosenWaypoint != null)
+            {
+                movementPointsContainer = chosenWaypoint.parent;
+                movementPoints.Clear();
+                //loops through children of container and adds them to list
+                for (int t = 0; t < movementPointsContainer.childCount; t++)
+                {
+                    movementPoints.Add(movementPointsContainer.GetChild(t));
+                }
+                //set movecounter to the right index, set destination
+                moveCounter = movementPoints.IndexOf(chosenWaypoint);
+                navMeshAgent.SetDestination(chosenWaypoint.position);
+                currentState = NPCState.MOVING;
+            }
+        }
+        //if no nearby paths, return home and say byebye
+        else
+        {
+            StartCoroutine(GreetPlayer());
+            DeactivateSelectionMenu();
+            SwitchSelectionButtons();
+        }
+    }
 
     //fills up lists of nearby plants and rocks
     public virtual void LookForFood()

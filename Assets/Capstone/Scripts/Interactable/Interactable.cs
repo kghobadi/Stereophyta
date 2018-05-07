@@ -18,6 +18,7 @@ public abstract class Interactable : MonoBehaviour
     //player refs
     protected GameObject _player; //player object
     protected GameObject cammy; // camera reference
+    protected RectTransform canvasRect;
     protected ThirdPersonController tpc; //player controller
     public GameObject rightArmObj; //where objects are held by player
 
@@ -56,10 +57,13 @@ public abstract class Interactable : MonoBehaviour
     //Canvas vars
     protected GameObject canvasObject;
     protected CanvasRaycaster graphicRaycaster;
-
+    //for player menu
+    protected Vector3 originalUiPos;
 
     public virtual void Start()
     {
+        canvasRect = GameObject.FindGameObjectWithTag("MainCanvas").GetComponent<RectTransform>();
+
         // player components
         _player = GameObject.FindGameObjectWithTag("Player"); //searches for Player
         tpc = _player.GetComponent<ThirdPersonController>();
@@ -85,6 +89,8 @@ public abstract class Interactable : MonoBehaviour
         {
             // get the menu object itself
             selectionMenu = GameObject.FindGameObjectWithTag("SelectionMenu").GetComponent<Image>();
+
+            originalUiPos = selectionMenu.gameObject.GetComponent<RectTransform>().position;
             //get the animator on it
             playerThoughtAnimator = selectionMenu.GetComponent<AnimateDialogue>();
             //store script ref
@@ -323,6 +329,7 @@ public abstract class Interactable : MonoBehaviour
     public virtual void DeactivateSelectionMenu()
     {
         // set images to null and turn buttons off.
+        selectionMenu.GetComponent<RectTransform>().position = originalUiPos;
         selectionMenu.enabled = false;
         graphicRaycaster.graphicsCastingOn = false;
         graphicRaycaster.hitWorld = false;
@@ -374,6 +381,18 @@ public abstract class Interactable : MonoBehaviour
                 selectionButtons.Add(selectionMenu.transform.GetChild(8).gameObject);
                 break;
         }
+    }
+
+    //move UI to where signpost is on screen
+    public virtual void CorrectUIPos(Transform worldObject, RectTransform uiObject, float xAdjust, float yAdjust)
+    {
+        Vector2 ViewportPosition = cammy.GetComponent<Camera>().WorldToViewportPoint(worldObject.position);
+        Vector2 WorldObject_ScreenPosition = new Vector2(
+        ((ViewportPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f) + xAdjust),
+        ((ViewportPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f) + yAdjust));
+
+        //now you can set the position of the ui element
+        uiObject.anchoredPosition = WorldObject_ScreenPosition;
     }
 
     //called when the script or object is disabled
