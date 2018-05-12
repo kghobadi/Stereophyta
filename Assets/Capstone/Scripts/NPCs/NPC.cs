@@ -555,6 +555,7 @@ public class NPC : Interactable {
                 if (currentState == NPCState.PLAYING)
                 {
                     myMusic.isPlaying = false;
+                    SwitchSelectionButtons();
                 }
                 //start talkin'
                 StopAllCoroutines();

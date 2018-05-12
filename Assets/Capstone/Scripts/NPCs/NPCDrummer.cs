@@ -24,9 +24,10 @@ public class NPCDrummer : NPC
     public LayerMask mask;
 
     public Animator rhythmIndicator;
+    SpriteRenderer rhythmSR;
     float disappearTimer, disappearTimerTotal = 1f;
 
-    bool startSounds, setDrumPosition; // use this in update
+    bool startSounds, setDrumPosition, nearRain; // use this in update
 
     public override void Start()
     {
@@ -78,7 +79,8 @@ public class NPCDrummer : NPC
         myMusic.isPlaying = true;
 
         disappearTimer = disappearTimerTotal;
-        rhythmIndicator.gameObject.SetActive(false);
+        rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
+        rhythmSR.enabled = false;
     }
 
     public override void Update()
@@ -163,6 +165,8 @@ public class NPCDrummer : NPC
         if (currentState == NPCState.PLAYING)
         {
             animator.SetBool("walking", false);
+            animator.SetBool("working", true);
+            animator.SetBool("idle", false);
             //turn on drum beat
             drumCollision.gameObject.SetActive(true);
             //readjust body collider
@@ -190,37 +194,38 @@ public class NPCDrummer : NPC
                 }
 
             GameObject[] rainObjects = GameObject.FindGameObjectsWithTag("Rain");
-            if(rainObjects.Length > 0)
+            if (rainObjects.Length > 0)
             {
-                bool nearRain = false;
-                for(int i = 0; i < rainObjects.Length; i++)
+                int rainCounter = 0;
+                for (int i = 0; i < rainObjects.Length; i++)
                 {
-                    if(Vector3.Distance(transform.position, rainObjects[i].transform.position) < 150)
+                    if (Vector3.Distance(transform.position, rainObjects[i].transform.position) < 150 && !nearRain)
                     {
-                        myMusic.isPlaying = false;
+                        myMusic.primaryTempo = Random.Range(0, 2);
                         nearRain = true;
+                        rainCounter++;
+                    }
+                    if(rainCounter == 0)
+                    {
+                        nearRain = false;
                     }
                 }
-                if (!nearRain && !playerClicked)
-                {
-                    myMusic.isPlaying = true;
-                }
             }
-            
+
         }
 
         if (selectionMenu.enabled && playerClicked && currentState == NPCState.PLAYING)
         {
-            rhythmIndicator.gameObject.SetActive(true);
+            rhythmSR.enabled = true;
             disappearTimer = disappearTimerTotal;
         }
 
-        if (rhythmIndicator.gameObject.activeSelf)
+        if (rhythmSR.enabled)
         {
             disappearTimer -= Time.deltaTime;
             if (disappearTimer < 0)
             {
-                rhythmIndicator.gameObject.SetActive(false);
+                rhythmSR.enabled = false;
                 disappearTimer = disappearTimerTotal;
             }
         }
@@ -235,7 +240,7 @@ public class NPCDrummer : NPC
         if(currentState == NPCState.PLAYING)
         {
             disappearTimer = disappearTimerTotal;
-            rhythmIndicator.gameObject.SetActive(true);
+            rhythmSR.enabled = true;
         }
         
     }
@@ -243,7 +248,7 @@ public class NPCDrummer : NPC
     public override void OnMouseExit()
     {
         base.OnMouseExit();
-        rhythmIndicator.gameObject.SetActive(false);
+        rhythmSR.enabled = false;
     }
 
     //Called as a command to NPCs who are FOLLOWING or PLAYING
@@ -267,6 +272,7 @@ public class NPCDrummer : NPC
     void SwitchTempoVisuals()
     {
         ParticleSystem.MainModule beatParticlesModule = beatParticles.main;
+        rhythmIndicator.SetInteger("Level", myMusic.primaryTempo);
 
         switch (myMusic.primaryTempo)
         {
@@ -274,31 +280,26 @@ public class NPCDrummer : NPC
                 collisionSpeed = 16;
                 particleSpeed = 1.875f;
                 particleLifetime = 12f;
-                rhythmIndicator.speed = 0.5f;
                 break;
             case 1:
                 collisionSpeed = 8f;
                 particleSpeed = 3.75f;
                 particleLifetime = 6f;
-                rhythmIndicator.speed = 0.75f;
                 break;
             case 2:
                 collisionSpeed = 4f;
                 particleSpeed = 7.5f;
                 particleLifetime = 3f;
-                rhythmIndicator.speed = 1f;
                 break;
             case 3:
                 collisionSpeed = 2f;
                 particleSpeed = 15f;
                 particleLifetime = 1.5f;
-                rhythmIndicator.speed = 1.25f;
                 break;
             case 4:
                 collisionSpeed = 1f;
                 particleSpeed = 30f;
                 particleLifetime = 0.75f;
-                rhythmIndicator.speed = 1.5f;
                 break;
         }
         beatParticlesModule.startSpeed = particleSpeed;
@@ -348,6 +349,7 @@ public class NPCDrummer : NPC
     public override void Selection_Two()
     {
         menuScript.clickTimer = 0f;
+        clickedButton = false;
         //if already following, this is the Labor command. Remove follower 
         if (lastState == NPCState.FOLLOWING && !clickedButton)
         {
@@ -357,13 +359,13 @@ public class NPCDrummer : NPC
             DeactivateSelectionMenu();
         }
         //Stop playing music while PLAYING
-        else if (lastState == NPCState.PLAYING && myMusic.isPlaying && !clickedButton)
+        else if ((lastState == NPCState.PLAYING || currentState == NPCState.PLAYING) && myMusic.isPlaying && !clickedButton)
         {
             myMusic.isPlaying = false;
             clickedButton = true;
         }
         //Start playing music while PLAYING
-        else if (lastState == NPCState.PLAYING && !myMusic.isPlaying && !clickedButton)
+        else if ((lastState == NPCState.PLAYING || currentState == NPCState.PLAYING) && !myMusic.isPlaying && !clickedButton)
         {
             myMusic.isPlaying = true;
             clickedButton = true;
@@ -416,13 +418,13 @@ public class NPCDrummer : NPC
             selectionImages = followingSelectionImages;
             selectionCounter = 2;
         }
-        else if (lastState == NPCState.PLAYING && myMusic.isPlaying)
+        else if ((lastState == NPCState.PLAYING || currentState == NPCState.PLAYING) && myMusic.isPlaying)
         {
             selectionImages = laborSelectionImages;
             selectionImages[1].buttonImages = stopPlayingMusic;
             selectionCounter = 4;
         }
-        else if (lastState == NPCState.PLAYING && !myMusic.isPlaying)
+        else if ((lastState == NPCState.PLAYING || currentState == NPCState.PLAYING) && !myMusic.isPlaying)
         {
             selectionImages = laborSelectionImages;
             selectionImages[1].buttonImages = startPlayingMusic;

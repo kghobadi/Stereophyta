@@ -70,6 +70,8 @@ public class PianoMonkNPC : NPC {
     {
         //wait here a moment
         animator.SetBool("walking", false);
+        animator.SetBool("idle", false);
+        animator.SetBool("working", true);
         squareRipples.Play();
         yield return new WaitForSeconds(waitingTime);
 

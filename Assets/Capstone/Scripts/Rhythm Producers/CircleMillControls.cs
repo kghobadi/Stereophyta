@@ -32,13 +32,15 @@ public class CircleMillControls : Interactable {
     public bool dirPositive = true;
 
     public Animator rhythmIndicator;
+    SpriteRenderer rhythmSR;
     float disappearTimer, disappearTimerTotal = 1f;
 
     public override void Start()
     {
         base.Start();
         interactable = true;
-        rhythmIndicator.gameObject.SetActive(false);
+        rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
+        rhythmSR.enabled = false;
         disappearTimer = disappearTimerTotal;
 
         controlsAudio = GetComponent<AudioSource>();
@@ -63,9 +65,9 @@ public class CircleMillControls : Interactable {
 
         //set rhythm states
         rhythmState = 2;
+        rhythmIndicator.SetInteger("Level", rhythmState);
         rotationSpeed = 30f;
         rhythmLever.transform.localEulerAngles = new Vector3(0, 0, 0);
-        rhythmIndicator.speed = 1f;
     }
 
     public override void Update()
@@ -81,7 +83,7 @@ public class CircleMillControls : Interactable {
                 camControl.zoomedOutRot = new Vector3(65, 45, 0);
             }
 
-            rhythmIndicator.gameObject.SetActive(true);
+            rhythmSR.enabled = true;
             disappearTimer = disappearTimerTotal;
         }
         else
@@ -93,12 +95,12 @@ public class CircleMillControls : Interactable {
             }
         }
 
-        if (rhythmIndicator.gameObject.activeSelf)
+        if (rhythmSR.enabled)
         {
             disappearTimer -= Time.deltaTime;
             if (disappearTimer < 0)
             {
-                rhythmIndicator.gameObject.SetActive(false);
+                rhythmSR.enabled = false;
                 disappearTimer = disappearTimerTotal;
             }
         }
@@ -109,20 +111,20 @@ public class CircleMillControls : Interactable {
     public override void OnMouseEnter()
     {
         base.OnMouseEnter();
-        rhythmIndicator.gameObject.SetActive(true);
+        rhythmSR.enabled = true;
     }
 
     public override void OnMouseOver()
     {
         base.OnMouseOver();
         disappearTimer = disappearTimerTotal;
-        rhythmIndicator.gameObject.SetActive(true);
+        rhythmSR.enabled = true;
     }
 
     public override void OnMouseExit()
     {
         base.OnMouseExit();
-        rhythmIndicator.gameObject.SetActive(false);
+        rhythmSR.enabled = false;
     }
 
     //Switch Wind Direction
@@ -186,7 +188,7 @@ public class CircleMillControls : Interactable {
             if (!controlsAudio.isPlaying)
                 controlsAudio.PlayOneShot(InteractSound, 1f);
         }
-        rhythmIndicator.speed += 0.25f;
+        rhythmIndicator.SetInteger("Level", rhythmState);
     }
 
     //Decrease Rhythm
@@ -208,7 +210,7 @@ public class CircleMillControls : Interactable {
             if (!controlsAudio.isPlaying)
                 controlsAudio.PlayOneShot(selectLower, 1f);
         }
-        rhythmIndicator.speed -= 0.25f;
+        rhythmIndicator.SetInteger("Level", rhythmState);
     }
 
     //These rhythm functions are stored separately because they can be called in dif. ways based on if dirPositive = true or not
