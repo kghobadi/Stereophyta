@@ -19,6 +19,7 @@ public class GuitarNPC : NPC {
                    windMachine.transform.position.y, movementPoints[moveCounter].transform.position.z));
         
         triRipple.Stop();
+        myMusic.primaryTempo = 2;
     }
 
     public override void Update()

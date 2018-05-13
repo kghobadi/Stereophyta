@@ -523,6 +523,7 @@ public class NPC : Interactable {
         {
             animator.SetBool("idle", true);
             animator.SetBool("walking", false);
+            animator.SetBool("working", false);
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         }
 
@@ -634,6 +635,8 @@ public class NPC : Interactable {
             {
                 myMusic.primaryTempo++;
                 navMeshAgent.speed += moveSpeedInterval;
+                animator.speed *= 2;
+                waitingTime *= 2;
             }
                
             SetMove();
@@ -662,6 +665,8 @@ public class NPC : Interactable {
             {
                 myMusic.primaryTempo--;
                 navMeshAgent.speed -= moveSpeedInterval;
+                animator.speed *= 0.5f;
+                waitingTime *= 0.5f;
             }
             SetMove();
         }

@@ -37,7 +37,7 @@ public class NPCDrummer : NPC
         setUpSpot.SetActive(false);
         moveCounter = 0;
         animator.SetBool("walking", false);
-        animator.speed = 0.75f;
+        
 
         beatParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
         beatParticles.Stop();
@@ -77,6 +77,7 @@ public class NPCDrummer : NPC
         startSounds = true;
         currentState = NPCState.PLAYING;
         myMusic.isPlaying = true;
+        
 
         disappearTimer = disappearTimerTotal;
         rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
@@ -126,6 +127,7 @@ public class NPCDrummer : NPC
         }
         else if (currentState == NPCState.MOVING)
         {
+            animator.speed = 0.75f;
             interactable = false;
             navMeshAgent.isStopped = false;
             animator.SetBool("walking", true);
@@ -148,6 +150,7 @@ public class NPCDrummer : NPC
 
         if (currentState == NPCState.FOLLOWING)
         {
+            animator.speed = 0.75f;
             //set rock drum positions
             for (int i = 0; i < drumSet.Count; i++)
             {
@@ -280,26 +283,31 @@ public class NPCDrummer : NPC
                 collisionSpeed = 16;
                 particleSpeed = 1.875f;
                 particleLifetime = 12f;
+                animator.speed = 0.09375f;
                 break;
             case 1:
                 collisionSpeed = 8f;
                 particleSpeed = 3.75f;
                 particleLifetime = 6f;
+                animator.speed = 0.1875f;
                 break;
             case 2:
                 collisionSpeed = 4f;
                 particleSpeed = 7.5f;
                 particleLifetime = 3f;
+                animator.speed = 0.375f;
                 break;
             case 3:
                 collisionSpeed = 2f;
                 particleSpeed = 15f;
                 particleLifetime = 1.5f;
+                animator.speed = 0.75f;
                 break;
             case 4:
                 collisionSpeed = 1f;
                 particleSpeed = 30f;
                 particleLifetime = 0.75f;
+                animator.speed = 1.5f;
                 break;
         }
         beatParticlesModule.startSpeed = particleSpeed;

@@ -24,6 +24,12 @@ public class HornNPC : NPC {
 
     float emitTimer = 0f, emitTimeTotal = 0.5f;
 
+    public override void Start()
+    {
+        base.Start();
+        myMusic.primaryTempo = 2;
+    }
+
     public override void Update()
     {
         if(currentState == NPCState.LABOR)
