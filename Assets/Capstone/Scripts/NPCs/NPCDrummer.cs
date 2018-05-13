@@ -14,6 +14,7 @@ public class NPCDrummer : NPC
     Vector3 originalColliderPos;
 
     ParticleSystem beatParticles;
+    public ParticleSystem beatRipples;
     DrumCollider drumCollision;
     public Transform drumBackpack, drumPosContainer;
     public int backpackMax;
@@ -41,6 +42,7 @@ public class NPCDrummer : NPC
 
         beatParticles = transform.GetChild(1).GetComponent<ParticleSystem>();
         beatParticles.Stop();
+        beatRipples.Stop();
         drumCollision = transform.GetChild(2).GetComponent<DrumCollider>();
 
 
@@ -193,6 +195,7 @@ public class NPCDrummer : NPC
                     drumCollision.StartCoroutine(drumCollision.LerpScale(collisionSpeed));
                     
                     beatParticles.Play();
+                beatRipples.Play();
                     myMusic.showRhythm = false;
                 }
 

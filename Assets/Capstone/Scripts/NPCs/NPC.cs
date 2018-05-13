@@ -217,6 +217,9 @@ public class NPC : Interactable {
         //while NPC is delivering first lines of language
         if(currentState == NPCState.TALKING)
         {
+            animator.SetBool("working", false);
+            animator.SetBool("walking", false);
+            animator.SetBool("idle", true);
             navMeshAgent.isStopped = true;
             transform.position = talkingPos.position;
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
