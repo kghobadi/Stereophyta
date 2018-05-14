@@ -199,6 +199,18 @@ public class NPCDrummer : NPC
                     myMusic.showRhythm = false;
                 }
 
+            if (!myMusic.isPlaying)
+            {
+                animator.SetBool("idle", true);
+                animator.SetBool("working", false);
+               
+            }
+            else
+            {
+                animator.SetBool("idle", false);
+                animator.SetBool("working", true);
+            }
+
             GameObject[] rainObjects = GameObject.FindGameObjectsWithTag("Rain");
             if (rainObjects.Length > 0)
             {
