@@ -24,6 +24,8 @@ public class HornNPC : NPC {
 
     float emitTimer = 0f, emitTimeTotal = 0.5f;
 
+    float laborTimer = 0f, laborTimeTotal = 10f;
+
     public override void Start()
     {
         base.Start();
@@ -35,10 +37,18 @@ public class HornNPC : NPC {
         if(currentState == NPCState.LABOR)
         {
             emitTimer += Time.deltaTime;
+            laborTimer += Time.deltaTime;
             if(emitTimer > emitTimeTotal)
             {
                 handRipples.Emit(1);
                 emitTimer = 0f;
+            }
+            if(laborTimer > laborTimeTotal)
+            {
+                animator.SetBool("working", false);
+                animator.SetBool("walking", true);
+                SetMove();
+                
             }
         }
         else
@@ -51,6 +61,7 @@ public class HornNPC : NPC {
 
     public override void SetMove()
     {
+        laborTimer = 0;
         if (myLanguage.talking)
         {
             Debug.Log("talking");

@@ -9,7 +9,6 @@ public class CircleWind : Rhythm {
 
 	void Start () {
         windMill = transform.parent.gameObject;
-        windSpeed = 30f;
 	}
 	
 	// Update is called once per frame

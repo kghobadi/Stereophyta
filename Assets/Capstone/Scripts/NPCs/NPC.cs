@@ -243,7 +243,7 @@ public class NPC : Interactable {
                 else
                 {
                     SetMove();
-                    animator.SetBool("idle", false);
+                    animator.SetBool("walking", true);
                 }
             }
         }
@@ -639,7 +639,7 @@ public class NPC : Interactable {
                 myMusic.primaryTempo++;
                 navMeshAgent.speed += moveSpeedInterval;
                 animator.speed *= 2;
-                waitingTime *= 2;
+                waitingTime *= 0.5f;
             }
                
             SetMove();
@@ -669,7 +669,7 @@ public class NPC : Interactable {
                 myMusic.primaryTempo--;
                 navMeshAgent.speed -= moveSpeedInterval;
                 animator.speed *= 0.5f;
-                waitingTime *= 0.5f;
+                waitingTime *= 2f;
             }
             SetMove();
         }
