@@ -64,6 +64,9 @@ public class GuitarNPC : NPC {
 
     IEnumerator ChangeWind()
     {
+        animator.SetBool("working", true);
+        animator.SetBool("idle", false);
+        animator.SetBool("walking", false);
         //this only happens if the player isn't interacting with the device
         if (!windMachine.playerRotating && !windMachine.playerHolding)
         {
@@ -142,6 +145,8 @@ public class GuitarNPC : NPC {
     {
         //wait here a moment
         animator.SetBool("walking", false);
+        animator.SetBool("working", true);
+        animator.SetBool("idle", false);
         triRipple.Play();
 
         int flowerChangeCounter = 3;
@@ -199,5 +204,7 @@ public class GuitarNPC : NPC {
         //set new move pos
         SetMove();
         animator.SetBool("walking", true);
+        animator.SetBool("working", false);
+        animator.SetBool("idle", false);
     }
 }
