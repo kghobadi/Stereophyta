@@ -64,7 +64,7 @@ public class Language : MonoBehaviour
 
     //ref to sprite face, its animator and position
     public GameObject faceSprite;
-    public Animation facialExpressor;
+    public Animator facialExpressor;
 
     //timer for speaking, distance check for quest items
     public float waitTime = 0, waitTimeTotal = 0.5f, checkRadius;
@@ -144,6 +144,8 @@ public class Language : MonoBehaviour
         questActive = allDialogues[dialogueCounter].questLine;
 
         mainCam = Camera.main.GetComponent<CameraController>();
+
+        facialExpressor = faceSprite.GetComponent<Animator>();
     }
 
     private void OnDrawGizmos()
@@ -160,9 +162,11 @@ public class Language : MonoBehaviour
         //checks for mouse input to advance dialogue
         if (talking)
         {
+            facialExpressor.SetBool("idle", false);
+            facialExpressor.SetBool("talking", true);
             symbolAnimator.animationSprites = talkingSprites;
             symbolAnimator.active = true;
-            CorrectUIPos(faceSprite.transform, thoughtCloud.GetComponent<RectTransform>(), -150, 0);
+            CorrectUIPos(faceSprite.transform, thoughtCloud.GetComponent<RectTransform>(), -175, 0);
             //delay for click to process stuff
             if (!advance)
             {
@@ -182,6 +186,8 @@ public class Language : MonoBehaviour
         }
         else
         {
+            facialExpressor.SetBool("idle", true);
+            facialExpressor.SetBool("talking", false);
             waitTime = 0f;
         }
     }

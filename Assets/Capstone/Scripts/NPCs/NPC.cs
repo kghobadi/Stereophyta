@@ -317,6 +317,7 @@ public class NPC : Interactable {
                     movementPoints[i].GetComponent<Waypoint>().playerSetting = false;
                 }
                 setCounter = 0;
+                clickedButton = false;
             }
            
         }
@@ -359,12 +360,13 @@ public class NPC : Interactable {
     {
         Debug.Log("going home");
         
+       
+        currentState = NPCState.MOVING;
         //reset move points
         moveCounter = 0;
         movementPointsContainer.SetParent(null);
         movementPointsContainer.position = homePosition;
         movementPointsContainer.localEulerAngles = homeRotation;
-        currentState = NPCState.MOVING;
         StartCoroutine(WaveAtPlayer());
     }
 

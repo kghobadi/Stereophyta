@@ -12,6 +12,7 @@ public class Waypoint : MonoBehaviour {
     public bool playerSetting, canBePlaced;
     bool hasBeenSet = false;
     public Vector3 origScale;
+    public LayerMask mask;
 
     public enum PathType
     {
@@ -48,13 +49,13 @@ public class Waypoint : MonoBehaviour {
 
     public bool RaycastToGround()
     {
-        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+        Vector3 down = Vector3.down;
 
-        Vector3 up = transform.TransformDirection(Vector3.up) * 10;
+        Vector3 up = Vector3.up;
 
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, down, out hit, 10f))
+        if (Physics.Raycast(transform.position, down, out hit, 25f, mask))
         {
             if(hit.transform.gameObject.tag == "Ground")
             {
@@ -64,7 +65,7 @@ public class Waypoint : MonoBehaviour {
             {
                 RaycastHit upHit;
 
-                if (Physics.Raycast(transform.position, up, out upHit, 10f))
+                if (Physics.Raycast(transform.position, up, out upHit, 25f, mask))
                 {
                     if (hit.transform.gameObject.tag == "Ground")
                     {
