@@ -120,7 +120,6 @@ public class NPC : Interactable {
             {
                 movementPointsContainer.SetParent(transform);
                 movementPointsContainer.localPosition = Vector3.zero;
-                movementPointsContainer.localScale = origPCscale;
             }
             followTimer += Time.deltaTime;
             canSeeDistance = 50;
@@ -313,6 +312,10 @@ public class NPC : Interactable {
                 tpc.talking = false;
                 interactable = true;
                 playerSettingMove = false;
+                for (int i = 0; i < movementPoints.Count; i++)
+                {
+                    movementPoints[i].GetComponent<Waypoint>().playerSetting = false;
+                }
                 setCounter = 0;
             }
            
@@ -614,10 +617,13 @@ public class NPC : Interactable {
             followTimer = 0;
 
             playerSettingMove = true;
+            movementPointsContainer.localScale = origPCscale;
 
             for (int i = 0; i < movementPoints.Count; i++)
             {
                 movementPoints[i].GetComponent<Waypoint>().playerSetting = true;
+                movementPoints[i].GetComponent<Waypoint>().transform.localScale = movementPoints[i].GetComponent<Waypoint>().origScale;
+                
             }
 
             clickedButton = true;
