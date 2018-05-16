@@ -26,21 +26,25 @@ public class WindMachine : RhythmProducer {
     public float drawDist;
 
     bool increasing;
+    public ParticleSystem triRipples;
+
+    SpriteRenderer rhythmSR;
 
     public override void Start () {
         base.Start();
 
         interactable = true;
-        rotationSpeed = 1;
+        rotationSpeed = 3;
 
 
         disappearTimer = disappearTimerTotal;
-        rhythmIndicator.gameObject.SetActive(false);
+        rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
+        rhythmSR.enabled = false;
 
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
         windSpeed = 5;
-
+        triRipples.Stop();
     }
 	
 	public override void Update () {
@@ -61,6 +65,7 @@ public class WindMachine : RhythmProducer {
         //make windmachine look at mouse pos
         if (playerRotating)
         {
+            triRipples.Play();
             tpc.talking = true;
             interactable = false;
 
@@ -101,16 +106,16 @@ public class WindMachine : RhythmProducer {
 
         if ((tpc.talking || selectionMenu.enabled) && playerClicked)
         {
-            rhythmIndicator.gameObject.SetActive(true);
+            rhythmSR.enabled = true;
             disappearTimer = disappearTimerTotal;
         }
 
-        if (rhythmIndicator.gameObject.activeSelf)
+        if (rhythmSR.enabled)
         {
             disappearTimer -= Time.deltaTime;
             if (disappearTimer < 0)
             {
-                rhythmIndicator.gameObject.SetActive(false);
+                rhythmSR.enabled = false;
                 disappearTimer = disappearTimerTotal;
             }
         }
@@ -122,13 +127,13 @@ public class WindMachine : RhythmProducer {
     {
         base.OnMouseOver();
         disappearTimer = disappearTimerTotal;
-        rhythmIndicator.gameObject.SetActive(true);
+        rhythmSR.enabled = true;
     }
 
     public override void OnMouseExit()
     {
         base.OnMouseExit();
-        rhythmIndicator.gameObject.SetActive(false);
+        rhythmSR.enabled = false;
     }
 
     public override void AudioRhythm()
@@ -171,7 +176,7 @@ public class WindMachine : RhythmProducer {
     public override void Selection_Two()
     {
         base.Selection_Two();
-
+        
         //rotating = true;
         transform.localEulerAngles = Vector3.zero;
         playerRotating = true;
@@ -189,8 +194,8 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed += 2;
             timeScale += 1;
+            rhythmIndicator.SetInteger("Level", timeScale);
             rotationSpeed *= 2;
-            rhythmIndicator.speed += 0.25f;
 
             if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(InteractSound);
@@ -205,8 +210,8 @@ public class WindMachine : RhythmProducer {
         {
             windSpeed -= 2;
             timeScale -= 1;
+            rhythmIndicator.SetInteger("Level", timeScale);
             rotationSpeed *= 0.5f;
-            rhythmIndicator.speed -= 0.25f;
 
             if (!soundBoard.isPlaying && playerClicked)
                 soundBoard.PlayOneShot(selectLower);

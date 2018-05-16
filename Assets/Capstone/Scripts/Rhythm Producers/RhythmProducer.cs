@@ -104,26 +104,23 @@ public abstract class RhythmProducer : Interactable {
 
     public virtual void SwitchTimeScale()
     {
+        rhythmIndicator.SetInteger("Level", timeScale);
         switch (timeScale)
         {
             case 0:
-                rhythmIndicator.speed = 0.5f;
                 beatSource.PlayScheduled(SimpleClock.AtNextMeasure());
+                
                 break;
             case 1:
-                rhythmIndicator.speed = 0.75f;
                 beatSource.PlayScheduled(SimpleClock.AtNextQuarter());
                 break;
             case 2:
-                rhythmIndicator.speed = 1f;
                 beatSource.PlayScheduled(SimpleClock.AtNextEighth());
                 break;
             case 3:
-                rhythmIndicator.speed = 1.25f;
                 beatSource.PlayScheduled(SimpleClock.AtNextSixteenth());
                 break;
             case 4:
-                rhythmIndicator.speed = 1.5f;
                 beatSource.PlayScheduled(SimpleClock.AtNextThirtySecond());
                 break;
         }

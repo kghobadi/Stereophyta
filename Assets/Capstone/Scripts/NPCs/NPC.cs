@@ -120,7 +120,6 @@ public class NPC : Interactable {
             {
                 movementPointsContainer.SetParent(transform);
                 movementPointsContainer.localPosition = Vector3.zero;
-                movementPointsContainer.localScale = origPCscale;
             }
             followTimer += Time.deltaTime;
             canSeeDistance = 50;
@@ -217,6 +216,9 @@ public class NPC : Interactable {
         //while NPC is delivering first lines of language
         if(currentState == NPCState.TALKING)
         {
+            animator.SetBool("working", false);
+            animator.SetBool("walking", false);
+            animator.SetBool("idle", true);
             navMeshAgent.isStopped = true;
             transform.position = talkingPos.position;
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
@@ -240,7 +242,7 @@ public class NPC : Interactable {
                 else
                 {
                     SetMove();
-                    animator.SetBool("idle", false);
+                    animator.SetBool("walking", true);
                 }
             }
         }
@@ -310,6 +312,10 @@ public class NPC : Interactable {
                 tpc.talking = false;
                 interactable = true;
                 playerSettingMove = false;
+                for (int i = 0; i < movementPoints.Count; i++)
+                {
+                    movementPoints[i].GetComponent<Waypoint>().playerSetting = false;
+                }
                 setCounter = 0;
             }
            
@@ -523,6 +529,7 @@ public class NPC : Interactable {
         {
             animator.SetBool("idle", true);
             animator.SetBool("walking", false);
+            animator.SetBool("working", false);
             transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
         }
 
@@ -555,6 +562,7 @@ public class NPC : Interactable {
                 if (currentState == NPCState.PLAYING)
                 {
                     myMusic.isPlaying = false;
+                    SwitchSelectionButtons();
                 }
                 //start talkin'
                 StopAllCoroutines();
@@ -609,10 +617,13 @@ public class NPC : Interactable {
             followTimer = 0;
 
             playerSettingMove = true;
+            movementPointsContainer.localScale = origPCscale;
 
             for (int i = 0; i < movementPoints.Count; i++)
             {
                 movementPoints[i].GetComponent<Waypoint>().playerSetting = true;
+                movementPoints[i].GetComponent<Waypoint>().transform.localScale = movementPoints[i].GetComponent<Waypoint>().origScale;
+                
             }
 
             clickedButton = true;
@@ -633,6 +644,8 @@ public class NPC : Interactable {
             {
                 myMusic.primaryTempo++;
                 navMeshAgent.speed += moveSpeedInterval;
+                animator.speed *= 2;
+                waitingTime *= 0.5f;
             }
                
             SetMove();
@@ -661,6 +674,8 @@ public class NPC : Interactable {
             {
                 myMusic.primaryTempo--;
                 navMeshAgent.speed -= moveSpeedInterval;
+                animator.speed *= 0.5f;
+                waitingTime *= 2f;
             }
             SetMove();
         }

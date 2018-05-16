@@ -63,9 +63,9 @@ public class Animal : Interactable {
         base.Start();
         
         //interact sprites -- change this to feeding sprites
-        for (int i = 1; i < 4; i++)
+        for (int i = 1; i < 3; i++)
         {
-            interactSprites.Add(Resources.Load<Sprite>("CursorSprites/talk " + i));
+            interactSprites.Add(Resources.Load<Sprite>("CursorSprites/feed " + i));
         }
 
         navMeshAgent = GetComponent<NavMeshAgent>();

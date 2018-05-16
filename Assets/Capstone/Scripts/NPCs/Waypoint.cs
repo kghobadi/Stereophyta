@@ -11,6 +11,7 @@ public class Waypoint : MonoBehaviour {
     SphereCollider sc;
     public bool playerSetting, canBePlaced;
     bool hasBeenSet = false;
+    public Vector3 origScale;
 
     public enum PathType
     {
@@ -21,6 +22,7 @@ public class Waypoint : MonoBehaviour {
     {
         mr = GetComponent<MeshRenderer>();
         sc = GetComponent<SphereCollider>();
+        origScale = transform.localScale;
     }
 
     void Update()

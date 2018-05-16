@@ -9,7 +9,7 @@ public class GuitarNPC : NPC {
     protected List<GuitarPlant> flowersToTake = new List<GuitarPlant>();
     public WindMachine windMachine;
 
-    public ParticleSystem triRipple, triBeam;
+    public ParticleSystem triRipple;
 
     public override void Start()
     {
@@ -17,9 +17,9 @@ public class GuitarNPC : NPC {
 
         windMachine.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
                    windMachine.transform.position.y, movementPoints[moveCounter].transform.position.z));
-
-        triBeam.Stop();
+        
         triRipple.Stop();
+        myMusic.primaryTempo = 2;
     }
 
     public override void Update()
@@ -64,6 +64,9 @@ public class GuitarNPC : NPC {
 
     IEnumerator ChangeWind()
     {
+        animator.SetBool("working", true);
+        animator.SetBool("idle", false);
+        animator.SetBool("walking", false);
         //this only happens if the player isn't interacting with the device
         if (!windMachine.playerRotating && !windMachine.playerHolding)
         {
@@ -76,8 +79,7 @@ public class GuitarNPC : NPC {
                 windMachine.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
                     windMachine.transform.position.y, movementPoints[moveCounter].transform.position.z));
                 //Debug.Log(windMachine.transform.localEulerAngles);
-                transform.LookAt(new Vector3(windMachine.transform.position.x, transform.position.y, windMachine.transform.position.z));
-                triBeam.Play();
+                windMachine.triRipples.Play();
                 yield return new WaitForSeconds(1);
             }
         }
@@ -128,8 +130,7 @@ public class GuitarNPC : NPC {
             }
         }
 
-        transform.LookAt(new Vector3(windMachine.transform.position.x, transform.position.y, windMachine.transform.position.z));
-        triBeam.Play();
+        windMachine.triRipples.Play();
         yield return new WaitForSeconds(1);
 
         currentState = NPCState.LABOR;
@@ -144,6 +145,8 @@ public class GuitarNPC : NPC {
     {
         //wait here a moment
         animator.SetBool("walking", false);
+        animator.SetBool("working", true);
+        animator.SetBool("idle", false);
         triRipple.Play();
 
         int flowerChangeCounter = 3;
@@ -201,5 +204,7 @@ public class GuitarNPC : NPC {
         //set new move pos
         SetMove();
         animator.SetBool("walking", true);
+        animator.SetBool("working", false);
+        animator.SetBool("idle", false);
     }
 }

@@ -225,6 +225,7 @@ public class Language : MonoBehaviour
             {
                 for (int q = 0; q < allQuestObjects.Length; q++)
                 {
+                    allQuestObjects[q].questImage.GetComponent<AnimateDialogue>().animationSprites = pictures[allQuestObjects[q].pictureArray].imageArray;
                     allQuestObjects[q].questImage.enabled = true;
                 }
                 SearchForQuestItems();
@@ -388,6 +389,11 @@ public class Language : MonoBehaviour
             {
                 Debug.Log("wrong NPC type");
             }
+        }
+        else if (allQuestObjects[questObjNumber].objectTag == "Animal")
+        {
+            allQuestObjects[questObjNumber].foundObjCount++;
+            Debug.Log("found animal");
         }
 
         //check if found object count reaches desired amount, then fulfill bool

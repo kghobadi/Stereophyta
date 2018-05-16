@@ -17,6 +17,7 @@ public class PianoMonkNPC : NPC {
     {
         base.Start();
         squareRipples.Stop();
+        myMusic.primaryTempo = 2;
     }
 
     public override void Update()
@@ -70,6 +71,8 @@ public class PianoMonkNPC : NPC {
     {
         //wait here a moment
         animator.SetBool("walking", false);
+        animator.SetBool("idle", false);
+        animator.SetBool("working", true);
         squareRipples.Play();
         yield return new WaitForSeconds(waitingTime);
 
@@ -77,9 +80,11 @@ public class PianoMonkNPC : NPC {
         int randomPlant = Random.Range(0, currentPlants.Count);
 
         int randomShift = Random.Range(0, 100);
+
+        int randomAmount = Random.Range(3, 7);
             
                 transform.LookAt(new Vector3(currentPlants[randomPlant].transform.position.x, transform.position.y, currentPlants[randomPlant].transform.position.z));
-                for(int n = 0; n < currentPlants[randomPlant].musicalNotes.Length - 1; n++)
+                for(int n = 0; n < randomAmount; n++)
         {
             //check if its active
             if (currentPlants[randomPlant].gameObject.activeSelf)
