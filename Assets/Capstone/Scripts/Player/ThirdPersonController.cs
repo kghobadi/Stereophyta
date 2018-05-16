@@ -47,8 +47,10 @@ public class ThirdPersonController : MonoBehaviour
     public AudioMixerSnapshot currentAudioMix;
     public AudioMixerGroup plantingGroup;
 
-    //Player command menu refs
-    public Image playerCommandsMenu;
+    //how to plant
+    public bool hasRightClicked, hasScrolled;
+    public Image rightClick, scroll;
+    public AnimateDialogue rightClicker, scrollThru;
 
     //dictionary to sort nearby audio sources by distance 
     Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
@@ -90,6 +92,11 @@ public class ThirdPersonController : MonoBehaviour
         headTurnTimer = 0;
         canUseSeed = true;
         currentSpeed = walkSpeed;
+
+        rightClicker = rightClick.GetComponent<AnimateDialogue>();
+        scrollThru = scroll.GetComponent<AnimateDialogue>();
+        rightClick.enabled = false;
+        scroll.enabled = false;
     }
 
     void Update()
@@ -227,6 +234,11 @@ public class ThirdPersonController : MonoBehaviour
                 seedLine.RemoveAt(index);
                 seedLine.Insert(0, seedToMove);
                 scrollTimer = scrollTimerTotal;
+                if (!hasScrolled)
+                {
+                    scroll.enabled = false;
+                    hasScrolled = true;
+                }
             }
 
             //Check if we are moving and transition animation controller

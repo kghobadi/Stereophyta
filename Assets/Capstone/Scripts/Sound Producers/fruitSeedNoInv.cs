@@ -59,6 +59,20 @@ public class fruitSeedNoInv : Interactable {
         if (pickedByPlayer)
         {
             seedMaster = _player;
+
+            if (!tpc.hasRightClicked)
+            {
+                tpc.rightClicker.active = true;
+                tpc.rightClick.enabled = true;
+                
+            }
+
+            if (!tpc.hasScrolled && tpc.seedLine.Count > 1)
+            {
+                tpc.scrollThru.active = true;
+                tpc.scroll.enabled = true;
+            }
+
             PickUpSeed();
         }
         else
@@ -67,7 +81,7 @@ public class fruitSeedNoInv : Interactable {
             transform.SetParent(seedPicker.seedSpots[seedSpotNumber]);
             transform.localPosition = Vector3.zero;
         }
-        
+
         
     }
 
@@ -122,6 +136,11 @@ public class fruitSeedNoInv : Interactable {
                         playerHolding = false;
                         tpc.seedLine.Remove(gameObject);
                         inSeedLine = false;
+                        if (tpc.rightClick.enabled)
+                        {
+                            tpc.rightClick.enabled = false;
+                            tpc.hasRightClicked = true;
+                        }
                     }
                     else
                     {
