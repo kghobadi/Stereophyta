@@ -67,7 +67,7 @@ public class fruitSeedNoInv : Interactable {
                 
             }
 
-            if (!tpc.hasScrolled && tpc.seedLine.Count > 1)
+            if (!tpc.hasScrolled && tpc.seedLine.Count > 1 && tpc.hasRightClicked)
             {
                 tpc.scrollThru.active = true;
                 tpc.scroll.enabled = true;
