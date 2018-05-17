@@ -25,6 +25,7 @@ public class ThirdPersonController : MonoBehaviour
     public AudioSource playerSource;
     public AudioClip[] footsteps, noNo;
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
+    public ParticleSystem walkingEffect;
     float footStepTimer = 0;
     int currentStep = 0;
     CameraController camControl;
@@ -68,6 +69,8 @@ public class ThirdPersonController : MonoBehaviour
 
     void Start()
     {
+
+        walkingEffect.Stop();
         //walking UI
         symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
         symbolAnimator = symbol.GetComponent<AnimateUI>();
@@ -244,11 +247,16 @@ public class ThirdPersonController : MonoBehaviour
             //Check if we are moving and transition animation controller
             if (isMoving)
             {
+
                 MovePlayer();
                 blubAnimator.SetBool("idle", false);
                 blubAnimator.SetBool("dancing", false);
                 blubAnimator.SetBool("touchingPlant", false);
 
+                if (!walkingEffect.isPlaying)
+                {
+                    walkingEffect.Play();
+                }
                 headTurnTimer = 0;
 
                 footStepTimer += Time.deltaTime;
@@ -302,6 +310,10 @@ public class ThirdPersonController : MonoBehaviour
             //this timer only plays the idle animation if we are not moving. still a little buggy
             else
             {
+                if (walkingEffect.isPlaying) {
+                    walkingEffect.Stop();
+                }
+              
                 footStepTimer = 0;
                 walkingPointer.SetActive(false);
                 blubAnimator.SetBool("walking", false);
