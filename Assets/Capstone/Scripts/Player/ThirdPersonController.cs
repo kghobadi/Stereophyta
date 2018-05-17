@@ -69,8 +69,11 @@ public class ThirdPersonController : MonoBehaviour
 
     void Start()
     {
-
-        walkingEffect.Stop();
+        if(walkingEffect!= null)
+        {
+            walkingEffect.Stop();
+        }
+        
         //walking UI
         symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
         symbolAnimator = symbol.GetComponent<AnimateUI>();
