@@ -67,7 +67,7 @@ public class fruitSeedNoInv : Interactable {
                 
             }
 
-            if (!tpc.hasScrolled && tpc.seedLine.Count > 1)
+            if (!tpc.hasScrolled && tpc.seedLine.Count > 1 && tpc.hasRightClicked)
             {
                 tpc.scrollThru.active = true;
                 tpc.scroll.enabled = true;
@@ -182,7 +182,7 @@ public class fruitSeedNoInv : Interactable {
                         targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
                     }
                     //increment follow speed of seeds
-                    followSpeed = followSpeedOrig - (currentSpot / 1.5f);
+                    followSpeed = followSpeedOrig - (currentSpot / 1.1f);
 
 
                     //look at targetPos
