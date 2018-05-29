@@ -182,7 +182,7 @@ public class fruitSeedNoInv : Interactable {
                         targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
                     }
                     //increment follow speed of seeds
-                    followSpeed = followSpeedOrig - (currentSpot / 1.5f);
+                    followSpeed = followSpeedOrig - (currentSpot / 1.1f);
 
 
                     //look at targetPos
