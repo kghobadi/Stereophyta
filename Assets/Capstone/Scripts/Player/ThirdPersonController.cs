@@ -53,11 +53,12 @@ public class ThirdPersonController : MonoBehaviour
     public Image rightClick, scroll;
     public AnimateDialogue rightClicker, scrollThru;
 
+    [SerializeField]
     //dictionary to sort nearby audio sources by distance 
     Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
-
-    //listener range
-    public float listeningRadius;
+    public List<string> tagsWithAudio = new List<string>();
+    WorldManager wm;
+   
     //store this mouse pos
     Vector3 lastPosition;
 
@@ -88,6 +89,7 @@ public class ThirdPersonController : MonoBehaviour
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         camControl = Camera.main.GetComponent<CameraController>();
+        wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
 
         //set starting points for most vars
         player = GetComponent<CharacterController>();
@@ -383,25 +385,23 @@ public class ThirdPersonController : MonoBehaviour
         //empty dictionary
         soundCreators.Clear();
         //overlap sphere to find nearby sound creators
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, listeningRadius);
-        int i = 0;
-        while (i < hitColliders.Length)
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, wm.activationDistance);
+
+        for(int i = 0; i < hitColliders.Length; i++)
         {
             //check to see if obj is plant or rock
-            if (hitColliders[i].gameObject.tag == "Plant" || hitColliders[i].gameObject.tag == "Rock" || 
-                hitColliders[i].gameObject.tag == "NPC" || hitColliders[i].gameObject.tag == "RainSplash" 
-                || hitColliders[i].gameObject.tag == "Ambient" || hitColliders[i].gameObject.tag == "Animal" 
-                || hitColliders[i].gameObject.tag == "Seed")
+            if (tagsWithAudio.Contains(hitColliders[i].gameObject.tag))
             {
                 //check distance and add to list
                 float distanceAway = Vector3.Distance(hitColliders[i].transform.position, transform.position);
                 //add to audiosource and distance to dictionary
                 soundCreators.Add(hitColliders[i].gameObject.GetComponent<AudioSource>(), distanceAway);
-
+                Debug.Log("added aud source");
 
             }
-            i++;
         }
+
+        Debug.Log(soundCreators.Count);
 
         int priority = 0;
         //sort the dictionary by order of ascending distance away

@@ -181,8 +181,19 @@ public class fruitSeedNoInv : Interactable {
                     {
                         targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
                     }
-                    //increment follow speed of seeds
-                    followSpeed = followSpeedOrig - (currentSpot / 1.1f);
+
+                    //so seed speeds eventually level out
+                    if (currentSpot < 10)
+                    {
+                        //increment follow speed of seeds
+                        followSpeed = followSpeedOrig - (currentSpot / 1.25f);
+                    }
+                    else
+                    {
+                        //increment follow speed of seeds
+                        followSpeed = followSpeedOrig - (10 / 1.25f);
+                    }
+                    
 
 
                     //look at targetPos
@@ -266,19 +277,20 @@ public class fruitSeedNoInv : Interactable {
     public void CheckPlaceInLine()
     {
         inSeedLine = true;
-       
-            
-                //this is the currently held seed!
-                if (currentSpot == 0)
-                {
-                    transform.SetParent(rightArmObj.transform);
-                    transform.localPosition = Vector3.zero;
-                    transform.localEulerAngles = Vector3.zero;
-                transform.localScale = origScale;
-                    gameObject.layer = originalLayer;
 
-                    playerHolding = true;
-                }
+        //this is the currently held seed!
+        if (currentSpot == 0)
+        {
+            transform.SetParent(rightArmObj.transform);
+            transform.localPosition = Vector3.zero;
+            transform.localEulerAngles = Vector3.zero;
+            transform.localScale = origScale;
+            gameObject.layer = originalLayer;
+
+            playerHolding = true;
+        }
+
+
         else
         {
             playerHolding = false;
@@ -287,25 +299,27 @@ public class fruitSeedNoInv : Interactable {
             {
                 transform.SetParent(null);
             }
-            else if (lastSpot == 0)
-            {
-                for (int i = 0; i <= currentSpot; i++)
-                {
-                    if (i < 10)
-                    {
-                        transform.localScale *= 0.9f;
-                    }
-                }
-            }
-            
-            
+            //else if (lastSpot == 0)
+            //{
+            //    for (int i = 0; i <= currentSpot; i++)
+            //    {
+            //        if (i < 10)
+            //        {
+            //            transform.localScale *= 0.9f;
+            //            Debug.Log("shrunk from 0");
+            //        }
+            //    }
+            //}
+
             if(currentSpot < lastSpot && transform.localScale.x < origScale.x)
             {
                 transform.localScale *= 1.1f;
+                Debug.Log("grew");
             }
             else if(currentSpot > lastSpot)
             {
                 transform.localScale *= 0.9f;
+                Debug.Log("shrunk");
             }
         }
             
