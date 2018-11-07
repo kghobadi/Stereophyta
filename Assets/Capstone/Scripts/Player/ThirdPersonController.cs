@@ -28,7 +28,7 @@ public class ThirdPersonController : MonoBehaviour
     public ParticleSystem walkingEffect;
     float footStepTimer = 0;
     int currentStep = 0;
-    CameraController camControl;
+    //CameraController camControl;
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask mask;
@@ -68,9 +68,53 @@ public class ThirdPersonController : MonoBehaviour
     List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
     int currentWalk = 0;
 
+
+    //PS4 move variables
+    public float movespeed = 5;
+    public float movespeedSmooth = 0.3f;
+    public float rotateSpeed = 10;
+    public float rotateSpeedSmooth = 0.3f;
+    public float jumpSpeed = 20;
+    public float jumpWaitTime, jumpWaitTimer;
+    public float airControlSmooth = 0.8f;
+    public float grav = 9.8f;
+    public bool jumping;
+
+    float moveSmoothUse;
+
+    float currentForwardSpeed;
+    float forwardSpeedV;
+
+    float targetRotation;
+    float currentRotation;
+    float rotationV;
+
+    Vector3 currentMovement;
+    CharacterController controller;
+    Transform cameraTransform;
+    float verticalSpeed;
+    Vector3 currentMovementV;
+
+    public Animator poopShoes;
+
+    AudioSource audioSource;
+    public AudioClip[] jumpSounds;
+
+
     void Start()
     {
-        if(walkingEffect!= null)
+        //for ps4 Move
+        moveSmoothUse = movespeedSmooth;
+        controller = GetComponent<CharacterController>();
+        cameraTransform = Camera.main.transform;
+        audioSource = GetComponent<AudioSource>();
+
+        poopShoes.SetBool("idle", true);
+        poopShoes.SetBool("running", false);
+        poopShoes.SetBool("jumping", false);
+
+        //for dirt particles
+        if (walkingEffect!= null)
         {
             walkingEffect.Stop();
         }
@@ -88,7 +132,7 @@ public class ThirdPersonController : MonoBehaviour
 
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
-        camControl = Camera.main.GetComponent<CameraController>();
+        //camControl = Camera.main.GetComponent<CameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
 
         //set starting points for most vars
@@ -109,6 +153,9 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
+
+        PS4Movement();
+
         if (!talking)
         {
             //this is used in fruitSeedNoInv to let seed know whether player has a seed already
@@ -217,9 +264,9 @@ public class ThirdPersonController : MonoBehaviour
             }
 
             //Restart game
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.R))
             {
-                SceneManager.LoadScene("Menu");
+                SceneManager.LoadScene("PlayerTest");
             }
 
             scrollTimer -= Time.deltaTime;
@@ -252,7 +299,6 @@ public class ThirdPersonController : MonoBehaviour
             //Check if we are moving and transition animation controller
             if (isMoving)
             {
-
                 MovePlayer();
                 blubAnimator.SetBool("idle", false);
                 blubAnimator.SetBool("dancing", false);
@@ -272,16 +318,7 @@ public class ThirdPersonController : MonoBehaviour
                     if (footStepTimer > runStepTotal)
                     {
                         playerSource.PlayOneShot(footsteps[currentStep]);
-                        //increment footstep audio
-                        if (currentStep < (footsteps.Length - 1))
-                        {
-                            currentStep+= Random.Range(0, (footsteps.Length - currentStep));
-                        }
-                        else
-                        {
-                            currentStep = 0;
-                        }
-                        footStepTimer = 0;
+                        IncrementFootsteps();
                     }
                     //animate ui
                     walkingPointer.SetActive(false);
@@ -295,16 +332,7 @@ public class ThirdPersonController : MonoBehaviour
                     if (footStepTimer > walkStepTotal)
                     {
                         playerSource.PlayOneShot(footsteps[currentStep]);
-                        //increment footstep audio
-                        if (currentStep < (footsteps.Length - 1))
-                        {
-                            currentStep += Random.Range(0, (footsteps.Length - currentStep));
-                        }
-                        else
-                        {
-                            currentStep = 0;
-                        }
-                        footStepTimer = 0;
+                        IncrementFootsteps();
                     }
                     blubAnimator.SetBool("walking", true);
                     blubAnimator.SetBool("running", false);
@@ -345,7 +373,99 @@ public class ThirdPersonController : MonoBehaviour
             lastPosition = transform.position;
         }
     }
-   
+
+    void IncrementFootsteps()
+    {
+        if (currentStep < (footsteps.Length - 1))
+        {
+            currentStep += Random.Range(0, (footsteps.Length - currentStep));
+        }
+        else
+        {
+            currentStep = 0;
+        }
+        footStepTimer = 0;
+    }
+
+    void PS4Movement()
+    {
+        //PS4 Controls
+        Vector3 horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        if (horizontalInput.magnitude > 1)
+        {
+            horizontalInput.Normalize();
+        }
+        if (horizontalInput.magnitude > 0)
+        {
+            poopShoes.SetBool("idle", false);
+            poopShoes.SetBool("walking", true);
+            poopShoes.SetBool("running", false);
+        }
+        else
+        {
+            poopShoes.SetBool("idle", true);
+            poopShoes.SetBool("walking", false);
+            poopShoes.SetBool("running", false);
+        }
+
+        Vector3 targetHorizontalMovement = horizontalInput;
+        targetHorizontalMovement = cameraTransform.rotation * targetHorizontalMovement;
+        targetHorizontalMovement.y = 0;
+        targetHorizontalMovement.Normalize();
+        targetHorizontalMovement *= horizontalInput.magnitude;
+
+        currentMovement = Vector3.SmoothDamp(currentMovement, targetHorizontalMovement * movespeed, ref currentMovementV, moveSmoothUse);
+
+        Quaternion targetRotationQ = Quaternion.LookRotation(Vector3.forward);
+        if (new Vector3(currentMovement.x, 0, currentMovement.z).magnitude > 1)
+        {
+            targetRotationQ = Quaternion.LookRotation(new Vector3(currentMovement.x, 0, currentMovement.z));
+            transform.rotation = Quaternion.Euler(0, Mathf.SmoothDampAngle(transform.rotation.eulerAngles.y, targetRotationQ.eulerAngles.y, ref rotationV, rotateSpeedSmooth), 0);
+        }
+
+        if (controller.isGrounded)
+        {
+            jumping = false;
+            jumpWaitTimer -= Time.deltaTime;
+            moveSmoothUse = movespeedSmooth;
+            verticalSpeed = 0;
+            if (poopShoes.GetBool("running") == true)
+            {
+                poopShoes.SetBool("idle", true);
+                poopShoes.SetBool("running", false);
+            }
+        }
+
+        if (!controller.isGrounded)
+        {
+            moveSmoothUse = airControlSmooth;
+            verticalSpeed -= grav * Time.deltaTime;
+        }
+
+        if (Input.GetButtonDown("Jump") && !jumping && jumpWaitTimer < 0)
+        {
+            if (!audioSource.isPlaying)
+                PlaySound(0);
+            verticalSpeed = jumpSpeed;
+            poopShoes.SetBool("idle", false);
+            poopShoes.SetBool("running", false);
+            poopShoes.SetBool("jumping", true);
+            jumping = true;
+            jumpWaitTimer = jumpWaitTime;
+        }
+
+
+        currentMovement.y = verticalSpeed;
+
+        controller.Move(currentMovement * Time.deltaTime);
+    }
+
+    //for ps4 move
+    void PlaySound(int clip)
+    {
+        audioSource.PlayOneShot(jumpSounds[clip]);
+    }
+
     //Movement function which relies on vector3 movetowards. when we arrive at target, stop moving.
     void MovePlayer()
     {
