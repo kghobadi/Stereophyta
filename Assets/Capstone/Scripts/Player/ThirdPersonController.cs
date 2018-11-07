@@ -138,8 +138,8 @@ public class ThirdPersonController : MonoBehaviour
         //set starting points for most vars
         player = GetComponent<CharacterController>();
         targetPosition = transform.position;
-        blubAnimator = GetComponentInChildren<Animator>();
-        blubAnimator.SetBool("idle", true);
+        //blubAnimator = GetComponentInChildren<Animator>();
+        //blubAnimator.SetBool("idle", true);
         startingHeight = transform.position.y;
         headTurnTimer = 0;
         canUseSeed = true;
@@ -300,9 +300,9 @@ public class ThirdPersonController : MonoBehaviour
             if (isMoving)
             {
                 MovePlayer();
-                blubAnimator.SetBool("idle", false);
-                blubAnimator.SetBool("dancing", false);
-                blubAnimator.SetBool("touchingPlant", false);
+                //blubAnimator.SetBool("idle", false);
+                //blubAnimator.SetBool("dancing", false);
+                //blubAnimator.SetBool("touchingPlant", false);
 
                 if (!walkingEffect.isPlaying)
                 {
@@ -323,8 +323,8 @@ public class ThirdPersonController : MonoBehaviour
                     //animate ui
                     walkingPointer.SetActive(false);
                     symbolAnimator.active = true;
-                    blubAnimator.SetBool("running", true);
-                    blubAnimator.SetBool("walking", false);
+                    //blubAnimator.SetBool("running", true);
+                    //blubAnimator.SetBool("walking", false);
                 }
                 else
                 {
@@ -334,8 +334,8 @@ public class ThirdPersonController : MonoBehaviour
                         playerSource.PlayOneShot(footsteps[currentStep]);
                         IncrementFootsteps();
                     }
-                    blubAnimator.SetBool("walking", true);
-                    blubAnimator.SetBool("running", false);
+                    //blubAnimator.SetBool("walking", true);
+                    //blubAnimator.SetBool("running", false);
                 }
 
               
@@ -349,19 +349,19 @@ public class ThirdPersonController : MonoBehaviour
               
                 footStepTimer = 0;
                 walkingPointer.SetActive(false);
-                blubAnimator.SetBool("walking", false);
-                blubAnimator.SetBool("running", false);
+                //blubAnimator.SetBool("walking", false);
+                //blubAnimator.SetBool("running", false);
 
-                headTurnTimer += Time.deltaTime;
-                if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
-                {
-                    blubAnimator.SetBool("idle", false);
-                    blubAnimator.SetBool("dancing", true);
-                }
-                else
-                {
-                    blubAnimator.SetBool("idle", true);
-                }
+                //headTurnTimer += Time.deltaTime;
+                //if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
+                //{
+                //    blubAnimator.SetBool("idle", false);
+                //    blubAnimator.SetBool("dancing", true);
+                //}
+                //else
+                //{
+                //    blubAnimator.SetBool("idle", true);
+                //}
             }
 
             //if mouse has moved, refill list & reevaluate priorities
@@ -398,13 +398,13 @@ public class ThirdPersonController : MonoBehaviour
         if (horizontalInput.magnitude > 0)
         {
             poopShoes.SetBool("idle", false);
-            poopShoes.SetBool("walking", true);
-            poopShoes.SetBool("running", false);
+            poopShoes.SetBool("jumping", false);
+            poopShoes.SetBool("running", true);
         }
         else
         {
             poopShoes.SetBool("idle", true);
-            poopShoes.SetBool("walking", false);
+            poopShoes.SetBool("jumping", false);
             poopShoes.SetBool("running", false);
         }
 
@@ -429,10 +429,11 @@ public class ThirdPersonController : MonoBehaviour
             jumpWaitTimer -= Time.deltaTime;
             moveSmoothUse = movespeedSmooth;
             verticalSpeed = 0;
-            if (poopShoes.GetBool("running") == true)
+            if (poopShoes.GetBool("jumping") == true)
             {
                 poopShoes.SetBool("idle", true);
                 poopShoes.SetBool("running", false);
+                poopShoes.SetBool("jumping", false);
             }
         }
 
