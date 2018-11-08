@@ -40,14 +40,14 @@ public class Rhythm : MonoBehaviour {
             {
                 other.gameObject.GetComponent<GuitarPlant>().PlaySound();
             }
-            else if (plantType == "HORN")
-            {
-                other.gameObject.GetComponent<HornPlant>().PlaySound();
-            }
-            else if (plantType == "PIANO")
-            {
-                other.gameObject.GetComponent<PianoPlant>().PlaySound();
-            }
+            //else if (plantType == "HORN")
+            //{
+            //    other.gameObject.GetComponent<HornPlant>().PlaySound();
+            //}
+            //else if (plantType == "PIANO")
+            //{
+            //    other.gameObject.GetComponent<PianoPlant>().PlaySound();
+            //}
         }
     }
 
@@ -57,11 +57,7 @@ public class Rhythm : MonoBehaviour {
         {
             string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
 
-            //for horns, need to tell audioSource to stop playing
-            if (plantType == "HORN")
-            {
-                other.gameObject.GetComponent<HornPlant>().audioSource.Stop();
-            }
+        
         }
     }
 
