@@ -138,8 +138,8 @@ public class ThirdPersonController : MonoBehaviour
         //set starting points for most vars
         player = GetComponent<CharacterController>();
         targetPosition = transform.position;
-        blubAnimator = GetComponentInChildren<Animator>();
-        blubAnimator.SetBool("idle", true);
+        //blubAnimator = GetComponentInChildren<Animator>();
+        //blubAnimator.SetBool("idle", true);
         startingHeight = transform.position.y;
         headTurnTimer = 0;
         canUseSeed = true;
@@ -300,9 +300,9 @@ public class ThirdPersonController : MonoBehaviour
             if (isMoving)
             {
                 MovePlayer();
-                blubAnimator.SetBool("idle", false);
-                blubAnimator.SetBool("dancing", false);
-                blubAnimator.SetBool("touchingPlant", false);
+                //blubAnimator.SetBool("idle", false);
+                //blubAnimator.SetBool("dancing", false);
+                //blubAnimator.SetBool("touchingPlant", false);
 
                 if (!walkingEffect.isPlaying)
                 {
@@ -323,8 +323,8 @@ public class ThirdPersonController : MonoBehaviour
                     //animate ui
                     walkingPointer.SetActive(false);
                     symbolAnimator.active = true;
-                    blubAnimator.SetBool("running", true);
-                    blubAnimator.SetBool("walking", false);
+                    //blubAnimator.SetBool("running", true);
+                    //blubAnimator.SetBool("walking", false);
                 }
                 else
                 {
@@ -334,8 +334,8 @@ public class ThirdPersonController : MonoBehaviour
                         playerSource.PlayOneShot(footsteps[currentStep]);
                         IncrementFootsteps();
                     }
-                    blubAnimator.SetBool("walking", true);
-                    blubAnimator.SetBool("running", false);
+                    //blubAnimator.SetBool("walking", true);
+                    //blubAnimator.SetBool("running", false);
                 }
 
               
@@ -343,25 +343,25 @@ public class ThirdPersonController : MonoBehaviour
             //this timer only plays the idle animation if we are not moving. still a little buggy
             else
             {
-                if (walkingEffect.isPlaying) {
-                    walkingEffect.Stop();
-                }
+                //if (walkingEffect.isPlaying) {
+                //    walkingEffect.Stop();
+                //}
               
-                footStepTimer = 0;
+                //footStepTimer = 0;
                 walkingPointer.SetActive(false);
-                blubAnimator.SetBool("walking", false);
-                blubAnimator.SetBool("running", false);
+                //blubAnimator.SetBool("walking", false);
+                //blubAnimator.SetBool("running", false);
 
-                headTurnTimer += Time.deltaTime;
-                if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
-                {
-                    blubAnimator.SetBool("idle", false);
-                    blubAnimator.SetBool("dancing", true);
-                }
-                else
-                {
-                    blubAnimator.SetBool("idle", true);
-                }
+                //headTurnTimer += Time.deltaTime;
+                //if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
+                //{
+                //    blubAnimator.SetBool("idle", false);
+                //    blubAnimator.SetBool("dancing", true);
+                //}
+                //else
+                //{
+                //    blubAnimator.SetBool("idle", true);
+                //}
             }
 
             //if mouse has moved, refill list & reevaluate priorities
@@ -391,6 +391,9 @@ public class ThirdPersonController : MonoBehaviour
     {
         //PS4 Controls
         Vector3 horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+
+        //should put measure in place to adjust animations and footsteps to walking speed based on slight input of joystick
+
         if (horizontalInput.magnitude > 1)
         {
             horizontalInput.Normalize();
@@ -398,14 +401,40 @@ public class ThirdPersonController : MonoBehaviour
         if (horizontalInput.magnitude > 0)
         {
             poopShoes.SetBool("idle", false);
-            poopShoes.SetBool("walking", true);
-            poopShoes.SetBool("running", false);
+            poopShoes.SetBool("jumping", false);
+            poopShoes.SetBool("running", true);
+
+            if (!jumping)
+            {
+                //dirt particles start
+                if (!walkingEffect.isPlaying)
+                {
+                    walkingEffect.Play();
+                }
+
+                footStepTimer += Time.deltaTime;
+
+                //play footstep sound
+                if (footStepTimer > runStepTotal)
+                {
+                    playerSource.PlayOneShot(footsteps[currentStep]);
+                    IncrementFootsteps();
+                }
+            }
         }
         else
         {
             poopShoes.SetBool("idle", true);
-            poopShoes.SetBool("walking", false);
+            poopShoes.SetBool("jumping", false);
             poopShoes.SetBool("running", false);
+            
+            //dirt particles stop
+            if (walkingEffect.isPlaying)
+            {
+                walkingEffect.Stop();
+            }
+
+            footStepTimer = 0;
         }
 
         Vector3 targetHorizontalMovement = horizontalInput;
@@ -429,10 +458,11 @@ public class ThirdPersonController : MonoBehaviour
             jumpWaitTimer -= Time.deltaTime;
             moveSmoothUse = movespeedSmooth;
             verticalSpeed = 0;
-            if (poopShoes.GetBool("running") == true)
+            if (poopShoes.GetBool("jumping") == true)
             {
                 poopShoes.SetBool("idle", true);
                 poopShoes.SetBool("running", false);
+                poopShoes.SetBool("jumping", false);
             }
         }
 
@@ -444,8 +474,7 @@ public class ThirdPersonController : MonoBehaviour
 
         if (Input.GetButtonDown("Jump") && !jumping && jumpWaitTimer < 0)
         {
-            if (!audioSource.isPlaying)
-                PlaySound(0);
+            PlayJumpSound();
             verticalSpeed = jumpSpeed;
             poopShoes.SetBool("idle", false);
             poopShoes.SetBool("running", false);
@@ -461,9 +490,10 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     //for ps4 move
-    void PlaySound(int clip)
+    void PlayJumpSound()
     {
-        audioSource.PlayOneShot(jumpSounds[clip]);
+        int randomJump = Random.Range(0, jumpSounds.Length);
+        audioSource.PlayOneShot(jumpSounds[randomJump]);
     }
 
     //Movement function which relies on vector3 movetowards. when we arrive at target, stop moving.
@@ -521,7 +551,7 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
 
-        Debug.Log(soundCreators.Count);
+        //Debug.Log(soundCreators.Count);
 
         int priority = 0;
         //sort the dictionary by order of ascending distance away
