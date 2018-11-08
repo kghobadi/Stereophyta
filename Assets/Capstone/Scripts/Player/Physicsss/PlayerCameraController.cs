@@ -34,8 +34,12 @@ public class PlayerCameraController : MonoBehaviour {
         targetLook = Quaternion.LookRotation(playerTransform.position - transform.position);
         transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, smoothLook * Time.deltaTime);
 
-
         //lets set up right analogue stick to enable us to rotate the camera around player and redirect motion as we do so
+        Vector3 horizontalRotation = new Vector3(0, Input.GetAxis("Joystick X"), 0);
+
+        Debug.Log(horizontalRotation.y);
+
+        playerTransform.Rotate(horizontalRotation);
 
         //float zoomVal = Input.GetAxis("Mouse ScrollWheel");
 
