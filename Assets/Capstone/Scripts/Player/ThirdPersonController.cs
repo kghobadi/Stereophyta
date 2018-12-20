@@ -89,6 +89,7 @@ public class ThirdPersonController : MonoBehaviour
     float currentRotation;
     float rotationV;
 
+    public Vector3 horizontalInput;
     Vector3 currentMovement;
     CharacterController controller;
     Transform cameraTransform;
@@ -390,7 +391,7 @@ public class ThirdPersonController : MonoBehaviour
     void PS4Movement()
     {
         //PS4 Controls
-        Vector3 horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
         //should put measure in place to adjust animations and footsteps to walking speed based on slight input of joystick
 
