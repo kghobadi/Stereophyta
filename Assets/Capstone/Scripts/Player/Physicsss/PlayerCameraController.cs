@@ -44,7 +44,7 @@ public class PlayerCameraController : MonoBehaviour {
 
         Vector3 horizontalRotation = new Vector3(0, Input.GetAxis("Mouse X") * cameraRotationSpeedX, 0);
 
-        Debug.Log(horizontalRotation.y);
+        //Debug.Log(horizontalRotation.y);
 
         playerTransform.Rotate(horizontalRotation);
 
@@ -67,7 +67,7 @@ public class PlayerCameraController : MonoBehaviour {
         {
             smoothLook = smoothLookOriginal;
             smoothMove = smoothMoveOriginal;
-            Debug.Log(Input.GetAxis("Mouse X"));
+            //Debug.Log(Input.GetAxis("Mouse X"));
         }
 
 
