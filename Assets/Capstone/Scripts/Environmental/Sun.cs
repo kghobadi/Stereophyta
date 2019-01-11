@@ -4,6 +4,10 @@ using UnityEngine.Audio;
 
 public class Sun : MonoBehaviour
 {
+    GameObject _player;
+    ThirdPersonController tpc;
+    public int yesterday, dayCounter = 0;
+
     public GameObject waterDay, waterNight;
     public float rotationSpeed = 10;
     public Transform rotation;
@@ -14,11 +18,6 @@ public class Sun : MonoBehaviour
     public Color ambientMorn, ambientMid, ambientDusk, ambientNight;
     //public Gradient lightColorMap;
     float totalXRange, interval, middayInterval, duskInterval, nightInterval;
-
-    public Texture lightCookie;
-    GameObject _player;
-    ThirdPersonController tpc;
-    public AudioMixerGroup forestGroup;
 
     void Start()
     {
@@ -39,18 +38,7 @@ public class Sun : MonoBehaviour
     void Update()
     {
         //rotates sun around zero 
-     
         transform.RotateAround(Vector3.zero, Vector3.forward, rotationSpeed * Time.deltaTime);
-        
-        if(tpc.plantingGroup == forestGroup)
-        {
-            sun.cookie = lightCookie;
-        }
-        else
-        {
-            sun.cookie = null;
-        }
-
 
         if(transform.position.x > middayInterval)
         {
@@ -63,6 +51,12 @@ public class Sun : MonoBehaviour
             isDusk = false;
             waterDay.SetActive(true);
             waterNight.SetActive(false);
+
+            //when its morning increase dayCounter
+            if (dayCounter == yesterday)
+            {
+                dayCounter++;
+            }
         }
         else if(transform.position.x < middayInterval && transform.position.x > duskInterval)
         {
@@ -92,6 +86,9 @@ public class Sun : MonoBehaviour
             isNight = true;
             waterDay.SetActive(false);
             waterNight.SetActive(true);
+            
+            //when its night, yesterday catches up to dayCounter
+            yesterday = dayCounter;
         }
 
         transform.LookAt(Vector3.zero);

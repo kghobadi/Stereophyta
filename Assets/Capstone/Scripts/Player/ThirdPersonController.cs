@@ -8,107 +8,63 @@ using UnityEngine.SceneManagement;
 
 public class ThirdPersonController : MonoBehaviour
 {
-    //Player movment variables. 
-    CharacterController player;
-    public bool mouseMovement;
-    public float currentSpeed, walkSpeed, runSpeedMax;
-    public float startingHeight, runTime;
-    private Vector3 targetPosition;
-    public bool isMoving; // for point to click
-    public Animator blubAnimator;
-    float clickTimer, headTurnTimer;
-    bool hasTurnedHead;
-    //these are used in seed script
-    public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
-    public GameObject walkingPointer;
-    //Camera ref variables
-    AudioSource cameraAudSource;
-    public AudioSource playerSource;
-    public AudioClip[] footsteps, noNo;
-    public float walkStepTotal = 1f, runStepTotal = 0.5f;
-    public ParticleSystem walkingEffect;
-    float footStepTimer = 0;
-    int currentStep = 0;
-    CameraController camControl;
+    //player controller and cam controller ref
+    CharacterController controller;
+    PlayerCameraController playerCameraController;
+    Transform cameraTransform;
+    public Animator poopShoes;
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask mask;
-
-    //control player actions with interactable objects
-    public bool isHoldingSomething, canUseSeed, talking;
- 
-    //Lists for follower line and seed line
-    public List<GameObject> followers = new List<GameObject>();
-    public List<float> followerDistances = new List<float>();
-    public int followerCountMax;
-
-    public List<GameObject> seedLine = new List<GameObject>();
-    float scrollTimer, scrollTimerTotal = 0.1f;
-
-    //Store the current audio mixer info so when you plant stuff and drop off followers, they adjust to where player is on map
-    public AudioMixerSnapshot currentAudioMix;
-    public AudioMixerGroup plantingGroup;
-
-    //how to plant
-    public bool hasRightClicked, hasScrolled;
-    public Image rightClick, scroll;
-    public AnimateDialogue rightClicker, scrollThru;
-
-    [SerializeField]
-    //dictionary to sort nearby audio sources by distance 
-    Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
-    public List<string> tagsWithAudio = new List<string>();
-    WorldManager wm;
-   
-    //store this mouse pos
-    Vector3 lastPosition;
-
-    //UI walking
-    Image symbol; // 2d sprite renderer icon reference
-    AnimateUI symbolAnimator;
-    List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
-    int currentWalk = 0;
-
+    public LayerMask groundedCheck;
 
     //PS4 move variables
-    public bool ps4Movement;
+    public bool playerCanMove;
+    Vector3 currentMovement;
+    public Vector3 horizontalInput;
     public float movespeed = 5;
     public float movespeedSmooth = 0.3f;
     public float rotateSpeed = 10;
     public float rotateSpeedSmooth = 0.3f;
+
+    //jump variables
     public float jumpSpeed = 20;
     public float jumpWaitTime, jumpWaitTimer;
     public float airControlSmooth = 0.8f;
     public float grav = 9.8f;
     public bool jumping;
-
     float moveSmoothUse;
-
-    float currentForwardSpeed;
-    float forwardSpeedV;
-
-    float targetRotation;
-    float currentRotation;
     float rotationV;
-
-    public Vector3 horizontalInput;
-    Vector3 currentMovement;
-    PlayerCameraController playerCameraController;
-    CharacterController controller;
-    Transform cameraTransform;
     float verticalSpeed;
     Vector3 currentMovementV;
-    public LayerMask groundedCheck;
-    public Animator poopShoes;
 
+    //seed inv
+    public int currentSeed = 0;
+    public GameObject currentSeedObj;
+    public List<GameObject> mySeeds = new List<GameObject>();
+    
     //for calc of sliding
     public Transform physicsRaycaster;
 
+    //all my audio stuff
     AudioSource audioSource;
+    AudioSource cameraAudSource;
+    public AudioSource playerSource;
     public AudioClip[] jumpSounds;
+    public AudioClip[] footsteps, noNo;
+    public float walkStepTotal = 1f, runStepTotal = 0.5f;
+    public ParticleSystem walkingEffect;
+    float footStepTimer = 0;
+    int currentStep = 0;
 
+    //world manager reference
+    WorldManager wm;
 
-
+    //dictionary to sort nearby audio sources by distance 
+    [SerializeField]
+    Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
+    public List<string> tagsWithAudio = new List<string>();
+    
     void Start()
     {
         //for dirt particles
@@ -116,73 +72,41 @@ public class ThirdPersonController : MonoBehaviour
         {
             walkingEffect.Stop();
         }
-        
-        //walking UI
-        symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
-        symbolAnimator = symbol.GetComponent<AnimateUI>();
-        for (int i = 1; i < 4; i++)
-        {
-            walkingSprites.Add(Resources.Load<Sprite>("CursorSprites/Foot" + i));
-        }
-
-        symbol.sprite = walkingSprites[currentWalk];
-        playerSource = GetComponent<AudioSource>();
 
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
-        camControl = Camera.main.GetComponent<CameraController>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        
+        //for ps4 Move
+        moveSmoothUse = movespeedSmooth;
+        controller = GetComponent<CharacterController>();
+        cameraTransform = Camera.main.transform;
+        audioSource = GetComponent<AudioSource>();
+        playerCameraController.enabled = true;
 
-        //set starting points for most vars
-        player = GetComponent<CharacterController>();
-        targetPosition = transform.position;
+        poopShoes.SetBool("idle", true);
+        poopShoes.SetBool("running", false);
+        poopShoes.SetBool("jumping", false);
 
-        if (mouseMovement)
-        {
-            blubAnimator = GetComponentInChildren<Animator>();
-            blubAnimator.SetBool("idle", true);
-            camControl.enabled = true;
-            playerCameraController.enabled = false;
-        }
-
-        if (ps4Movement)
-        { //for ps4 Move
-            moveSmoothUse = movespeedSmooth;
-            controller = GetComponent<CharacterController>();
-            cameraTransform = Camera.main.transform;
-            audioSource = GetComponent<AudioSource>();
-
-            camControl.enabled = false;
-            playerCameraController.enabled = true;
-
-            poopShoes.SetBool("idle", true);
-            poopShoes.SetBool("running", false);
-            poopShoes.SetBool("jumping", false);
-        }
-       
-        startingHeight = transform.position.y;
-        headTurnTimer = 0;
-        canUseSeed = true;
-        currentSpeed = walkSpeed;
-
-        rightClicker = rightClick.GetComponent<AnimateDialogue>();
-        scrollThru = scroll.GetComponent<AnimateDialogue>();
-        rightClick.enabled = false;
-        scroll.enabled = false;
+        currentSeedObj = mySeeds[currentSeed];
+        playerCanMove = true;
     }
 
     void Update()
     {
-        if(ps4Movement)
+        if(playerCanMove)
             PS4Movement();
 
-        if (mouseMovement)
+        //if (mouseMovement)
+        //{
+        //WASD move + Mouse controls for cam & interactions
+        //}
+
+        //switch current seed
+        if (Input.GetButtonDown("SwitchSeed"))
         {
-            if (!talking)
-            {
-                MouseMovement();
-            }
+            SwitchSeed();
         }
 
         //Restart game
@@ -190,6 +114,31 @@ public class ThirdPersonController : MonoBehaviour
         {
             SceneManager.LoadScene("PlayerTest");
         }
+    }
+
+    public void SwitchSeed()
+    {
+        //rotate all the seeds equally around me body
+        for (int i = 0; i < mySeeds.Count; i++)
+        {
+            mySeeds[i].transform.RotateAround(transform.position, transform.up, 360 / mySeeds.Count);
+        }
+
+        currentSeedObj.GetComponent<Seed>().seedSelected = false;
+
+        //increment seed counter
+        if (currentSeed < mySeeds.Count - 1)
+        {
+            currentSeed++;
+        }
+        else
+        {
+            currentSeed = 0;
+        }
+
+        //set new seed
+        currentSeedObj = mySeeds[currentSeed];
+        currentSeedObj.GetComponent<Seed>().seedSelected = true;
     }
 
     void IncrementFootsteps()
@@ -370,251 +319,6 @@ public class ThirdPersonController : MonoBehaviour
         {
             verticalSpeed = 0;
         }
-    }
-
-    void MouseMovement()
-    {
-        //this is used in fruitSeedNoInv to let seed know whether player has a seed already
-        if (seedLine.Count == 0)
-        {
-            isHoldingSomething = false;
-        }
-        else
-        {
-            isHoldingSomething = true;
-        }
-
-        //click to move to point
-        if (Input.GetMouseButton(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            clickTimer += Time.deltaTime;
-            if (clickTimer > runTime && currentSpeed < runSpeedMax)
-            {
-                currentSpeed += Time.deltaTime * 5;
-            }
-
-            if (Physics.Raycast(ray, out hit, 100, mask))
-            {
-                //if we hit the ground & height is in range, move the character to that position
-                if (hit.transform.gameObject.tag == "Ground")
-                {
-                    walkingPointer.transform.position = hit.point;
-                    targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
-                    isMoving = true;
-
-                }
-
-                //if we hit an interactable object AND we are far from it, the player should auto walk towards it
-                else if (Vector3.Distance(transform.position, hit.transform.position) > 5 &&
-                    (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
-                    || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
-                    || hit.transform.gameObject.tag == "Rock" || hit.transform.gameObject.tag == "NPC"))
-                {
-                    if (hit.transform.gameObject.tag == "NPC" && hit.transform.gameObject.GetComponent<Language>().questActive)
-                    {
-                        targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                        walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
-                        isMoving = true;
-                    }
-                    else if (hit.transform.gameObject.tag == "NPC" && !hit.transform.gameObject.GetComponent<Language>().questActive)
-                    {
-                        //nothing
-                    }
-                    else
-                    {
-                        targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                        walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
-                        isMoving = true;
-                    }
-
-
-                }
-                else
-                {
-                    isMoving = false;
-                }
-            }
-        }
-
-        //On mouse up, we check clickTimer to see if we are walking to that point or stopping the character from running 
-        if (Input.GetMouseButtonUp(0))
-        {
-            playerSource.PlayOneShot(footsteps[currentStep]);
-            //increment footstep audio
-            if (currentStep < (footsteps.Length - 1))
-            {
-                currentStep++;
-            }
-            else
-            {
-                currentStep = 0;
-            }
-            if (clickTimer < runTime)
-            {
-                isMoving = true;
-                clickTimer = 0;
-                currentSpeed = walkSpeed;
-                //set walk sprite
-                if (currentWalk < (walkingSprites.Count - 1))
-                {
-                    currentWalk++;
-                }
-                else
-                {
-                    currentWalk = 0;
-                }
-                symbol.sprite = walkingSprites[currentWalk];
-                symbolAnimator.active = false;
-                walkingPointer.SetActive(true);
-            }
-            else
-            {
-                symbolAnimator.active = false;
-                isMoving = false;
-                clickTimer = 0;
-                currentSpeed = walkSpeed;
-            }
-        }
-
-        scrollTimer -= Time.deltaTime;
-        //Input map for Mousewheel scroll to change seeds
-        //if scroll up 
-        if (Input.GetAxis("Mouse ScrollWheel") > 0 && seedLine.Count > 1 && scrollTimer < 0)
-        {
-            GameObject seedToMove = seedLine[0];
-            seedLine.Remove(seedToMove);
-            seedLine.Insert(seedLine.Count, seedToMove);
-
-            scrollTimer = scrollTimerTotal;
-        }
-        //if scroll down 
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0 && seedLine.Count > 1 && scrollTimer < 0)
-        {
-            GameObject seedToMove = seedLine[seedLine.Count - 1];
-            int index = seedLine.Count - 1;
-            // move all seed positions backward in line 
-            seedLine.RemoveAt(index);
-            seedLine.Insert(0, seedToMove);
-            scrollTimer = scrollTimerTotal;
-            if (!hasScrolled)
-            {
-                scroll.enabled = false;
-                hasScrolled = true;
-            }
-        }
-
-        //Check if we are moving and transition animation controller
-        if (isMoving)
-        {
-            MouseMovePlayer();
-            blubAnimator.SetBool("idle", false);
-            blubAnimator.SetBool("dancing", false);
-            blubAnimator.SetBool("touchingPlant", false);
-
-            if (!walkingEffect.isPlaying)
-            {
-                walkingEffect.Play();
-            }
-            headTurnTimer = 0;
-
-            footStepTimer += Time.deltaTime;
-
-            if (currentSpeed > 12)
-            {
-                //play footstep sound
-                if (footStepTimer > runStepTotal)
-                {
-                    playerSource.PlayOneShot(footsteps[currentStep]);
-                    IncrementFootsteps();
-                }
-                //animate ui
-                walkingPointer.SetActive(false);
-                symbolAnimator.active = true;
-                blubAnimator.SetBool("running", true);
-                blubAnimator.SetBool("walking", false);
-            }
-            else
-            {
-                //play footstep sound
-                if (footStepTimer > walkStepTotal)
-                {
-                    playerSource.PlayOneShot(footsteps[currentStep]);
-                    IncrementFootsteps();
-                }
-                blubAnimator.SetBool("walking", true);
-                blubAnimator.SetBool("running", false);
-            }
-
-
-        }
-        //this timer only plays the idle animation if we are not moving. still a little buggy
-        else
-        {
-            if (walkingEffect.isPlaying)
-            {
-                walkingEffect.Stop();
-            }
-
-            footStepTimer = 0;
-            walkingPointer.SetActive(false);
-            blubAnimator.SetBool("walking", false);
-            blubAnimator.SetBool("running", false);
-
-            headTurnTimer += Time.deltaTime;
-            if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
-            {
-                blubAnimator.SetBool("idle", false);
-                blubAnimator.SetBool("dancing", true);
-            }
-            else
-            {
-                blubAnimator.SetBool("idle", true);
-            }
-        }
-
-        //if mouse has moved, refill list & reevaluate priorities
-        if (lastPosition != transform.position)
-        {
-            ResetNearbyAudioSources();
-        }
-
-        lastPosition = transform.position;
-    }
-
-    //Movement function which relies on vector3 movetowards. when we arrive at target, stop moving.
-    void MouseMovePlayer()
-    {
-        //first calculate rotation and look
-        targetPosition = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
-
-        float currentDist = Vector3.Distance(transform.position, targetPosition);
-
-        //this is a bit finnicky with char controller so may need to continuously set it 
-        if (currentDist >= 0.5f)
-        {
-            transform.LookAt(targetPosition);
-
-            //then set movement
-            Vector3 movement = new Vector3(0, 0, currentSpeed);
-
-            transform.localEulerAngles = new Vector3(0, transform.localEulerAngles.y, transform.localEulerAngles.z);
-
-            movement = transform.rotation * movement;
-
-            //Actually move
-            player.Move(movement * Time.deltaTime);
-
-            player.Move(new Vector3(0, -0.5f, 0));
-        }
-        else
-        {
-            isMoving = false;
-        }
-
-       
     }
 
     //this function shifts all audio source priorities dynamically

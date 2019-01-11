@@ -98,7 +98,7 @@ public abstract class SoundProducer : Interactable {
     public override void OnMouseEnter()
     {
         base.OnMouseEnter();
-        tpc.blubAnimator.Play("ListenToPlant", 0);
+        //tpc.blubAnimator.Play("ListenToPlant", 0);
     }
 
     //while mouse is over obj, have player look at current sound source

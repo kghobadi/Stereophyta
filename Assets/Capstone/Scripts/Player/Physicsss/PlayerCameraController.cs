@@ -53,14 +53,14 @@ public class PlayerCameraController : MonoBehaviour {
         {
             smoothLook = turnSmooth;
             smoothMove = turnSmoothMove;
-            Debug.Log("new smoothers");
+            //Debug.Log("new smoothers");
         }
         //if palyer moving AND we rotating, rotate MEDIUM
         else if(tpc.horizontalInput.magnitude > 0 && horizontalRotation.magnitude > 0)
         {
             smoothLook = movingTurnSmooth;
             smoothMove = movingTurnSmoothMove;
-            Debug.Log("new smoothers");
+            //Debug.Log("new smoothers");
         }
         //leave the values as is when player moving
         else if (horizontalRotation.magnitude == 0)

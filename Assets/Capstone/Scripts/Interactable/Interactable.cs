@@ -124,10 +124,10 @@ public abstract class Interactable : MonoBehaviour
     {
         if (distanceFromPlayer <= canSeeDistance && interactable)
         {
-            tpc.blubAnimator.SetBool("walking", false);
-            tpc.blubAnimator.SetBool("running", false);
-            tpc.blubAnimator.SetBool("idle", false);
-            tpc.blubAnimator.SetBool("touchingPlant", true);
+            //tpc.blubAnimator.SetBool("walking", false);
+            //tpc.blubAnimator.SetBool("running", false);
+            //tpc.blubAnimator.SetBool("idle", false);
+            //tpc.blubAnimator.SetBool("touchingPlant", true);
             _player.transform.LookAt(new Vector3(transform.position.x, _player.transform.position.y, transform.position.z));
         }
     }
@@ -137,7 +137,7 @@ public abstract class Interactable : MonoBehaviour
     {
         if (interactable)
         {
-            tpc.blubAnimator.SetBool("touchingPlant", false);
+            //tpc.blubAnimator.SetBool("touchingPlant", false);
             symbolAnimator.animationSprites.Clear();
             for (int i = 0; i < interactSprites.Count; i++)
             {
@@ -163,7 +163,7 @@ public abstract class Interactable : MonoBehaviour
         SwitchSelectionButtons();
         if(selectionCounter > 1)
         {
-            tpc.talking = true;
+            //tpc.talking = true;
             symbolAnimator.animationSprites.Clear();
             for (int i = 0; i < interactSprites.Count; i++)
             {
@@ -207,21 +207,21 @@ public abstract class Interactable : MonoBehaviour
         //Debug.Log(isActive);
 
         //while player is talking, nothing is interactable
-        if (tpc.talking )
-        {
-            canClickDistance = 0f;
-            canSeeDistance = 0f;
-            interactable = false;
-            interactableSwitched = true;
-        }
+        //if (tpc.talking )
+        //{
+        //    canClickDistance = 0f;
+        //    canSeeDistance = 0f;
+        //    interactable = false;
+        //    interactableSwitched = true;
+        //}
         //use interactable switched to make everything interactable once more
-        else if(!tpc.talking && interactableSwitched)
-        {
-            interactable = true;
-            interactableSwitched = false;
-            canClickDistance = 10f;
-            canSeeDistance = 15f;
-        }
+        //else if(!tpc.talking && interactableSwitched)
+        //{
+        //    interactable = true;
+        //    interactableSwitched = false;
+        //    canClickDistance = 10f;
+        //    canSeeDistance = 15f;
+        //}
 
         //if object is active and too far from player, turn off
         if(isActive && distanceFromPlayer > _worldManager.activationDistance)
@@ -252,10 +252,10 @@ public abstract class Interactable : MonoBehaviour
 
             playerThoughtAnimator.active = true;
 
-            tpc.blubAnimator.SetBool("walking", false);
-            tpc.blubAnimator.SetBool("running", false);
-            tpc.blubAnimator.SetBool("idle", false);
-            tpc.blubAnimator.SetBool("touchingPlant", true);
+            //tpc.blubAnimator.SetBool("walking", false);
+            //tpc.blubAnimator.SetBool("running", false);
+            //tpc.blubAnimator.SetBool("idle", false);
+            //tpc.blubAnimator.SetBool("touchingPlant", true);
 
             if (menuScript.clickTimer > menuScript.clickWait && !graphicRaycaster.graphicsCastingOn)
             {
@@ -342,7 +342,7 @@ public abstract class Interactable : MonoBehaviour
         }
 
         
-        tpc.talking = false;
+        //tpc.talking = false;
 
         symbolAnimator.animationSprites.Clear();
         for (int i = 0; i < interactSprites.Count; i++)
