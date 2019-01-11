@@ -33,8 +33,8 @@ public class Rock : SoundProducer
         //stop moving rock
         if (playerHolding)
         {
-            audioSource.outputAudioMixerGroup = tpc.plantingGroup;
-            tpc.currentSpeed = 5;
+            //audioSource.outputAudioMixerGroup = tpc.plantingGroup;
+            //tpc.currentSpeed = 5;
             if (Input.GetMouseButtonDown(1))
             {
                 DropObject();
@@ -76,8 +76,8 @@ public class Rock : SoundProducer
 
         DeactivateSelectionMenu();
 
-        tpc.isHoldingSomething = true;
-        tpc.canUseSeed = false;
+        //tpc.isHoldingSomething = true;
+        //tpc.canUseSeed = false;
         playerHolding = true;
         interactable = false;
     }
@@ -119,8 +119,8 @@ public class Rock : SoundProducer
             transform.Translate(0, -1, 0);
         }
 
-        tpc.canUseSeed = true;
-        tpc.isHoldingSomething = false;
+        //tpc.canUseSeed = true;
+        //tpc.isHoldingSomething = false;
         playerHolding = false;
         interactable = true;
     }

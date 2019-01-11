@@ -66,7 +66,7 @@ public class WindMachine : RhythmProducer {
         if (playerRotating)
         {
             triRipples.Play();
-            tpc.talking = true;
+            //tpc.talking = true;
             interactable = false;
 
             holdTimer += Time.deltaTime;
@@ -86,7 +86,7 @@ public class WindMachine : RhythmProducer {
             //on click call raycasts. 
             if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
             {
-                tpc.talking = false;
+                //tpc.talking = false;
                 interactable = true;
                 playerRotating = false;
             }
@@ -104,7 +104,7 @@ public class WindMachine : RhythmProducer {
             }
         }
 
-        if ((tpc.talking || selectionMenu.enabled) && playerClicked)
+        if ((/*tpc.talking ||*/ selectionMenu.enabled) && playerClicked)
         {
             rhythmSR.enabled = true;
             disappearTimer = disappearTimerTotal;
@@ -165,8 +165,8 @@ public class WindMachine : RhythmProducer {
         transform.localPosition = Vector3.zero;
         transform.localEulerAngles = Vector3.zero;
 
-        tpc.canUseSeed = false;
-        tpc.isHoldingSomething = true;
+        //tpc.canUseSeed = false;
+        //tpc.isHoldingSomething = true;
         playerHolding = true;
         interactable = false;
         
@@ -224,8 +224,8 @@ public class WindMachine : RhythmProducer {
         transform.localPosition -= new Vector3(0, 2, 0);
         transform.SetParent(null);
 
-        tpc.isHoldingSomething = false;
-        tpc.canUseSeed = true;
+        //tpc.isHoldingSomething = false;
+        //tpc.canUseSeed = true;
         playerHolding = false;
         interactable = true;
     }

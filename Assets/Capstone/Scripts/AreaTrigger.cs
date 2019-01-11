@@ -48,8 +48,8 @@ public class AreaTrigger : MonoBehaviour {
                 }
             }
             thisArea.TransitionTo(1f);
-            tpc.currentAudioMix = thisArea;
-            tpc.plantingGroup = thisGroup;
+            //tpc.currentAudioMix = thisArea;
+            //tpc.plantingGroup = thisGroup;
             transitioned = true;
         }
     }
@@ -59,8 +59,8 @@ public class AreaTrigger : MonoBehaviour {
         if (other.gameObject.tag == "Player")
         {
             oldArea.TransitionTo(1f);
-            tpc.currentAudioMix = oldArea;
-            tpc.plantingGroup = oldGroup;
+            //tpc.currentAudioMix = oldArea;
+            //tpc.plantingGroup = oldGroup;
             transitioned = true;
         }
 

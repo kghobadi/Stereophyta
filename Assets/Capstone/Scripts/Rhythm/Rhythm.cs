@@ -9,44 +9,24 @@ public class Rhythm : MonoBehaviour {
     {
         if (other.gameObject.tag == "Plant")
         {
-            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
-
-            if (plantType == "GUITAR")
-            {
-                other.gameObject.GetComponent<GuitarPlant>().PlaySound();
-            }
-            else if (plantType == "HORN")
-            {
-                other.gameObject.GetComponent<HornPlant>().PlaySound();
-            }
-            else if (plantType == "PIANO")
-            {
-                other.gameObject.GetComponent<PianoPlant>().PlaySound();
-            }
+            other.gameObject.GetComponent<Plont>().PlaySound();
         }
-        else if (other.gameObject.tag == "Seed")
-        {
-            other.gameObject.GetComponent<fruitSeedNoInv>().PlaySound();
-            Debug.Log("seed playing");
-        }
+        //else if (other.gameObject.tag == "Seed")
+        //{
+        //    other.gameObject.GetComponent<Seed>().PlaySound();
+        //}
     }
+    
+
     public virtual void OnTriggerStay(Collider other)
     {
         if (other.gameObject.tag == "Plant")
         {
-            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+            //string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
 
-            if (plantType == "GUITAR")
-            {
-                other.gameObject.GetComponent<GuitarPlant>().PlaySound();
-            }
-            //else if (plantType == "HORN")
+            //if (plantType == "GUITAR")
             //{
-            //    other.gameObject.GetComponent<HornPlant>().PlaySound();
-            //}
-            //else if (plantType == "PIANO")
-            //{
-            //    other.gameObject.GetComponent<PianoPlant>().PlaySound();
+            //    other.gameObject.GetComponent<GuitarPlant>().PlaySound();
             //}
         }
     }
@@ -55,7 +35,7 @@ public class Rhythm : MonoBehaviour {
     {
         if(other.gameObject.tag == "Plant")
         {
-            string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
+           // string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
 
         
         }

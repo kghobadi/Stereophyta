@@ -271,7 +271,7 @@ public class NPC : Interactable {
         //while a player is reseting waypoints
         if (playerSettingMove)
         {
-            tpc.talking = true;
+            //tpc.talking = true;
             interactable = false;
 
             holdTimer += Time.deltaTime;
@@ -309,7 +309,7 @@ public class NPC : Interactable {
 
             if(setCounter > 2)
             {
-                tpc.talking = false;
+                //tpc.talking = false;
                 interactable = true;
                 playerSettingMove = false;
                 for (int i = 0; i < movementPoints.Count; i++)
@@ -376,7 +376,7 @@ public class NPC : Interactable {
         //Should play sound effect for successful path set!
         Debug.Log("set new path");
         playerSettingMove = false;
-        tpc.talking = false;
+        //tpc.talking = false;
         moveCounter = 0;
         movementPointsContainer.SetParent(null);
         holdTimer = 0;
@@ -501,53 +501,53 @@ public class NPC : Interactable {
     //The follow ability all NPCs have. Checks place in line, then moves towards it on NavMesh
     public virtual void FollowPlayer()
     {
-        navMeshAgent.isStopped = false;
-        //check place in line
-        int currentLineLength = tpc.followers.Count;
-        if (currentLineLength != lastLineLength)
-        {
-            CheckPlaceInLine();
-        }
+        //navMeshAgent.isStopped = false;
+        ////check place in line
+        //int currentLineLength = tpc.followers.Count;
+        //if (currentLineLength != lastLineLength)
+        //{
+        //    CheckPlaceInLine();
+        //}
 
-        Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
+        //Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
         
-        if (Vector3.Distance(transform.position, spotInLine) > 25f)
-        {
-            animator.SetBool("walking", true);
-            animator.SetBool("idle", false);
-            navMeshAgent.SetDestination(spotInLine);
-            navMeshAgent.speed = tpc.currentSpeed + 5;
-            transform.LookAt(spotInLine);
-        }
-        else if (Vector3.Distance(transform.position, spotInLine) > 5f && Vector3.Distance(transform.position, spotInLine) < 25f)
-        {
-            animator.SetBool("walking", true);
-            animator.SetBool("idle", false);
-            navMeshAgent.speed = moveSpeedOriginal;
-            navMeshAgent.SetDestination(spotInLine);
-            transform.LookAt(spotInLine);
-        }
-        else
-        {
-            animator.SetBool("idle", true);
-            animator.SetBool("walking", false);
-            animator.SetBool("working", false);
-            transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
-        }
+        //if (Vector3.Distance(transform.position, spotInLine) > 25f)
+        //{
+        //    animator.SetBool("walking", true);
+        //    animator.SetBool("idle", false);
+        //    navMeshAgent.SetDestination(spotInLine);
+        //    navMeshAgent.speed = tpc.currentSpeed + 5;
+        //    transform.LookAt(spotInLine);
+        //}
+        //else if (Vector3.Distance(transform.position, spotInLine) > 5f && Vector3.Distance(transform.position, spotInLine) < 25f)
+        //{
+        //    animator.SetBool("walking", true);
+        //    animator.SetBool("idle", false);
+        //    navMeshAgent.speed = moveSpeedOriginal;
+        //    navMeshAgent.SetDestination(spotInLine);
+        //    transform.LookAt(spotInLine);
+        //}
+        //else
+        //{
+        //    animator.SetBool("idle", true);
+        //    animator.SetBool("walking", false);
+        //    animator.SetBool("working", false);
+        //    transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+        //}
 
-        lastLineLength = tpc.followers.Count;
+        //lastLineLength = tpc.followers.Count;
     }
 
     //private function for checking NPC follower line spot 
     public virtual void CheckPlaceInLine()
     {
-        placeInLine = tpc.followers.IndexOf(gameObject);
-        currentFollowDistance = 0;
+        //placeInLine = tpc.followers.IndexOf(gameObject);
+        //currentFollowDistance = 0;
 
-        for (int i = 0; i <= placeInLine; i++)
-        {
-            currentFollowDistance += tpc.followerDistances[i];
-        }
+        //for (int i = 0; i <= placeInLine; i++)
+        //{
+        //    currentFollowDistance += tpc.followerDistances[i];
+        //}
 
     }
 
@@ -597,9 +597,9 @@ public class NPC : Interactable {
         if (lastState != NPCState.FOLLOWING  && !clickedButton)
         {
             myLanguage.playerResponded = true;
-            tpc.followers.Add(gameObject);
-            tpc.followerDistances.Add(followDistance);
-            tpc.blubAnimator.Play("Wave", 0);
+            //tpc.followers.Add(gameObject);
+            //tpc.followerDistances.Add(followDistance);
+            //tpc.blubAnimator.Play("Wave", 0);
             CheckPlaceInLine();
 
             moveSpeedOriginal = navMeshAgent.speed;
@@ -613,9 +613,9 @@ public class NPC : Interactable {
         else if(lastState == NPCState.FOLLOWING && !clickedButton)
         {
             myLanguage.playerResponded = true;
-            tpc.followers.Remove(gameObject);
-            tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
-            tpc.blubAnimator.Play("Wave", 0);
+            //tpc.followers.Remove(gameObject);
+            //tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
+            //tpc.blubAnimator.Play("Wave", 0);
             followTimer = 0;
 
             playerSettingMove = true;
