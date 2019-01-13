@@ -38,10 +38,8 @@ public class ThirdPersonController : MonoBehaviour
     float verticalSpeed;
     Vector3 currentMovementV;
 
-    //seed inv
-    public int currentSeed = 0;
-    public GameObject currentSeedObj;
-    public List<GameObject> mySeeds = new List<GameObject>();
+    //inventory ref
+    Inventory myInventory;
     
     //for calc of sliding
     public Transform physicsRaycaster;
@@ -77,6 +75,7 @@ public class ThirdPersonController : MonoBehaviour
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        myInventory = GetComponent<Inventory>();
         
         //for ps4 Move
         moveSmoothUse = movespeedSmooth;
@@ -88,8 +87,7 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("idle", true);
         poopShoes.SetBool("running", false);
         poopShoes.SetBool("jumping", false);
-
-        currentSeedObj = mySeeds[currentSeed];
+        
         playerCanMove = true;
     }
 
@@ -103,42 +101,11 @@ public class ThirdPersonController : MonoBehaviour
         //WASD move + Mouse controls for cam & interactions
         //}
 
-        //switch current seed
-        if (Input.GetButtonDown("SwitchSeed"))
-        {
-            SwitchSeed();
-        }
-
         //Restart game
         if (Input.GetKeyDown(KeyCode.R))
         {
             SceneManager.LoadScene("PlayerTest");
         }
-    }
-
-    public void SwitchSeed()
-    {
-        //rotate all the seeds equally around me body
-        for (int i = 0; i < mySeeds.Count; i++)
-        {
-            mySeeds[i].transform.RotateAround(transform.position, transform.up, 360 / mySeeds.Count);
-        }
-
-        currentSeedObj.GetComponent<Seed>().seedSelected = false;
-
-        //increment seed counter
-        if (currentSeed < mySeeds.Count - 1)
-        {
-            currentSeed++;
-        }
-        else
-        {
-            currentSeed = 0;
-        }
-
-        //set new seed
-        currentSeedObj = mySeeds[currentSeed];
-        currentSeedObj.GetComponent<Seed>().seedSelected = true;
     }
 
     void IncrementFootsteps()
