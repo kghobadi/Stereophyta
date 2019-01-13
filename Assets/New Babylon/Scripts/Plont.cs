@@ -46,7 +46,7 @@ public class Plont : MonoBehaviour {
         soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
         soundPlaying.Stop();
 
-        GrowPlant();
+        GrowPlant(true);
     }
 	
 	void Update () {
@@ -59,7 +59,7 @@ public class Plont : MonoBehaviour {
 
                 if (myAge == nextStage)
                 {
-                    GrowPlant();
+                    GrowPlant(true);
                 }
 
                 dayPassed = true;
@@ -85,18 +85,37 @@ public class Plont : MonoBehaviour {
         }
 	}
 
-    public void GrowPlant()
+    public void GrowPlant(bool growOrShrink)
     {
-        Debug.Log("growing!!");
-        //increment current stage based on number of growth stages
-        if(currentStage < myGrowthStages.Length - 1)
-            currentStage++;
+        //grow
+        if (growOrShrink)
+        {
+            Debug.Log("growing!!");
+            //increment current stage based on number of growth stages
+            if (currentStage < myGrowthStages.Length - 1)
+                currentStage++;
+            else
+            {
+                //time to die!
+                Debug.Log("Rip " + gameObject.name);
+                Destroy(gameObject);
+            }
+        }
+        //shrink
         else
         {
-            //time to die!
-            Debug.Log("Rip " + gameObject.name);
-            Destroy(gameObject);
+            Debug.Log("shrinking!!");
+            //increment current stage based on number of growth stages
+            if (currentStage > 1)
+                currentStage--;
+            else
+            {
+                //time to die!
+                Debug.Log("Rip " + gameObject.name);
+                Destroy(gameObject);
+            }
         }
+        
 
         //if there is a new model for this stage
         if (myGrowthStages[currentStage].stageModel)
@@ -121,7 +140,7 @@ public class Plont : MonoBehaviour {
         //set current clip
         currentClip = myGrowthStages[currentStage].stageSound;
     }
-
+    
     public void PlaySound()
     {
         plantSource.PlayOneShot(currentClip);
