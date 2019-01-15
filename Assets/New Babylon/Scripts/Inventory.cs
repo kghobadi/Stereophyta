@@ -45,18 +45,16 @@ public class Inventory : MonoBehaviour {
         //switch current item +
         if (Input.GetAxis("SwitchItem") > 0 && canSwitchInv)
         {
-            Debug.Log("pos switch");
             SwitchItem(true);
         }
         //switch current item -
         if (Input.GetAxis("SwitchItem") < 0 && canSwitchInv)
         {
-            Debug.Log("neg switch");
             SwitchItem(false);
         }
 
         //switch current seed if we are holding seed Itemtype
-        if (Input.GetButtonDown("SwitchSeed") && currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED)
+        if (Input.GetButtonDown("SwitchSeed") && currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED && tpc.playerCanMove)
         {
             SwitchSeed();
         }
