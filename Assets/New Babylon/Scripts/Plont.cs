@@ -25,7 +25,7 @@ public class Plont : MonoBehaviour {
     public float emitFreq=0.25f;
     float emitTimer;
 
-    float originalHeight;
+    Vector3 originalScale;
     public int myAge, currentStage, nextStage;
     public bool dayPassed;
     public GrowthStages[] myGrowthStages;
@@ -40,7 +40,7 @@ public class Plont : MonoBehaviour {
         plantCollider = GetComponent<BoxCollider>();
         plantSource = GetComponent<AudioSource>();
 
-        originalHeight = transform.localScale.y;
+        originalScale = transform.localScale;
         myAge = 0;
         currentStage = 0;
         soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
@@ -131,7 +131,7 @@ public class Plont : MonoBehaviour {
         //just increase its height ok to original * current stage
         else
         {
-            transform.localScale = new Vector3(transform.localScale.x, originalHeight * currentStage, transform.localScale.z);
+            transform.localScale = originalScale * currentStage;
         }
         
 

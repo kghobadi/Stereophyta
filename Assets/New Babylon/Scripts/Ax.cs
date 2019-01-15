@@ -38,7 +38,6 @@ public class Ax : Tool {
         base.MainAction();
         axAnimator.SetBool("axing", true);
         axing = true;
-        Debug.Log("main action");
     }
 
     void OnTriggerEnter(Collider other)
@@ -53,4 +52,18 @@ public class Ax : Tool {
             Debug.Log("hit plant");
         }
     }
+
+    void OnTriggerStay(Collider other)
+    {
+        //collided with plant
+        if (other.gameObject.tag == "Plant" && axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.2f)
+        {
+            other.GetComponent<Plont>().GrowPlant(false);
+            axing = false;
+            //virtual play sounds
+            PlaySound(axSource, axHits);
+            Debug.Log("hit plant");
+        }
+    }
+
 }
