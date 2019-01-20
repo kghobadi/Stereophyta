@@ -60,18 +60,18 @@ public class fruitSeedNoInv : Interactable {
         {
             seedMaster = _player;
 
-            if (!tpc.hasRightClicked)
-            {
-                tpc.rightClicker.active = true;
-                tpc.rightClick.enabled = true;
+            //if (!tpc.hasRightClicked)
+            //{
+            //    tpc.rightClicker.active = true;
+            //    tpc.rightClick.enabled = true;
                 
-            }
+            //}
 
-            if (!tpc.hasScrolled && tpc.seedLine.Count > 1 && tpc.hasRightClicked)
-            {
-                tpc.scrollThru.active = true;
-                tpc.scroll.enabled = true;
-            }
+            //if (!tpc.hasScrolled && tpc.seedLine.Count > 1 && tpc.hasRightClicked)
+            //{
+            //    tpc.scrollThru.active = true;
+            //    tpc.scroll.enabled = true;
+            //}
 
             PickUpSeed();
         }
@@ -88,11 +88,11 @@ public class fruitSeedNoInv : Interactable {
     //technically will not need this since seeds appear directly from plant
     public override void handleClickSuccess()
     {
-        if(interactable && !tpc.isHoldingSomething)
-        {
-            base.handleClickSuccess();
-            PickUpSeed();
-        }
+        //if(interactable && !tpc.isHoldingSomething)
+        //{
+        //    base.handleClickSuccess();
+        //    PickUpSeed();
+        //}
 
     }
     
@@ -103,10 +103,10 @@ public class fruitSeedNoInv : Interactable {
 
         if (pickedByPlayer)
         {
-            seedSource.outputAudioMixerGroup = tpc.plantingGroup;
+            //seedSource.outputAudioMixerGroup = tpc.plantingGroup;
             
-            currentSeedCount = tpc.seedLine.Count;
-            currentSpot = tpc.seedLine.IndexOf(gameObject);
+            //currentSeedCount = tpc.seedLine.Count;
+            //currentSpot = tpc.seedLine.IndexOf(gameObject);
             //controls whether a seed is playing a clip or not
             if (seedSource.isPlaying)
             {
@@ -117,36 +117,36 @@ public class fruitSeedNoInv : Interactable {
             if (playerHolding)
             {
                 //if you right click and nothing is stopping you
-                if (Input.GetMouseButtonDown(1) && tpc.canUseSeed)
-                {
-                    bool canPlant = true;
-                    Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
-                    int i = 0;
-                    while (i < hitColliders.Length)
-                    {
-                        if (hitColliders[i].gameObject.tag == "Plant")
-                        {
-                            canPlant = false;
-                        }
-                        i++;
-                    }
-                    if (canPlant && tpc.canUseSeed)
-                    {
-                        planting = true;
-                        playerHolding = false;
-                        tpc.seedLine.Remove(gameObject);
-                        inSeedLine = false;
-                        if (tpc.rightClick.enabled)
-                        {
-                            tpc.rightClick.enabled = false;
-                            tpc.hasRightClicked = true;
-                        }
-                    }
-                    else
-                    {
-                        seedSource.PlayOneShot(tpc.noNo[0]);
-                    }
-                }
+                //if (Input.GetMouseButtonDown(1) && tpc.canUseSeed)
+                //{
+                //    bool canPlant = true;
+                //    Collider[] hitColliders = Physics.OverlapSphere(transform.position, plantingRadius);
+                //    int i = 0;
+                //    while (i < hitColliders.Length)
+                //    {
+                //        if (hitColliders[i].gameObject.tag == "Plant")
+                //        {
+                //            canPlant = false;
+                //        }
+                //        i++;
+                //    }
+                //    if (canPlant && tpc.canUseSeed)
+                //    {
+                //        planting = true;
+                //        playerHolding = false;
+                //        tpc.seedLine.Remove(gameObject);
+                //        inSeedLine = false;
+                //        if (tpc.rightClick.enabled)
+                //        {
+                //            tpc.rightClick.enabled = false;
+                //            tpc.hasRightClicked = true;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        seedSource.PlayOneShot(tpc.noNo[0]);
+                //    }
+                //}
             }
 
             //for controlling behavior of all seeds in line
@@ -173,14 +173,14 @@ public class fruitSeedNoInv : Interactable {
                 else
                 {
                     //controls whether a seed is playing a clip or not
-                    if (seedSource.isPlaying)
-                    {
-                        targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1) + new Vector3(0, 1 - (currentSpot / 10), 0);
-                    }
-                    else
-                    {
-                        targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
-                    }
+                    //if (seedSource.isPlaying)
+                    //{
+                    //    targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1) + new Vector3(0, 1 - (currentSpot / 10), 0);
+                    //}
+                    //else
+                    //{
+                    //    targetPos = tpc.seedLine[currentSpot - 1].transform.position - new Vector3(0, 0, 1);
+                    //}
 
                     //so seed speeds eventually level out
                     if (currentSpot < 10)
@@ -214,8 +214,8 @@ public class fruitSeedNoInv : Interactable {
                 CheckPlaceInLine();
             }
 
-            lastLineLength = tpc.seedLine.Count;
-            lastSpot = tpc.seedLine.IndexOf(gameObject);
+            //lastLineLength = tpc.seedLine.Count;
+            //lastSpot = tpc.seedLine.IndexOf(gameObject);
             movedInLine = false;
 
         }
@@ -242,35 +242,35 @@ public class fruitSeedNoInv : Interactable {
 
     public void PickUpSeed()
     {
-        tpc.seedLine.Add(gameObject);
-        inSeedLine = true;
-        if (tpc.seedLine.Count == 1)
-        {
-                //move to player holding pos
-                transform.SetParent(rightArmObj.transform);
-                transform.localPosition = Vector3.zero;
-                transform.localEulerAngles = Vector3.zero;
-                gameObject.layer = originalLayer;
+        //tpc.seedLine.Add(gameObject);
+        //inSeedLine = true;
+        //if (tpc.seedLine.Count == 1)
+        //{
+        //        //move to player holding pos
+        //        transform.SetParent(rightArmObj.transform);
+        //        transform.localPosition = Vector3.zero;
+        //        transform.localEulerAngles = Vector3.zero;
+        //        gameObject.layer = originalLayer;
 
-                playerHolding = true;
+        //        playerHolding = true;
             
             
-        }
-        else
-        {
-            //reset pos
-            int lineIndex = tpc.seedLine.IndexOf(gameObject);
-            transform.position = seedMaster.transform.position;
-            transform.localEulerAngles = Vector3.zero;
+        //}
+        //else
+        //{
+        //    //reset pos
+        //    int lineIndex = tpc.seedLine.IndexOf(gameObject);
+        //    transform.position = seedMaster.transform.position;
+        //    transform.localEulerAngles = Vector3.zero;
           
-            for (int i = 0;i <= currentSpot; i++)
-            {
-                if( i < 10)
-                {
-                    transform.localScale *= 0.9f;
-                }
-            }
-        }
+        //    for (int i = 0;i <= currentSpot; i++)
+        //    {
+        //        if( i < 10)
+        //        {
+        //            transform.localScale *= 0.9f;
+        //        }
+        //    }
+        //}
     }
 
 
@@ -355,8 +355,8 @@ public class fruitSeedNoInv : Interactable {
 
         if (pickedByPlayer)
         {
-            tpc.canUseSeed = false;
-            tpc.talking = true;
+            //tpc.canUseSeed = false;
+            //tpc.talking = true;
         }
        
         transform.Translate(0, fallingSpeed * Time.deltaTime, 0);
@@ -388,9 +388,9 @@ public class fruitSeedNoInv : Interactable {
 
                 if (pickedByPlayer)
                 {
-                    plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;   
-                    tpc.talking = false;
-                    tpc.canUseSeed = true;
+                    //plantClone.GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;   
+                    //tpc.talking = false;
+                    //tpc.canUseSeed = true;
                 }
                 else
                 {

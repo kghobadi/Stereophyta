@@ -8,369 +8,103 @@ using UnityEngine.SceneManagement;
 
 public class ThirdPersonController : MonoBehaviour
 {
-    //Player movment variables. 
-    CharacterController player;
-    public float currentSpeed, walkSpeed, runSpeedMax;
-    public float startingHeight, runTime;
-    private Vector3 targetPosition;
-    public bool isMoving; // for point to click
-    public Animator blubAnimator;
-    float clickTimer, headTurnTimer;
-    bool hasTurnedHead;
-    //these are used in seed script
-    public float throwStrength, throwMin, throwMax, throwStrengthMultiplier, gravity;
-    public GameObject walkingPointer;
-    //Camera ref variables
-    AudioSource cameraAudSource;
-    public AudioSource playerSource;
-    public AudioClip[] footsteps, noNo;
-    public float walkStepTotal = 1f, runStepTotal = 0.5f;
-    public ParticleSystem walkingEffect;
-    float footStepTimer = 0;
-    int currentStep = 0;
-    //CameraController camControl;
+    //player controller and cam controller ref
+    CharacterController controller;
+    PlayerCameraController playerCameraController;
+    Transform cameraTransform;
+    public Animator poopShoes;
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask mask;
-
-    //control player actions with interactable objects
-    public bool isHoldingSomething, canUseSeed, talking;
- 
-    //Lists for follower line and seed line
-    public List<GameObject> followers = new List<GameObject>();
-    public List<float> followerDistances = new List<float>();
-    public int followerCountMax;
-
-    public List<GameObject> seedLine = new List<GameObject>();
-    float scrollTimer, scrollTimerTotal = 0.1f;
-
-    //Store the current audio mixer info so when you plant stuff and drop off followers, they adjust to where player is on map
-    public AudioMixerSnapshot currentAudioMix;
-    public AudioMixerGroup plantingGroup;
-
-    //how to plant
-    public bool hasRightClicked, hasScrolled;
-    public Image rightClick, scroll;
-    public AnimateDialogue rightClicker, scrollThru;
-
-    [SerializeField]
-    //dictionary to sort nearby audio sources by distance 
-    Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
-    public List<string> tagsWithAudio = new List<string>();
-    WorldManager wm;
-   
-    //store this mouse pos
-    Vector3 lastPosition;
-
-    //UI walking
-    Image symbol; // 2d sprite renderer icon reference
-    AnimateUI symbolAnimator;
-    List<Sprite> walkingSprites = new List<Sprite>(); // walking feet cursor
-    int currentWalk = 0;
-
+    public LayerMask groundedCheck;
 
     //PS4 move variables
+    public bool playerCanMove;
+    Vector3 currentMovement;
+    public Vector3 horizontalInput;
     public float movespeed = 5;
     public float movespeedSmooth = 0.3f;
     public float rotateSpeed = 10;
     public float rotateSpeedSmooth = 0.3f;
+
+    //jump variables
     public float jumpSpeed = 20;
     public float jumpWaitTime, jumpWaitTimer;
     public float airControlSmooth = 0.8f;
     public float grav = 9.8f;
     public bool jumping;
-
     float moveSmoothUse;
-
-    float currentForwardSpeed;
-    float forwardSpeedV;
-
-    float targetRotation;
-    float currentRotation;
     float rotationV;
-
-    Vector3 currentMovement;
-    CharacterController controller;
-    Transform cameraTransform;
     float verticalSpeed;
     Vector3 currentMovementV;
 
-    public Animator poopShoes;
+    //inventory ref
+    Inventory myInventory;
+    
+    //for calc of sliding
+    public Transform physicsRaycaster;
 
+    //all my audio stuff
     AudioSource audioSource;
+    AudioSource cameraAudSource;
+    public AudioSource playerSource;
     public AudioClip[] jumpSounds;
+    public AudioClip[] footsteps, noNo;
+    public float walkStepTotal = 1f, runStepTotal = 0.5f;
+    public ParticleSystem walkingEffect;
+    float footStepTimer = 0;
+    int currentStep = 0;
 
+    //world manager reference
+    WorldManager wm;
 
+    //dictionary to sort nearby audio sources by distance 
+    [SerializeField]
+    Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
+    public List<string> tagsWithAudio = new List<string>();
+    
     void Start()
     {
-        //for ps4 Move
-        moveSmoothUse = movespeedSmooth;
-        controller = GetComponent<CharacterController>();
-        cameraTransform = Camera.main.transform;
-        audioSource = GetComponent<AudioSource>();
-
-        poopShoes.SetBool("idle", true);
-        poopShoes.SetBool("running", false);
-        poopShoes.SetBool("jumping", false);
-
         //for dirt particles
         if (walkingEffect!= null)
         {
             walkingEffect.Stop();
         }
-        
-        //walking UI
-        symbol = GameObject.FindGameObjectWithTag("Symbol").GetComponent<Image>(); //searches for InteractSymbol
-        symbolAnimator = symbol.GetComponent<AnimateUI>();
-        for (int i = 1; i < 4; i++)
-        {
-            walkingSprites.Add(Resources.Load<Sprite>("CursorSprites/Foot" + i));
-        }
-
-        symbol.sprite = walkingSprites[currentWalk];
-        playerSource = GetComponent<AudioSource>();
 
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
-        //camControl = Camera.main.GetComponent<CameraController>();
+        playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        myInventory = GetComponent<Inventory>();
+        
+        //for ps4 Move
+        moveSmoothUse = movespeedSmooth;
+        controller = GetComponent<CharacterController>();
+        cameraTransform = Camera.main.transform;
+        audioSource = GetComponent<AudioSource>();
+        playerCameraController.enabled = true;
 
-        //set starting points for most vars
-        player = GetComponent<CharacterController>();
-        targetPosition = transform.position;
-        //blubAnimator = GetComponentInChildren<Animator>();
-        //blubAnimator.SetBool("idle", true);
-        startingHeight = transform.position.y;
-        headTurnTimer = 0;
-        canUseSeed = true;
-        currentSpeed = walkSpeed;
-
-        rightClicker = rightClick.GetComponent<AnimateDialogue>();
-        scrollThru = scroll.GetComponent<AnimateDialogue>();
-        rightClick.enabled = false;
-        scroll.enabled = false;
+        poopShoes.SetBool("idle", true);
+        poopShoes.SetBool("running", false);
+        poopShoes.SetBool("jumping", false);
+        
+        playerCanMove = true;
     }
 
     void Update()
     {
+        if(playerCanMove)
+            PS4Movement();
 
-        PS4Movement();
+        //if (mouseMovement)
+        //{
+        //WASD move + Mouse controls for cam & interactions
+        //}
 
-        if (!talking)
+        //Restart game
+        if (Input.GetKeyDown(KeyCode.R))
         {
-            //this is used in fruitSeedNoInv to let seed know whether player has a seed already
-            if (seedLine.Count == 0)
-            {
-                isHoldingSomething = false;
-            }
-            else
-            {
-                isHoldingSomething = true;
-            }
-
-            //click to move to point
-            if (Input.GetMouseButton(0))
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-
-                clickTimer += Time.deltaTime;
-                if (clickTimer > runTime && currentSpeed < runSpeedMax)
-                {
-                    currentSpeed += Time.deltaTime * 5;
-                }
-
-                if (Physics.Raycast(ray, out hit, 100, mask))
-                {
-                    //if we hit the ground & height is in range, move the character to that position
-                    if (hit.transform.gameObject.tag == "Ground")
-                    {
-                        walkingPointer.transform.position = hit.point;
-                        targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
-                        isMoving = true;
-
-                    }
-
-                    //if we hit an interactable object AND we are far from it, the player should auto walk towards it
-                    else if (Vector3.Distance(transform.position, hit.transform.position) > 5 &&
-                        (hit.transform.gameObject.tag == "WindGen" || hit.transform.gameObject.tag == "Plant"
-                        || hit.transform.gameObject.tag == "Seed" || hit.transform.gameObject.tag == "WindMachines"
-                        || hit.transform.gameObject.tag == "Rock" || hit.transform.gameObject.tag == "NPC"))
-                    {
-                        if(hit.transform.gameObject.tag == "NPC" && hit.transform.gameObject.GetComponent<Language>().questActive)
-                        {
-                            targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                            walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
-                            isMoving = true;
-                        }
-                        else if(hit.transform.gameObject.tag == "NPC" && !hit.transform.gameObject.GetComponent<Language>().questActive)
-                        {
-                            //nothing
-                        }
-                        else
-                        {
-                            targetPosition = new Vector3(hit.point.x + 2, transform.position.y, hit.point.z + 2);
-                            walkingPointer.transform.position = new Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z);
-                            isMoving = true;
-                        }
-                        
-
-                    }
-                    else
-                    {
-                        isMoving = false;
-                    }
-                }
-            }
-
-            //On mouse up, we check clickTimer to see if we are walking to that point or stopping the character from running 
-            if (Input.GetMouseButtonUp(0))
-            {
-                playerSource.PlayOneShot(footsteps[currentStep]);
-                //increment footstep audio
-                if (currentStep < (footsteps.Length - 1))
-                {
-                    currentStep++;
-                }
-                else
-                {
-                    currentStep = 0;
-                }
-                if (clickTimer < runTime)
-                {
-                    isMoving = true;
-                    clickTimer = 0;
-                    currentSpeed = walkSpeed;
-                    //set walk sprite
-                    if (currentWalk < (walkingSprites.Count - 1))
-                    {
-                        currentWalk++;
-                    }
-                    else
-                    {
-                        currentWalk = 0;
-                    }
-                    symbol.sprite = walkingSprites[currentWalk];
-                    symbolAnimator.active = false;
-                    walkingPointer.SetActive(true);
-                }
-                else
-                {
-                    symbolAnimator.active = false;
-                    isMoving = false;
-                    clickTimer = 0;
-                    currentSpeed = walkSpeed;
-                }
-            }
-
-            //Restart game
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                SceneManager.LoadScene("PlayerTest");
-            }
-
-            scrollTimer -= Time.deltaTime;
-            //Input map for Mousewheel scroll to change seeds
-            //if scroll up 
-            if (Input.GetAxis("Mouse ScrollWheel") > 0 && seedLine.Count > 1 && scrollTimer <0)
-            {
-                GameObject seedToMove = seedLine[0];
-                seedLine.Remove(seedToMove);
-                seedLine.Insert(seedLine.Count, seedToMove);
-
-                scrollTimer = scrollTimerTotal;
-            }
-            //if scroll down 
-            else if (Input.GetAxis("Mouse ScrollWheel") < 0 && seedLine.Count > 1 && scrollTimer < 0)
-            {
-                GameObject seedToMove = seedLine[seedLine.Count - 1];
-                int index = seedLine.Count - 1;
-                // move all seed positions backward in line 
-                seedLine.RemoveAt(index);
-                seedLine.Insert(0, seedToMove);
-                scrollTimer = scrollTimerTotal;
-                if (!hasScrolled)
-                {
-                    scroll.enabled = false;
-                    hasScrolled = true;
-                }
-            }
-
-            //Check if we are moving and transition animation controller
-            if (isMoving)
-            {
-                MovePlayer();
-                //blubAnimator.SetBool("idle", false);
-                //blubAnimator.SetBool("dancing", false);
-                //blubAnimator.SetBool("touchingPlant", false);
-
-                if (!walkingEffect.isPlaying)
-                {
-                    walkingEffect.Play();
-                }
-                headTurnTimer = 0;
-
-                footStepTimer += Time.deltaTime;
-                
-                if (currentSpeed > 12)
-                {
-                    //play footstep sound
-                    if (footStepTimer > runStepTotal)
-                    {
-                        playerSource.PlayOneShot(footsteps[currentStep]);
-                        IncrementFootsteps();
-                    }
-                    //animate ui
-                    walkingPointer.SetActive(false);
-                    symbolAnimator.active = true;
-                    //blubAnimator.SetBool("running", true);
-                    //blubAnimator.SetBool("walking", false);
-                }
-                else
-                {
-                    //play footstep sound
-                    if (footStepTimer > walkStepTotal)
-                    {
-                        playerSource.PlayOneShot(footsteps[currentStep]);
-                        IncrementFootsteps();
-                    }
-                    //blubAnimator.SetBool("walking", true);
-                    //blubAnimator.SetBool("running", false);
-                }
-
-              
-            }
-            //this timer only plays the idle animation if we are not moving. still a little buggy
-            else
-            {
-                //if (walkingEffect.isPlaying) {
-                //    walkingEffect.Stop();
-                //}
-              
-                //footStepTimer = 0;
-                walkingPointer.SetActive(false);
-                //blubAnimator.SetBool("walking", false);
-                //blubAnimator.SetBool("running", false);
-
-                //headTurnTimer += Time.deltaTime;
-                //if (headTurnTimer > 3.5f && !blubAnimator.GetBool("touchingPlant"))
-                //{
-                //    blubAnimator.SetBool("idle", false);
-                //    blubAnimator.SetBool("dancing", true);
-                //}
-                //else
-                //{
-                //    blubAnimator.SetBool("idle", true);
-                //}
-            }
-
-            //if mouse has moved, refill list & reevaluate priorities
-            if (lastPosition != transform.position)
-            {
-                ResetNearbyAudioSources();
-            }
-
-            lastPosition = transform.position;
+            SceneManager.LoadScene("PlayerTest");
         }
     }
 
@@ -390,7 +124,7 @@ public class ThirdPersonController : MonoBehaviour
     void PS4Movement()
     {
         //PS4 Controls
-        Vector3 horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
         //should put measure in place to adjust animations and footsteps to walking speed based on slight input of joystick
 
@@ -457,13 +191,16 @@ public class ThirdPersonController : MonoBehaviour
             jumping = false;
             jumpWaitTimer -= Time.deltaTime;
             moveSmoothUse = movespeedSmooth;
-            verticalSpeed = 0;
+
+            //if animator still jumping, set back to idle
             if (poopShoes.GetBool("jumping") == true)
             {
                 poopShoes.SetBool("idle", true);
                 poopShoes.SetBool("running", false);
                 poopShoes.SetBool("jumping", false);
             }
+
+            SlideCheck();
         }
 
         if (!controller.isGrounded)
@@ -486,6 +223,7 @@ public class ThirdPersonController : MonoBehaviour
 
         currentMovement.y = verticalSpeed;
 
+        //Debug.Log(" currentMovement = " + currentMovement);
         controller.Move(currentMovement * Time.deltaTime);
     }
 
@@ -496,37 +234,58 @@ public class ThirdPersonController : MonoBehaviour
         audioSource.PlayOneShot(jumpSounds[randomJump]);
     }
 
-    //Movement function which relies on vector3 movetowards. when we arrive at target, stop moving.
-    void MovePlayer()
+    //we want to see if we are on terrain that should make us slide downward
+    //only gets called while Player is considered to be grounded
+    void SlideCheck()
     {
-        //first calculate rotation and look
-        targetPosition = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
+        //store hit and point
+        RaycastHit hit;
+        Vector3 point;
 
-        float currentDist = Vector3.Distance(transform.position, targetPosition);
+        bool sliding = false;
 
-        //this is a bit finnicky with char controller so may need to continuously set it 
-        if (currentDist >= 0.5f)
+        for(int i = 0; i < 30; i++)
         {
-            transform.LookAt(targetPosition);
+            //raycast forward to see if we hit terrain 
+            if (Physics.Raycast(physicsRaycaster.transform.position, physicsRaycaster.transform.forward, out hit, 3, groundedCheck))
+            {
+                point = hit.point;
 
-            //then set movement
-            Vector3 movement = new Vector3(0, 0, currentSpeed);
+                //hit down
+                RaycastHit hitD;
+                Vector3 dPoint;
 
-            transform.localEulerAngles = new Vector3(0, transform.localEulerAngles.y, transform.localEulerAngles.z);
+                //raycast down to see if we hit the terrain;
+                if (Physics.Raycast(transform.position, -transform.up, out hitD, 10, groundedCheck))
+                {
+                    dPoint = hitD.point;
 
-            movement = transform.rotation * movement;
+                    //compare the heights of these points. 
+                    //if down point is lower height, we should fall down slowly
+                    if (dPoint.y < (point.y - 1.5f))
+                    {
+                        verticalSpeed = -jumpSpeed * 2;
+                        float zForce = -physicsRaycaster.transform.forward.z * 5;
+                        //i think we need to somehow reorient the player before applying this force. 
+                        transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, physicsRaycaster.transform.localEulerAngles.y, transform.localEulerAngles.z);
+                        currentMovement.z = zForce;
+                        sliding = true;
 
-            //Actually move
-            player.Move(movement * Time.deltaTime);
+                        //should make an animation for this, dust particles, sound?
 
-            player.Move(new Vector3(0, -0.5f, 0));
+                        Debug.Log("sliding backward");
+                    }
+                }
+            }
+
+            //spin physics raycaster 1/30th of the way around y axis to shoot ray again
+            physicsRaycaster.transform.Rotate(0, 12, 0);
         }
-        else
+
+        if (!sliding)
         {
-            isMoving = false;
+            verticalSpeed = 0;
         }
-
-       
     }
 
     //this function shifts all audio source priorities dynamically

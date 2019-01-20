@@ -91,7 +91,7 @@ public class NPCDrummer : NPC
         if (playerSettingMove)
         {
             setUpSpot.SetActive(true);
-            tpc.talking = true;
+            //tpc.talking = true;
             interactable = false;
 
             holdTimer += Time.deltaTime;
@@ -120,7 +120,7 @@ public class NPCDrummer : NPC
 
                         StartCoroutine(WaveAtPlayer());
 
-                        tpc.talking = false;
+                        //tpc.talking = false;
                     }
 
                 }
@@ -158,7 +158,7 @@ public class NPCDrummer : NPC
             {
                 drumSet[i].transform.localPosition = drumBackpack.localPosition;
                 drumSet[i].transform.localEulerAngles = new Vector3(-90, 0, 0);
-                drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
+                //drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
             //no drum beat colliding
             drumCollision.gameObject.SetActive(false);
@@ -185,8 +185,8 @@ public class NPCDrummer : NPC
                     drumSet[i].transform.localPosition = new Vector3(drumPositions[i].localPosition.x, -2, drumPositions[i].localPosition.z);
                     drumSet[i].transform.localEulerAngles = new Vector3(0, 0, 0);
                 }
-                if (!startSounds)
-                    drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
+                //if (!startSounds)
+                    //drumSet[i].GetComponent<AudioSource>().outputAudioMixerGroup = tpc.plantingGroup;
             }
 
             if (myMusic.showRhythm && myMusic.isPlaying)
@@ -340,9 +340,9 @@ public class NPCDrummer : NPC
         if (lastState != NPCState.FOLLOWING && !clickedButton)
         {
             myLanguage.playerResponded = true;
-            tpc.followers.Add(gameObject);
-            tpc.followerDistances.Add(followDistance);
-            tpc.blubAnimator.Play("Wave", 0);
+            //tpc.followers.Add(gameObject);
+            //tpc.followerDistances.Add(followDistance);
+            //tpc.blubAnimator.Play("Wave", 0);
             CheckPlaceInLine();
 
             moveSpeedOriginal = navMeshAgent.speed;
@@ -356,9 +356,9 @@ public class NPCDrummer : NPC
         else if (lastState == NPCState.FOLLOWING && !clickedButton)
         {
             myLanguage.playerResponded = true;
-            tpc.followers.Remove(gameObject);
-            tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
-            tpc.blubAnimator.Play("Wave", 0);
+            //tpc.followers.Remove(gameObject);
+            //tpc.followerDistances.Remove(tpc.followerDistances[placeInLine]);
+            //tpc.blubAnimator.Play("Wave", 0);
             followTimer = 0;
 
             playerSettingMove = true;

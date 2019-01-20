@@ -75,7 +75,7 @@ public class CircleMillControls : Interactable {
         base.Update();
 
 
-        if((tpc.talking || selectionMenu.enabled) && playerClicked)
+        if((/*tpc.talking ||*/ selectionMenu.enabled) && playerClicked)
         {
             if (camControl != null)
             {

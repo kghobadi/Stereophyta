@@ -109,7 +109,7 @@ public class Animal : Interactable {
             {
                 canSeeDistance = 50;
                 canClickDistance = 30;
-                FollowPlayer();
+                //FollowPlayer();
             }
             else
             {
@@ -427,11 +427,11 @@ public class Animal : Interactable {
 
         transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
 
-        myVoice.clip = tpc.seedLine[0].GetComponent<fruitSeedNoInv>().plantNote;
+        //myVoice.clip = tpc.seedLine[0].GetComponent<fruitSeedNoInv>().plantNote;
 
-        Destroy(tpc.seedLine[0]);
+        //Destroy(tpc.seedLine[0]);
 
-        tpc.seedLine.Remove(tpc.seedLine[0]);
+        //tpc.seedLine.Remove(tpc.seedLine[0]);
 
         animator.SetTrigger("eat");
 
@@ -452,86 +452,86 @@ public class Animal : Interactable {
     }
 
     //The follow ability all NPCs have. Checks place in line, then moves towards it on NavMesh
-    public virtual void FollowPlayer()
-    {
-        navMeshAgent.isStopped = false;
-        //check place in line
-        int currentLineLength = tpc.followers.Count;
-        if (currentLineLength != lastLineLength)
-        {
-            CheckPlaceInLine();
-        }
+    //public virtual void FollowPlayer()
+    //{
+    //    navMeshAgent.isStopped = false;
+    //    //check place in line
+    //    int currentLineLength = tpc.followers.Count;
+    //    if (currentLineLength != lastLineLength)
+    //    {
+    //        CheckPlaceInLine();
+    //    }
 
-        Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
+    //    Vector3 spotInLine = new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z - currentFollowDistance);
         
-        if (Vector3.Distance(transform.position, spotInLine) > 25f)
-        {
-            animator.SetBool("walking", true);
-            animator.SetBool("idle", false);
-            navMeshAgent.SetDestination(spotInLine);
-            navMeshAgent.speed = tpc.currentSpeed + 3;
-            transform.LookAt(spotInLine);
-        }
-        else if (Vector3.Distance(transform.position, spotInLine) > 5f && Vector3.Distance(transform.position, spotInLine) < 25f)
-        {
-            animator.SetBool("walking", true);
-            animator.SetBool("idle", false);
-            navMeshAgent.speed = moveSpeedOriginal;
-            navMeshAgent.SetDestination(spotInLine);
-            transform.LookAt(spotInLine);
-        }
-        else
-        {
-            animator.SetBool("idle", true);
-            animator.SetBool("walking", false);
-            transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
-        }
+    //    if (Vector3.Distance(transform.position, spotInLine) > 25f)
+    //    {
+    //        animator.SetBool("walking", true);
+    //        animator.SetBool("idle", false);
+    //        navMeshAgent.SetDestination(spotInLine);
+    //        navMeshAgent.speed = tpc.currentSpeed + 3;
+    //        transform.LookAt(spotInLine);
+    //    }
+    //    else if (Vector3.Distance(transform.position, spotInLine) > 5f && Vector3.Distance(transform.position, spotInLine) < 25f)
+    //    {
+    //        animator.SetBool("walking", true);
+    //        animator.SetBool("idle", false);
+    //        navMeshAgent.speed = moveSpeedOriginal;
+    //        navMeshAgent.SetDestination(spotInLine);
+    //        transform.LookAt(spotInLine);
+    //    }
+    //    else
+    //    {
+    //        animator.SetBool("idle", true);
+    //        animator.SetBool("walking", false);
+    //        transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+    //    }
 
-        lastLineLength = tpc.followers.Count;
-    }
+    //    lastLineLength = tpc.followers.Count;
+    //}
 
     //private function for checking NPC follower line spot 
-    void CheckPlaceInLine()
-    {
-        placeInLine = tpc.followers.IndexOf(gameObject);
-        currentFollowDistance = 0;
+    //void CheckPlaceInLine()
+    //{
+    //    placeInLine = tpc.followers.IndexOf(gameObject);
+    //    currentFollowDistance = 0;
 
-        for (int i = 0; i <= placeInLine; i++)
-        {
-            currentFollowDistance += tpc.followerDistances[i];
-        }
+    //    for (int i = 0; i <= placeInLine; i++)
+    //    {
+    //        currentFollowDistance += tpc.followerDistances[i];
+    //    }
 
-    }
+    //}
 
     //inherited from Interactable, whenever player clicks on NPC stop moving
-    public override void handleClickSuccess()
-    {
-        //if player has a seed
-        if (currentState != NPCState.FOLLOWING && tpc.seedLine.Count > 0)
-        {
-            //eat my seed
-            StopAllCoroutines();
+    //public override void handleClickSuccess()
+    //{
+    //    //if player has a seed
+    //    if (currentState != NPCState.FOLLOWING && tpc.seedLine.Count > 0)
+    //    {
+    //        //eat my seed
+    //        StopAllCoroutines();
 
-            followTimer = 0;
+    //        followTimer = 0;
 
-            StartCoroutine(EatPlayerSeed());
-        }
-        else if(currentState == NPCState.FOLLOWING && tpc.seedLine.Count > 0)
-        {
-            followTimer = 0;
+    //        StartCoroutine(EatPlayerSeed());
+    //    }
+    //    else if(currentState == NPCState.FOLLOWING && tpc.seedLine.Count > 0)
+    //    {
+    //        followTimer = 0;
 
-            StartCoroutine(EatPlayerSeed());
-        }
+    //        StartCoroutine(EatPlayerSeed());
+    //    }
 
-        //shake head no!!!
-        else 
-        {
-            transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
-            myVoice.PlayOneShot(tpc.noNo[0]);
-            animator.SetTrigger("no");
-        }
+    //    //shake head no!!!
+    //    else 
+    //    {
+    //        transform.LookAt(new Vector3(_player.transform.position.x, transform.position.y, _player.transform.position.z));
+    //        myVoice.PlayOneShot(tpc.noNo[0]);
+    //        animator.SetTrigger("no");
+    //    }
         
-    }
+    //}
 
     public override void OnDisable()
     {

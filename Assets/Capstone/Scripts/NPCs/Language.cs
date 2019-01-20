@@ -196,14 +196,14 @@ public class Language : MonoBehaviour
     //function called takes an array or list of strings
     public IEnumerator Speak()
     {
-        currentMixerGroup = tpc.currentAudioMix;
+        //currentMixerGroup = tpc.currentAudioMix;
         talkingMix.TransitionTo(1f);
         //Debug.Log("speaking");
         if (!finishedQuest)
         {
             //open cloud manual anim
             _player.transform.LookAt(new Vector3(transform.position.x, _player.transform.position.y, transform.position.z));
-            tpc.talking = true;
+            //tpc.talking = true;
             mainCam.zoomedOut = false;
             mainCam.npcTransform = transform;
             mainCam.zoomedIn = true;
@@ -307,7 +307,7 @@ public class Language : MonoBehaviour
                 //zoom out and reactivate player
                 mainCam.zoomedOut = true;
                 mainCam.zoomedIn = false;
-                tpc.talking = false;
+                //tpc.talking = false;
             }
 
             //allow player to issue command if NPC quest complete or they are following you
@@ -320,7 +320,7 @@ public class Language : MonoBehaviour
                 currentMixerGroup.TransitionTo(1f);
                 mainCam.zoomedOut = true;
                 mainCam.zoomedIn = false;
-                tpc.talking = false;
+                //tpc.talking = false;
                 playerResponded = false;
                 waitingForPlayer = false;
             }
