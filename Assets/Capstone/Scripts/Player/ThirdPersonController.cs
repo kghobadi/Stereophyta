@@ -19,7 +19,7 @@ public class ThirdPersonController : MonoBehaviour
     public LayerMask groundedCheck;
 
     //PS4 move variables
-    public bool playerCanMove;
+    public bool playerCanMove, menuOpen;
     Vector3 currentMovement;
     public Vector3 horizontalInput;
     public float movespeed = 5;
@@ -93,7 +93,7 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
-        if(playerCanMove)
+        if(playerCanMove && !menuOpen)
             PS4Movement();
 
         //if (mouseMovement)

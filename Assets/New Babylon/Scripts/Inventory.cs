@@ -42,22 +42,43 @@ public class Inventory : MonoBehaviour {
             canSwitchInv = true;
         }
 
-        //switch current item +
-        if (Input.GetAxis("SwitchItem") > 0 && canSwitchInv)
+        if (!tpc.menuOpen)
         {
-            SwitchItem(true);
-        }
-        //switch current item -
-        if (Input.GetAxis("SwitchItem") < 0 && canSwitchInv)
-        {
-            SwitchItem(false);
+
+            //switch current item +
+            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetAxis("Mouse ScrollWheel") > 0) && canSwitchInv)
+            {
+                SwitchItem(true);
+            }
+            //switch current item -
+            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetAxis("Mouse ScrollWheel") < 0) && canSwitchInv)
+            {
+                SwitchItem(false);
+            }
+
+            //checks for switching seeds
+            if(currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED && tpc.playerCanMove)
+            {
+                //switch current seed if we are holding seed Itemtype
+                if (Input.GetButtonDown("SwitchSeed"))
+                {
+                    SwitchSeed(true);
+                }
+
+                //switch seed neg
+                if (Input.GetKeyDown(KeyCode.Q))
+                {
+                    SwitchSeed(false);
+                }
+                //switch seed pos
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    SwitchSeed(true);
+                }
+            }
+
         }
 
-        //switch current seed if we are holding seed Itemtype
-        if (Input.GetButtonDown("SwitchSeed") && currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED && tpc.playerCanMove)
-        {
-            SwitchSeed();
-        }
     }
 
     public void SwitchItem(bool posOrNeg)
@@ -101,25 +122,53 @@ public class Inventory : MonoBehaviour {
         canSwitchInv = false;
     }
 
-    public void SwitchSeed()
+    public void SwitchSeed(bool posOrNeg)
     {
-        //rotate all the seeds equally around player body
-        for (int i = 0; i < mySeeds.Count; i++)
+
+        if (posOrNeg)
         {
-            mySeeds[i].transform.RotateAround(tpc.transform.position, transform.up, 360 / mySeeds.Count);
+            //rotate all the seeds equally around player body
+            for (int i = 0; i < mySeeds.Count; i++)
+            {
+                mySeeds[i].transform.RotateAround(tpc.transform.position, transform.up, 360 / mySeeds.Count);
+            }
+        }
+        else
+        {
+            //rotate all the seeds equally around player body
+            for (int i = 0; i < mySeeds.Count; i++)
+            {
+                mySeeds[i].transform.RotateAround(tpc.transform.position, transform.up, -360 / mySeeds.Count);
+            }
         }
 
         currentSeedObj.GetComponent<Seed>().seedSelected = false;
 
-        //increment seed counter
-        if (currentSeed < mySeeds.Count - 1)
+        if (posOrNeg)
         {
-            currentSeed++;
+            //increment seed counter up
+            if (currentSeed < mySeeds.Count - 1)
+            {
+                currentSeed++;
+            }
+            else
+            {
+                currentSeed = 0;
+            }
         }
         else
         {
-            currentSeed = 0;
+            //increment seed counter down
+            if (currentSeed > 0)
+            {
+                currentSeed--;
+            }
+            else
+            {
+                currentSeed = mySeeds.Count - 1;
+            }
         }
+       
 
         //set new seed
         currentSeedObj = mySeeds[currentSeed];
