@@ -11,6 +11,10 @@ public class Ax : Tool {
     AudioSource axSource;
     public AudioClip[] axHits;
 
+    public GameObject axWindPrefab;
+    public float distanceToDestroyWinds;
+    public float axWindSpeed;
+
 	public override void Start () {
         base.Start();
         //all my refs
@@ -49,6 +53,7 @@ public class Ax : Tool {
             axing = false;
             //virtual play sounds
             PlaySound(axSource, axHits);
+            SpawnAxWinds(other.gameObject.transform.position);
             Debug.Log("hit plant");
         }
     }
@@ -62,8 +67,29 @@ public class Ax : Tool {
             axing = false;
             //virtual play sounds
             PlaySound(axSource, axHits);
+            SpawnAxWinds(other.gameObject.transform.position);
             Debug.Log("hit plant");
         }
+    }
+
+    //spawns one ax wind
+    void SpawnAxWinds(Vector3 spawnPoint)
+    {
+        GameObject axWindCenter = Instantiate(axWindPrefab, spawnPoint, Quaternion.Euler(tpc.transform.localEulerAngles));
+
+        axWindCenter.GetComponent<AxWind>().myAxDaddy = this;
+
+        Vector3 leftRot = new Vector3(tpc.transform.localEulerAngles.x, tpc.transform.localEulerAngles.y - 45, tpc.transform.localEulerAngles.z);
+
+        GameObject axWindLeft = Instantiate(axWindPrefab, spawnPoint, Quaternion.Euler(leftRot));
+
+        axWindLeft.GetComponent<AxWind>().myAxDaddy = this;
+
+        Vector3 rightRot = new Vector3(tpc.transform.localEulerAngles.x, tpc.transform.localEulerAngles.y + 45, tpc.transform.localEulerAngles.z);
+
+        GameObject axWindRight = Instantiate(axWindPrefab, spawnPoint, Quaternion.Euler(rightRot));
+
+        axWindRight.GetComponent<AxWind>().myAxDaddy = this;
     }
 
 }
