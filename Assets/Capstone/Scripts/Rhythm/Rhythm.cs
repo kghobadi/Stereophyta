@@ -11,10 +11,11 @@ public class Rhythm : MonoBehaviour {
         {
             other.gameObject.GetComponent<Plont>().PlaySound();
         }
-        //else if (other.gameObject.tag == "Seed")
-        //{
-        //    other.gameObject.GetComponent<Seed>().PlaySound();
-        //}
+        else if (other.gameObject.tag == "Tree")
+        {
+            other.gameObject.GetComponent<AncientTree>().PlaySound();
+            //Debug.Log("Tree played sound");
+        }
     }
     
 

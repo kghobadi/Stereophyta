@@ -14,7 +14,7 @@ public abstract class Tool : MonoBehaviour {
 
     public virtual void Update ()
     {
-        if (Input.GetButtonDown("MainAction"))
+        if (Input.GetButtonDown("MainAction") && !tpc.menuOpen)
         {
             MainAction();
         }

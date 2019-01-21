@@ -29,7 +29,7 @@ public class Seed : MonoBehaviour {
 	
 	void Update () {
         //plant seed
-        if (Input.GetButtonDown("Plant") && seedSelected && !planting)
+        if (Input.GetButtonDown("Plant") && seedSelected && !planting && !tpc.menuOpen)
         {
             planting = true;
             originalPos = transform.localPosition;
