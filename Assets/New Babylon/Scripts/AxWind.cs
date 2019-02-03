@@ -33,7 +33,7 @@ public class AxWind : Rhythm {
         {
             if (hit.transform.gameObject.tag == "Ground")
             {
-                transform.position = hit.point + new Vector3(0, 5f, 0);
+                transform.position = hit.point + new Vector3(0, 3f, 0);
             }
         }
     }
