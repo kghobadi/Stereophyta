@@ -17,7 +17,7 @@ public class Plont : Interactive {
     BoxCollider plantCollider;
     GameObject currentModel;
 
-    AudioSource plantSource;
+    public AudioSource plantSource;
     public AudioClip currentClip;
     ParticleSystem soundPlaying;
     public float emitFreq=0.25f;

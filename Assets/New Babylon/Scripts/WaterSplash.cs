@@ -37,7 +37,8 @@ public class WaterSplash : Rhythm {
         base.OnTriggerEnter(other);
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<Plont>().PlaySound();
+            if(!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+                other.gameObject.GetComponent<Plont>().PlaySound();
 
             //if it hasn't been watered, grow and water
             if (!other.gameObject.GetComponent<Plont>().hasBeenWatered)
