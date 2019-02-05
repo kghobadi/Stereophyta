@@ -25,7 +25,7 @@ public class Plont : Interactive {
 
     Vector3 originalScale;
     public int myAge, currentStage, nextStage;
-    public bool dayPassed;
+    public bool dayPassed, hasBeenWatered;
     public GrowthStages[] myGrowthStages;
     
 	void Start () {
@@ -52,6 +52,8 @@ public class Plont : Interactive {
             if (!dayPassed)
             {
                 myAge++;
+
+                hasBeenWatered = false;
 
                 if (myAge == nextStage)
                 {
