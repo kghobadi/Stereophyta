@@ -98,7 +98,7 @@ public class Water : MonoBehaviour
                 if (other.tag == "Ground" || other.tag == "Plant")
                 {
                     Vector3 pos = collisionEvents[i].intersection;
-                    waterSplashes[i].transform.position = pos;
+                    waterSplashes[i].transform.position = pos + new Vector3(0, 1, 0);
                     WaterSplash thisSplash = waterSplashes[i].GetComponent<WaterSplash>();
                     if (!thisSplash.splashing)
                     {
