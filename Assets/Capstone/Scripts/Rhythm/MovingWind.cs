@@ -6,8 +6,9 @@ public class MovingWind : Rhythm {
 
     float currentSpeed;
     public WindGen _windGen;
-    
-	void Start () {
+    public LayerMask ground;
+
+    void Start () {
         currentSpeed = _windGen.windSpeed;
 	}
 	
@@ -28,7 +29,7 @@ public class MovingWind : Rhythm {
 
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, down, out hit, 25f))
+        if (Physics.Raycast(transform.position, down, out hit, 150f))
         {
             if (hit.transform.gameObject.tag == "Ground")
             {

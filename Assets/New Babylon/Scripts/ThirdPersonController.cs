@@ -38,6 +38,10 @@ public class ThirdPersonController : MonoBehaviour
     float verticalSpeed;
     Vector3 currentMovementV;
 
+    //dust splash
+    public GameObject dustSplash;
+    DustSplash splashScript;
+
     //inventory ref
     Inventory myInventory;
     
@@ -82,6 +86,8 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("idle", true);
         poopShoes.SetBool("running", false);
         poopShoes.SetBool("jumping", false);
+
+        splashScript = dustSplash.GetComponent<DustSplash>();
         
         playerCanMove = true;
     }
@@ -183,7 +189,21 @@ public class ThirdPersonController : MonoBehaviour
 
         if (controller.isGrounded)
         {
-            jumping = false;
+            if (jumping)
+            {
+                jumping = false;
+                //dust fall rhythm
+                //hit down
+                RaycastHit hitD;
+
+                //raycast down to see if we hit the terrain;
+                if (Physics.Raycast(transform.position, -transform.up, out hitD, 10, groundedCheck))
+                {
+                    //dust splash
+                    dustSplash.transform.position = hitD.point;
+                    splashScript.StartCoroutine(splashScript.Splash());
+                }
+            }
             jumpWaitTimer -= Time.deltaTime;
             moveSmoothUse = movespeedSmooth;
 

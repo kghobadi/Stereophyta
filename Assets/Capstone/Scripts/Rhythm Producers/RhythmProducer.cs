@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class RhythmProducer : Interactable {
+public abstract class RhythmProducer : MonoBehaviour {
+    protected GameObject player;
+    protected ThirdPersonController tpc;
+
     public AudioClip[] basicBeats;
     protected AudioSource beatSource;
 
@@ -16,13 +19,9 @@ public abstract class RhythmProducer : Interactable {
 
     public virtual void Awake()
     {
-        
+        player = GameObject.FindGameObjectWithTag("Player");
+        tpc = player.GetComponent<ThirdPersonController>();
         SimpleClock.ThirtySecond += OnThirtySecond;
-        //interact sprites
-        for (int i = 1; i < 4; i++)
-        {
-            interactSprites.Add(Resources.Load<Sprite>("CursorSprites/machine " + i));
-        }
     }
 
     public virtual void OnDestroy()
@@ -74,8 +73,7 @@ public abstract class RhythmProducer : Interactable {
     }
 
     // Update is called once per frame
-    public override void Update () {
-        base.Update();
+    public virtual void Update () {
         //may need to qualify this with and if statement in override
         AudioRhythm();
 

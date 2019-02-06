@@ -11,18 +11,15 @@ public class WindGen : RhythmProducer {
     public float distanceToDestroy;
 	
 	public override void Update () {
-        if (Vector3.Distance(_player.transform.position, transform.position) < 100)
-        {
-            if (showRhythm)
-            {
-                //base.Update(); only call this if there is a sound produced when rhythm is produced
-                //instantiate wind, show particles, etc.
-                windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.eulerAngles));
-                windClone.GetComponent<MovingWind>()._windGen = this;
-                showRhythm = false;
 
-               
-            }
+        if (showRhythm)
+        {
+            //base.Update(); only call this if there is a sound produced when rhythm is produced
+            //instantiate wind, show particles, etc.
+            windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.eulerAngles));
+            windClone.GetComponent<MovingWind>()._windGen = this;
+            showRhythm = false;
         }
-	}
+
+    }
 }

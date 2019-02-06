@@ -8,6 +8,8 @@ public class PuzzleWind : Rhythm
     float currentSpeed;
     public WindMachine _windGen;
 
+    public LayerMask ground;
+
     void Start()
     {
         currentSpeed = _windGen.windSpeed;
@@ -32,14 +34,13 @@ public class PuzzleWind : Rhythm
 
     void AdjustHeight()
     {
-        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
-
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, down, out hit, 15f))
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 35f))
         {
             if (hit.transform.gameObject.tag == "Ground")
             {
+                //Debug.Log("adjusting " + hit.point);
                 transform.position = hit.point + new Vector3(0, 3f, 0);
             }
         }

@@ -100,9 +100,12 @@ public class Water : MonoBehaviour
                     Vector3 pos = collisionEvents[i].intersection;
                     waterSplashes[i].transform.position = pos;
                     WaterSplash thisSplash = waterSplashes[i].GetComponent<WaterSplash>();
-                    thisSplash.StartCoroutine(thisSplash.Splash());
-                    hasWatered = true;
-                    break;
+                    if (!thisSplash.splashing)
+                    {
+                        thisSplash.StartCoroutine(thisSplash.Splash());
+                        hasWatered = true;
+                    }
+                    
                 }
             }
            

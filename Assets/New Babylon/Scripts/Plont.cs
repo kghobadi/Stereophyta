@@ -27,6 +27,8 @@ public class Plont : Interactive {
     public int myAge, currentStage, nextStage;
     public bool dayPassed, hasBeenWatered;
     public GrowthStages[] myGrowthStages;
+
+    Animator plantAnimator;
     
 	void Start () {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
@@ -41,6 +43,8 @@ public class Plont : Interactive {
         currentStage = 0;
         soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
         soundPlaying.Stop();
+
+        plantAnimator = GetComponent<Animator>();
 
         GrowPlant(true);
     }
@@ -140,5 +144,6 @@ public class Plont : Interactive {
     public void PlaySound()
     {
         plantSource.PlayOneShot(currentClip);
+        plantAnimator.SetTrigger("wobble");
     }
 }

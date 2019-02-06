@@ -68,7 +68,7 @@ public class GuitarNPC : NPC {
         animator.SetBool("idle", false);
         animator.SetBool("walking", false);
         //this only happens if the player isn't interacting with the device
-        if (!windMachine.playerRotating && !windMachine.playerHolding)
+        if (!windMachine.playerRotating /*&& !windMachine.playerHolding*/)
         {
             //change wind machine rotation
             int randomRotate = Random.Range(0, 100);
@@ -90,45 +90,45 @@ public class GuitarNPC : NPC {
 
         //tempo setting chances
         //if tempo is already fast
-        if (windMachine.timeScale > 2)
-        {
-            //increase chance low
-            if (randomTempo < 25)
-            {
-                windMachine.Selection_Three();
-            }
-            //decrease chance high
-            else
-            {
-                windMachine.Selection_Four();
-            }
-        }
-        else if (windMachine.timeScale == 2)
-        {
-            //increase 
-            if (randomTempo < 50)
-            {
-                windMachine.Selection_Three();
-            }
-            //decrease 
-            else
-            {
-                windMachine.Selection_Four();
-            }
-        }
-        else if (windMachine.timeScale < 2)
-        {
-            //increase chance high
-            if (randomTempo < 75)
-            {
-                windMachine.Selection_Three();
-            }
-            //decrease chance low
-            else
-            {
-                windMachine.Selection_Four();
-            }
-        }
+        //if (windMachine.timeScale > 2)
+        //{
+        //    increase chance low
+        //    if (randomTempo < 25)
+        //    {
+        //        windMachine.Selection_Three();
+        //    }
+        //    decrease chance high
+        //    else
+        //    {
+        //        windMachine.Selection_Four();
+        //    }
+        //}
+        //else if (windMachine.timeScale == 2)
+        //{
+        //    increase
+        //    if (randomTempo < 50)
+        //    {
+        //        windMachine.Selection_Three();
+        //    }
+        //    decrease
+        //    else
+        //    {
+        //        windMachine.Selection_Four();
+        //    }
+        //}
+        //else if (windMachine.timeScale < 2)
+        //{
+        //    increase chance high
+        //    if (randomTempo < 75)
+        //    {
+        //        windMachine.Selection_Three();
+        //    }
+        //    decrease chance low
+        //    else
+        //    {
+        //        windMachine.Selection_Four();
+        //    }
+        //}
 
         windMachine.triRipples.Play();
         yield return new WaitForSeconds(1);
