@@ -6,6 +6,9 @@ using UnityEngine;
 public abstract class Tool : MonoBehaviour {
     protected GameObject player;
     protected ThirdPersonController tpc;
+
+
+    //set tool refs in awake so that inventory can disable them at start
     
 	public virtual void Start () {
         player = GameObject.FindGameObjectWithTag("Player");

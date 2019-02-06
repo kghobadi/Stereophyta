@@ -10,16 +10,14 @@ public struct GrowthStages
     public AudioClip stageSound;
 }
 
-public class Plont : MonoBehaviour {
+public class Plont : Interactive {
     Sun sun;
-    GameObject player;
-    ThirdPersonController tpc;
 
     Rigidbody plantBody;
     BoxCollider plantCollider;
     GameObject currentModel;
 
-    AudioSource plantSource;
+    public AudioSource plantSource;
     public AudioClip currentClip;
     ParticleSystem soundPlaying;
     public float emitFreq=0.25f;
@@ -27,13 +25,13 @@ public class Plont : MonoBehaviour {
 
     Vector3 originalScale;
     public int myAge, currentStage, nextStage;
-    public bool dayPassed;
+    public bool dayPassed, hasBeenWatered;
     public GrowthStages[] myGrowthStages;
+
+    Animator plantAnimator;
     
 	void Start () {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
-        player = GameObject.FindGameObjectWithTag("Player");
-        tpc = player.GetComponent<ThirdPersonController>();
 
         plantBody = GetComponent<Rigidbody>();
         plantBody.isKinematic = true;
@@ -46,16 +44,20 @@ public class Plont : MonoBehaviour {
         soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
         soundPlaying.Stop();
 
+        plantAnimator = GetComponent<Animator>();
+
         GrowPlant(true);
     }
 	
-	void Update () {
+	 public override void Update () {
         //counting days is hard work
         if (sun.dayCounter > sun.yesterday)
         {
             if (!dayPassed)
             {
                 myAge++;
+
+                hasBeenWatered = false;
 
                 if (myAge == nextStage)
                 {
@@ -70,9 +72,7 @@ public class Plont : MonoBehaviour {
         {
             dayPassed = false;
         }
-
-     
-
+        
         //turn sound particles on and off
         if (plantSource.isPlaying)
         {
@@ -144,5 +144,6 @@ public class Plont : MonoBehaviour {
     public void PlaySound()
     {
         plantSource.PlayOneShot(currentClip);
+        plantAnimator.SetTrigger("wobble");
     }
 }

@@ -27,6 +27,9 @@ public class PlayerCameraController : MonoBehaviour {
     public bool mouseControls;
     public float cameraRotationSpeedXMouse = 5;
 
+    // for boat stuff
+    public bool inBoat;
+
     void Start () {
         //player refs set
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;

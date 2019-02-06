@@ -30,13 +30,9 @@ public class WindMachine : RhythmProducer {
 
     SpriteRenderer rhythmSR;
 
-    public override void Start () {
-        base.Start();
-
-        interactable = true;
+    public void Start () {
         rotationSpeed = 3;
-
-
+        
         disappearTimer = disappearTimerTotal;
         rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
         rhythmSR.enabled = false;
@@ -51,14 +47,14 @@ public class WindMachine : RhythmProducer {
         base.Update();
 
         //wind machine drop while holding
-        if (playerHolding)
-        {
-            if (Input.GetMouseButtonDown(1))
-            {
-                DropObject();
+        //if (playerHolding)
+        //{
+        //    if (Input.GetMouseButtonDown(1))
+        //    {
+        //        DropObject();
                 
-            }
-        }
+        //    }
+        //}
 
         fanObj.transform.Rotate(0, 0, rotationSpeed);
 
@@ -67,7 +63,7 @@ public class WindMachine : RhythmProducer {
         {
             triRipples.Play();
             //tpc.talking = true;
-            interactable = false;
+            //interactable = false;
 
             holdTimer += Time.deltaTime;
 
@@ -87,28 +83,28 @@ public class WindMachine : RhythmProducer {
             if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
             {
                 //tpc.talking = false;
-                interactable = true;
+                //interactable = true;
                 playerRotating = false;
             }
         }
 
         //if player is nearby, generate wind rhythm at timeInterval (look in Rhythm Producer)
-        if (Vector3.Distance(_player.transform.position, transform.position) < 100)
+        if (Vector3.Distance(player.transform.position, transform.position) < 100)
         {
             if (showRhythm)
             {
                 //instantiate wind, show particles, etc.
-                windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.eulerAngles - new Vector3(0,90,0)));
+                windClone = Instantiate(wind, transform.position + new Vector3(0, 5, 0), Quaternion.Euler(transform.eulerAngles - new Vector3(0,90,0)));
                 windClone.GetComponent<PuzzleWind>()._windGen = this;
                 showRhythm = false;
             }
         }
 
-        if ((/*tpc.talking ||*/ selectionMenu.enabled) && playerClicked)
-        {
-            rhythmSR.enabled = true;
-            disappearTimer = disappearTimerTotal;
-        }
+        //if ((/*tpc.talking ||*/ selectionMenu.enabled) && playerClicked)
+        //{
+        //    rhythmSR.enabled = true;
+        //    disappearTimer = disappearTimerTotal;
+        //}
 
         if (rhythmSR.enabled)
         {
@@ -123,16 +119,14 @@ public class WindMachine : RhythmProducer {
     }
 
 
-    public override void OnMouseOver()
+    public void OnMouseOver()
     {
-        base.OnMouseOver();
         disappearTimer = disappearTimerTotal;
         rhythmSR.enabled = true;
     }
 
-    public override void OnMouseExit()
+    public void OnMouseExit()
     {
-        base.OnMouseExit();
         rhythmSR.enabled = false;
     }
 
@@ -146,87 +140,79 @@ public class WindMachine : RhythmProducer {
         // nothing here, we don't want sound to play
     }
 
-    public override void handleClickSuccess()
-    {
-        //player cannot click on this if they are holding it already
-        if(interactable && !playerHolding)
-        {
-            base.handleClickSuccess();
-        }
-    }
 
     //Pick Up the WindMachine
-    public override void Selection_One()
-    {
-        base.Selection_One();
-        DeactivateSelectionMenu();
-        transform.SetParent(rightArmObj.transform);
+    //public override void Selection_One()
+    //{
+    //    base.Selection_One();
+    //    DeactivateSelectionMenu();
+    //    transform.SetParent(rightArmObj.transform);
 
-        transform.localPosition = Vector3.zero;
-        transform.localEulerAngles = Vector3.zero;
+    //    transform.localPosition = Vector3.zero;
+    //    transform.localEulerAngles = Vector3.zero;
 
-        //tpc.canUseSeed = false;
-        //tpc.isHoldingSomething = true;
-        playerHolding = true;
-        interactable = false;
+    //    //tpc.canUseSeed = false;
+    //    //tpc.isHoldingSomething = true;
+    //    playerHolding = true;
+    //    interactable = false;
         
-    }
+    //}
 
-    //Rotate WindMachine 90
-    public override void Selection_Two()
-    {
-        base.Selection_Two();
+    ////Rotate WindMachine 90
+    //public override void Selection_Two()
+    //{
+    //    base.Selection_Two();
         
-        //rotating = true;
-        transform.localEulerAngles = Vector3.zero;
-        playerRotating = true;
-        DeactivateSelectionMenu();
+    //    //rotating = true;
+    //    transform.localEulerAngles = Vector3.zero;
+    //    playerRotating = true;
+    //    DeactivateSelectionMenu();
 
-        if (!soundBoard.isPlaying)
-            soundBoard.PlayOneShot(InteractSound);
-    }
+    //    if (!soundBoard.isPlaying)
+    //        soundBoard.PlayOneShot(InteractSound);
+    //}
 
-    //Increase rhythm
-    public override void Selection_Three()
-    {
-        base.Selection_Three();
-        if(timeScale < timeScaleMax)
-        {
-            windSpeed += 2;
-            timeScale += 1;
-            rhythmIndicator.SetInteger("Level", timeScale);
-            rotationSpeed *= 2;
+    ////Increase rhythm
+    //public override void Selection_Three()
+    //{
+    //    base.Selection_Three();
+    //    if(timeScale < timeScaleMax)
+    //    {
+    //        windSpeed += 2;
+    //        timeScale += 1;
+    //        rhythmIndicator.SetInteger("Level", timeScale);
+    //        rotationSpeed *= 2;
 
-            if (!soundBoard.isPlaying && playerClicked)
-                soundBoard.PlayOneShot(InteractSound);
-        }
-    }
+    //        if (!soundBoard.isPlaying && playerClicked)
+    //            soundBoard.PlayOneShot(InteractSound);
+    //    }
+    //}
 
-    //Decrease Rhythm
-    public override void Selection_Four()
-    {
-        base.Selection_Four();
-        if (timeScale > 0)
-        {
-            windSpeed -= 2;
-            timeScale -= 1;
-            rhythmIndicator.SetInteger("Level", timeScale);
-            rotationSpeed *= 0.5f;
+    ////Decrease Rhythm
+    //public override void Selection_Four()
+    //{
+    //    base.Selection_Four();
+    //    if (timeScale > 0)
+    //    {
+    //        windSpeed -= 2;
+    //        timeScale -= 1;
+    //        rhythmIndicator.SetInteger("Level", timeScale);
+    //        rotationSpeed *= 0.5f;
 
-            if (!soundBoard.isPlaying && playerClicked)
-                soundBoard.PlayOneShot(selectLower);
-        }
-    }
+    //        if (!soundBoard.isPlaying && playerClicked)
+    //            soundBoard.PlayOneShot(selectLower);
+    //    }
+    //}
 
-    //Called when player is holding the windMachine and right clicks to drop
-    public void DropObject()
-    {
-        transform.localPosition -= new Vector3(0, 2, 0);
-        transform.SetParent(null);
+    ////Called when player is holding the windMachine and right clicks to drop
+    //public void DropObject()
+    //{
+    //    transform.localPosition -= new Vector3(0, 2, 0);
+    //    transform.SetParent(null);
 
-        //tpc.isHoldingSomething = false;
-        //tpc.canUseSeed = true;
-        playerHolding = false;
-        interactable = true;
-    }
+    //    //tpc.isHoldingSomething = false;
+    //    //tpc.canUseSeed = true;
+    //    playerHolding = false;
+    //    interactable = true;
+    //}
 }
