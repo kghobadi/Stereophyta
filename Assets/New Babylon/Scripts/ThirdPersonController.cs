@@ -200,7 +200,7 @@ public class ThirdPersonController : MonoBehaviour
                 if (Physics.Raycast(transform.position, -transform.up, out hitD, 10, groundedCheck))
                 {
                     //dust splash
-                    dustSplash.transform.position = hitD.point;
+                    dustSplash.transform.position = hitD.point + new Vector3(0, 1f, 0);
                     splashScript.StartCoroutine(splashScript.Splash());
                 }
             }
