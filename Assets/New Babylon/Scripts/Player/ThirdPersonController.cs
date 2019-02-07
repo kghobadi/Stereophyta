@@ -44,7 +44,7 @@ public class ThirdPersonController : MonoBehaviour
 
     //inventory ref
     Inventory myInventory;
-    
+
     //for calc of sliding
     public Transform physicsRaycaster;
 
@@ -65,11 +65,11 @@ public class ThirdPersonController : MonoBehaviour
     //for planting effect 
     public List<ParticleSystem> plantingEffects = new List<ParticleSystem>();
     public int plantingEffectCounter = 0;
-
+    
     void Awake()
     {
         //for dirt particles
-        if (walkingEffect!= null)
+        if (walkingEffect != null)
         {
             walkingEffect.Stop();
         }
@@ -79,7 +79,7 @@ public class ThirdPersonController : MonoBehaviour
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
         myInventory = GetComponent<Inventory>();
-        
+
         //for ps4 Move
         moveSmoothUse = movespeedSmooth;
         controller = GetComponent<CharacterController>();
@@ -92,13 +92,13 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("jumping", false);
 
         splashScript = dustSplash.GetComponent<DustSplash>();
-        
+
         playerCanMove = true;
     }
 
     void Update()
     {
-        if(playerCanMove && !menuOpen)
+        if (playerCanMove && !menuOpen)
             PS4Movement();
 
         //if (mouseMovement)
@@ -166,7 +166,7 @@ public class ThirdPersonController : MonoBehaviour
             poopShoes.SetBool("idle", true);
             poopShoes.SetBool("jumping", false);
             poopShoes.SetBool("running", false);
-            
+
             //dirt particles stop
             if (walkingEffect.isPlaying)
             {
@@ -228,22 +228,26 @@ public class ThirdPersonController : MonoBehaviour
             verticalSpeed -= grav * Time.deltaTime;
         }
 
-        if (Input.GetButtonDown("Jump") && !jumping && jumpWaitTimer < 0)
+        //hold jump button to jump on rhythm
+        if (Input.GetButton("Jump") && !jumping && jumpWaitTimer < 0)
         {
-            PlayJumpSound();
-            verticalSpeed = jumpSpeed;
-            poopShoes.SetBool("idle", false);
-            poopShoes.SetBool("running", false);
-            poopShoes.SetBool("jumping", true);
-            jumping = true;
-            jumpWaitTimer = jumpWaitTime;
+            SetJump();
         }
-
-
         currentMovement.y = verticalSpeed;
 
         //Debug.Log(" currentMovement = " + currentMovement);
         controller.Move(currentMovement * Time.deltaTime);
+    }
+
+    void SetJump()
+    {
+        PlayJumpSound();
+        verticalSpeed = jumpSpeed;
+        poopShoes.SetBool("idle", false);
+        poopShoes.SetBool("running", false);
+        poopShoes.SetBool("jumping", true);
+        jumping = true;
+        jumpWaitTimer = jumpWaitTime;
     }
 
     //for ps4 move
@@ -306,4 +310,7 @@ public class ThirdPersonController : MonoBehaviour
             verticalSpeed = 0;
         }
     }
+
+
+   
 }
