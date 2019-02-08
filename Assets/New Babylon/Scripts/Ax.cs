@@ -28,26 +28,26 @@ public class Ax : Tool {
         base.Update();
 
         //if swinging and anim over, switch back to idle
-        if (axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.4f) 
+        if (axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.4f)
         {
             axing = false;
-            axAnimator.SetBool("axing", false);
             Debug.Log("stopped swinging");
         }
-	}
+    }
 
     //swing ax
     public override void MainAction()
     {
         base.MainAction();
-        axAnimator.SetBool("axing", true);
+        axAnimator.SetTrigger("swing1");
+        //axAnimator.SetBool("axing", true);
         axing = true;
     }
 
     void OnTriggerEnter(Collider other)
     {
         //collided with plant
-        if(other.gameObject.tag == "Plant" && axing)
+        if (other.gameObject.tag == "Plant" && axing)
         {
             other.GetComponent<Plont>().GrowPlant(false);
             axing = false;
@@ -61,7 +61,7 @@ public class Ax : Tool {
     void OnTriggerStay(Collider other)
     {
         //collided with plant
-        if (other.gameObject.tag == "Plant" && axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.2f)
+        if (other.gameObject.tag == "Plant" && axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.2f)
         {
             other.GetComponent<Plont>().GrowPlant(false);
             axing = false;

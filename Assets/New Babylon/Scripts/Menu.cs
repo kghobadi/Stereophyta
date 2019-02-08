@@ -23,7 +23,7 @@ public class Menu : MonoBehaviour {
 
         //set initial values
         volumeSlider.value = 0;
-        mouseControlsToggle.isOn = true;
+        mouseControlsToggle.isOn = camController.mouseControls;
 
         menuObj.SetActive(false);
     }

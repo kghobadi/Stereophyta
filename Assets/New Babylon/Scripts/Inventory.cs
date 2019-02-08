@@ -13,22 +13,19 @@ public class Inventory : MonoBehaviour {
     public List<GameObject> myItems = new List<GameObject>();
     float inputTimer;
     bool canSwitchInv;
-
-    //seed inv
-    public int currentSeed = 0;
-    public GameObject currentSeedObj;
-    public List<GameObject> mySeeds = new List<GameObject>();
     
     void Start () {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-
-        currentSeedObj = mySeeds[currentSeed];
-        currentSeedObj.GetComponent<Seed>().seedSelected = true;
+        
         currenItemObj = myItems[currentItem];
+        if (currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED)
+        {
+            currenItemObj.GetComponent<Seed>().seedSelected = true;
+        }
 
         //turn off all other items
-        for(int i = 0; i < myItems.Count; i++)
+        for (int i = 0; i < myItems.Count; i++)
         {
             if(i != currentItem)
                 myItems[i].SetActive(false);
@@ -56,33 +53,17 @@ public class Inventory : MonoBehaviour {
                 SwitchItem(false);
             }
 
-            //checks for switching seeds
-            if(currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED && tpc.playerCanMove)
-            {
-                //switch current seed if we are holding seed Itemtype
-                if (Input.GetButtonDown("SwitchSeed"))
-                {
-                    SwitchSeed(true);
-                }
-
-                //switch seed neg
-                if (Input.GetKeyDown(KeyCode.Q))
-                {
-                    SwitchSeed(false);
-                }
-                //switch seed pos
-                if (Input.GetKeyDown(KeyCode.E))
-                {
-                    SwitchSeed(true);
-                }
-            }
-
         }
 
     }
 
     public void SwitchItem(bool posOrNeg)
     {
+        //if seed, turn off
+        if(currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED)
+        {
+            currenItemObj.GetComponent<Seed>().seedSelected = false;
+        }
         currenItemObj.SetActive(false);
 
         //switch pos
@@ -116,62 +97,16 @@ public class Inventory : MonoBehaviour {
         //set new seed
         currenItemObj = myItems[currentItem];
         currenItemObj.SetActive(true);
+        //set seed active
+        if (currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED)
+        {
+            currenItemObj.GetComponent<Seed>().seedSelected = true;
+        }
 
         //reset timer so not infinite switch
         inputTimer = 0.25f;
         canSwitchInv = false;
     }
 
-    public void SwitchSeed(bool posOrNeg)
-    {
-
-        if (posOrNeg)
-        {
-            //rotate all the seeds equally around player body
-            for (int i = 0; i < mySeeds.Count; i++)
-            {
-                mySeeds[i].transform.RotateAround(tpc.transform.position, transform.up, 360 / mySeeds.Count);
-            }
-        }
-        else
-        {
-            //rotate all the seeds equally around player body
-            for (int i = 0; i < mySeeds.Count; i++)
-            {
-                mySeeds[i].transform.RotateAround(tpc.transform.position, transform.up, -360 / mySeeds.Count);
-            }
-        }
-
-        currentSeedObj.GetComponent<Seed>().seedSelected = false;
-
-        if (posOrNeg)
-        {
-            //increment seed counter up
-            if (currentSeed < mySeeds.Count - 1)
-            {
-                currentSeed++;
-            }
-            else
-            {
-                currentSeed = 0;
-            }
-        }
-        else
-        {
-            //increment seed counter down
-            if (currentSeed > 0)
-            {
-                currentSeed--;
-            }
-            else
-            {
-                currentSeed = mySeeds.Count - 1;
-            }
-        }
-       
-
-        //set new seed
-        currentSeedObj = mySeeds[currentSeed];
-        currentSeedObj.GetComponent<Seed>().seedSelected = true;
-    }
+   
 }

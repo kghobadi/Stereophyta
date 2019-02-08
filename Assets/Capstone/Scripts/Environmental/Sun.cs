@@ -49,8 +49,9 @@ public class Sun : MonoBehaviour
             isNight = false;
             isMidday = false;
             isDusk = false;
-            waterDay.SetActive(true);
-            waterNight.SetActive(false);
+            //should alter water over course of the day through its shader
+            //waterDay.SetActive(true);
+            //waterNight.SetActive(false);
 
             //when its morning increase dayCounter
             if (dayCounter == yesterday)
@@ -84,8 +85,8 @@ public class Sun : MonoBehaviour
             isMidday = false;
             isDusk = false;
             isNight = true;
-            waterDay.SetActive(false);
-            waterNight.SetActive(true);
+            //waterDay.SetActive(false);
+            //waterNight.SetActive(true);
             
             //when its night, yesterday catches up to dayCounter
             yesterday = dayCounter;
