@@ -15,7 +15,7 @@ public abstract class Tool : MonoBehaviour {
     //set tool refs in awake so that inventory can disable them at start
     public virtual void Awake()
     {
-        SimpleClock.ThirtySecond += OnThirtySecond;
+       
 
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
@@ -24,51 +24,58 @@ public abstract class Tool : MonoBehaviour {
     public virtual void Start () {
 	}
 
-    public void OnDestroy()
+    public void OnEnable()
+    {
+        SimpleClock.ThirtySecond += OnThirtySecond;
+    }
+
+    public void OnDisable()
     {
         SimpleClock.ThirtySecond -= OnThirtySecond;
     }
 
     public virtual void OnThirtySecond(BeatArgs e)
     {
-        switch (timeScale)
-        {
-            case 0:
-                if (e.TickMask[TickValue.Measure])
-                {
-                    // rhythm creation / beat visual
-                    showRhythm = true;
-                }
-                break;
-            case 1:
-                if (e.TickMask[TickValue.Quarter])
-                {
-                    // rhythm creation / beat visual
-                    showRhythm = true;
-                }
-                break;
-            case 2:
-                if (e.TickMask[TickValue.Eighth])
-                {
-                    // rhythm creation / beat visual
-                    showRhythm = true;
-                }
-                break;
-            case 3:
-                if (e.TickMask[TickValue.Sixteenth])
-                {
-                    // rhythm creation / beat visual
-                    showRhythm = true;
-                }
-                break;
-            case 4:
-                if (e.TickMask[TickValue.ThirtySecond])
-                {
-                    // rhythm creation / beat visual
-                    showRhythm = true;
-                }
-                break;
-        }
+            switch (timeScale)
+            {
+                case 0:
+                    if (e.TickMask[TickValue.Measure])
+                    {
+                        // rhythm creation / beat visual
+                        showRhythm = true;
+                    }
+                    break;
+                case 1:
+                    if (e.TickMask[TickValue.Quarter])
+                    {
+                        // rhythm creation / beat visual
+                        showRhythm = true;
+                    }
+                    break;
+                case 2:
+                    if (e.TickMask[TickValue.Eighth])
+                    {
+                        // rhythm creation / beat visual
+                        showRhythm = true;
+                    }
+                    break;
+                case 3:
+                    if (e.TickMask[TickValue.Sixteenth])
+                    {
+                        // rhythm creation / beat visual
+                        showRhythm = true;
+                    }
+                    break;
+                case 4:
+                    if (e.TickMask[TickValue.ThirtySecond])
+                    {
+                        // rhythm creation / beat visual
+                        showRhythm = true;
+                    }
+                    break;
+            }
+        
+        
 
     }
 

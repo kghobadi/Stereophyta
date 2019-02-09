@@ -53,11 +53,11 @@ public class ThirdPersonController : MonoBehaviour
     AudioSource cameraAudSource;
     public AudioSource playerSource;
     public AudioClip[] jumpSounds;
-    public AudioClip[] footsteps, noNo;
+    public AudioClip[] currentFootsteps, grassSteps, woodSteps, noNo;
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
     public ParticleSystem walkingEffect;
     float footStepTimer = 0;
-    int currentStep = 0;
+    public int currentStep = 0;
 
     //world manager reference
     WorldManager wm;
@@ -65,9 +65,22 @@ public class ThirdPersonController : MonoBehaviour
     //for planting effect 
     public List<ParticleSystem> plantingEffects = new List<ParticleSystem>();
     public int plantingEffectCounter = 0;
-    
+
+    //dictionary to sort nearby audio sources by distance 
+    [SerializeField]
+    public Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
+    //to shorten if statement
+    public List<GameObject> audioObjects = new List<GameObject>();
+    //listener range
+    public float listeningRadius;
+    //to shorten if statement
+    public List<string> audioTags = new List<string>();
+
+
     void Awake()
     {
+        currentFootsteps = grassSteps;
+
         //for dirt particles
         if (walkingEffect != null)
         {
@@ -115,9 +128,9 @@ public class ThirdPersonController : MonoBehaviour
 
     void IncrementFootsteps()
     {
-        if (currentStep < (footsteps.Length - 1))
+        if (currentStep < (currentFootsteps.Length - 1))
         {
-            currentStep += Random.Range(0, (footsteps.Length - currentStep));
+            currentStep += Random.Range(0, (currentFootsteps.Length - currentStep));
         }
         else
         {
@@ -156,7 +169,7 @@ public class ThirdPersonController : MonoBehaviour
                 //play footstep sound
                 if (footStepTimer > runStepTotal)
                 {
-                    playerSource.PlayOneShot(footsteps[currentStep]);
+                    playerSource.PlayOneShot(currentFootsteps[currentStep]);
                     IncrementFootsteps();
                 }
             }
@@ -219,7 +232,7 @@ public class ThirdPersonController : MonoBehaviour
                 poopShoes.SetBool("jumping", false);
             }
 
-            SlideCheck();
+            //SlideCheck();
         }
 
         if (!controller.isGrounded)
@@ -237,6 +250,11 @@ public class ThirdPersonController : MonoBehaviour
 
         //Debug.Log(" currentMovement = " + currentMovement);
         controller.Move(currentMovement * Time.deltaTime);
+
+        if(currentMovement.magnitude > 0)
+        {
+            ResetNearbyAudioSources();
+        }
     }
 
     void SetJump()
@@ -312,5 +330,44 @@ public class ThirdPersonController : MonoBehaviour
     }
 
 
-   
+    //this function shifts all audio source priorities dynamically
+    void ResetNearbyAudioSources()
+    {
+        //empty dictionary and audioObjects
+        soundCreators.Clear();
+        audioObjects.Clear();
+        //overlap sphere to find nearby sound creators
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, listeningRadius);
+        int i = 0;
+        while (i < hitColliders.Length)
+        {
+            GameObject audioObj = hitColliders[i].gameObject;
+
+            //check to see if obj has desired tag
+            //that the object is both active and not already part of our audioObjects list
+            //and that the object has an audio source
+            if (audioTags.Contains(audioObj.tag) &&
+                    audioObj.activeSelf && !audioObjects.Contains(audioObj) &&
+                    audioObj.GetComponent<AudioSource>() != null)
+            {
+                //check distance and add to list
+                float distanceAway = Vector3.Distance(hitColliders[i].transform.position, transform.position);
+                //add to audiosource and distance to dictionary
+                soundCreators.Add(audioObj.GetComponent<AudioSource>(), distanceAway);
+                //add to list of objects
+                audioObjects.Add(audioObj);
+            }
+            i++;
+        }
+
+        int priority = 0;
+        //sort the dictionary by order of ascending distance away
+        foreach (KeyValuePair<AudioSource, float> item in soundCreators.OrderBy(key => key.Value))
+        {
+            // do something with item.Key and item.Value
+            item.Key.priority = priority;
+            priority++;
+        }
+    }
+
 }

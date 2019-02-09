@@ -10,7 +10,7 @@ public abstract class AnimalAI : MonoBehaviour {
     protected GameObject player;
 
     //privately referenced usable components of this game object
-    protected AudioSource animalAudio;
+    public AudioSource animalAudio;
     protected Animator animator;
 
     //audio clip arrays for different audio stages
@@ -18,7 +18,7 @@ public abstract class AnimalAI : MonoBehaviour {
     public AudioClip[] walking, idle, running;
 
     //for targeting new positions with the nav mesh
-    protected Vector3 targetPosition, origPosition;
+    protected Vector3 targetPosition, origPosition, returnPos;
 
     //radius within which crab can move, and movement speeds
     public float movementRadius = 25f, walkSpeed, runSpeed = 10f;
@@ -43,7 +43,9 @@ public abstract class AnimalAI : MonoBehaviour {
     public SkinnedMeshRenderer myMR;
     public Color idleSilent, idleAudible, walkingSilent, walkingAudible, runningSilent, runningAudible;
 
+    //lerps colors
     public float lerpSpeed;
+    public LayerMask grounded;
 
 	public virtual void Start () {
         //find our player!
@@ -99,7 +101,7 @@ public abstract class AnimalAI : MonoBehaviour {
         {
             //animal looks at the point it will be running to
             //How would we make it dynamically look forward rather than always face its final destination?
-            transform.LookAt(targetPosition);
+            transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z));
 
             nextNoteIn -= Time.deltaTime;
 
@@ -119,14 +121,9 @@ public abstract class AnimalAI : MonoBehaviour {
             //stop running after we are close to position
             if(Vector3.Distance(transform.position, targetPosition) < stopMovingDistance)
             {
-                isMoving = false;
-                myNavMesh.speed = walkSpeed;
-                myNavMesh.isStopped = true;
-                isRunning = false;
-                soundTimerTotal = walkTimerTotal;
-                animator.SetBool("running", false);
-                animator.SetBool("walking", false);
-                animator.SetBool("idle", true);
+                Debug.Log("stopped moving");
+
+                StopMoving();
             }
         }
 
@@ -187,7 +184,21 @@ public abstract class AnimalAI : MonoBehaviour {
         animator.SetBool("walking", false);
         animator.SetBool("running", true);
         animator.SetBool("idle", false);
+        returnPos = transform.position;
         SetDestination();
+    }
+
+    //stops movement
+    public virtual void StopMoving()
+    {
+        isMoving = false;
+        isRunning = false;
+        myNavMesh.speed = walkSpeed;
+        myNavMesh.isStopped = true;
+        soundTimerTotal = walkTimerTotal;
+        animator.SetBool("running", false);
+        animator.SetBool("walking", false);
+        animator.SetBool("idle", true);
     }
 
     //this function sets a random point as the nav mesh destination
@@ -196,28 +207,34 @@ public abstract class AnimalAI : MonoBehaviour {
     public virtual void SetDestination()
     {
         Vector2 xz = Random.insideUnitCircle * movementRadius;
-        
-        targetPosition = new Vector3(xz.x + origPosition.x, transform.position.y, xz.y + origPosition.z);
 
-        Collider[] collisions = Physics.OverlapSphere(targetPosition, 7);
+        Vector3 pointToCastFrom = new Vector3(xz.x + origPosition.x, transform.position.y + 10, xz.y + origPosition.z);
 
-        int colCounter = 0;
-
-        for(int i = 0; i < collisions.Length; i++)
+        RaycastHit hit;
+        // Does the ray intersect any objects excluding the player layer
+        if (Physics.Raycast(pointToCastFrom, Vector3.down, out hit, Mathf.Infinity, grounded))
         {
-            if(collisions[i].gameObject.tag == "Plant" || collisions[i].gameObject.tag == "House" ||
-                collisions[i].gameObject.tag == "Animal")
-            {
-                colCounter++;
-            }
+            targetPosition = hit.point;
         }
-        //call function again
-        if(colCounter > 0)
-        {
-            SetDestination();
-        }
-        else
-        {
+
+        //Collider[] collisions = Physics.OverlapSphere(targetPosition, 7);
+
+        //int colCounter = 0;
+
+        //for(int i = 0; i < collisions.Length; i++)
+        //{
+        //    if(collisions[i].gameObject.tag == "Plant" || collisions[i].gameObject.tag == "House" )
+        //    {
+        //        colCounter++;
+        //    }
+        //}
+        ////call function again
+        //if(colCounter > 0)
+        //{
+        //    SetDestination();
+        //}
+        //else
+        //{
             myNavMesh.SetDestination(targetPosition);
 
             isMoving = true;
@@ -230,7 +247,7 @@ public abstract class AnimalAI : MonoBehaviour {
             {
                 animator.SetBool("walking", true);
             }
-        }
+        //}
        
     }
 
@@ -252,6 +269,6 @@ public abstract class AnimalAI : MonoBehaviour {
     {
         int randomSound = Random.Range(0, animalSounds.Length);
         animalAudio.PlayOneShot(animalSounds[randomSound]);
-        animalAudio.clip = animalSounds[randomSound];
+        //animalAudio.clip = animalSounds[randomSound];
     }
 }

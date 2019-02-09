@@ -55,9 +55,11 @@ public class AxWind : Rhythm {
         if(other.gameObject.tag == "Plant" )
         {
 
-            if(!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
+            if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
+            {
+                PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
+            }
 
-            PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
         }
     }
 

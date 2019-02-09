@@ -44,6 +44,12 @@ public class DustSplash : Rhythm {
             if(!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
                 other.gameObject.GetComponent<Plont>().PlaySound();
         }
+
+        if (other.gameObject.tag == "Animal")
+        {
+            if (!other.gameObject.GetComponent<Crab>().animalAudio.isPlaying)
+                other.gameObject.GetComponent<Crab>().PlaySound(other.gameObject.GetComponent<Crab>().running);
+        }
     }
 
     void PlaySplashSound()

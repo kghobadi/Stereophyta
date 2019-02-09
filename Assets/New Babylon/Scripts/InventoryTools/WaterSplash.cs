@@ -54,6 +54,12 @@ public class WaterSplash : Rhythm {
                 other.gameObject.GetComponent<Plont>().GrowPlant(true);
                 other.gameObject.GetComponent<Plont>().hasBeenWatered = true;
             }
+
+            if (other.gameObject.tag == "Animal")
+            {
+                if (!other.gameObject.GetComponent<Crab>().animalAudio.isPlaying)
+                    other.gameObject.GetComponent<Crab>().PlaySound(other.gameObject.GetComponent<Crab>().running);
+            }
         }
     }
 }

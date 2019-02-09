@@ -15,13 +15,19 @@ public class Crab : AnimalAI {
     {
         base.Update();
 
-        if (isRunning)
+        if(Vector3.Distance(transform.position, origPosition) > 75)
         {
-            animalAudio.pitch = desiredPitch;
+            transform.position = origPosition;
+            StopMoving();
         }
-        else
-        {
-            animalAudio.pitch = originalPitch;
-        }
+
+        //if (isRunning)
+        //{
+        //    animalAudio.pitch = desiredPitch;
+        //}
+        //else
+        //{
+        //    animalAudio.pitch = originalPitch;
+        //}
     }
 }

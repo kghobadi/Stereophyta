@@ -31,12 +31,21 @@ public class Seed : MonoBehaviour {
         //plant seed
         if (Input.GetButtonDown("Plant") && seedSelected && !planting && !tpc.menuOpen)
         {
-            planting = true;
-            originalPos = transform.localPosition;
-            tpc.playerCanMove = false;
-            seedBody.isKinematic = false;
-            seedBody.useGravity = true;
-            seedSource.PlayOneShot(dropSeed);
+
+            RaycastHit hit;
+            // Does the ray intersect any objects excluding the player layer
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
+            {
+                if(hit.transform.gameObject.tag == "Ground")
+                {
+                    planting = true;
+                    originalPos = transform.localPosition;
+                    tpc.playerCanMove = false;
+                    seedBody.isKinematic = false;
+                    seedBody.useGravity = true;
+                    seedSource.PlayOneShot(dropSeed);
+                }
+            }
         }
 	}
 
