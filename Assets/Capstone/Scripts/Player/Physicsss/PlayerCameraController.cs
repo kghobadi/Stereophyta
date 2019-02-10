@@ -20,7 +20,7 @@ public class PlayerCameraController : MonoBehaviour {
     public float heightMin, heightMax;
     public float zoomSpeed;
 
-    //all the feel variables
+    //all the ps4 feel variables
     public float cameraRotationSpeedX = 5;
     public float cameraRotationSpeedY = 5;
     public float smoothLookOriginal, smoothMoveOriginal;
@@ -33,6 +33,10 @@ public class PlayerCameraController : MonoBehaviour {
     public float cameraRotationSpeedXMouse = 5;
     public float cameraRotationSpeedYMouse = 5;
 
+    public float mouseSmoothLookOriginal, mouseSmoothMoveOriginal;
+    public float mouseSmoothLook = 0.5f, mouseSmoothMove = 0.5f;
+    public float mouseTurnSmooth = 0.1f, mouseMovingTurnSmooth;
+    public float mouseTurnSmoothMove = 0.1f, mouseMovingTurnSmoothMove;
 
     // for boat stuff
     public bool inBoat;
@@ -47,6 +51,8 @@ public class PlayerCameraController : MonoBehaviour {
         //set original smooth vals 
         smoothLookOriginal = smoothLook;
         smoothMoveOriginal = smoothMove;
+        mouseSmoothLookOriginal = mouseSmoothLook;
+        mouseSmoothMoveOriginal = mouseSmoothMove;
         Cursor.visible = false;
     }
 	
@@ -56,7 +62,14 @@ public class PlayerCameraController : MonoBehaviour {
 
         //as the player turns their body more intensely, we want to simultaneously increase smoothMove
 
-        transform.position = Vector3.Lerp(transform.position, targetMove, smoothMove * Time.deltaTime);
+        if (mouseControls)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetMove, mouseSmoothMove * Time.deltaTime);
+        }
+        else
+        {
+            transform.position = Vector3.Lerp(transform.position, targetMove, smoothMove * Time.deltaTime);
+        }
 
         //lets set up right analogue stick to enable us to rotate the camera around player and redirect motion as we do so
         Vector3 horizontalRotation;
@@ -76,7 +89,15 @@ public class PlayerCameraController : MonoBehaviour {
         }
         
         targetLook = Quaternion.LookRotation(playerTransform.position - transform.position) ;
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetLook , smoothLook * Time.deltaTime);
+
+        if (mouseControls)
+        {
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mouseSmoothLook * Time.deltaTime);
+        }
+        else
+        {
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, smoothLook * Time.deltaTime);
+        }
 
         float zoomInput = Input.GetAxis("Mouse ScrollWheel");
 
@@ -102,27 +123,54 @@ public class PlayerCameraController : MonoBehaviour {
         //rotate the player's body
         playerTransform.Rotate(horizontalRotation);
 
-        Debug.Log(verticalRotation);
+        //Debug.Log(verticalRotation);
         transform.Rotate(-verticalRotation, 0, 0);
 
-        //if player is not moving and we are rotating, rotate FASTER
-        if (tpc.horizontalInput.magnitude == 0 && horizontalRotation.magnitude > 0)
+        //ps4 smooth move 
+        if (!mouseControls)
         {
-            smoothLook = turnSmooth;
-            smoothMove = turnSmoothMove;
+            //if player is not moving and we are rotating, rotate FASTER
+            if (tpc.horizontalInput.magnitude == 0 && horizontalRotation.magnitude > 0)
+            {
+                smoothLook = turnSmooth;
+                smoothMove = turnSmoothMove;
+            }
+            //if player moving AND we rotating, rotate MEDIUM
+            else if (tpc.horizontalInput.magnitude > 0 && horizontalRotation.magnitude > 0)
+            {
+                smoothLook = movingTurnSmooth;
+                smoothMove = movingTurnSmoothMove;
+            }
+            //leave the values as is when player moving
+            else if (horizontalRotation.magnitude == 0)
+            {
+                smoothLook = smoothLookOriginal;
+                smoothMove = smoothMoveOriginal;
+            }
         }
-        //if player moving AND we rotating, rotate MEDIUM
-        else if (tpc.horizontalInput.magnitude > 0 && horizontalRotation.magnitude > 0)
+        //mouse 
+        else
         {
-            smoothLook = movingTurnSmooth;
-            smoothMove = movingTurnSmoothMove;
+            //if player is not moving and we are rotating, rotate FASTER
+            if (tpc.forwardInput.magnitude == 0 && (horizontalRotation.magnitude > 0 || tpc.horizontalInput.magnitude > 0))
+            {
+                mouseSmoothLook = mouseTurnSmooth;
+                mouseSmoothMove = mouseTurnSmoothMove;
+            }
+            //if player moving AND we rotating, rotate MEDIUM
+            else if (tpc.forwardInput.magnitude > 0 && (horizontalRotation.magnitude > 0 || tpc.horizontalInput.magnitude > 0))
+            {
+                mouseSmoothLook = mouseMovingTurnSmooth;
+                mouseSmoothMove = mouseMovingTurnSmoothMove;
+            }
+            //leave the values as is when player moving
+            else if (horizontalRotation.magnitude == 0 && tpc.horizontalInput.magnitude == 0)
+            {
+                mouseSmoothLook = mouseSmoothLookOriginal;
+                mouseSmoothMove = mouseSmoothMoveOriginal;
+            }
         }
-        //leave the values as is when player moving
-        else if (horizontalRotation.magnitude == 0)
-        {
-            smoothLook = smoothLookOriginal;
-            smoothMove = smoothMoveOriginal;
-        }
+       
 
         //for y axis of right analogue, want to be able to set camera look up and down.
         //pushing stick up moves camera down closer to and behind player, 

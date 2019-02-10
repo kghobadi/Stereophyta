@@ -17,6 +17,8 @@ public class Seed : MonoBehaviour {
     AudioSource seedSource;
     public AudioClip dropSeed, spawnPlant;
 
+    Transform inventoryParent;
+
 	void Start () {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
@@ -25,11 +27,13 @@ public class Seed : MonoBehaviour {
         seedBody.isKinematic = true;
         seedCollider = GetComponent<SphereCollider>();
         seedSource = GetComponent<AudioSource>();
+
+        inventoryParent = transform.parent;
 	}
 	
 	void Update () {
         //plant seed
-        if (Input.GetButtonDown("Plant") && seedSelected && !planting && !tpc.menuOpen)
+        if (Input.GetButton("Plant") && seedSelected && !planting && !tpc.menuOpen)
         {
 
             RaycastHit hit;
@@ -40,7 +44,7 @@ public class Seed : MonoBehaviour {
                 {
                     planting = true;
                     originalPos = transform.localPosition;
-                    tpc.playerCanMove = false;
+                    transform.SetParent(null);
                     seedBody.isKinematic = false;
                     seedBody.useGravity = true;
                     seedSource.PlayOneShot(dropSeed);
@@ -63,6 +67,7 @@ public class Seed : MonoBehaviour {
 
         plantClone = Instantiate(plantPrefab, transform.position, Quaternion.identity);
 
+        transform.SetParent(inventoryParent);
         transform.localPosition = originalPos;
 
         tpc.playerCanMove = true;

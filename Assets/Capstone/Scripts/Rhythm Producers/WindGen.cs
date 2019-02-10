@@ -22,4 +22,28 @@ public class WindGen : RhythmProducer {
         }
 
     }
+
+    public override void SwitchTimeScale()
+    {
+        base.SwitchTimeScale();
+
+        switch (timeScale)
+        {
+            case 0:
+                windSpeed = 2.5f;
+                break;
+            case 1:
+                windSpeed = 5f;
+                break;
+            case 2:
+                windSpeed = 10f;
+                break;
+            case 3:
+                windSpeed = 20f;
+                break;
+            case 4:
+                windSpeed = 40f;
+                break;
+        }
+    }
 }

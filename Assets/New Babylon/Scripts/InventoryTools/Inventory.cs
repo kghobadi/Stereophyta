@@ -7,10 +7,16 @@ public class Inventory : MonoBehaviour {
     GameObject player;
     ThirdPersonController tpc;
 
-    //normal inv
+    //tools inv
     public int currentItem = 0;
     public GameObject currenItemObj;
     public List<GameObject> myItems = new List<GameObject>();
+
+    //seed inv
+    public int currentSeed = 0;
+    public GameObject currenSeedObj;
+    public List<GameObject> mySeeds = new List<GameObject>();
+
     float inputTimer;
     bool canSwitchInv;
     
@@ -19,16 +25,21 @@ public class Inventory : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
         
         currenItemObj = myItems[currentItem];
-        if (currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED)
-        {
-            currenItemObj.GetComponent<Seed>().seedSelected = true;
-        }
+        currenSeedObj = mySeeds[currentSeed];
+        currenSeedObj.GetComponent<Seed>().seedSelected = true;
 
         //turn off all other items
         for (int i = 0; i < myItems.Count; i++)
         {
             if(i != currentItem)
                 myItems[i].SetActive(false);
+        }
+
+        //turn off other seeds
+        for (int i = 0; i < mySeeds.Count; i++)
+        {
+            if (i != currentSeed)
+                mySeeds[i].SetActive(false);
         }
     }
 	
@@ -50,7 +61,7 @@ public class Inventory : MonoBehaviour {
             //switch current item -
             if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv)
             {
-                SwitchItem(false);
+                SwitchSeed(true);
             }
 
         }
@@ -59,11 +70,6 @@ public class Inventory : MonoBehaviour {
 
     public void SwitchItem(bool posOrNeg)
     {
-        //if seed, turn off
-        if(currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED)
-        {
-            currenItemObj.GetComponent<Seed>().seedSelected = false;
-        }
         currenItemObj.SetActive(false);
 
         //switch pos
@@ -97,16 +103,52 @@ public class Inventory : MonoBehaviour {
         //set new seed
         currenItemObj = myItems[currentItem];
         currenItemObj.SetActive(true);
-        //set seed active
-        if (currenItemObj.GetComponent<Item>().itemType == Item.ItemType.SEED)
-        {
-            currenItemObj.GetComponent<Seed>().seedSelected = true;
-        }
 
         //reset timer so not infinite switch
-        inputTimer = 0.25f;
+        inputTimer = 0.1f;
         canSwitchInv = false;
     }
 
-   
+   public void SwitchSeed(bool posOrNeg)
+    {
+        currenSeedObj.GetComponent<Seed>().seedSelected = false;
+        currenSeedObj.SetActive(false);
+
+        //switch pos
+        if (posOrNeg)
+        {
+            //increment item counter
+            if (currentSeed < mySeeds.Count - 1)
+            {
+                currentSeed++;
+            }
+            else
+            {
+                currentSeed = 0;
+            }
+        }
+        //switch neg
+        else
+        {
+            //increment item counter
+            if (currentSeed > 0)
+            {
+                currentSeed--;
+            }
+            else
+            {
+                currentSeed = mySeeds.Count - 1;
+            }
+        }
+
+
+        //set new seed
+        currenSeedObj = mySeeds[currentSeed];
+        currenSeedObj.SetActive(true);
+        currenSeedObj.GetComponent<Seed>().seedSelected = true;
+
+        //reset timer so not infinite switch
+        inputTimer = 0.1f;
+        canSwitchInv = false;
+    }
 }

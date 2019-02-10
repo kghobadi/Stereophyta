@@ -58,6 +58,7 @@ public class AxWind : Rhythm {
             if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
             {
                 PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
+                Debug.Log("played guitar sound");
             }
 
         }

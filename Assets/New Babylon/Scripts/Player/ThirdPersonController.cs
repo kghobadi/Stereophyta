@@ -22,10 +22,14 @@ public class ThirdPersonController : MonoBehaviour
     public bool playerCanMove, menuOpen;
     Vector3 currentMovement;
     public Vector3 horizontalInput;
+    public Vector3 forwardInput;
     public float movespeed = 5;
     public float movespeedSmooth = 0.3f;
     public float rotateSpeed = 10;
     public float rotateSpeedSmooth = 0.3f;
+
+    //mouse feel vars
+    public float rotateSpeedMouse;
 
     //jump variables
     public float jumpSpeed = 20;
@@ -111,37 +115,66 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
-        if (playerCanMove && !menuOpen)
+        //ps4 move
+        if (playerCanMove && !menuOpen && !playerCameraController.mouseControls)
             PS4Movement();
 
-        //if (mouseMovement)
-        //{
-        //WASD move + Mouse controls for cam & interactions
-        //}
+        //calls mouse move
+        if (playerCanMove && !menuOpen && playerCameraController.mouseControls)
+        {
+            MouseMovement();
+        }
 
         //Restart game
         if (Input.GetKeyDown(KeyCode.R))
         {
-            SceneManager.LoadScene("PlayerTest");
+            SceneManager.LoadScene("DemoIslandTest");
         }
     }
 
-    void IncrementFootsteps()
+    //same sort of logic for jump and other stuff, different core movement from ps4 controllers
+    void MouseMovement()
     {
-        if (currentStep < (currentFootsteps.Length - 1))
+        //grab inputs from our axes
+        forwardInput = new Vector3(0, 0, Input.GetAxis("Vertical"));
+        horizontalInput = new Vector3(0, Input.GetAxis("Horizontal"), 0);
+
+        if (horizontalInput.magnitude > 1)
         {
-            currentStep += Random.Range(0, (currentFootsteps.Length - currentStep));
+            horizontalInput.Normalize();
         }
-        else
+
+        SetPlayerAnimsFootsteps(forwardInput);
+
+        //actual movement (tanky boy)
+        Vector3 targetForwardMovement = forwardInput;
+        targetForwardMovement = transform.rotation * forwardInput;
+        targetForwardMovement.y = 0;
+        targetForwardMovement.Normalize();
+        targetForwardMovement *= forwardInput.magnitude;
+
+        currentMovement = Vector3.SmoothDamp(currentMovement, targetForwardMovement * movespeed, ref currentMovementV, moveSmoothUse);
+
+        //rotate the player's body
+        transform.Rotate(horizontalInput * rotateSpeedMouse * Time.deltaTime);
+
+        JumpCheck();
+
+        currentMovement.y = verticalSpeed;
+
+        //Debug.Log(" currentMovement = " + currentMovement);
+        controller.Move(currentMovement * Time.deltaTime);
+
+        if (currentMovement.magnitude > 0)
         {
-            currentStep = 0;
+            ResetNearbyAudioSources();
         }
-        footStepTimer = 0;
     }
 
+    //PS4 Controls
     void PS4Movement()
     {
-        //PS4 Controls
+        //gets both of these Axes from the L analogue stick
         horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
         //should put measure in place to adjust animations and footsteps to walking speed based on slight input of joystick
@@ -150,7 +183,45 @@ public class ThirdPersonController : MonoBehaviour
         {
             horizontalInput.Normalize();
         }
-        if (horizontalInput.magnitude > 0)
+
+        //checking if and how we are moving to set vis effects and anims
+        SetPlayerAnimsFootsteps(horizontalInput);
+
+
+        //Actual movement calcs
+        Vector3 targetHorizontalMovement = horizontalInput;
+        targetHorizontalMovement = cameraTransform.rotation * targetHorizontalMovement;
+        targetHorizontalMovement.y = 0;
+        targetHorizontalMovement.Normalize();
+        targetHorizontalMovement *= horizontalInput.magnitude;
+
+        currentMovement = Vector3.SmoothDamp(currentMovement, targetHorizontalMovement * movespeed, ref currentMovementV, moveSmoothUse);
+
+        Quaternion targetRotationQ = Quaternion.LookRotation(Vector3.forward);
+        if (new Vector3(currentMovement.x, 0, currentMovement.z).magnitude > 1)
+        {
+            targetRotationQ = Quaternion.LookRotation(new Vector3(currentMovement.x, 0, currentMovement.z));
+            transform.rotation = Quaternion.Euler(0, Mathf.SmoothDampAngle(transform.rotation.eulerAngles.y, targetRotationQ.eulerAngles.y, ref rotationV, rotateSpeedSmooth), 0);
+        }
+
+        //jump logics
+        JumpCheck();
+
+        currentMovement.y = verticalSpeed;
+
+        //Debug.Log(" currentMovement = " + currentMovement);
+        controller.Move(currentMovement * Time.deltaTime);
+
+        if(currentMovement.magnitude > 0)
+        {
+            ResetNearbyAudioSources();
+        }
+    }
+
+    //checking if and how we are moving to set vis effects and anims
+    void SetPlayerAnimsFootsteps(Vector3 inputToCheck)
+    {
+        if (inputToCheck.magnitude > 0)
         {
             poopShoes.SetBool("idle", false);
             poopShoes.SetBool("jumping", false);
@@ -188,22 +259,24 @@ public class ThirdPersonController : MonoBehaviour
 
             footStepTimer = 0;
         }
+    }
 
-        Vector3 targetHorizontalMovement = horizontalInput;
-        targetHorizontalMovement = cameraTransform.rotation * targetHorizontalMovement;
-        targetHorizontalMovement.y = 0;
-        targetHorizontalMovement.Normalize();
-        targetHorizontalMovement *= horizontalInput.magnitude;
-
-        currentMovement = Vector3.SmoothDamp(currentMovement, targetHorizontalMovement * movespeed, ref currentMovementV, moveSmoothUse);
-
-        Quaternion targetRotationQ = Quaternion.LookRotation(Vector3.forward);
-        if (new Vector3(currentMovement.x, 0, currentMovement.z).magnitude > 1)
+    void IncrementFootsteps()
+    {
+        if (currentStep < (currentFootsteps.Length - 1))
         {
-            targetRotationQ = Quaternion.LookRotation(new Vector3(currentMovement.x, 0, currentMovement.z));
-            transform.rotation = Quaternion.Euler(0, Mathf.SmoothDampAngle(transform.rotation.eulerAngles.y, targetRotationQ.eulerAngles.y, ref rotationV, rotateSpeedSmooth), 0);
+            currentStep += Random.Range(0, (currentFootsteps.Length - currentStep));
         }
+        else
+        {
+            currentStep = 0;
+        }
+        footStepTimer = 0;
+    }
 
+    //jump logics
+    void JumpCheck()
+    {
         if (controller.isGrounded)
         {
             if (jumping)
@@ -231,7 +304,6 @@ public class ThirdPersonController : MonoBehaviour
                 poopShoes.SetBool("running", false);
                 poopShoes.SetBool("jumping", false);
             }
-
             //SlideCheck();
         }
 
@@ -246,17 +318,10 @@ public class ThirdPersonController : MonoBehaviour
         {
             SetJump();
         }
-        currentMovement.y = verticalSpeed;
 
-        //Debug.Log(" currentMovement = " + currentMovement);
-        controller.Move(currentMovement * Time.deltaTime);
-
-        if(currentMovement.magnitude > 0)
-        {
-            ResetNearbyAudioSources();
-        }
     }
 
+    //called to actually jump
     void SetJump()
     {
         PlayJumpSound();

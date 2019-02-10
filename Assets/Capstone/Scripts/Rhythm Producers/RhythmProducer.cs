@@ -9,7 +9,7 @@ public abstract class RhythmProducer : MonoBehaviour {
     public AudioClip[] basicBeats;
     protected AudioSource beatSource;
 
-    public Animator rhythmIndicator;
+    //public Animator rhythmIndicator;
 
     protected bool playedAudio, showRhythm;
 
@@ -21,10 +21,14 @@ public abstract class RhythmProducer : MonoBehaviour {
     {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+    }
+
+    public virtual void OnEnable()
+    {
         SimpleClock.ThirtySecond += OnThirtySecond;
     }
 
-    public virtual void OnDestroy()
+    public virtual void OnDisable()
     {
         SimpleClock.ThirtySecond -= OnThirtySecond;
     }
@@ -76,9 +80,6 @@ public abstract class RhythmProducer : MonoBehaviour {
     public virtual void Update () {
         //may need to qualify this with and if statement in override
         AudioRhythm();
-
-      
-
     }
 
 
@@ -102,25 +103,24 @@ public abstract class RhythmProducer : MonoBehaviour {
 
     public virtual void SwitchTimeScale()
     {
-        rhythmIndicator.SetInteger("Level", timeScale);
-        switch (timeScale)
-        {
-            case 0:
-                beatSource.PlayScheduled(SimpleClock.AtNextMeasure());
-                
-                break;
-            case 1:
-                beatSource.PlayScheduled(SimpleClock.AtNextQuarter());
-                break;
-            case 2:
-                beatSource.PlayScheduled(SimpleClock.AtNextEighth());
-                break;
-            case 3:
-                beatSource.PlayScheduled(SimpleClock.AtNextSixteenth());
-                break;
-            case 4:
-                beatSource.PlayScheduled(SimpleClock.AtNextThirtySecond());
-                break;
-        }
+        //rhythmIndicator.SetInteger("Level", timeScale);
+        //switch (timeScale)
+        //{
+        //    case 0:
+        //        beatSource.PlayScheduled(SimpleClock.AtNextMeasure());
+        //        break;
+        //    case 1:
+        //        beatSource.PlayScheduled(SimpleClock.AtNextQuarter());
+        //        break;
+        //    case 2:
+        //        beatSource.PlayScheduled(SimpleClock.AtNextEighth());
+        //        break;
+        //    case 3:
+        //        beatSource.PlayScheduled(SimpleClock.AtNextSixteenth());
+        //        break;
+        //    case 4:
+        //        beatSource.PlayScheduled(SimpleClock.AtNextThirtySecond());
+        //        break;
+        //}
     }
 }

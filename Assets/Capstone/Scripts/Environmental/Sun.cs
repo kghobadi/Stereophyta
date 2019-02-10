@@ -19,6 +19,10 @@ public class Sun : MonoBehaviour
     //public Gradient lightColorMap;
     float totalXRange, interval, middayInterval, duskInterval, nightInterval;
 
+    //wind stuff
+    public int windCounter = 0;
+    public GameObject[] windDirections;
+
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -33,6 +37,8 @@ public class Sun : MonoBehaviour
         isMidday = false;
         isDusk = false;
         isNight = false;
+
+        RandomizeWinds();
     }
 
     void Update()
@@ -57,6 +63,7 @@ public class Sun : MonoBehaviour
             if (dayCounter == yesterday)
             {
                 dayCounter++;
+                RandomizeWinds();
             }
         }
         else if(transform.position.x < middayInterval && transform.position.x > duskInterval)
@@ -95,6 +102,26 @@ public class Sun : MonoBehaviour
         transform.LookAt(Vector3.zero);
 
    
+    }
+
+    void RandomizeWinds()
+    {
+        int randomWind = Random.Range(0, 4);
+
+        for(int i = 0; i < windDirections.Length; i++)
+        {
+            windDirections[i].SetActive(false);
+        }
+
+        windDirections[randomWind].SetActive(true);
+
+        //randomize time scales of winds
+        for(int i = 0; i < windDirections[randomWind].transform.childCount; i++)
+        {
+            int randomScale = Random.Range(0, 4);
+            windDirections[randomWind].transform.GetChild(i).GetComponent<WindGen>().timeScale = randomScale;
+            windDirections[randomWind].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
+        }
     }
 }
 

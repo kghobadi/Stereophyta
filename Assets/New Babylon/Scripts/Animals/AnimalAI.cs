@@ -121,7 +121,7 @@ public abstract class AnimalAI : MonoBehaviour {
             //stop running after we are close to position
             if(Vector3.Distance(transform.position, targetPosition) < stopMovingDistance)
             {
-                Debug.Log("stopped moving");
+                //Debug.Log("stopped moving");
 
                 StopMoving();
             }

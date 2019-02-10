@@ -111,7 +111,7 @@ public class Plont : Interactive {
         //grow
         if (growOrShrink)
         {
-            Debug.Log("growing!!");
+            //Debug.Log("growing!!");
             //increment current stage based on number of growth stages
             if (currentStage < myGrowthStages.Length - 1)
                 currentStage++;
@@ -125,7 +125,7 @@ public class Plont : Interactive {
         //shrink
         else
         {
-            Debug.Log("shrinking!!");
+            //Debug.Log("shrinking!!");
             //increment current stage based on number of growth stages
             if (currentStage > 1)
                 currentStage--;
@@ -197,7 +197,7 @@ public class Plont : Interactive {
     {
         if (other.gameObject.tag == "Player" && !plantSource.isPlaying )
         {
-            Debug.Log("player triggered");
+            //Debug.Log("player triggered");
             PlaySound();
         }
     }

@@ -40,7 +40,7 @@ public class WateringCan : Tool
         base.MainAction();
         if (!watering)
         {
-            Debug.Log("water already!1!");
+            //Debug.Log("water already!1!");
             wateringCanimator.SetTrigger("water1");
             wateringCanimator.SetBool("watering", true);
             waterParticles.waterEffect.Play();
