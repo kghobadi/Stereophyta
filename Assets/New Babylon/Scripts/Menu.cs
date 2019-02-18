@@ -36,10 +36,12 @@ public class Menu : MonoBehaviour {
             {
                 menuObj.SetActive(false);
                 tpc.menuOpen = false;
+                Cursor.visible = false;
             }
             //turn on
             else
             {
+                Cursor.visible = true;
                 menuObj.SetActive(true);
                 tpc.menuOpen = true;
             }

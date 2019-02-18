@@ -40,16 +40,16 @@ public class InteractiveObjectType : MonoBehaviour {
         switch (objectType)
         {
             case 0:
-                gameObject.GetComponent<Plont>().UpdateInteractPrompt();
+                //gameObject.GetComponent<Plont>().UpdateInteractPrompt();
                 break;
             case 1:
-                gameObject.GetComponent<Plont>().UpdateInteractPrompt();
+                //gameObject.GetComponent<Plont>().UpdateInteractPrompt();
                 break;
             case 2:
                 gameObject.GetComponent<Boat>().UpdateInteractPrompt();
                 break;
             case 3:
-                gameObject.GetComponent<Plont>().UpdateInteractPrompt();
+                //gameObject.GetComponent<Plont>().UpdateInteractPrompt();
                 break;
         }
     }
@@ -59,16 +59,16 @@ public class InteractiveObjectType : MonoBehaviour {
         switch (objectType)
         {
             case 0:
-                gameObject.GetComponent<Plont>().DisableInteractPrompt();
+                //gameObject.GetComponent<Plont>().DisableInteractPrompt();
                 break;
             case 1:
-                gameObject.GetComponent<Plont>().DisableInteractPrompt();
+                //gameObject.GetComponent<Plont>().DisableInteractPrompt();
                 break;
             case 2:
                 gameObject.GetComponent<Boat>().DisableInteractPrompt();
                 break;
             case 3:
-                gameObject.GetComponent<Plont>().DisableInteractPrompt();
+                //gameObject.GetComponent<Plont>().DisableInteractPrompt();
                 break;
         }
     }
