@@ -9,8 +9,10 @@ public struct GrowthStages
     public GameObject stageModel;
 }
 
-public class Plont : Interactive {
+public class Plont : MonoBehaviour {
     Sun sun;
+    GameObject player;
+    ThirdPersonController tpc;
 
     Rigidbody plantBody;
     BoxCollider plantCollider;
@@ -19,7 +21,9 @@ public class Plont : Interactive {
     public AudioSource plantSource, extraVoice;
     public AudioClip currentClip;
     ParticleSystem soundPlaying;
-    public float emitFreq=0.25f;
+    ParticleSystem.MainModule soundsPlayer;
+    public float emitFreq = 0.25f;
+        public int emitCount;
     float emitTimer;
 
     Vector3 originalScale;
@@ -27,6 +31,7 @@ public class Plont : Interactive {
     public bool dayPassed, hasBeenWatered;
     public GrowthStages[] myGrowthStages;
     public AudioClip[] stageSounds;
+    public AudioClip sicknessSound;
     Animator plantAnimator;
 
     public bool growing;
@@ -36,6 +41,8 @@ public class Plont : Interactive {
 	void Start () {
         //hail the sun
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
+        player = GameObject.FindGameObjectWithTag("Player");
+        tpc = player.GetComponent<ThirdPersonController>();
         //colliders and rigibodys
         plantBody = GetComponent<Rigidbody>();
         plantBody.isKinematic = true;
@@ -52,13 +59,12 @@ public class Plont : Interactive {
         currentStage = 0;
         soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
         soundPlaying.Stop();
-
         //call funcs
         PlayPlantingEffect();
         GrowPlant(true);
     }
-	
-	 public override void Update () {
+
+    public void Update() {
         //counting days is hard work
         if (sun.dayCounter > sun.yesterday)
         {
@@ -77,21 +83,26 @@ public class Plont : Interactive {
             }
         }
 
-        if(sun.yesterday == sun.dayCounter)
+        if (sun.yesterday == sun.dayCounter)
         {
             dayPassed = false;
         }
-        
+
         //turn sound particles on and off
-        if (plantSource.isPlaying)
-        {
-            emitTimer -= Time.deltaTime;
-            if(emitTimer < 0)
-            {
-                soundPlaying.Emit(1);
-                emitTimer = emitFreq;
-            }
-        }
+        //if (plantSource.isPlaying || extraVoice.isPlaying)
+        //{
+        //    soundPlaying.Play();
+        //    emitTimer -= Time.deltaTime;
+        //    if (emitTimer < 0)
+        //    {
+        //        soundPlaying.Emit(emitCount);
+        //        emitTimer = emitFreq;
+        //    }
+        //}
+        //else
+        //{
+        //    soundPlaying.Stop();
+        //}
 
         //lerps scale up as plants grow
         if (growing)
@@ -108,16 +119,31 @@ public class Plont : Interactive {
 
     public void GrowPlant(bool growOrShrink)
     {
+        //if (plantAnimator.GetBool("sick") == true)
+        //{
+        //    plantSource.Stop();
+        //    plantSource.loop = false;
+        //    //n o more sick
+        //    plantAnimator.SetBool("sick", false);
+        //}
         //grow
         if (growOrShrink)
         {
             //Debug.Log("growing!!");
             //increment current stage based on number of growth stages
             if (currentStage < myGrowthStages.Length - 1)
+            {
                 currentStage++;
+            } 
+            //time to die!
             else
             {
-                //time to die!
+                //gets sick until the player cuts it
+                //plantAnimator.SetBool("sick", true);
+                ////set current clip
+                //currentClip = sicknessSound;
+                //plantSource.loop = true;
+                //plantSource.Play();
                 Debug.Log("Rip " + gameObject.name);
                 Destroy(gameObject);
             }
@@ -128,10 +154,12 @@ public class Plont : Interactive {
             //Debug.Log("shrinking!!");
             //increment current stage based on number of growth stages
             if (currentStage > 1)
+            {
                 currentStage--;
+            }
+            //time to die!
             else
             {
-                //time to die!
                 Debug.Log("Rip " + gameObject.name);
                 Destroy(gameObject);
             }
@@ -163,18 +191,33 @@ public class Plont : Interactive {
                 transform.localScale = originalScale * currentStage;
             }
         }
-        
+
 
         //set nextStage
         nextStage = myAge + myGrowthStages[currentStage].growthDays;
         //set current clip
         currentClip = stageSounds[myAge];
+
+        ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
+        soundsPlayer.duration = currentClip.length;
+        //float randomSickness = Random.Range(0, 100);
+        ////make the plant sick!
+        //if (randomSickness < 5)
+        //{
+        //    plantAnimator.SetBool("sick", true);
+        //    //set current clip
+        //    currentClip = sicknessSound;
+        //}
     }
     
     public void PlaySound()
     {
-        plantSource.PlayOneShot(currentClip);
-        plantAnimator.SetTrigger("wobble");
+        if (!plantAnimator.GetBool("sick"))
+        {
+            plantSource.PlayOneShot(currentClip);
+            soundPlaying.Play();
+            plantAnimator.SetTrigger("wobble");
+        }
     }
 
     //plays the dirt planting effect at start

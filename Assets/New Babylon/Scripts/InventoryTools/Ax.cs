@@ -16,8 +16,7 @@ public class Ax : Tool {
     public float axWindSpeed;
     public float scaleIncrease;
 
-	public override void Start () {
-        base.Start();
+    void Start () {
         //all my refs
         myAxBody = GetComponent<Rigidbody>();
         myCollider = GetComponent<BoxCollider>();

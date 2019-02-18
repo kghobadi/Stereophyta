@@ -63,7 +63,12 @@ public class Sun : MonoBehaviour
             if (dayCounter == yesterday)
             {
                 dayCounter++;
-                RandomizeWinds();
+
+                //if dayCounter is multiple of 3, randomize wind
+                if(dayCounter % 3 == 0)
+                {
+                    RandomizeWinds();
+                }
             }
         }
         else if(transform.position.x < middayInterval && transform.position.x > duskInterval)

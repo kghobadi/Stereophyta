@@ -15,14 +15,9 @@ public abstract class Tool : MonoBehaviour {
     //set tool refs in awake so that inventory can disable them at start
     public virtual void Awake()
     {
-       
-
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
     }
-
-    public virtual void Start () {
-	}
 
     public void OnEnable()
     {
