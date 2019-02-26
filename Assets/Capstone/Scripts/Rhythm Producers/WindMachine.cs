@@ -28,14 +28,14 @@ public class WindMachine : RhythmProducer {
     bool increasing;
     public ParticleSystem triRipples;
 
-    SpriteRenderer rhythmSR;
+    //SpriteRenderer rhythmSR;
 
     public void Start () {
         rotationSpeed = 3;
         
         disappearTimer = disappearTimerTotal;
-        rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
-        rhythmSR.enabled = false;
+        //rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
+        //rhythmSR.enabled = false;
 
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
@@ -106,15 +106,15 @@ public class WindMachine : RhythmProducer {
         //    disappearTimer = disappearTimerTotal;
         //}
 
-        if (rhythmSR.enabled)
-        {
-            disappearTimer -= Time.deltaTime;
-            if (disappearTimer < 0)
-            {
-                rhythmSR.enabled = false;
-                disappearTimer = disappearTimerTotal;
-            }
-        }
+        //if (rhythmSR.enabled)
+        //{
+        //    disappearTimer -= Time.deltaTime;
+        //    if (disappearTimer < 0)
+        //    {
+        //        rhythmSR.enabled = false;
+        //        disappearTimer = disappearTimerTotal;
+        //    }
+        //}
 
     }
 
@@ -122,12 +122,12 @@ public class WindMachine : RhythmProducer {
     public void OnMouseOver()
     {
         disappearTimer = disappearTimerTotal;
-        rhythmSR.enabled = true;
+        //rhythmSR.enabled = true;
     }
 
     public void OnMouseExit()
     {
-        rhythmSR.enabled = false;
+        //rhythmSR.enabled = false;
     }
 
     public override void AudioRhythm()
