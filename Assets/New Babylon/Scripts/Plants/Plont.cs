@@ -34,6 +34,9 @@ public class Plont : MonoBehaviour {
     public AudioClip sicknessSound;
     Animator plantAnimator;
 
+    public bool hasCropBundles;
+    public GameObject[] cropBundles;
+
     public bool growing;
     public float growthSpeed;
     Vector3 newScale;
@@ -59,6 +62,16 @@ public class Plont : MonoBehaviour {
         currentStage = 0;
         soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
         soundPlaying.Stop();
+
+        //turn off all the crop bundles at start
+        if (hasCropBundles)
+        {
+            for(int i = 0; i < cropBundles.Length; i++)
+            {
+                cropBundles[i].SetActive(false);
+            }
+        }
+
         //call funcs
         PlayPlantingEffect();
         GrowPlant(true);
@@ -147,10 +160,22 @@ public class Plont : MonoBehaviour {
                 Debug.Log("Rip " + gameObject.name);
                 Destroy(gameObject);
             }
+
+            if (hasCropBundles)
+            {
+                if (currentStage <= cropBundles.Length - 1)
+                    cropBundles[currentStage].SetActive(true);
+            }
         }
         //shrink
         else
         {
+            if (hasCropBundles)
+            {
+                cropBundles[currentStage].SetActive(false);
+                //SPAWN SEED HERE
+            }
+
             //Debug.Log("shrinking!!");
             //increment current stage based on number of growth stages
             if (currentStage > 1)
@@ -212,12 +237,9 @@ public class Plont : MonoBehaviour {
     
     public void PlaySound()
     {
-        if (!plantAnimator.GetBool("sick"))
-        {
-            plantSource.PlayOneShot(currentClip);
-            soundPlaying.Play();
-            plantAnimator.SetTrigger("wobble");
-        }
+        plantSource.PlayOneShot(currentClip);
+        soundPlaying.Play();
+        plantAnimator.SetTrigger("wobble");
     }
 
     //plays the dirt planting effect at start
