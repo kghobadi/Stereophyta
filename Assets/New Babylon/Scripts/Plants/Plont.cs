@@ -32,7 +32,8 @@ public class Plont : MonoBehaviour {
     public GrowthStages[] myGrowthStages;
     public AudioClip[] stageSounds;
     public AudioClip sicknessSound;
-    Animator plantAnimator;
+    public Animator plantAnimator;
+    public bool animatorInChildren;
 
     public bool hasCropBundles;
     public GameObject[] cropBundles;
@@ -50,7 +51,10 @@ public class Plont : MonoBehaviour {
         plantBody = GetComponent<Rigidbody>();
         plantBody.isKinematic = true;
         plantCollider = GetComponent<BoxCollider>();
-        plantAnimator = GetComponent<Animator>();
+        if (!animatorInChildren)
+        {
+            plantAnimator = GetComponent<Animator>();
+        }
 
         //grab audio sources
         plantSource = GetComponent<AudioSource>();
@@ -207,13 +211,13 @@ public class Plont : MonoBehaviour {
         {
             if (growOrShrink)
             {
-                newScale = originalScale * currentStage;
+                newScale = (originalScale * currentStage) / 2;
                 growing = true;
             }
             //shrink
             else
             {
-                transform.localScale = originalScale * currentStage;
+                transform.localScale = (originalScale * currentStage) / 2;
             }
         }
 
