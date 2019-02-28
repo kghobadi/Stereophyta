@@ -36,10 +36,10 @@ public class PlayerCameraController : MonoBehaviour {
     public float cameraRotationSpeedXMouse = 5;
     public float cameraRotationSpeedYMouse = 5;
 
-    public float mouseSmoothLookOriginal, mouseSmoothMoveOriginal;
-    public float mouseSmoothLook = 0.5f, mouseSmoothMove = 0.5f;
-    public float mouseTurnSmooth = 0.1f, mouseMovingTurnSmooth;
-    public float mouseTurnSmoothMove = 0.1f, mouseMovingTurnSmoothMove;
+    public float mSmoothLookOriginal, mSmoothMoveOriginal;
+    public float mSmoothLook = 0.5f, mSmoothMove = 0.5f;
+    public float mTurnSmoothLook = 0.1f, mMovingTurnSmoothLook;
+    public float mTurnSmoothMove = 0.1f, mMovingTurnSmoothMove;
 
     // for boat stuff
     public bool inBoat;
@@ -54,8 +54,8 @@ public class PlayerCameraController : MonoBehaviour {
         //set original smooth vals 
         smoothLookOriginal = smoothLook;
         smoothMoveOriginal = smoothMove;
-        mouseSmoothLookOriginal = mouseSmoothLook;
-        mouseSmoothMoveOriginal = mouseSmoothMove;
+        mSmoothLookOriginal = mSmoothLook;
+        mSmoothMoveOriginal = mSmoothMove;
         Cursor.visible = false;
     }
 	
@@ -67,7 +67,7 @@ public class PlayerCameraController : MonoBehaviour {
 
         if (mouseControls)
         {
-            transform.position = Vector3.Lerp(transform.position, targetMove, mouseSmoothMove * Time.deltaTime);
+            transform.position = Vector3.Lerp(transform.position, targetMove, mSmoothMove * Time.deltaTime);
         }
         else
         {
@@ -108,7 +108,7 @@ public class PlayerCameraController : MonoBehaviour {
 
         if (mouseControls)
         {
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mouseSmoothLook * Time.deltaTime);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mSmoothLook * Time.deltaTime);
         }
         else
         {
@@ -171,20 +171,20 @@ public class PlayerCameraController : MonoBehaviour {
             //if player is not moving and we are rotating, rotate FASTER
             if (tpc.forwardInput.magnitude == 0 && (horizontalRotation.magnitude > 0 || tpc.horizontalInput.magnitude > 0))
             {
-                mouseSmoothLook = mouseTurnSmooth;
-                mouseSmoothMove = mouseTurnSmoothMove;
+                mSmoothLook = mTurnSmoothLook;
+                mSmoothMove = mTurnSmoothMove;
             }
             //if player moving AND we rotating, rotate MEDIUM
             else if (tpc.forwardInput.magnitude > 0 && (horizontalRotation.magnitude > 0 || tpc.horizontalInput.magnitude > 0))
             {
-                mouseSmoothLook = mouseMovingTurnSmooth;
-                mouseSmoothMove = mouseMovingTurnSmoothMove;
+                mSmoothLook = mMovingTurnSmoothLook;
+                mSmoothMove = mMovingTurnSmoothMove;
             }
             //leave the values as is when player moving
             else if (horizontalRotation.magnitude == 0 && tpc.horizontalInput.magnitude == 0)
             {
-                mouseSmoothLook = mouseSmoothLookOriginal;
-                mouseSmoothMove = mouseSmoothMoveOriginal;
+                mSmoothLook = mSmoothLookOriginal;
+                mSmoothMove = mSmoothMoveOriginal;
             }
         }
        

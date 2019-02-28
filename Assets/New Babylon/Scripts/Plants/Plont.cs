@@ -32,8 +32,8 @@ public class Plont : MonoBehaviour {
     public GrowthStages[] myGrowthStages;
     public AudioClip[] stageSounds;
     public AudioClip sicknessSound;
-    public Animator plantAnimator;
-    public bool animatorInChildren;
+    public Animator plantAnimator, extraAnimator;
+    public bool animatorInChildren, hasExtraAnimator;
 
     public bool hasCropBundles;
     public GameObject[] cropBundles;
@@ -228,6 +228,7 @@ public class Plont : MonoBehaviour {
         currentClip = stageSounds[myAge];
 
         ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
+        soundPlaying.Stop();
         soundsPlayer.duration = currentClip.length;
         //float randomSickness = Random.Range(0, 100);
         ////make the plant sick!
@@ -244,6 +245,8 @@ public class Plont : MonoBehaviour {
         plantSource.PlayOneShot(currentClip);
         soundPlaying.Play();
         plantAnimator.SetTrigger("wobble");
+        if(hasExtraAnimator)
+            extraAnimator.SetTrigger("wobble");
     }
 
     //plays the dirt planting effect at start
