@@ -10,6 +10,8 @@ public class PlayerCameraController : MonoBehaviour {
 
     //all the camera movement vars
     Quaternion targetLook;
+    //stores verticalRotation input and consistently sets it
+    Vector3 yLook;
     Vector3 targetMove;
     public float rayHitMoveInFront = 0.1f;
     Vector3 targetMoveUse;
@@ -18,6 +20,7 @@ public class PlayerCameraController : MonoBehaviour {
     public float distanceFromPlayerMax;
     public float heightFromPlayer = 3;
     public float heightMin, heightMax;
+    public float yLookMin, yLookMax;
     public float zoomSpeed;
 
     //all the ps4 feel variables
@@ -87,8 +90,21 @@ public class PlayerCameraController : MonoBehaviour {
             horizontalRotation = new Vector3(0, Input.GetAxis("Mouse X") * cameraRotationSpeedX, 0);
             verticalRotation = new Vector3(0, Input.GetAxis("Mouse Y") * cameraRotationSpeedY, 0);
         }
+
+        //if mouse up and yLook is less than yLookMax
+        if(verticalRotation.y > 0.25f && yLook.y < yLookMax)
+        {
+            yLook += verticalRotation;
+        }
+        //if mouse down and yLook is greater than yLookMin
+        if (verticalRotation.y < -0.25f && yLook.y > yLookMin)
+        {
+            yLook += verticalRotation;
+        }
+
+        //add yLook to the player pos, then subtract cam pos to get the forward look
+        targetLook = Quaternion.LookRotation((playerTransform.position + yLook) - transform.position) ;
         
-        targetLook = Quaternion.LookRotation(playerTransform.position - transform.position) ;
 
         if (mouseControls)
         {
@@ -97,6 +113,7 @@ public class PlayerCameraController : MonoBehaviour {
         else
         {
             transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, smoothLook * Time.deltaTime);
+           
         }
 
         float zoomInput = Input.GetAxis("Mouse ScrollWheel");
@@ -124,7 +141,7 @@ public class PlayerCameraController : MonoBehaviour {
         playerTransform.Rotate(horizontalRotation);
 
         //Debug.Log(verticalRotation);
-        transform.Rotate(-verticalRotation, 0, 0);
+        //transform.Rotate(-verticalRotation, 0, 0);
 
         //ps4 smooth move 
         if (!mouseControls)
