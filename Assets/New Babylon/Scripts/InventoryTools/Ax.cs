@@ -58,7 +58,7 @@ public class Ax : Tool {
             axing = false;
             //virtual play sounds
             PlaySound(axSource, axHits);
-            SpawnAxWinds(other.gameObject.transform.position);
+            SpawnAxWinds(other.gameObject.transform.position + new Vector3(0, transform.position.y, 0));
             Debug.Log("hit plant");
         }
     }
@@ -72,7 +72,7 @@ public class Ax : Tool {
             axing = false;
             //virtual play sounds
             PlaySound(axSource, axHits);
-            SpawnAxWinds(other.gameObject.transform.position);
+            SpawnAxWinds(other.gameObject.transform.position + new Vector3(0, transform.position.y, 0));
             Debug.Log("hit plant");
         }
     }
