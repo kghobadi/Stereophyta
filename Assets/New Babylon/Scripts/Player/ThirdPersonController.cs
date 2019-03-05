@@ -47,7 +47,7 @@ public class ThirdPersonController : MonoBehaviour
     DustSplash splashScript;
 
     //inventory ref
-    Inventory myInventory;
+    public Inventory myInventory;
 
     //for calc of sliding
     public Transform physicsRaycaster;
@@ -95,7 +95,7 @@ public class ThirdPersonController : MonoBehaviour
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
-        myInventory = GetComponent<Inventory>();
+        myInventory = transform.GetChild(0).GetComponent<Inventory>();
 
         //for ps4 Move
         moveSmoothUse = movespeedSmooth;

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Seed : MonoBehaviour {
+    public int mySeedIndex;
     GameObject player;
     ThirdPersonController tpc;
+    Inventory inventoryScript;
 
     Rigidbody seedBody;
     SphereCollider seedCollider;
-    public bool seedSelected, planting;
+    public bool seedSelected, planting, falling, vortexing;
 
     Vector3 originalPos;
     public GameObject plantPrefab;
@@ -19,16 +21,26 @@ public class Seed : MonoBehaviour {
 
     Transform inventoryParent;
 
+    public bool UIseed;
+
 	void Start () {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        inventoryScript = tpc.myInventory;
 
         seedBody = GetComponent<Rigidbody>();
         seedBody.isKinematic = true;
         seedCollider = GetComponent<SphereCollider>();
         seedSource = GetComponent<AudioSource>();
 
-        inventoryParent = transform.parent;
+        if (!UIseed)
+        {
+            SeedFall();
+        }
+        else
+        {
+            inventoryParent = transform.parent;
+        }
 	}
 	
 	void Update () {
@@ -51,14 +63,57 @@ public class Seed : MonoBehaviour {
                 }
             }
         }
-	}
+
+        //right after spawning
+        if (falling)
+        {
+
+            seedBody.AddForce(1, -3, 1);
+        }
+
+        //when player is near and nothing happening 
+        if (!falling && !planting && !UIseed && !vortexing)
+        {
+            if(Vector3.Distance(transform.position, player.transform.position) < 5)
+            {
+                vortexing = true;
+            }
+        }
+
+        //succ to player
+        if (vortexing)
+        {
+            transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * 5);
+
+            if (Vector3.Distance(transform.position, player.transform.position) < 1)
+            {
+                SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
+                seedStorageTemp.seedCount++;
+
+                inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
+
+                Destroy(gameObject);
+            }
+        }
+    }
 
     void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.tag == "Ground")
+        if(collision.gameObject.tag == "Ground" && planting)
         {
             SpawnPlant();
         }
+
+        if (collision.gameObject.tag == "Ground" && falling)
+        {
+            falling = false;
+            transform.position = transform.position + new Vector3(0, 0.5f, 0);
+            seedBody.useGravity = false;
+            seedBody.isKinematic = true;
+            Debug.Log("stopped falling");
+        }
+
+     
     }
 
     void SpawnPlant()
@@ -73,9 +128,30 @@ public class Seed : MonoBehaviour {
         tpc.playerCanMove = true;
 
         planting = false;
-
         seedBody.isKinematic = true;
         seedBody.useGravity = false;
+
+        //set seed count
+        SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
+        seedStorageTemp.seedCount--;
+
+        inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
+
+        //turn off if no more seeds
+        if(seedStorageTemp.seedCount == 0)
+        {
+            gameObject.SetActive(false);
+        }
+    }
+
+    //called when it falls off a plant from chop
+    public void SeedFall()
+    {
+        seedBody.isKinematic = false;
+        seedBody.useGravity = true;
+        seedBody.AddRelativeForce(0, 15, 5);
+
+        falling = true;
     }
 
 }

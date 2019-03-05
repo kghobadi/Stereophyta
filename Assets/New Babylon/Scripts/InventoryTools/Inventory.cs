@@ -2,6 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//seed storage info -- helps us count multiple seeds
+[System.Serializable]
+public struct SeedStorage
+{
+    public GameObject seedObj;
+    public int seedCount;
+}
+
 public class Inventory : MonoBehaviour {
     //player control ref
     GameObject player;
@@ -15,7 +23,8 @@ public class Inventory : MonoBehaviour {
     //seed inv
     public int currentSeed = 0;
     public GameObject currenSeedObj;
-    public List<GameObject> mySeeds = new List<GameObject>();
+
+    public List<SeedStorage> seedStorage = new List<SeedStorage>();
 
     float inputTimer;
     bool canSwitchInv;
@@ -25,7 +34,7 @@ public class Inventory : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
         
         currenItemObj = myItems[currentItem];
-        currenSeedObj = mySeeds[currentSeed];
+        currenSeedObj = seedStorage[currentSeed].seedObj;
         currenSeedObj.GetComponent<Seed>().seedSelected = true;
 
         //turn off all other items
@@ -36,10 +45,10 @@ public class Inventory : MonoBehaviour {
         }
 
         //turn off other seeds
-        for (int i = 0; i < mySeeds.Count; i++)
+        for (int i = 0; i < seedStorage.Count; i++)
         {
             if (i != currentSeed)
-                mySeeds[i].SetActive(false);
+                seedStorage[i].seedObj.SetActive(false);
         }
     }
 	
@@ -117,38 +126,57 @@ public class Inventory : MonoBehaviour {
         //switch pos
         if (posOrNeg)
         {
-            //increment item counter
-            if (currentSeed < mySeeds.Count - 1)
-            {
-                currentSeed++;
-            }
-            else
-            {
-                currentSeed = 0;
-            }
+            CountSeedUp();
         }
         //switch neg
         else
         {
-            //increment item counter
-            if (currentSeed > 0)
-            {
-                currentSeed--;
-            }
-            else
-            {
-                currentSeed = mySeeds.Count - 1;
-            }
+            CountSeedDown();
         }
+
+        //Need to check if player has any of this seed type. 
+        //if not, switch to it, but leave obj inactive
+        //if so, normal switch
+        //link this up to inventory UI
 
 
         //set new seed
-        currenSeedObj = mySeeds[currentSeed];
-        currenSeedObj.SetActive(true);
-        currenSeedObj.GetComponent<Seed>().seedSelected = true;
+        currenSeedObj = seedStorage[currentSeed].seedObj;
+        if(seedStorage[currentSeed].seedCount > 0)
+        {
+            currenSeedObj.SetActive(true);
+            currenSeedObj.GetComponent<Seed>().seedSelected = true;
+        }
+        
 
         //reset timer so not infinite switch
         inputTimer = 0.1f;
         canSwitchInv = false;
+    }
+
+    void CountSeedUp()
+    {
+        //increment item counter
+        if (currentSeed < seedStorage.Count - 1)
+        {
+            currentSeed++;
+        }
+        else
+        {
+            currentSeed = 0;
+        }
+    }
+
+    void CountSeedDown()
+    {
+        //increment item counter
+        if (currentSeed > 0)
+        {
+            currentSeed--;
+        }
+        else
+        {
+            currentSeed = seedStorage.Count - 1;
+        }
     }
 }
