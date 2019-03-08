@@ -69,6 +69,8 @@ public class ThirdPersonController : MonoBehaviour
     //for planting effect 
     public List<ParticleSystem> plantingEffects = new List<ParticleSystem>();
     public int plantingEffectCounter = 0;
+    public AudioSource seedAudio;
+    public AudioClip[] seedCollects;
 
     //dictionary to sort nearby audio sources by distance 
     [SerializeField]
@@ -433,6 +435,12 @@ public class ThirdPersonController : MonoBehaviour
             item.Key.priority = priority;
             priority++;
         }
+    }
+
+    public void SeedCollect()
+    {
+        int randomSlurp = Random.Range(0, seedCollects.Length);
+        seedAudio.PlayOneShot(seedCollects[randomSlurp]);
     }
 
 }

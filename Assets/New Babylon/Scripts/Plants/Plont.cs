@@ -149,6 +149,12 @@ public class Plont : MonoBehaviour {
             //time to die!
             else
             {
+                //spawn a bunch of seeds and die
+                for(int i = 0; i < cropBundles.Length; i++)
+                {
+                    Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
+                    GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
+                }
                 Debug.Log("Rip " + gameObject.name);
                 Destroy(gameObject);
             }
@@ -230,11 +236,14 @@ public class Plont : MonoBehaviour {
             extraAnimator.SetTrigger("wobble");
     }
 
+    //called when chop and when plant dies
     public void CutCrop()
     {
-        cropBundles[currentStage].SetActive(false);
+        if(cropBundles[currentStage].activeSelf)
+            cropBundles[currentStage].SetActive(false);
         //SPAWN SEED HERE
-        GameObject newSeed = Instantiate(seedPrefab, cropBundles[currentStage].transform.position, Quaternion.Euler(player.transform.localEulerAngles));
+        Vector3 spawnPos = cropBundles[currentStage].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
+        GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
     }
 
     //plays the dirt planting effect at start

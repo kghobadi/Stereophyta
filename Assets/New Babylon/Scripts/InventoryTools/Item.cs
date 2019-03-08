@@ -15,7 +15,7 @@ public class Item : MonoBehaviour {
 
     public enum ToolType
     {
-        AX, WATER,
+        AX, WATER, PICKAX,
     }
 
     public enum SeedType

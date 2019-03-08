@@ -92,6 +92,8 @@ public class Seed : MonoBehaviour {
 
                 inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
 
+                tpc.SeedCollect();
+
                 Destroy(gameObject);
             }
         }
