@@ -43,7 +43,7 @@ public class AxWind : Rhythm {
         {
             if (hit.transform.gameObject.tag == "Ground")
             {
-                transform.position = hit.point + new Vector3(0, 3f, 0);
+                transform.position = hit.point + new Vector3(0, 1.5f, 0);
             }
         }
     }
@@ -57,6 +57,8 @@ public class AxWind : Rhythm {
 
             if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
             {
+                //shrink plant and play guitar sound
+                other.GetComponent<Plont>().GrowPlant(false);
                 PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
                 Debug.Log("played guitar sound");
             }

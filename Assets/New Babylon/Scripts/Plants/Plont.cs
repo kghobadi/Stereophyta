@@ -37,6 +37,8 @@ public class Plont : MonoBehaviour {
 
     public bool hasCropBundles;
     public GameObject[] cropBundles;
+    //for spawning seeds when cut down
+    public GameObject seedPrefab;
 
     public bool growing;
     public float growthSpeed;
@@ -136,35 +138,28 @@ public class Plont : MonoBehaviour {
 
     public void GrowPlant(bool growOrShrink)
     {
-        //if (plantAnimator.GetBool("sick") == true)
-        //{
-        //    plantSource.Stop();
-        //    plantSource.loop = false;
-        //    //n o more sick
-        //    plantAnimator.SetBool("sick", false);
-        //}
         //grow
         if (growOrShrink)
         {
-            //Debug.Log("growing!!");
             //increment current stage based on number of growth stages
             if (currentStage < myGrowthStages.Length - 1)
             {
                 currentStage++;
-            } 
+            }
             //time to die!
             else
             {
-                //gets sick until the player cuts it
-                //plantAnimator.SetBool("sick", true);
-                ////set current clip
-                //currentClip = sicknessSound;
-                //plantSource.loop = true;
-                //plantSource.Play();
+                //spawn a bunch of seeds and die
+                for(int i = 0; i < cropBundles.Length; i++)
+                {
+                    Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
+                    GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
+                }
                 Debug.Log("Rip " + gameObject.name);
                 Destroy(gameObject);
             }
 
+            //set active next crop bundle
             if (hasCropBundles)
             {
                 if (currentStage <= cropBundles.Length - 1)
@@ -174,10 +169,10 @@ public class Plont : MonoBehaviour {
         //shrink
         else
         {
+            
             if (hasCropBundles)
             {
-                cropBundles[currentStage].SetActive(false);
-                //SPAWN SEED HERE
+                CutCrop();
             }
 
             //Debug.Log("shrinking!!");
@@ -193,7 +188,7 @@ public class Plont : MonoBehaviour {
                 Destroy(gameObject);
             }
         }
-        
+
 
         //if there is a new model for this stage
         if (myGrowthStages[currentStage].stageModel)
@@ -230,14 +225,6 @@ public class Plont : MonoBehaviour {
         ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
         soundPlaying.Stop();
         soundsPlayer.duration = currentClip.length;
-        //float randomSickness = Random.Range(0, 100);
-        ////make the plant sick!
-        //if (randomSickness < 5)
-        //{
-        //    plantAnimator.SetBool("sick", true);
-        //    //set current clip
-        //    currentClip = sicknessSound;
-        //}
     }
     
     public void PlaySound()
@@ -247,6 +234,16 @@ public class Plont : MonoBehaviour {
         plantAnimator.SetTrigger("wobble");
         if(hasExtraAnimator)
             extraAnimator.SetTrigger("wobble");
+    }
+
+    //called when chop and when plant dies
+    public void CutCrop()
+    {
+        if(cropBundles[currentStage].activeSelf)
+            cropBundles[currentStage].SetActive(false);
+        //SPAWN SEED HERE
+        Vector3 spawnPos = cropBundles[currentStage].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
+        GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
     }
 
     //plays the dirt planting effect at start

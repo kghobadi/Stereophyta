@@ -47,7 +47,7 @@ public class ThirdPersonController : MonoBehaviour
     DustSplash splashScript;
 
     //inventory ref
-    Inventory myInventory;
+    public Inventory myInventory;
 
     //for calc of sliding
     public Transform physicsRaycaster;
@@ -69,6 +69,8 @@ public class ThirdPersonController : MonoBehaviour
     //for planting effect 
     public List<ParticleSystem> plantingEffects = new List<ParticleSystem>();
     public int plantingEffectCounter = 0;
+    public AudioSource seedAudio;
+    public AudioClip[] seedCollects;
 
     //dictionary to sort nearby audio sources by distance 
     [SerializeField]
@@ -95,7 +97,7 @@ public class ThirdPersonController : MonoBehaviour
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
-        myInventory = GetComponent<Inventory>();
+        myInventory = transform.GetChild(0).GetComponent<Inventory>();
 
         //for ps4 Move
         moveSmoothUse = movespeedSmooth;
@@ -433,6 +435,12 @@ public class ThirdPersonController : MonoBehaviour
             item.Key.priority = priority;
             priority++;
         }
+    }
+
+    public void SeedCollect()
+    {
+        int randomSlurp = Random.Range(0, seedCollects.Length);
+        seedAudio.PlayOneShot(seedCollects[randomSlurp]);
     }
 
 }

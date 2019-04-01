@@ -15,6 +15,7 @@ public class WaterSplash : Rhythm {
 
     SphereCollider sphereCol;
     public bool splashing;
+    ParticleSystem.MainModule splashMain;
 
 	void Awake () {
         waterParent = transform.parent.GetComponent<WateringCan>();
@@ -24,6 +25,7 @@ public class WaterSplash : Rhythm {
         sphereCol = GetComponent<SphereCollider>();
         splashEffect.Stop();
         tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
+        splashMain = splashEffect.main;
 	}
     
     public IEnumerator Splash()
@@ -33,7 +35,7 @@ public class WaterSplash : Rhythm {
         int randomSplash = Random.Range(0, splashSounds.Length);
         splashAudio.PlayOneShot(splashSounds[randomSplash], 0.25f);
         splashing = true;
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(splashMain.duration);
         splashing = false;
         splashEffect.Stop();
         sphereCol.enabled = false;
@@ -43,7 +45,7 @@ public class WaterSplash : Rhythm {
     public override void OnTriggerEnter(Collider other)
     {
         base.OnTriggerEnter(other);
-        if (other.gameObject.tag == "Plant")
+        if (other.gameObject.tag == "Plant" && splashing)
         {
             if(!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
                 other.gameObject.GetComponent<Plont>().PlaySound();
