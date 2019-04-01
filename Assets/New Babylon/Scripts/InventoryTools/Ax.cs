@@ -46,36 +46,38 @@ public class Ax : Tool {
         base.MainAction();
         axAnimator.SetTrigger("swing1");
         //axAnimator.SetBool("axing", true);
+        //virtual play sounds
+        PlaySound(axSource, axHits);
+        SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
+
         axing = true;
+
     }
 
     void OnTriggerEnter(Collider other)
     {
         //collided with plant
-        if (other.gameObject.tag == "Plant" && axing)
+        if (other.gameObject.tag == "Plant")
         {
-            other.GetComponent<Plont>().GrowPlant(false);
             axing = false;
-            //virtual play sounds
-            PlaySound(axSource, axHits);
-            SpawnAxWinds(other.gameObject.transform.position + new Vector3(0, transform.position.y, 0));
+           
             Debug.Log("hit plant");
         }
     }
 
-    void OnTriggerStay(Collider other)
-    {
-        //collided with plant
-        if (other.gameObject.tag == "Plant" && axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.2f)
-        {
-            other.GetComponent<Plont>().GrowPlant(false);
-            axing = false;
-            //virtual play sounds
-            PlaySound(axSource, axHits);
-            SpawnAxWinds(other.gameObject.transform.position + new Vector3(0, transform.position.y, 0));
-            Debug.Log("hit plant");
-        }
-    }
+    //void OnTriggerStay(Collider other)
+    //{
+    //    //collided with plant
+    //    if (other.gameObject.tag == "Plant" && axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.2f)
+    //    {
+    //        other.GetComponent<Plont>().GrowPlant(false);
+    //        axing = false;
+    //        //virtual play sounds
+    //        PlaySound(axSource, axHits);
+    //        SpawnAxWinds(other.gameObject.transform.position + new Vector3(0, transform.position.y, 0));
+    //        Debug.Log("hit plant");
+    //    }
+    //}
 
     //spawns one ax wind
     void SpawnAxWinds(Vector3 spawnPoint)
