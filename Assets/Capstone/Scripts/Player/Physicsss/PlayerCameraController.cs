@@ -56,7 +56,10 @@ public class PlayerCameraController : MonoBehaviour {
         smoothMoveOriginal = smoothMove;
         mSmoothLookOriginal = mSmoothLook;
         mSmoothMoveOriginal = mSmoothMove;
+
+        //set cursor
         Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 	
 	void LateUpdate ()

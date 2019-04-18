@@ -13,6 +13,7 @@ public class ThirdPersonController : MonoBehaviour
     PlayerCameraController playerCameraController;
     Transform cameraTransform;
     public Animator poopShoes;
+    BoxCollider playerRunCollider;
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask mask;
@@ -23,7 +24,7 @@ public class ThirdPersonController : MonoBehaviour
     Vector3 currentMovement;
     public Vector3 horizontalInput;
     public Vector3 forwardInput;
-    public float movespeed = 5;
+    public float movespeed = 5, runSpeed;
     public float movespeedSmooth = 0.3f;
     public float rotateSpeed = 10;
     public float rotateSpeedSmooth = 0.3f;
@@ -98,6 +99,8 @@ public class ThirdPersonController : MonoBehaviour
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
         myInventory = transform.GetChild(0).GetComponent<Inventory>();
+        playerRunCollider = GetComponent<BoxCollider>();
+        playerRunCollider.enabled = false;
 
         //for ps4 Move
         moveSmoothUse = movespeedSmooth;
@@ -155,7 +158,18 @@ public class ThirdPersonController : MonoBehaviour
         targetForwardMovement.Normalize();
         targetForwardMovement *= forwardInput.magnitude;
 
-        currentMovement = Vector3.SmoothDamp(currentMovement, targetForwardMovement * movespeed, ref currentMovementV, moveSmoothUse);
+        //run
+        if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            currentMovement = Vector3.SmoothDamp(currentMovement, targetForwardMovement * runSpeed, ref currentMovementV, moveSmoothUse);
+            playerRunCollider.enabled = true;
+        }
+        //walk
+        else
+        {
+            currentMovement = Vector3.SmoothDamp(currentMovement, targetForwardMovement * movespeed, ref currentMovementV, moveSmoothUse);
+            playerRunCollider.enabled = false;
+        }
 
         //rotate the player's body
         transform.Rotate(horizontalInput * rotateSpeedMouse * Time.deltaTime);
