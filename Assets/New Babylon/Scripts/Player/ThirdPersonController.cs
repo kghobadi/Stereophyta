@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 public class ThirdPersonController : MonoBehaviour
 {
     //player controller and cam controller ref
-    CharacterController controller;
+    public CharacterController controller;
     PlayerCameraController playerCameraController;
     Transform cameraTransform;
     public Animator poopShoes;
@@ -33,7 +33,9 @@ public class ThirdPersonController : MonoBehaviour
     public float rotateSpeedMouse;
 
     //jump variables
-    public float jumpSpeed = 20;
+    public float jumpSpeed = 20, smallJump, midJump, bigJump;
+    public float jumpCharger, midJCharge, bigJCharge, jumpChargerMax;
+    public int lastJumpType;
     public float jumpWaitTime, jumpWaitTimer;
     public float airControlSmooth = 0.8f;
     public float grav = 9.8f;
@@ -66,12 +68,21 @@ public class ThirdPersonController : MonoBehaviour
 
     //world manager reference
     WorldManager wm;
+    GameObject sun;
+    Sun sunScript;
 
     //for planting effect 
     public List<ParticleSystem> plantingEffects = new List<ParticleSystem>();
     public int plantingEffectCounter = 0;
     public AudioSource seedAudio;
     public AudioClip[] seedCollects;
+
+    //for sleeping
+    public bool sleeping;
+    public int daysWithoutSleep = 0;
+    public int daysToSleep;
+    public int noSleepMax = 3;
+    public AudioClip[] snores, yawns;
 
     //dictionary to sort nearby audio sources by distance 
     [SerializeField]
@@ -86,6 +97,10 @@ public class ThirdPersonController : MonoBehaviour
 
     void Awake()
     {
+        //grab sun refs
+        sun = GameObject.FindGameObjectWithTag("Sun");
+        sunScript = sun.GetComponent<Sun>();
+
         currentFootsteps = grassSteps;
 
         //for dirt particles
@@ -128,6 +143,23 @@ public class ThirdPersonController : MonoBehaviour
         if (playerCanMove && !menuOpen && playerCameraController.mouseControls)
         {
             MouseMovement();
+        }
+
+        //call sleep -- only works if you haven't slept for a day and you are on the ground
+        if(!sleeping && Input.GetKeyDown(KeyCode.B) && controller.isGrounded)
+        {
+            Sleep(true);
+        }
+
+        //repeatedly snore while sleeping
+        if (sleeping)
+        {
+            //play snore sounds
+            if (!playerSource.isPlaying)
+            {
+                int randomSnore = Random.Range(0, snores.Length);
+                playerSource.PlayOneShot(snores[randomSnore], 1f);
+            }
         }
 
         //Restart game
@@ -234,6 +266,66 @@ public class ThirdPersonController : MonoBehaviour
         }
     }
 
+    //called either when player presses B or has passed out from exhaustion
+    public void Sleep(bool pressedOrPassed)
+    {
+        Debug.Log("sleep time");
+        //set bools
+        sleeping = true;
+        playerCanMove = false;
+        playerCameraController.enabled = false;
+        myInventory.gameObject.SetActive(false);
+
+        //player just pressed B
+        if (pressedOrPassed)
+        {
+            daysToSleep = 1;
+        }
+        //player passed out
+        else
+        {
+            daysToSleep = Random.Range(1, 3);
+        }
+
+        //increase sun rotationSpeed
+        sunScript.rotationSpeed = sunScript.sleepRotation;
+
+        //play random yawn sound
+        int randomYawn = Random.Range(0, yawns.Length);
+        playerSource.PlayOneShot(yawns[randomYawn], 1f);
+
+        //set animator
+        poopShoes.SetBool("idle", false);
+        poopShoes.SetBool("jumping", false);
+        poopShoes.SetBool("running", false);
+        poopShoes.SetBool("sleeping", true);
+    }
+
+    //called by Sun when player's daysToSleep reaches 0 while sleeping is true
+    public void WakeUp()
+    {
+        Debug.Log("wake up time");
+        //set bools
+        sleeping = false;
+        playerCanMove = true;
+        playerCameraController.enabled = true;
+        myInventory.gameObject.SetActive(true);
+        daysWithoutSleep = 0;
+
+        //play random yawn sound
+        int randomYawn = Random.Range(0, yawns.Length);
+        playerSource.PlayOneShot(yawns[randomYawn], 1f);
+
+        //reset sun rotationSpeed
+        sunScript.rotationSpeed = sunScript.normalRotation;
+
+        //set animator
+        poopShoes.SetBool("jumping", false);
+        poopShoes.SetBool("running", false);
+        poopShoes.SetBool("sleeping", false);
+        poopShoes.SetBool("idle", true);
+    }
+
     //checking if and how we are moving to set vis effects and anims
     void SetPlayerAnimsFootsteps(Vector3 inputToCheck)
     {
@@ -307,7 +399,7 @@ public class ThirdPersonController : MonoBehaviour
                 {
                     //dust splash
                     dustSplash.transform.position = hitD.point + new Vector3(0, 1f, 0);
-                    splashScript.StartCoroutine(splashScript.Splash());
+                    splashScript.StartCoroutine(splashScript.Splash(lastJumpType));
                 }
             }
             jumpWaitTimer -= Time.deltaTime;
@@ -329,24 +421,64 @@ public class ThirdPersonController : MonoBehaviour
             verticalSpeed -= grav * Time.deltaTime;
         }
 
-        //hold jump button to jump on rhythm
-        if (Input.GetButton("Jump") && !jumping && jumpWaitTimer < 0)
+        //hold jump button to charge jump on rhythm
+        if (Input.GetButton("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
         {
-            SetJump();
+            jumpCharger += Time.deltaTime;
+
+            //reached capacity -- big jump
+            if(jumpCharger > jumpChargerMax)
+            {
+                SetJump(2);
+            }
+        }
+
+        //release to set jump
+        if(Input.GetButtonUp("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
+        {
+            //small jump
+            if(jumpCharger < midJCharge)
+            {
+                SetJump(0);
+            }
+            //mid jump
+            if(jumpCharger > midJCharge && jumpCharger < bigJCharge)
+            {
+                SetJump(1);
+            }
+            //big jump
+            if (jumpCharger > bigJCharge)
+            {
+                SetJump(2);
+            }
         }
 
     }
 
     //called to actually jump
-    void SetJump()
+    void SetJump(int jumpType)
     {
         PlayJumpSound();
-        verticalSpeed = jumpSpeed;
+        //set various jump speeds
+        switch (jumpType)
+        {
+            case 0:
+                verticalSpeed = smallJump;
+                break;
+            case 1:
+                verticalSpeed = midJump;
+                break;
+            case 2:
+                verticalSpeed = bigJump;
+                break;
+        }
         poopShoes.SetBool("idle", false);
         poopShoes.SetBool("running", false);
         poopShoes.SetBool("jumping", true);
         jumping = true;
         jumpWaitTimer = jumpWaitTime;
+        jumpCharger = 0;
+        lastJumpType = jumpType;
     }
 
     //for ps4 move

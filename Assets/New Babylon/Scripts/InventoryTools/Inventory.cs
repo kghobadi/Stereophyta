@@ -68,7 +68,7 @@ public class Inventory : MonoBehaviour {
                 SwitchItem(true);
             }
             //switch current item -
-            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv)
+            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv && !currenSeedObj.GetComponent<Seed>().planting)
             {
                 SwitchSeed(true);
             }
@@ -142,10 +142,16 @@ public class Inventory : MonoBehaviour {
 
         //set new seed
         currenSeedObj = seedStorage[currentSeed].seedObj;
+        //if seed count of this seed > 0
         if(seedStorage[currentSeed].seedCount > 0)
         {
             currenSeedObj.SetActive(true);
             currenSeedObj.GetComponent<Seed>().seedSelected = true;
+        }
+        //switch seed again
+        else
+        {
+            SwitchSeed(true);
         }
         
 

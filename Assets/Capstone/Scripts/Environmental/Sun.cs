@@ -9,7 +9,7 @@ public class Sun : MonoBehaviour
     public int yesterday, dayCounter = 0;
 
     public GameObject waterDay, waterNight;
-    public float rotationSpeed = 10;
+    public float rotationSpeed = 10, sleepRotation, normalRotation;
     public Transform rotation;
 
     public Light sun;
@@ -37,6 +37,7 @@ public class Sun : MonoBehaviour
         isMidday = false;
         isDusk = false;
         isNight = false;
+        rotationSpeed = normalRotation;
 
         RandomizeWinds();
     }
@@ -63,11 +64,29 @@ public class Sun : MonoBehaviour
             if (dayCounter == yesterday)
             {
                 dayCounter++;
+                // randomize wind
+                RandomizeWinds();
 
-                //if dayCounter is multiple of 3, randomize wind
-                if(dayCounter % 3 == 0)
+                //subtract from player's days to sleep
+                if (tpc.sleeping)
                 {
-                    RandomizeWinds();
+                    tpc.daysToSleep--;
+                    //wake player up if its time
+                    if(tpc.daysToSleep <= 0)
+                    {
+                        tpc.WakeUp();
+                    }
+                }
+
+                //add to players days without sleep
+                else
+                {
+                    tpc.daysWithoutSleep++;
+                    //player passes out from exhaustion
+                    if(tpc.daysWithoutSleep > tpc.noSleepMax)
+                    {
+                        StartCoroutine(WaitForPlayerToPassOut());
+                    }
                 }
             }
         }
@@ -127,6 +146,15 @@ public class Sun : MonoBehaviour
             windDirections[randomWind].transform.GetChild(i).GetComponent<WindGen>().timeScale = randomScale;
             windDirections[randomWind].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
         }
+    }
+
+    IEnumerator WaitForPlayerToPassOut()
+    {
+        yield return new WaitUntil(() => tpc.controller.isGrounded == true);
+
+        tpc.Sleep(false);
+
+        Debug.Log("Sun called sleep");
     }
 }
 

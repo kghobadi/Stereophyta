@@ -16,6 +16,18 @@ public class Rhythm : MonoBehaviour {
             other.gameObject.GetComponent<AncientTree>().PlaySound();
             //Debug.Log("Tree played sound");
         }
+
+        //seed plays sound, starts reacting to physics
+        if (other.gameObject.tag == "Seed")
+        {
+            Seed seedScript = other.gameObject.GetComponent<Seed>();
+
+            seedScript.seedSource.PlayOneShot(seedScript.dropSeed);
+
+            seedScript.seedBody.isKinematic = false;
+
+            Debug.Log("seed enter wind");
+        }
     }
     
 
@@ -31,11 +43,21 @@ public class Rhythm : MonoBehaviour {
             //}
 
             //repeatedly play notes while wind is on it
-            if (other.gameObject.tag == "Plant")
-            {
-                if(!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-                    other.gameObject.GetComponent<Plont>().PlaySound();
-            }
+            if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+                other.gameObject.GetComponent<Plont>().PlaySound();
+
+        }
+
+        //push seed while on it
+        if(other.gameObject.tag == "Seed")
+        {
+            Seed seedScript = other.gameObject.GetComponent<Seed>();
+
+            Vector3 force = -transform.forward;
+
+            seedScript.seedBody.AddForce(force);
+
+            Debug.Log("wind pushing seed, seed vel = " + seedScript.seedBody.velocity);
         }
     }
 
@@ -46,6 +68,18 @@ public class Rhythm : MonoBehaviour {
            // string plantType = other.gameObject.GetComponent<Plant>().plantSpecieName.ToString();
 
         
+        }
+
+        //seed plays sound, stops reacting to physics
+        if (other.gameObject.tag == "Seed")
+        {
+            Seed seedScript = other.gameObject.GetComponent<Seed>();
+
+            seedScript.seedSource.PlayOneShot(seedScript.spawnPlant);
+
+            seedScript.seedBody.isKinematic = true;
+
+            Debug.Log("seed exit wind");
         }
     }
 

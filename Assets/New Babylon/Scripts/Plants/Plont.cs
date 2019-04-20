@@ -10,14 +10,17 @@ public struct GrowthStages
 }
 
 public class Plont : MonoBehaviour {
+    //player and sun ref
     Sun sun;
     GameObject player;
     ThirdPersonController tpc;
 
+    //physics 
     Rigidbody plantBody;
     BoxCollider plantCollider;
     GameObject currentModel;
 
+    //sound controls
     public AudioSource plantSource, extraVoice;
     public AudioClip currentClip;
     ParticleSystem soundPlaying;
@@ -27,6 +30,7 @@ public class Plont : MonoBehaviour {
     float emitTimer;
 
     Vector3 originalScale;
+    //stages
     public int myAge, currentStage, nextStage;
     public bool dayPassed, hasBeenWatered;
     public GrowthStages[] myGrowthStages;
@@ -43,12 +47,14 @@ public class Plont : MonoBehaviour {
     public bool growing;
     public float growthSpeed;
     Vector3 newScale;
+    public float seedSpawnChance = 10;
     
 	void Start () {
         //hail the sun
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+
         //colliders and rigibodys
         plantBody = GetComponent<Rigidbody>();
         plantBody.isKinematic = true;
@@ -145,12 +151,28 @@ public class Plont : MonoBehaviour {
             if (currentStage < myGrowthStages.Length - 1)
             {
                 currentStage++;
+
+                //if older than 1
+                if(currentStage > 1)
+                {
+                    //random chance to spawn a seed each time plant ages
+                    float randomSpawn = Random.Range(0, 100);
+
+                    if (randomSpawn < seedSpawnChance)
+                    {
+                        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
+                        GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
+                    }
+                }
+               
             }
             //time to die!
             else
             {
+                //a little less than total # of crop bundles on plant death
+                int randomDrop = Random.Range(cropBundles.Length - 3, cropBundles.Length);
                 //spawn a bunch of seeds and die
-                for(int i = 0; i < cropBundles.Length; i++)
+                for(int i = 0; i < randomDrop; i++)
                 {
                     Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
                     GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
@@ -172,7 +194,12 @@ public class Plont : MonoBehaviour {
             
             if (hasCropBundles)
             {
-                CutCrop();
+                //high chance to spawn seed when cut
+                float randomChance = Random.Range(0, 100);
+                if(randomChance > 50)
+                {
+                    CutCrop();
+                }
             }
 
             //Debug.Log("shrinking!!");
@@ -184,7 +211,7 @@ public class Plont : MonoBehaviour {
             //time to die!
             else
             {
-                Debug.Log("Rip " + gameObject.name);
+                //Debug.Log("Rip " + gameObject.name);
                 Destroy(gameObject);
             }
         }

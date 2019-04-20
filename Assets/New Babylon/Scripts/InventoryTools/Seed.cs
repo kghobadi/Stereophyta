@@ -3,27 +3,41 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Seed : MonoBehaviour {
+    //for inv
     public int mySeedIndex;
+    //player and inv ref
     GameObject player;
     ThirdPersonController tpc;
     Inventory inventoryScript;
+    GameObject sun;
+    Sun sunScript;
 
-    Rigidbody seedBody;
+    //physics and collision
+    public Rigidbody seedBody;
     SphereCollider seedCollider;
     public bool seedSelected, planting, falling, vortexing;
 
+    //for spawning plant
     Vector3 originalPos;
     public GameObject plantPrefab;
     GameObject plantClone;
 
-    AudioSource seedSource;
+    //audio
+    public AudioSource seedSource;
     public AudioClip dropSeed, spawnPlant;
 
     Transform inventoryParent;
 
     public bool UIseed;
 
+    //for planting itself after a few days
+    public int daysBeforePlanting;
+    public bool dayPassed;
+
 	void Start () {
+        //grab refs
+        sun = GameObject.FindGameObjectWithTag("Sun");
+        sunScript = sun.GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
@@ -35,6 +49,7 @@ public class Seed : MonoBehaviour {
 
         if (!UIseed)
         {
+            daysBeforePlanting = Random.Range(2, 4);
             SeedFall();
         }
         else
@@ -44,10 +59,38 @@ public class Seed : MonoBehaviour {
 	}
 	
 	void Update () {
+        //counting days is hard work (for spawned seeds only)
+        if (!UIseed)
+        {
+            if (sunScript.dayCounter > sunScript.yesterday)
+            {
+                if (!dayPassed)
+                {
+                    daysBeforePlanting--;
+
+                    if (daysBeforePlanting == 0)
+                    {
+                        planting = true;
+                        seedBody.isKinematic = false;
+                        seedBody.useGravity = true;
+                        seedCollider.isTrigger = false;
+                    }
+
+                    dayPassed = true;
+                }
+
+            }
+
+            if (sunScript.yesterday == sunScript.dayCounter)
+            {
+                dayPassed = false;
+            }
+        }
+     
+
         //plant seed
         if (Input.GetButton("Plant") && seedSelected && !planting && !tpc.menuOpen)
         {
-
             RaycastHit hit;
             // Does the ray intersect any objects excluding the player layer
             if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
@@ -67,7 +110,6 @@ public class Seed : MonoBehaviour {
         //right after spawning
         if (falling)
         {
-
             seedBody.AddForce(1, -3, 1);
         }
 
@@ -112,6 +154,7 @@ public class Seed : MonoBehaviour {
             transform.position = transform.position + new Vector3(0, 0.5f, 0);
             seedBody.useGravity = false;
             seedBody.isKinematic = true;
+            seedCollider.isTrigger = true;
             Debug.Log("stopped falling");
         }
 

@@ -23,12 +23,12 @@ public class DustSplash : Rhythm {
         tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
 	}
     
-    public IEnumerator Splash()
+    public IEnumerator Splash(int jumpType)
     {
         splashEffect.Play();
         sphereCol.enabled = true;
         splashing = true;
-        PlaySplashSound();
+        PlaySplashSound(jumpType);
         yield return new WaitForSeconds(0.5f);
         splashing = false;
         splashEffect.Stop();
@@ -52,9 +52,8 @@ public class DustSplash : Rhythm {
         }
     }
 
-    void PlaySplashSound()
+    void PlaySplashSound(int jumpType)
     {
-        int randomSplash = Random.Range(0, splashSounds.Length);
-        splashAudio.PlayOneShot(splashSounds[randomSplash], 1f);
+        splashAudio.PlayOneShot(splashSounds[jumpType], 1f);
     }
 }
