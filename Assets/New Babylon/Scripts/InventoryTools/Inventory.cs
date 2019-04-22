@@ -148,7 +148,7 @@ public class Inventory : MonoBehaviour {
             currenSeedObj.SetActive(true);
             currenSeedObj.GetComponent<Seed>().seedSelected = true;
         }
-        //switch seed again
+        //switch seed again -- this causes a StackOverflow if there's no seeds in your inv
         else
         {
             SwitchSeed(true);
