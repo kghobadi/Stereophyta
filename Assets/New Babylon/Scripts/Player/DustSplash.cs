@@ -14,6 +14,8 @@ public class DustSplash : Rhythm {
     SphereCollider sphereCol;
     public bool splashing;
 
+    Vector3 origScale;
+
 	void Awake () {
         splashAudio = GetComponent<AudioSource>();
         originalPosition = transform.localPosition;
@@ -21,10 +23,12 @@ public class DustSplash : Rhythm {
         sphereCol = GetComponent<SphereCollider>();
         splashEffect.Stop();
         tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
+        origScale = transform.localScale;
 	}
     
     public IEnumerator Splash(int jumpType)
     {
+        transform.localScale = origScale * (jumpType + 1);
         splashEffect.Play();
         sphereCol.enabled = true;
         splashing = true;

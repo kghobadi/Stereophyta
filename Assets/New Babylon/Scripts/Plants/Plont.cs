@@ -160,8 +160,7 @@ public class Plont : MonoBehaviour {
 
                     if (randomSpawn < seedSpawnChance)
                     {
-                        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
-                        GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
+                        SpawnSeed();
                     }
                 }
                
@@ -174,8 +173,7 @@ public class Plont : MonoBehaviour {
                 //spawn a bunch of seeds and die
                 for(int i = 0; i < randomDrop; i++)
                 {
-                    Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
-                    GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
+                    SpawnSeed();
                 }
                 Debug.Log("Rip " + gameObject.name);
                 Destroy(gameObject);
@@ -269,7 +267,12 @@ public class Plont : MonoBehaviour {
         if(cropBundles[currentStage].activeSelf)
             cropBundles[currentStage].SetActive(false);
         //SPAWN SEED HERE
-        Vector3 spawnPos = cropBundles[currentStage].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
+        SpawnSeed();
+    }
+
+    void SpawnSeed()
+    {
+        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
         GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
     }
 
@@ -295,6 +298,14 @@ public class Plont : MonoBehaviour {
         {
             //Debug.Log("player triggered");
             PlaySound();
+
+            //player might knock a seed down
+            float randomChanceToDropSeed = Random.Range(0f, 100f);
+
+            if(randomChanceToDropSeed < 1f)
+            {
+                SpawnSeed();
+            }
         }
     }
 }

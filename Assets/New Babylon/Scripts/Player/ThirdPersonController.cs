@@ -21,6 +21,8 @@ public class ThirdPersonController : MonoBehaviour
 
     //PS4 move variables
     public bool playerCanMove, menuOpen;
+    public bool running;
+    public GameObject runParticles;
     Vector3 currentMovement;
     public Vector3 horizontalInput;
     public Vector3 forwardInput;
@@ -82,7 +84,9 @@ public class ThirdPersonController : MonoBehaviour
     public int daysWithoutSleep = 0;
     public int daysToSleep;
     public int noSleepMax = 3;
+    public AudioSource sleepSource;
     public AudioClip[] snores, yawns;
+    public GameObject sleepParticles;
 
     //dictionary to sort nearby audio sources by distance 
     [SerializeField]
@@ -129,6 +133,8 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("jumping", false);
 
         splashScript = dustSplash.GetComponent<DustSplash>();
+        sleepParticles.SetActive(false);
+        runParticles.SetActive(false);
 
         playerCanMove = true;
     }
@@ -146,7 +152,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //call sleep -- only works if you haven't slept for a day and you are on the ground
-        if(!sleeping && Input.GetKeyDown(KeyCode.B) && controller.isGrounded)
+        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded)
         {
             Sleep(true);
         }
@@ -155,15 +161,15 @@ public class ThirdPersonController : MonoBehaviour
         if (sleeping)
         {
             //play snore sounds
-            if (!playerSource.isPlaying)
+            if (!sleepSource.isPlaying)
             {
                 int randomSnore = Random.Range(0, snores.Length);
-                playerSource.PlayOneShot(snores[randomSnore], 1f);
+                sleepSource.PlayOneShot(snores[randomSnore], 1f);
             }
         }
 
         //Restart game
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.Delete))
         {
             SceneManager.LoadScene("DemoIslandTest");
         }
@@ -195,12 +201,23 @@ public class ThirdPersonController : MonoBehaviour
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetForwardMovement * runSpeed, ref currentMovementV, moveSmoothUse);
             playerRunCollider.enabled = true;
+            running = true;
+            if(forwardInput.magnitude > 0)
+            {
+                runParticles.SetActive(true);
+            }
+            else
+            {
+                runParticles.SetActive(false);
+            }
         }
         //walk
         else
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetForwardMovement * movespeed, ref currentMovementV, moveSmoothUse);
             playerRunCollider.enabled = false;
+            running = false;
+            runParticles.SetActive(false);
         }
 
         //rotate the player's body
@@ -292,7 +309,9 @@ public class ThirdPersonController : MonoBehaviour
 
         //play random yawn sound
         int randomYawn = Random.Range(0, yawns.Length);
-        playerSource.PlayOneShot(yawns[randomYawn], 1f);
+        sleepSource.PlayOneShot(yawns[randomYawn], 1f);
+
+        sleepParticles.SetActive(true);
 
         //set animator
         poopShoes.SetBool("idle", false);
@@ -313,8 +332,11 @@ public class ThirdPersonController : MonoBehaviour
         daysWithoutSleep = 0;
 
         //play random yawn sound
+        sleepSource.Stop();
         int randomYawn = Random.Range(0, yawns.Length);
-        playerSource.PlayOneShot(yawns[randomYawn], 1f);
+        sleepSource.PlayOneShot(yawns[randomYawn], 1f);
+
+        sleepParticles.SetActive(false);
 
         //reset sun rotationSpeed
         sunScript.rotationSpeed = sunScript.normalRotation;
