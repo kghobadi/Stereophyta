@@ -14,6 +14,7 @@ public class Plont : MonoBehaviour {
     Sun sun;
     GameObject player;
     ThirdPersonController tpc;
+    SleepSave saveScript;
 
     //physics 
     Rigidbody plantBody;
@@ -43,6 +44,7 @@ public class Plont : MonoBehaviour {
     public GameObject[] cropBundles;
     //for spawning seeds when cut down
     public GameObject seedPrefab;
+    public GameObject plantPrefab;
 
     public bool growing;
     public float growthSpeed;
@@ -54,6 +56,9 @@ public class Plont : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+        saveScript.mySaveStorage.plants.Add(gameObject);
+        saveScript.mySaveStorage.plantScripts.Add(this);
 
         //colliders and rigibodys
         plantBody = GetComponent<Rigidbody>();
@@ -108,26 +113,11 @@ public class Plont : MonoBehaviour {
             }
         }
 
+        //resets day passed when sun increments its day counter ahead of its yesterday int
         if (sun.yesterday == sun.dayCounter)
         {
             dayPassed = false;
         }
-
-        //turn sound particles on and off
-        //if (plantSource.isPlaying || extraVoice.isPlaying)
-        //{
-        //    soundPlaying.Play();
-        //    emitTimer -= Time.deltaTime;
-        //    if (emitTimer < 0)
-        //    {
-        //        soundPlaying.Emit(emitCount);
-        //        emitTimer = emitFreq;
-        //    }
-        //}
-        //else
-        //{
-        //    soundPlaying.Stop();
-        //}
 
         //lerps scale up as plants grow
         if (growing)
@@ -175,8 +165,9 @@ public class Plont : MonoBehaviour {
                 {
                     SpawnSeed();
                 }
-                Debug.Log("Rip " + gameObject.name);
-                Destroy(gameObject);
+
+                //from old age
+                Die();
             }
 
             //set active next crop bundle
@@ -189,7 +180,7 @@ public class Plont : MonoBehaviour {
         //shrink
         else
         {
-            
+            //has seeds to drop
             if (hasCropBundles)
             {
                 //high chance to spawn seed when cut
@@ -209,8 +200,8 @@ public class Plont : MonoBehaviour {
             //time to die!
             else
             {
-                //Debug.Log("Rip " + gameObject.name);
-                Destroy(gameObject);
+                //from cutting down
+                Die();
             }
         }
 
@@ -247,11 +238,13 @@ public class Plont : MonoBehaviour {
         //set current clip
         currentClip = stageSounds[myAge];
 
+        //set particles duration to our current audio clip's length
         ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
         soundPlaying.Stop();
         soundsPlayer.duration = currentClip.length;
     }
     
+    //plays current audio clip and wobbles plant
     public void PlaySound()
     {
         plantSource.PlayOneShot(currentClip);
@@ -268,6 +261,17 @@ public class Plont : MonoBehaviour {
             cropBundles[currentStage].SetActive(false);
         //SPAWN SEED HERE
         SpawnSeed();
+    }
+
+    void Die()
+    {
+        //Debug.Log("Rip " + gameObject.name);
+
+        //go through sleep save lists and remove me from everything
+        saveScript.mySaveStorage.plants.Remove(gameObject);
+        saveScript.mySaveStorage.plantScripts.Remove(this);
+
+        Destroy(gameObject);
     }
 
     void SpawnSeed()

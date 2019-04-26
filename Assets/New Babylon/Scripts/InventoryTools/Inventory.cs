@@ -134,12 +134,6 @@ public class Inventory : MonoBehaviour {
             CountSeedDown();
         }
 
-        //Need to check if player has any of this seed type. 
-        //if not, switch to it, but leave obj inactive
-        //if so, normal switch
-        //link this up to inventory UI
-
-
         //set new seed
         currenSeedObj = seedStorage[currentSeed].seedObj;
         //if seed count of this seed > 0

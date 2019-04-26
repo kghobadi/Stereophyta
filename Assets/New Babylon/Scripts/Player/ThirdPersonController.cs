@@ -98,6 +98,8 @@ public class ThirdPersonController : MonoBehaviour
     //to shorten if statement
     public List<string> audioTags = new List<string>();
 
+    public SleepSave saveScript;
+
 
     void Awake()
     {
@@ -346,6 +348,9 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("running", false);
         poopShoes.SetBool("sleeping", false);
         poopShoes.SetBool("idle", true);
+
+        //save game upon waking up
+        saveScript.SaveGameData();
     }
 
     //checking if and how we are moving to set vis effects and anims
