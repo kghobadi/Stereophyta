@@ -12,7 +12,7 @@ public class TerrainGenerator : MonoBehaviour {
     public float offsetX = 100f;
     public float offsetY = 100f;
 
-    public GameObject theMiner, theWindmill, theHang;
+    public GameObject theHang;
 
     public int instantAmount = 10;
     public float heightOffset;

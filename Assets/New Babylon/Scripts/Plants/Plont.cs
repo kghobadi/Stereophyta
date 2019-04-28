@@ -15,6 +15,7 @@ public class Plont : MonoBehaviour {
     GameObject player;
     ThirdPersonController tpc;
     SleepSave saveScript;
+    public bool startingPlant;
 
     //physics 
     Rigidbody plantBody;
@@ -50,6 +51,14 @@ public class Plont : MonoBehaviour {
     public float growthSpeed;
     Vector3 newScale;
     public float seedSpawnChance = 10;
+
+    public PlantType myPlantType;
+
+    //mostly used for saving / loading 
+    public enum PlantType
+    {
+        PIANO, SUCCULENTAR, GUITAR, BELL, TRIANGULAR,
+    }
     
 	void Start () {
         //hail the sun
@@ -57,8 +66,15 @@ public class Plont : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
-        saveScript.mySaveStorage.plants.Add(gameObject);
-        saveScript.mySaveStorage.plantScripts.Add(this);
+        //add data to save script
+        if (!startingPlant)
+        {
+            saveScript.mySaveStorage.plants.Add(gameObject);
+            saveScript.mySaveStorage.plantScripts.Add(this);
+            saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
+
+            Debug.Log("added this plant to save storage");
+        }
 
         //colliders and rigibodys
         plantBody = GetComponent<Rigidbody>();
@@ -243,6 +259,19 @@ public class Plont : MonoBehaviour {
         soundPlaying.Stop();
         soundsPlayer.duration = currentClip.length;
     }
+
+    //generally only called by loading script
+    public IEnumerator AgeAtStart(int ages)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        for(int i = 0; i < ages; i++)
+        {
+            GrowPlant(true);
+        }
+
+        //Debug.Log("grew at start");
+    }
     
     //plays current audio clip and wobbles plant
     public void PlaySound()
@@ -268,8 +297,10 @@ public class Plont : MonoBehaviour {
         //Debug.Log("Rip " + gameObject.name);
 
         //go through sleep save lists and remove me from everything
+        int indexToRemove = saveScript.mySaveStorage.plants.IndexOf(gameObject);
         saveScript.mySaveStorage.plants.Remove(gameObject);
         saveScript.mySaveStorage.plantScripts.Remove(this);
+        saveScript.mySaveStorage.plantType.RemoveAt(indexToRemove);
 
         Destroy(gameObject);
     }

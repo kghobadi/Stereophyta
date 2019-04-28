@@ -349,6 +349,13 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("sleeping", false);
         poopShoes.SetBool("idle", true);
 
+        StartCoroutine(WaitToSave());
+    }
+
+    IEnumerator WaitToSave()
+    {
+        //so that plants can grow before the save
+        yield return new WaitForSeconds(0.25f);
         //save game upon waking up
         saveScript.SaveGameData();
     }
