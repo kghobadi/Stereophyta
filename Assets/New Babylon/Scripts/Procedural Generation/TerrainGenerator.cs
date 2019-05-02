@@ -66,6 +66,11 @@ public class TerrainGenerator : MonoBehaviour {
 
                     //will also want to generate landmarks in the water so that players can find their way
                     // then it will be time to bring out the BOAT!!!
+
+                    //will want to be able to find the peak of each hill and know the radius of surface area of land which is above water
+                    //from there, will paint texture on terrain and height differentiations
+                    //can paint grass as well and maybe later the family field recorder trees if i decide that makes any sense at all
+                    //eventually could have random chance for animal spawns as well  -- that comes later
                 }
                 
             }
