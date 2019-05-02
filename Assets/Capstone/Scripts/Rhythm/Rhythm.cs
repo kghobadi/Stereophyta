@@ -43,8 +43,8 @@ public class Rhythm : MonoBehaviour {
             //}
 
             //repeatedly play notes while wind is on it
-            if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-                other.gameObject.GetComponent<Plont>().PlaySound();
+            //if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+            //    other.gameObject.GetComponent<Plont>().PlaySound();
 
         }
 

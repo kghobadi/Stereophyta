@@ -54,6 +54,7 @@ public class Plont : MonoBehaviour {
 
     public PlantType myPlantType;
 
+   
     //mostly used for saving / loading 
     public enum PlantType
     {
@@ -199,9 +200,9 @@ public class Plont : MonoBehaviour {
             //has seeds to drop
             if (hasCropBundles)
             {
-                //high chance to spawn seed when cut
+                //high chance to spawn seed when cut // always drops when plant is on last life
                 float randomChance = Random.Range(0, 100);
-                if(randomChance > 50)
+                if(randomChance > 50 || currentStage == 1)
                 {
                     CutCrop();
                 }
@@ -297,10 +298,14 @@ public class Plont : MonoBehaviour {
         //Debug.Log("Rip " + gameObject.name);
 
         //go through sleep save lists and remove me from everything
-        int indexToRemove = saveScript.mySaveStorage.plants.IndexOf(gameObject);
-        saveScript.mySaveStorage.plants.Remove(gameObject);
-        saveScript.mySaveStorage.plantScripts.Remove(this);
-        saveScript.mySaveStorage.plantType.RemoveAt(indexToRemove);
+        if (!startingPlant)
+        {
+            int indexToRemove = saveScript.mySaveStorage.plants.IndexOf(gameObject);
+            saveScript.mySaveStorage.plants.Remove(gameObject);
+            saveScript.mySaveStorage.plantScripts.Remove(this);
+            saveScript.mySaveStorage.plantType.RemoveAt(indexToRemove);
+        }
+       
 
         Destroy(gameObject);
     }

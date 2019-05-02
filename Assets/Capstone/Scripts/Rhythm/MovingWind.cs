@@ -37,4 +37,13 @@ public class MovingWind : Rhythm {
             }
         }
     }
+
+    public override void OnTriggerStay(Collider other)
+    {
+        base.OnTriggerStay(other);
+
+        //repeatedly play notes while wind is on it
+        if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+            other.gameObject.GetComponent<Plont>().PlaySound();
+    }
 }

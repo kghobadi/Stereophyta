@@ -34,8 +34,7 @@ public class WindMachine : RhythmProducer {
         rotationSpeed = 3;
         
         disappearTimer = disappearTimerTotal;
-        //rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
-        //rhythmSR.enabled = false;
+
 
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
@@ -155,14 +154,14 @@ public class WindMachine : RhythmProducer {
     //    //tpc.isHoldingSomething = true;
     //    playerHolding = true;
     //    interactable = false;
-        
+
     //}
 
     ////Rotate WindMachine 90
     //public override void Selection_Two()
     //{
     //    base.Selection_Two();
-        
+
     //    //rotating = true;
     //    transform.localEulerAngles = Vector3.zero;
     //    playerRotating = true;
@@ -172,21 +171,26 @@ public class WindMachine : RhythmProducer {
     //        soundBoard.PlayOneShot(InteractSound);
     //}
 
-    ////Increase rhythm
-    //public override void Selection_Three()
-    //{
-    //    base.Selection_Three();
-    //    if(timeScale < timeScaleMax)
-    //    {
-    //        windSpeed += 2;
-    //        timeScale += 1;
-    //        rhythmIndicator.SetInteger("Level", timeScale);
-    //        rotationSpeed *= 2;
-
-    //        if (!soundBoard.isPlaying && playerClicked)
-    //            soundBoard.PlayOneShot(InteractSound);
-    //    }
-    //}
+    //Increase rhythm
+    public void IncreaseTempo()
+    {
+        //need to get the rhythm indicator working again...
+        if (timeScale < timeScaleMax )
+        {
+            timeScale += 1;
+            windSpeed += 2;
+            rotationSpeed *= 2;
+            Debug.Log("increased tempo");
+        }
+        else
+        {
+            //reset 
+            timeScale = 0;
+            windSpeed -= (2 * timeScaleMax);
+            rotationSpeed /= (2 * timeScaleMax);
+            Debug.Log("reset tempo");
+        }
+    }
 
     ////Decrease Rhythm
     //public override void Selection_Four()

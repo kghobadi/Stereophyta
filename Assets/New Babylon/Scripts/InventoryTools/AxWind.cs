@@ -64,6 +64,12 @@ public class AxWind : Rhythm {
             }
 
         }
+
+        //when u hit on wind fan increase the rhythm
+        if (other.gameObject.tag == "WindMachines")
+        {
+            other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
+        }
     }
 
     //adds on ax sound (guitar notes

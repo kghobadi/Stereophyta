@@ -30,6 +30,9 @@ public class Seed : MonoBehaviour {
 
     public bool UIseed;
 
+    //needs to be this far away from other plants
+    public float distFromOtherPlants;
+
     //for planting itself after a few days
     public int daysBeforePlanting;
     public bool dayPassed;
@@ -97,12 +100,35 @@ public class Seed : MonoBehaviour {
             {
                 if(hit.transform.gameObject.tag == "Ground")
                 {
-                    planting = true;
-                    originalPos = transform.localPosition;
-                    transform.SetParent(null);
-                    seedBody.isKinematic = false;
-                    seedBody.useGravity = true;
-                    seedSource.PlayOneShot(dropSeed);
+
+                    //check in radius of planting point if its too close to others
+                    bool nearOtherPlant = false;
+                    Collider[] hitColliders = Physics.OverlapSphere(hit.point, distFromOtherPlants);
+                    int i = 0;
+                    while (i < hitColliders.Length)
+                    {
+                        if(hitColliders[i].gameObject.tag == "Plant")
+                        {
+                            nearOtherPlant = true;
+                        }
+                        i++;
+                    }
+                    
+                    //if remains false
+                    if (!nearOtherPlant)
+                    {
+                        planting = true;
+                        originalPos = transform.localPosition;
+                        transform.SetParent(null);
+                        seedBody.isKinematic = false;
+                        seedBody.useGravity = true;
+                        seedSource.PlayOneShot(dropSeed);
+                    }
+                    else
+                    {
+                        Debug.Log("nono");
+                        //player source play NoNo sound
+                    }
                 }
             }
         }

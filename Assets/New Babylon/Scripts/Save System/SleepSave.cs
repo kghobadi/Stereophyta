@@ -8,7 +8,7 @@ using System;
 [Serializable]
 public class SaveStorage
 {
-    //for saving plants -- objects, scripts, their positions, and current ages
+    //for saving plants -- objects, scripts, plant type, their positions, and current ages
     public List<GameObject> plants;
     public List<Plont> plantScripts;
     public List<string> plantType;

@@ -32,6 +32,10 @@ public class DrumCollider : Rhythm {
         {
             other.gameObject.GetComponent<Rock>().PlaySound();
         }
+        if (other.gameObject.tag == "Plant")
+        {
+            other.gameObject.GetComponent<Plont>().PlaySound();
+        }
     }
 
     public override void OnTriggerStay(Collider other)
