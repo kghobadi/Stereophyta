@@ -295,12 +295,20 @@ public class Plont : MonoBehaviour {
     void Die()
     {
         //Debug.Log("Rip " + gameObject.name);
-
-        //go through sleep save lists and remove me from everything
-        int indexToRemove = saveScript.mySaveStorage.plants.IndexOf(gameObject);
-        saveScript.mySaveStorage.plants.Remove(gameObject);
-        saveScript.mySaveStorage.plantScripts.Remove(this);
-        saveScript.mySaveStorage.plantType.RemoveAt(indexToRemove);
+        if (!startingPlant)
+        {
+            //go through sleep save lists and remove me from everything
+            int indexToRemove = saveScript.mySaveStorage.plants.IndexOf(gameObject);
+            saveScript.mySaveStorage.plants.Remove(gameObject);
+            saveScript.mySaveStorage.plantScripts.Remove(this);
+            saveScript.mySaveStorage.plantType.RemoveAt(indexToRemove);
+        }
+        //auto drop seeds on death
+        else
+        {
+            SpawnSeed();
+        }
+    
 
         Destroy(gameObject);
     }
