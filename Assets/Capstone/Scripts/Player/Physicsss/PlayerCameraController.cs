@@ -22,6 +22,7 @@ public class PlayerCameraController : MonoBehaviour {
     public float heightMin, heightMax;
     public float yLookMin, yLookMax;
     public float zoomSpeed;
+    float zoomInput;
 
     //all the ps4 feel variables
     public float cameraRotationSpeedX = 5;
@@ -43,6 +44,7 @@ public class PlayerCameraController : MonoBehaviour {
 
     // for boat stuff
     public bool inBoat;
+    public LayerMask obstructionMask;
 
     void Start () {
         //player refs set
@@ -119,26 +121,25 @@ public class PlayerCameraController : MonoBehaviour {
            
         }
 
-        float zoomInput = Input.GetAxis("Mouse ScrollWheel");
+        //grab input from scroll wheel axis
+        zoomInput = Input.GetAxis("Mouse ScrollWheel");
 
         //zoom in
-        if (zoomInput < 0 && heightFromPlayer > heightMin)
+        if (zoomInput < 0 && heightFromPlayer > heightMin )
         {
-            float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoomInput);
-            heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime );
-            //see fuurther as it zooms in
-            if (actualCam.farClipPlane < 1000)
-                actualCam.farClipPlane += zoomSpeed * Time.deltaTime * 3;
+            Debug.Log("zoom in");
+            ZoomIn(zoomInput);
         }
         //and out
-        if (zoomInput > 0 && heightFromPlayer < heightMax)
+        if (zoomInput > 0 && heightFromPlayer < heightMax )
         {
-            float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoomInput);
-            heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
-            //see less as it zooms out
-            if(actualCam.farClipPlane > 500)
-                actualCam.farClipPlane -= zoomSpeed * Time.deltaTime * 3;
+            Debug.Log("zoom out");
+            ZoomOut(zoomInput);
         }
+        
+        heightFromPlayer = Mathf.Clamp(heightFromPlayer, heightMin, heightMax);
+
+        RaycastToPlayer();
 
         //rotate the player's body
         playerTransform.Rotate(horizontalRotation);
@@ -196,5 +197,43 @@ public class PlayerCameraController : MonoBehaviour {
         //pushing stick up moves camera down closer to and behind player, 
         //while moving it down looks down at player and moves camera up? or the reverse...
 
+    }
+
+    void ZoomIn(float zoom)
+    {
+        float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
+        heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
+        //see fuurther as it zooms in
+        if (actualCam.farClipPlane < 1000)
+            actualCam.farClipPlane += zoomSpeed * Time.deltaTime * 3;
+    }
+
+    void ZoomOut(float zoom)
+    {
+        float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
+        heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
+
+        //see less as it zooms out
+        if (actualCam.farClipPlane > 500)
+            actualCam.farClipPlane -= zoomSpeed * Time.deltaTime * 3;
+    }
+
+    //detects whether cam is seeing ground in front of player somehw
+    void RaycastToPlayer()
+    {
+        RaycastHit hit = new RaycastHit();
+        Vector3 dir = playerTransform.position - transform.position;
+        float dist = Vector3.Distance(transform.position, playerTransform.position);
+        //send raycast
+        if (Physics.Raycast(transform.position, dir, out hit, dist + 1f, obstructionMask))
+        {
+            //anything on layer mask that is not player
+            if(hit.transform.tag != "Player")
+            {
+                ZoomOut(0.025f);
+
+                Debug.Log("cam hitting obstruction");
+            }
+        }
     }
 }

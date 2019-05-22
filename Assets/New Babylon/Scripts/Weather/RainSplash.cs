@@ -47,11 +47,19 @@ public class RainSplash : Rhythm
         splashAudio.clip = splashSounds[randomSplash];
 
         splashing = true;
-        Debug.Log("splashing");
+        //Debug.Log("splashing");
 
-        //wait length of audio to return 
-        yield return new WaitForSeconds(splashAudio.clip.length);
-
+        if(splashAudio.clip.length > splashEffect.main.duration)
+        {
+            //wait length of audio to return if it is longer
+            yield return new WaitForSeconds(splashAudio.clip.length);
+        }
+        else
+        {
+            //wait length of splash effect if it is longer
+            yield return new WaitForSeconds(splashEffect.main.duration);
+        }
+        
         splashing = false;
         splashEffect.Stop();
         sphereCol.enabled = false;

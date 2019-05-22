@@ -69,7 +69,7 @@ public class RainCloud : MonoBehaviour
     //drop all our rain drops
     public void DropRain()
     {
-        Debug.Log("dropping rain");
+        //Debug.Log("dropping rain");
 
         for(int i = 0; i < rainDrops.Count; i++)
         {
@@ -98,7 +98,7 @@ public class RainCloud : MonoBehaviour
 
                     sentSplash = true;
 
-                    Debug.Log("sent splash");
+                    //Debug.Log("sent splash");
                 }
             }
         }

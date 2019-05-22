@@ -145,7 +145,7 @@ public class SleepSave : MonoBehaviour {
                 inventoryScript.seedStorage[i] = seedStorageTemp;
             }
 
-            Debug.Log("finished loading!");
+            //Debug.Log("finished loading!");
         }
     }
 }

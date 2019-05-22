@@ -46,8 +46,8 @@ public class Farmhouse : MonoBehaviour {
     //so when you sleep it stays off
     void OnTriggerStay(Collider other)
     {
-        if(playerInventory.activeSelf)
-            playerInventory.SetActive(false);
+        //if(playerInventory.activeSelf)
+        //    playerInventory.SetActive(false);
     }
 
     //player leaving, turn stuff back on

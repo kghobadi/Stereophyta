@@ -125,7 +125,7 @@ public class Seed : MonoBehaviour {
         //succ to player
         if (vortexing)
         {
-            transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * 5);
+            transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * 7.5f);
 
             if (Vector3.Distance(transform.position, player.transform.position) < 1)
             {
@@ -155,7 +155,7 @@ public class Seed : MonoBehaviour {
             seedBody.useGravity = false;
             seedBody.isKinematic = true;
             seedCollider.isTrigger = true;
-            Debug.Log("stopped falling");
+            //Debug.Log("stopped falling");
         }
 
      

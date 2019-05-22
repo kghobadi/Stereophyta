@@ -73,7 +73,7 @@ public class Plont : MonoBehaviour {
             saveScript.mySaveStorage.plantScripts.Add(this);
             saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
 
-            Debug.Log("added this plant to save storage");
+            //Debug.Log("added this plant to save storage");
         }
 
         //colliders and rigibodys

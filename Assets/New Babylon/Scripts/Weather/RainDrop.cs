@@ -18,6 +18,7 @@ public class RainDrop : MonoBehaviour {
     public bool dropping;
     public bool hasSplashed;
     Vector3 originalPosition;
+    Vector3 originalScale;
 
     void Start () {
 
@@ -37,6 +38,7 @@ public class RainDrop : MonoBehaviour {
         originalPosition = transform.localPosition;
 
         origMoveSpeed = moveSpeedOverTime;
+        originalScale = transform.localScale;
     }
 
 	void Update () {
@@ -56,6 +58,7 @@ public class RainDrop : MonoBehaviour {
         rainMesh.enabled = true;
         hasSplashed = false;
         //randomize fall speed a bit
+        transform.localScale = originalScale * Random.Range(0.5f, 1.25f);
         moveSpeedOverTime = origMoveSpeed + Random.Range(-5f, 5f);
     }
 
@@ -66,7 +69,7 @@ public class RainDrop : MonoBehaviour {
         {
             if (other.gameObject.tag == "Plant" || other.gameObject.tag == "Ground" || other.gameObject.tag == "Building" || other.gameObject.tag == "Water")
             {
-                Debug.Log("drop collided");
+                //Debug.Log("drop collided");
                 Vector3 splashPos = transform.position + new Vector3(0, 1.5f, 0);
 
                 cloudParent.SendRainSplash(splashPos);

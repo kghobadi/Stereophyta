@@ -233,10 +233,9 @@ public class ThirdPersonController : MonoBehaviour
         //Debug.Log(" currentMovement = " + currentMovement);
         controller.Move(currentMovement * Time.deltaTime);
 
-        if (currentMovement.magnitude > 0)
-        {
-            ResetNearbyAudioSources();
-        }
+       
+        ResetNearbyAudioSources();
+        
     }
 
     //PS4 Controls
@@ -280,10 +279,7 @@ public class ThirdPersonController : MonoBehaviour
         //Debug.Log(" currentMovement = " + currentMovement);
         controller.Move(currentMovement * Time.deltaTime);
 
-        if(currentMovement.magnitude > 0)
-        {
-            ResetNearbyAudioSources();
-        }
+        ResetNearbyAudioSources();
     }
 
     //called either when player presses B or has passed out from exhaustion
