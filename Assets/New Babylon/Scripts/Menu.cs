@@ -5,6 +5,12 @@ using UnityEngine.UI;
 using UnityEngine.Audio;
 
 public class Menu : MonoBehaviour {
+    //sun
+    GameObject sun;
+    Sun sunScript;
+    float lastSunSpeed;
+
+    //player
     GameObject player;
     ThirdPersonController tpc;
 
@@ -18,6 +24,11 @@ public class Menu : MonoBehaviour {
 
 	void Start ()
     {
+        //grab sun refs
+        sun = GameObject.FindGameObjectWithTag("Sun");
+        sunScript = sun.GetComponent<Sun>();
+
+        //player
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
 
@@ -34,16 +45,31 @@ public class Menu : MonoBehaviour {
             //turn off
             if (menuObj.activeSelf)
             {
+                //menu off
                 menuObj.SetActive(false);
                 tpc.menuOpen = false;
+
+                //cursor off
                 Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+
+                //reset sun
+                sunScript.rotationSpeed = lastSunSpeed;
             }
             //turn on
             else
             {
+                //cursor on
                 Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+
+                //menu on
                 menuObj.SetActive(true);
                 tpc.menuOpen = true;
+
+                //pause sun
+                lastSunSpeed = sunScript.rotationSpeed;
+                sunScript.rotationSpeed = 0;
             }
         }
 	}

@@ -10,14 +10,19 @@ public struct GrowthStages
 }
 
 public class Plont : MonoBehaviour {
+    //player and sun ref
     Sun sun;
     GameObject player;
     ThirdPersonController tpc;
+    SleepSave saveScript;
+    public bool startingPlant;
 
+    //physics 
     Rigidbody plantBody;
     BoxCollider plantCollider;
     GameObject currentModel;
 
+    //sound controls
     public AudioSource plantSource, extraVoice;
     public AudioClip currentClip;
     ParticleSystem soundPlaying;
@@ -27,6 +32,7 @@ public class Plont : MonoBehaviour {
     float emitTimer;
 
     Vector3 originalScale;
+    //stages
     public int myAge, currentStage, nextStage;
     public bool dayPassed, hasBeenWatered;
     public GrowthStages[] myGrowthStages;
@@ -39,16 +45,37 @@ public class Plont : MonoBehaviour {
     public GameObject[] cropBundles;
     //for spawning seeds when cut down
     public GameObject seedPrefab;
+    public GameObject plantPrefab;
 
     public bool growing;
     public float growthSpeed;
     Vector3 newScale;
+    public float seedSpawnChance = 10;
+
+    public PlantType myPlantType;
+
+    //mostly used for saving / loading 
+    public enum PlantType
+    {
+        PIANO, SUCCULENTAR, GUITAR, BELL, TRIANGULAR,
+    }
     
 	void Start () {
         //hail the sun
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+        //add data to save script
+        if (!startingPlant)
+        {
+            saveScript.mySaveStorage.plants.Add(gameObject);
+            saveScript.mySaveStorage.plantScripts.Add(this);
+            saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
+
+            Debug.Log("added this plant to save storage");
+        }
+
         //colliders and rigibodys
         plantBody = GetComponent<Rigidbody>();
         plantBody.isKinematic = true;
@@ -102,26 +129,11 @@ public class Plont : MonoBehaviour {
             }
         }
 
+        //resets day passed when sun increments its day counter ahead of its yesterday int
         if (sun.yesterday == sun.dayCounter)
         {
             dayPassed = false;
         }
-
-        //turn sound particles on and off
-        //if (plantSource.isPlaying || extraVoice.isPlaying)
-        //{
-        //    soundPlaying.Play();
-        //    emitTimer -= Time.deltaTime;
-        //    if (emitTimer < 0)
-        //    {
-        //        soundPlaying.Emit(emitCount);
-        //        emitTimer = emitFreq;
-        //    }
-        //}
-        //else
-        //{
-        //    soundPlaying.Stop();
-        //}
 
         //lerps scale up as plants grow
         if (growing)
@@ -145,18 +157,33 @@ public class Plont : MonoBehaviour {
             if (currentStage < myGrowthStages.Length - 1)
             {
                 currentStage++;
+
+                //if older than 1
+                if(currentStage > 1)
+                {
+                    //random chance to spawn a seed each time plant ages
+                    float randomSpawn = Random.Range(0, 100);
+
+                    if (randomSpawn < seedSpawnChance)
+                    {
+                        SpawnSeed();
+                    }
+                }
+               
             }
             //time to die!
             else
             {
+                //a little less than total # of crop bundles on plant death
+                int randomDrop = Random.Range(cropBundles.Length - 3, cropBundles.Length);
                 //spawn a bunch of seeds and die
-                for(int i = 0; i < cropBundles.Length; i++)
+                for(int i = 0; i < randomDrop; i++)
                 {
-                    Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
-                    GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
+                    SpawnSeed();
                 }
-                Debug.Log("Rip " + gameObject.name);
-                Destroy(gameObject);
+
+                //from old age
+                Die();
             }
 
             //set active next crop bundle
@@ -169,10 +196,15 @@ public class Plont : MonoBehaviour {
         //shrink
         else
         {
-            
+            //has seeds to drop
             if (hasCropBundles)
             {
-                CutCrop();
+                //high chance to spawn seed when cut
+                float randomChance = Random.Range(0, 100);
+                if(randomChance > 50)
+                {
+                    CutCrop();
+                }
             }
 
             //Debug.Log("shrinking!!");
@@ -184,8 +216,8 @@ public class Plont : MonoBehaviour {
             //time to die!
             else
             {
-                Debug.Log("Rip " + gameObject.name);
-                Destroy(gameObject);
+                //from cutting down
+                Die();
             }
         }
 
@@ -222,11 +254,26 @@ public class Plont : MonoBehaviour {
         //set current clip
         currentClip = stageSounds[myAge];
 
+        //set particles duration to our current audio clip's length
         ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
         soundPlaying.Stop();
         soundsPlayer.duration = currentClip.length;
     }
+
+    //generally only called by loading script
+    public IEnumerator AgeAtStart(int ages)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        for(int i = 0; i < ages; i++)
+        {
+            GrowPlant(true);
+        }
+
+        //Debug.Log("grew at start");
+    }
     
+    //plays current audio clip and wobbles plant
     public void PlaySound()
     {
         plantSource.PlayOneShot(currentClip);
@@ -242,7 +289,33 @@ public class Plont : MonoBehaviour {
         if(cropBundles[currentStage].activeSelf)
             cropBundles[currentStage].SetActive(false);
         //SPAWN SEED HERE
-        Vector3 spawnPos = cropBundles[currentStage].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
+        SpawnSeed();
+    }
+
+    void Die()
+    {
+        //Debug.Log("Rip " + gameObject.name);
+        if (!startingPlant)
+        {
+            //go through sleep save lists and remove me from everything
+            int indexToRemove = saveScript.mySaveStorage.plants.IndexOf(gameObject);
+            saveScript.mySaveStorage.plants.Remove(gameObject);
+            saveScript.mySaveStorage.plantScripts.Remove(this);
+            saveScript.mySaveStorage.plantType.RemoveAt(indexToRemove);
+        }
+        //auto drop seeds on death
+        else
+        {
+            SpawnSeed();
+        }
+    
+
+        Destroy(gameObject);
+    }
+
+    void SpawnSeed()
+    {
+        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
         GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
     }
 
@@ -268,6 +341,14 @@ public class Plont : MonoBehaviour {
         {
             //Debug.Log("player triggered");
             PlaySound();
+
+            //player might knock a seed down
+            float randomChanceToDropSeed = Random.Range(0f, 100f);
+
+            if(randomChanceToDropSeed < 1f)
+            {
+                SpawnSeed();
+            }
         }
     }
 }

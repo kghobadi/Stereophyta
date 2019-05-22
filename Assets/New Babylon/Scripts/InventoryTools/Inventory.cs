@@ -68,7 +68,7 @@ public class Inventory : MonoBehaviour {
                 SwitchItem(true);
             }
             //switch current item -
-            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv)
+            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv && !currenSeedObj.GetComponent<Seed>().planting)
             {
                 SwitchSeed(true);
             }
@@ -134,18 +134,18 @@ public class Inventory : MonoBehaviour {
             CountSeedDown();
         }
 
-        //Need to check if player has any of this seed type. 
-        //if not, switch to it, but leave obj inactive
-        //if so, normal switch
-        //link this up to inventory UI
-
-
         //set new seed
         currenSeedObj = seedStorage[currentSeed].seedObj;
+        //if seed count of this seed > 0
         if(seedStorage[currentSeed].seedCount > 0)
         {
             currenSeedObj.SetActive(true);
             currenSeedObj.GetComponent<Seed>().seedSelected = true;
+        }
+        //switch seed again -- this causes a StackOverflow if there's no seeds in your inv
+        else
+        {
+            SwitchSeed(true);
         }
         
 

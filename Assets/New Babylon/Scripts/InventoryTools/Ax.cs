@@ -36,7 +36,7 @@ public class Ax : Tool {
         if (axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.4f)
         {
             axing = false;
-            Debug.Log("stopped swinging");
+            //Debug.Log("stopped swinging");
         }
     }
 
@@ -61,7 +61,7 @@ public class Ax : Tool {
         {
             axing = false;
            
-            Debug.Log("hit plant");
+            //Debug.Log("hit plant");
         }
     }
 
