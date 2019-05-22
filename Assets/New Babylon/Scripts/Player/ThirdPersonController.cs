@@ -98,6 +98,7 @@ public class ThirdPersonController : MonoBehaviour
     //to shorten if statement
     public List<string> audioTags = new List<string>();
 
+    //save ref
     public SleepSave saveScript;
 
 
@@ -330,6 +331,7 @@ public class ThirdPersonController : MonoBehaviour
         sleeping = false;
         playerCanMove = true;
         playerCameraController.enabled = true;
+        //if not in farmhouse
         myInventory.gameObject.SetActive(true);
         daysWithoutSleep = 0;
 
@@ -382,7 +384,8 @@ public class ThirdPersonController : MonoBehaviour
                 //play footstep sound
                 if (footStepTimer > runStepTotal)
                 {
-                    playerSource.PlayOneShot(currentFootsteps[currentStep]);
+                    if(currentStep < currentFootsteps.Length)
+                        playerSource.PlayOneShot(currentFootsteps[currentStep]);
                     IncrementFootsteps();
                 }
             }

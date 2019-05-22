@@ -25,6 +25,7 @@ public class Sun : MonoBehaviour
     public Light sun;
     public Color morn, mid, dusk, night;
     public Color ambientMorn, ambientMid, ambientDusk, ambientNight;
+    public Material skyMorn, skyMid, skyDusk, skyNight;
 
     //wind stuff
     public int windCounter = 0;
@@ -32,6 +33,7 @@ public class Sun : MonoBehaviour
 
     //stars
     public GameObject stars;
+    ParticleSystem starParticles;
     //waters 
     public GameObject waterDay, waterNight;
 
@@ -47,6 +49,11 @@ public class Sun : MonoBehaviour
 
         //find the total diameter of the suns rotation path
         rotationDiameter = Mathf.Abs(transform.position.x * 2);
+
+        //stars
+        starParticles = stars.GetComponent<ParticleSystem>();
+        //stars.SetActive(true);
+        //starParticles.Stop();
 
         SwitchTimeState(0);
 
@@ -69,7 +76,8 @@ public class Sun : MonoBehaviour
     void CheckSunsRotation()
     {
         //for checking angle
-        Vector3 forward = transform.forward;        angleInDegrees = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg;
+        Vector3 forward = transform.forward;
+        angleInDegrees = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg;
 
         //is Morning 
         if (angleInDegrees > morningInterval || angleInDegrees < middayInterval)
@@ -80,9 +88,9 @@ public class Sun : MonoBehaviour
                 stars.SetActive(false);
             }
 
-            sun.color = Color.Lerp(sun.color, mid, Time.deltaTime / 10);
-            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientMid, Time.deltaTime / 10);
-
+            //lighting
+            LerpLighting(morn, ambientMorn, skyMorn);
+            //time bool
             SwitchTimeState(0);
 
             //resets day bools and sleep stuff every morning
@@ -91,31 +99,32 @@ public class Sun : MonoBehaviour
         //is Midday
         else if (angleInDegrees > middayInterval && angleInDegrees < duskInterval)
         {
-            sun.color = Color.Lerp(sun.color, dusk, Time.deltaTime / 10);
-            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientDusk, Time.deltaTime / 10);
-
+            //lighting
+            LerpLighting(mid, ambientMid, skyMid);
+            //time bool
             SwitchTimeState(1);
         }
         //is Dusk
         else if (angleInDegrees > duskInterval && angleInDegrees < nightInterval)
         {
-            sun.color = Color.Lerp(sun.color, night, Time.deltaTime / 10);
-            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientNight, Time.deltaTime / 10);
-
+            //lighting
+            LerpLighting(dusk, ambientDusk, skyDusk);
+            //time bool
             SwitchTimeState(2);
         }
         //is Night
         else if (angleInDegrees > nightInterval && angleInDegrees < morningInterval)
         {
+            //lighting
+            LerpLighting(night, ambientNight, skyNight);
+            //time bool
             SwitchTimeState(3);
-            //waterDay.SetActive(false);
-            //waterNight.SetActive(true);
 
             //when its night, yesterday catches up to dayCounter
             yesterday = dayCounter;
 
             //turn on stars
-            if (!stars.activeSelf)
+            if (!stars.activeSelf )
             {
                 stars.SetActive(true);
             }
@@ -156,6 +165,14 @@ public class Sun : MonoBehaviour
                 isNight = true;
                 break;
         }
+    }
+
+    //lerps lighting color values
+    void LerpLighting(Color sunC, Color ambientC, Material skyboxC)
+    {
+        sun.color = Color.Lerp(sun.color, sunC, Time.deltaTime / 10);
+        RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientC, Time.deltaTime / 10);
+        RenderSettings.skybox = skyboxC;
     }
 
     //called every morning
