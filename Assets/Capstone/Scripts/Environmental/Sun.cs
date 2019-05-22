@@ -16,8 +16,12 @@ public class Sun : MonoBehaviour
    
     //angle of sun's rotation
     public float angleInDegrees;
-    //time state bools
-    public bool isMorning, isMidday, isDusk, isNight;
+    //time state enum
+    public TimeState timeState;
+    public enum TimeState
+    {
+        MORNING, MIDDAY, DUSK, NIGHT,
+    }
     //intervals are set publicly based on info obtained from angleInDegrees
     public float rotationDiameter, morningInterval, middayInterval, duskInterval, nightInterval;
 
@@ -30,6 +34,10 @@ public class Sun : MonoBehaviour
     //wind stuff
     public int windCounter = 0;
     public GameObject[] windDirections;
+
+    //raincloud stuff
+    public int rainCounter = 0;
+    public GameObject[] rainDirections;
 
     //stars
     public GameObject stars;
@@ -59,7 +67,10 @@ public class Sun : MonoBehaviour
 
         rotationSpeed = normalRotation;
 
+        // randomize wind && rains
         RandomizeWinds();
+        RandomizeRains();
+
     }
 
     void Update()
@@ -82,19 +93,23 @@ public class Sun : MonoBehaviour
         //is Morning 
         if (angleInDegrees > morningInterval || angleInDegrees < middayInterval)
         {
-            //turn off stars
-            if (stars.activeSelf)
+            if(timeState != TimeState.MORNING)
             {
+                //time bool
+                timeState = TimeState.MORNING;
+                //resets day bools and sleep stuff every morning
+                //when its morning increase dayCounter
+                if (dayCounter == yesterday)
+                {
+                    NewDay();
+                }
+                //turn off stars
                 stars.SetActive(false);
             }
-
+           
             //lighting
             LerpLighting(morn, ambientMorn, skyMorn);
-            //time bool
-            SwitchTimeState(0);
-
-            //resets day bools and sleep stuff every morning
-            NewDay();
+           
         }
         //is Midday
         else if (angleInDegrees > middayInterval && angleInDegrees < duskInterval)
@@ -138,31 +153,19 @@ public class Sun : MonoBehaviour
         {
             //morning
             case 0:
-                isMorning = true;
-                isMidday = false;
-                isDusk = false;
-                isNight = false;
+                timeState = TimeState.MORNING;
                 break;
             //midday
             case 1:
-                isMorning = false;
-                isMidday = true;
-                isDusk = false;
-                isNight = false;
+                timeState = TimeState.MIDDAY;
                 break;
             //dusk
             case 2:
-                isMorning = false;
-                isMidday = false;
-                isDusk = true;
-                isNight = false;
+                timeState = TimeState.DUSK;
                 break;
             //night
             case 3:
-                isMorning = false;
-                isMidday = false;
-                isDusk = false;
-                isNight = true;
+                timeState = TimeState.NIGHT;
                 break;
         }
     }
@@ -178,33 +181,30 @@ public class Sun : MonoBehaviour
     //called every morning
     void NewDay()
     {
-        //when its morning increase dayCounter
-        if (dayCounter == yesterday)
+        dayCounter++;
+        // randomize wind && rains
+        RandomizeWinds();
+        RandomizeRains();
+
+        //subtract from player's days to sleep
+        if (tpc.sleeping)
         {
-            dayCounter++;
-            // randomize wind
-            RandomizeWinds();
-
-            //subtract from player's days to sleep
-            if (tpc.sleeping)
+            tpc.daysToSleep--;
+            //wake player up if its time
+            if (tpc.daysToSleep <= 0)
             {
-                tpc.daysToSleep--;
-                //wake player up if its time
-                if (tpc.daysToSleep <= 0)
-                {
-                    tpc.WakeUp();
-                }
+                tpc.WakeUp();
             }
+        }
 
-            //add to players days without sleep
-            else
+        //add to players days without sleep
+        else
+        {
+            tpc.daysWithoutSleep++;
+            //player passes out from exhaustion
+            if (tpc.daysWithoutSleep > tpc.noSleepMax)
             {
-                tpc.daysWithoutSleep++;
-                //player passes out from exhaustion
-                if (tpc.daysWithoutSleep > tpc.noSleepMax)
-                {
-                    StartCoroutine(WaitForPlayerToPassOut());
-                }
+                StartCoroutine(WaitForPlayerToPassOut());
             }
         }
     }
@@ -212,21 +212,42 @@ public class Sun : MonoBehaviour
     //randomizes the wind generators active, their speeds & direction
     void RandomizeWinds()
     {
-        int randomWind = Random.Range(0, 4);
+        windCounter = Random.Range(0, 4);
 
         for(int i = 0; i < windDirections.Length; i++)
         {
             windDirections[i].SetActive(false);
         }
 
-        windDirections[randomWind].SetActive(true);
+        windDirections[windCounter].SetActive(true);
 
         //randomize time scales of winds
-        for(int i = 0; i < windDirections[randomWind].transform.childCount; i++)
+        for(int i = 0; i < windDirections[windCounter].transform.childCount; i++)
         {
             int randomScale = Random.Range(0, 4);
-            windDirections[randomWind].transform.GetChild(i).GetComponent<WindGen>().timeScale = randomScale;
-            windDirections[randomWind].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
+            windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().timeScale = randomScale;
+            windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
+        }
+    }
+
+    //randomizes the wind generators active, their speeds & direction
+    void RandomizeRains()
+    {
+        rainCounter = Random.Range(0, 4);
+
+        for (int i = 0; i < rainDirections.Length; i++)
+        {
+            rainDirections[i].SetActive(false);
+        }
+
+        rainDirections[rainCounter].SetActive(true);
+
+        //randomize time scales of winds
+        for (int i = 0; i < rainDirections[rainCounter].transform.childCount; i++)
+        {
+            int randomScale = Random.Range(0, 4);
+            rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().timeScale = randomScale;
+            rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().SwitchTimeScale();
         }
     }
 

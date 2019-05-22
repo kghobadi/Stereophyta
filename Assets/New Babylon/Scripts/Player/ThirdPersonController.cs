@@ -351,6 +351,7 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("sleeping", false);
         poopShoes.SetBool("idle", true);
 
+        //call save
         StartCoroutine(WaitToSave());
     }
 
