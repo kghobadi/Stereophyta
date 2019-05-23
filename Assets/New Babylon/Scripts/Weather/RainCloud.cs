@@ -24,6 +24,17 @@ public class RainCloud : MonoBehaviour
     {
         _player = GameObject.FindGameObjectWithTag("Player");
 
+        //add rain drop children
+        for(int i = 0; i < transform.GetChild(0).transform.childCount; i++)
+        {
+            rainDrops.Add(transform.GetChild(0).transform.GetChild(i).GetComponent<RainDrop>());
+        }
+        //add rain splash children
+        for (int i = 0; i < transform.GetChild(1).transform.childCount; i++)
+        {
+            rainSplashes.Add(transform.GetChild(1).transform.GetChild(i).GetComponent<RainSplash>());
+        }
+
         currentSpeed = _cloudGen.cloudSpeed;
 
         SwitchTimeScale();
@@ -173,55 +184,55 @@ public class RainCloud : MonoBehaviour
                 dropChance = 100;
                 for (int i = 0; i < rainDrops.Count; i++)
                 {
-                    rainDrops[i].GetComponent<RainDrop>().moveSpeedOverTime = 10;
+                    rainDrops[i].moveSpeedOverTime = 10;
                 }
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
-                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().oneNotes;
+                    rainSplashes[i].splashSounds = rainSplashes[i].oneNotes;
                 }
                 break;
             case 1:
                 dropChance = 50;
                 for (int i = 0; i < rainDrops.Count; i++)
                 {
-                    rainDrops[i].GetComponent<RainDrop>().moveSpeedOverTime = 20;
+                    rainDrops[i].moveSpeedOverTime = 20;
                 }
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
-                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().twoNotes;
+                    rainSplashes[i].splashSounds = rainSplashes[i].twoNotes;
                 }
                 break;
             case 2:
                 dropChance = 25;
                 for (int i = 0; i < rainDrops.Count; i++)
                 {
-                    rainDrops[i].GetComponent<RainDrop>().moveSpeedOverTime = 40;
+                    rainDrops[i].moveSpeedOverTime = 40;
                 }
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
-                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().threeNotes;
+                    rainSplashes[i].splashSounds = rainSplashes[i].threeNotes;
                 }
                 break;
             case 3:
                 dropChance = 12.5f;
                 for (int i = 0; i < rainDrops.Count; i++)
                 {
-                    rainDrops[i].GetComponent<RainDrop>().moveSpeedOverTime = 80;
+                    rainDrops[i].moveSpeedOverTime = 80;
                 }
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
-                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().fourNotes;
+                    rainSplashes[i].splashSounds = rainSplashes[i].fourNotes;
                 }
                 break;
             case 4:
                 dropChance = 6.25f;
                 for (int i = 0; i < rainDrops.Count; i++)
                 {
-                    rainDrops[i].GetComponent<RainDrop>().moveSpeedOverTime = 160;
+                    rainDrops[i].moveSpeedOverTime = 160;
                 }
                 for (int i = 0; i < rainSplashes.Count; i++)
                 {
-                    rainSplashes[i].GetComponent<RainSplash>().splashSounds = rainSplashes[i].GetComponent<RainSplash>().fiveNotes;
+                    rainSplashes[i].splashSounds = rainSplashes[i].fiveNotes;
                 }
                 break;
         }

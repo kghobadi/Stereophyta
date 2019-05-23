@@ -153,10 +153,7 @@ public class PlayerCameraController : MonoBehaviour {
                 transform.position = Vector3.Lerp(transform.position, targetMove, smoothMove * Time.deltaTime);
             }
 
-            //lets set up right analogue stick to enable us to rotate the camera around player and redirect motion as we do so
-            Vector3 horizontalRotation;
-            Vector3 verticalRotation;
-
+           
             //using mouse and WASD
             if (mouseControls)
             {
@@ -252,10 +249,10 @@ public class PlayerCameraController : MonoBehaviour {
             //for y axis of right analogue, want to be able to set camera look up and down.
             //pushing stick up moves camera down closer to and behind player, 
             //while moving it down looks down at player and moves camera up? or the reverse...
-        }
-
-
     }
+
+
+    
 
     void ZoomIn(float zoom)
     {

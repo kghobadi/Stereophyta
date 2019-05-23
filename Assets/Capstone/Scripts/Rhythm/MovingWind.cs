@@ -43,7 +43,11 @@ public class MovingWind : Rhythm {
         base.OnTriggerStay(other);
 
         //repeatedly play notes while wind is on it
-        if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-            other.gameObject.GetComponent<Plont>().PlaySound();
+        if(other.gameObject.tag == "Plant")
+        {
+            if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+                other.gameObject.GetComponent<Plont>().PlaySound();
+        }
+     
     }
 }
