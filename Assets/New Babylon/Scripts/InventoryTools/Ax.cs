@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Ax : Tool {
+    //physics & anims
     Rigidbody myAxBody;
     BoxCollider myCollider;
     Animator axAnimator;
     public bool axing;
 
+    //audio
     AudioSource axSource;
     public AudioClip[] axHits;
 
+    //ax wind refs
     public GameObject axWindPrefab;
     public float distanceToDestroyWinds;
     public float axWindSpeed;
@@ -25,18 +28,17 @@ public class Ax : Tool {
 	}
     
     public override void Update () {
-        base.Update();
 
-        if (Input.GetButton("MainAction") && !tpc.menuOpen && showRhythm && !axing)
+        //take input on button down
+        if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !axing)
         {
             MainAction();
         }
 
         //if swinging and anim over, switch back to idle
-        if (axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.4f)
+        if (axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
         {
             axing = false;
-            //Debug.Log("stopped swinging");
         }
     }
 
@@ -45,7 +47,7 @@ public class Ax : Tool {
     {
         base.MainAction();
         axAnimator.SetTrigger("swing1");
-        //axAnimator.SetBool("axing", true);
+
         //virtual play sounds
         PlaySound(axSource, axHits);
         SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
@@ -57,27 +59,17 @@ public class Ax : Tool {
     void OnTriggerEnter(Collider other)
     {
         //collided with plant
-        if (other.gameObject.tag == "Plant")
+        if (other.gameObject.tag == "Plant" && axing)
         {
             axing = false;
-           
-            //Debug.Log("hit plant");
+
+            other.gameObject.GetComponent<Plont>().GrowPlant(false);
+            
+            //virtual play sounds
+            PlaySound(axSource, axHits);
+            SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
         }
     }
-
-    //void OnTriggerStay(Collider other)
-    //{
-    //    //collided with plant
-    //    if (other.gameObject.tag == "Plant" && axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.2f)
-    //    {
-    //        other.GetComponent<Plont>().GrowPlant(false);
-    //        axing = false;
-    //        //virtual play sounds
-    //        PlaySound(axSource, axHits);
-    //        SpawnAxWinds(other.gameObject.transform.position + new Vector3(0, transform.position.y, 0));
-    //        Debug.Log("hit plant");
-    //    }
-    //}
 
     //spawns one ax wind
     void SpawnAxWinds(Vector3 spawnPoint)
@@ -99,4 +91,18 @@ public class Ax : Tool {
         //axWindRight.GetComponent<AxWind>().myAxDaddy = this;
     }
 
+
+    //void OnTriggerStay(Collider other)
+    //{
+    //    //collided with plant
+    //    if (other.gameObject.tag == "Plant" && axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.2f)
+    //    {
+    //        other.GetComponent<Plont>().GrowPlant(false);
+    //        axing = false;
+    //        //virtual play sounds
+    //        PlaySound(axSource, axHits);
+    //        SpawnAxWinds(other.gameObject.transform.position + new Vector3(0, transform.position.y, 0));
+    //        Debug.Log("hit plant");
+    //    }
+    //}
 }

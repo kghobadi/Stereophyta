@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CloudGenerator : RhythmProducer
 {
-
     public GameObject cloud;
     GameObject cloudClone;
 
@@ -12,6 +11,7 @@ public class CloudGenerator : RhythmProducer
     public float distanceToDestroy;
 
     public int cloudCounter = 0;
+    public bool rainGen;
 
     public override void Awake()
     {
@@ -25,24 +25,79 @@ public class CloudGenerator : RhythmProducer
         //rhythm true from clock
         if (showRhythm)
         {
-            //to help trim down cloud count
-            if(cloudCounter < 4)
+            //rain cloud generator
+            if (rainGen)
             {
-                cloudCounter++;
+                //to help trim down cloud count
+                if (cloudCounter < 4)
+                {
+                    cloudCounter++;
+                }
+                else
+                {
+                    cloudCounter = 0;
+
+                    SpawnRainCloud();
+                }
             }
+            //normal cloud generator
             else
             {
-                cloudCounter = 0;
+                //to help trim down cloud count
+                if (cloudCounter < 4)
+                {
+                    cloudCounter++;
+                }
+                else
+                {
+                    cloudCounter = 0;
 
-                cloudClone = Instantiate(cloud, transform.position, Quaternion.Euler(transform.eulerAngles));
-                cloudClone.GetComponent<RainCloud>()._cloudGen = this;
-                cloudClone.GetComponent<RainCloud>().timeScale = timeScale;
+                    //SpawnCloud();
+                }
+                SpawnCloud();
             }
+          
            
             showRhythm = false;
         }
 
     }
+
+    //spawn normal cloud
+    void SpawnCloud()
+    {
+        //randomize spawn pos a bit
+        Vector3 spawnPos = transform.position + Random.insideUnitSphere * 150f;
+        spawnPos = new Vector3(spawnPos.x, transform.position.y, spawnPos.z);
+        cloudClone = Instantiate(cloud, spawnPos, Quaternion.Euler(transform.eulerAngles));
+        //assign refs to rain cloud script
+        cloudClone.GetComponent<Cloud>()._cloudGen = this;
+
+        //grab all the particle mod refs
+        ParticleSystem cloudSystem = cloudClone.GetComponent<ParticleSystem>();
+        ParticleSystem.MainModule cloudMain = cloudSystem.main;
+        ParticleSystem.ShapeModule cloudShape = cloudSystem.shape;
+        ParticleSystem.EmissionModule cloudEmis = cloudSystem.emission;
+
+        //random max particles
+        cloudMain.maxParticles += Random.Range(-15, 15);
+
+        //randomize shape 
+        float xScale = cloudShape.scale.x + Random.Range(-5f, 5f);
+        float yScale = cloudShape.scale.y + Random.Range(-2.5f, 2.5f);
+        float zScale = cloudShape.scale.z + Random.Range(-5f, 5f);
+        cloudShape.scale = new Vector3(xScale, yScale, zScale);
+    }
+
+    //spawn rain cloud
+    void SpawnRainCloud()
+    {
+        cloudClone = Instantiate(cloud, transform.position, Quaternion.Euler(transform.eulerAngles));
+        //assign refs to rain cloud script
+        cloudClone.GetComponent<RainCloud>()._cloudGen = this;
+        cloudClone.GetComponent<RainCloud>().timeScale = timeScale;
+    }
+
 
     public override void SwitchTimeScale()
     {

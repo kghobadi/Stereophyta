@@ -139,116 +139,60 @@ public class PlayerCameraController : MonoBehaviour {
         
         heightFromPlayer = Mathf.Clamp(heightFromPlayer, heightMin, heightMax);
 
-        RaycastToPlayer();
+        CastToPlayer();
 
         //rotate the player's body
         playerTransform.Rotate(horizontalRotation);
 
-            if (mouseControls)
+        //ps4 smooth move 
+        if (!mouseControls)
+        {
+            //if player is not moving and we are rotating, rotate FASTER
+            if (tpc.horizontalInput.magnitude == 0 && horizontalRotation.magnitude > 0)
             {
-                transform.position = Vector3.Lerp(transform.position, targetMove, mSmoothMove * Time.deltaTime);
+                smoothLook = turnSmooth;
+                smoothMove = turnSmoothMove;
             }
-            else
+            //if player moving AND we rotating, rotate MEDIUM
+            else if (tpc.horizontalInput.magnitude > 0 && horizontalRotation.magnitude > 0)
             {
-                transform.position = Vector3.Lerp(transform.position, targetMove, smoothMove * Time.deltaTime);
+                smoothLook = movingTurnSmooth;
+                smoothMove = movingTurnSmoothMove;
             }
-
-           
-            //using mouse and WASD
-            if (mouseControls)
+            //leave the values as is when player moving
+            else if (horizontalRotation.magnitude == 0)
             {
-                horizontalRotation = new Vector3(0, Input.GetAxis("mouse x") * cameraRotationSpeedXMouse, 0);
-                verticalRotation = new Vector3(0, Input.GetAxis("mouse y") * cameraRotationSpeedYMouse, 0);
+                smoothLook = smoothLookOriginal;
+                smoothMove = smoothMoveOriginal;
             }
-            //using ps4 controller
-            else
+        }
+        //mouse 
+        else
+        {
+            //if player is not moving and we are rotating, rotate FASTER
+            if (tpc.forwardInput.magnitude == 0 && (horizontalRotation.magnitude > 0 || tpc.horizontalInput.magnitude > 0))
             {
-                horizontalRotation = new Vector3(0, Input.GetAxis("Mouse X") * cameraRotationSpeedX, 0);
-                verticalRotation = new Vector3(0, Input.GetAxis("Mouse Y") * cameraRotationSpeedY, 0);
+                mSmoothLook = mTurnSmoothLook;
+                mSmoothMove = mTurnSmoothMove;
             }
-
-            //if mouse up and yLook is less than yLookMax
-            if (verticalRotation.y > 0.25f && yLook.y < yLookMax)
+            //if player moving AND we rotating, rotate MEDIUM
+            else if (tpc.forwardInput.magnitude > 0 && (horizontalRotation.magnitude > 0 || tpc.horizontalInput.magnitude > 0))
             {
-                yLook += verticalRotation;
+                mSmoothLook = mMovingTurnSmoothLook;
+                mSmoothMove = mMovingTurnSmoothMove;
             }
-            //if mouse down and yLook is greater than yLookMin
-            if (verticalRotation.y < -0.25f && yLook.y > yLookMin)
+            //leave the values as is when player moving
+            else if (horizontalRotation.magnitude == 0 && tpc.horizontalInput.magnitude == 0)
             {
-                yLook += verticalRotation;
+                mSmoothLook = mSmoothLookOriginal;
+                mSmoothMove = mSmoothMoveOriginal;
             }
+        }
+        
 
-            //add yLook to the player pos, then subtract cam pos to get the forward look
-            targetLook = Quaternion.LookRotation((playerTransform.position + yLook) - transform.position);
-
-
-            if (mouseControls)
-            {
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mSmoothLook * Time.deltaTime);
-            }
-            else
-            {
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, smoothLook * Time.deltaTime);
-
-            }
-
-
-
-            //rotate the player's body
-            playerTransform.Rotate(horizontalRotation);
-
-            //Debug.Log(verticalRotation);
-            //transform.Rotate(-verticalRotation, 0, 0);
-
-            //ps4 smooth move 
-            if (!mouseControls)
-            {
-                //if player is not moving and we are rotating, rotate FASTER
-                if (tpc.horizontalInput.magnitude == 0 && horizontalRotation.magnitude > 0)
-                {
-                    smoothLook = turnSmooth;
-                    smoothMove = turnSmoothMove;
-                }
-                //if player moving AND we rotating, rotate MEDIUM
-                else if (tpc.horizontalInput.magnitude > 0 && horizontalRotation.magnitude > 0)
-                {
-                    smoothLook = movingTurnSmooth;
-                    smoothMove = movingTurnSmoothMove;
-                }
-                //leave the values as is when player moving
-                else if (horizontalRotation.magnitude == 0)
-                {
-                    smoothLook = smoothLookOriginal;
-                    smoothMove = smoothMoveOriginal;
-                }
-            }
-            //mouse 
-            else
-            {
-                //if player is not moving and we are rotating, rotate FASTER
-                if (tpc.forwardInput.magnitude == 0 && (horizontalRotation.magnitude > 0 || tpc.horizontalInput.magnitude > 0))
-                {
-                    mSmoothLook = mTurnSmoothLook;
-                    mSmoothMove = mTurnSmoothMove;
-                }
-                //if player moving AND we rotating, rotate MEDIUM
-                else if (tpc.forwardInput.magnitude > 0 && (horizontalRotation.magnitude > 0 || tpc.horizontalInput.magnitude > 0))
-                {
-                    mSmoothLook = mMovingTurnSmoothLook;
-                    mSmoothMove = mMovingTurnSmoothMove;
-                }
-                //leave the values as is when player moving
-                else if (horizontalRotation.magnitude == 0 && tpc.horizontalInput.magnitude == 0)
-                {
-                    mSmoothLook = mSmoothLookOriginal;
-                    mSmoothMove = mSmoothMoveOriginal;
-                }
-            }
-
-
-            //for y axis of right analogue, want to be able to set camera look up and down.
-            //pushing stick up moves camera down closer to and behind player, 
-            //while moving it down looks down at player and moves camera up? or the reverse...
+        //for y axis of right analogue, want to be able to set camera look up and down.
+        //pushing stick up moves camera down closer to and behind player, 
+        //while moving it down looks down at player and moves camera up? or the reverse...
     }
 
 
@@ -274,13 +218,14 @@ public class PlayerCameraController : MonoBehaviour {
     }
 
     //detects whether cam is seeing ground in front of player somehw
-    void RaycastToPlayer()
+    void CastToPlayer()
     {
         RaycastHit hit = new RaycastHit();
+        float radius = 1f;
         Vector3 dir = playerTransform.position - transform.position;
         float dist = Vector3.Distance(transform.position, playerTransform.position);
         //send raycast
-        if (Physics.Raycast(transform.position, dir, out hit, dist + 1f, obstructionMask))
+        if (Physics.SphereCast(transform.position, radius, dir, out hit, dist , obstructionMask))
         {
             //anything on layer mask that is not player
             if(hit.transform.tag != "Player")

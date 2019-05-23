@@ -620,7 +620,19 @@ public class ThirdPersonController : MonoBehaviour
     public void SeedCollect()
     {
         int randomSlurp = Random.Range(0, seedCollects.Length);
+        float randomPitch = Random.Range(0.8f, 1.2f);
+        seedAudio.pitch = randomPitch;
+        seedAudio.clip = seedCollects[randomSlurp];
         seedAudio.PlayOneShot(seedCollects[randomSlurp]);
+
+        StopCoroutine(ResetSeedPitch());
+        StartCoroutine(ResetSeedPitch());
+    }
+
+    IEnumerator ResetSeedPitch()
+    {
+        yield return new WaitForSeconds(seedAudio.clip.length);
+        seedAudio.pitch = 1f;
     }
 
 }
