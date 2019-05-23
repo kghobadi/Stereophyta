@@ -74,7 +74,7 @@ public class Plont : MonoBehaviour {
             saveScript.mySaveStorage.plantScripts.Add(this);
             saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
 
-            Debug.Log("added this plant to save storage");
+            //Debug.Log("added this plant to save storage");
         }
 
         //colliders and rigibodys
@@ -296,16 +296,20 @@ public class Plont : MonoBehaviour {
     void Die()
     {
         //Debug.Log("Rip " + gameObject.name);
-
-        //go through sleep save lists and remove me from everything
         if (!startingPlant)
         {
+            //go through sleep save lists and remove me from everything
             int indexToRemove = saveScript.mySaveStorage.plants.IndexOf(gameObject);
             saveScript.mySaveStorage.plants.Remove(gameObject);
             saveScript.mySaveStorage.plantScripts.Remove(this);
             saveScript.mySaveStorage.plantType.RemoveAt(indexToRemove);
         }
-       
+        //auto drop seeds on death
+        else
+        {
+            SpawnSeed();
+        }
+    
 
         Destroy(gameObject);
     }

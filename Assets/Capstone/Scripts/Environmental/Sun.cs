@@ -4,42 +4,73 @@ using UnityEngine.Audio;
 
 public class Sun : MonoBehaviour
 {
+    //player refs
     GameObject _player;
     ThirdPersonController tpc;
+    //day counters
     public int yesterday, dayCounter = 0;
 
-    public GameObject waterDay, waterNight;
-    public float rotationSpeed = 10, sleepRotation, normalRotation;
+    //rotation speed refs
     public Transform rotation;
+    public float rotationSpeed = 10, sleepRotation, normalRotation;
+   
+    //angle of sun's rotation
+    public float angleInDegrees;
+    //time state enum
+    public TimeState timeState;
+    public enum TimeState
+    {
+        MORNING, MIDDAY, DUSK, NIGHT,
+    }
+    //intervals are set publicly based on info obtained from angleInDegrees
+    public float rotationDiameter, morningInterval, middayInterval, duskInterval, nightInterval;
 
+    //lighting color settings
     public Light sun;
-    public bool isMorning, isMidday, isDusk, isNight;
-	public Color morn, mid, dusk, night;
+    public Color morn, mid, dusk, night;
     public Color ambientMorn, ambientMid, ambientDusk, ambientNight;
-    //public Gradient lightColorMap;
-    float totalXRange, interval, middayInterval, duskInterval, nightInterval;
+    public Material skyMorn, skyMid, skyDusk, skyNight;
 
     //wind stuff
     public int windCounter = 0;
     public GameObject[] windDirections;
 
+    //raincloud stuff
+    public int rainCounter = 0;
+    public GameObject[] rainDirections;
+
+    //stars
+    public GameObject stars;
+    ParticleSystem starParticles;
+    //waters 
+    public GameObject waterDay, waterNight;
+
     void Start()
     {
+        //player refs
         _player = GameObject.FindGameObjectWithTag("Player");
         tpc = _player.GetComponent<ThirdPersonController>();
+
+        //set lighting settings to morning at start
         RenderSettings.ambientLight = ambientMorn;
 		sun.color = morn;
-        totalXRange = transform.position.x * 2;
-        interval = totalXRange / 4;
-        middayInterval = transform.position.x - interval;
-        duskInterval = transform.position.x - (interval * 2);
-        nightInterval = transform.position.x - (interval * 3);
-        isMidday = false;
-        isDusk = false;
-        isNight = false;
+
+        //find the total diameter of the suns rotation path
+        rotationDiameter = Mathf.Abs(transform.position.x * 2);
+
+        //stars
+        starParticles = stars.GetComponent<ParticleSystem>();
+        //stars.SetActive(true);
+        //starParticles.Stop();
+
+        SwitchTimeState(0);
+
         rotationSpeed = normalRotation;
 
+        // randomize wind && rains
         RandomizeWinds();
+        RandomizeRains();
+
     }
 
     void Update()
@@ -47,107 +78,180 @@ public class Sun : MonoBehaviour
         //rotates sun around zero 
         transform.RotateAround(Vector3.zero, Vector3.forward, rotationSpeed * Time.deltaTime);
 
-        if(transform.position.x > middayInterval)
-        {
-			sun.color = Color.Lerp(sun.color, mid, Time.deltaTime / 10);
-            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientMid, Time.deltaTime / 10);
-			//sun.intensity = Mathf.Lerp (sun.intensity, 1.5f, Time.deltaTime);
-            isMorning = true;
-            isNight = false;
-            isMidday = false;
-            isDusk = false;
-            //should alter water over course of the day through its shader
-            //waterDay.SetActive(true);
-            //waterNight.SetActive(false);
-
-            //when its morning increase dayCounter
-            if (dayCounter == yesterday)
-            {
-                dayCounter++;
-                // randomize wind
-                RandomizeWinds();
-
-                //subtract from player's days to sleep
-                if (tpc.sleeping)
-                {
-                    tpc.daysToSleep--;
-                    //wake player up if its time
-                    if(tpc.daysToSleep <= 0)
-                    {
-                        tpc.WakeUp();
-                    }
-                }
-
-                //add to players days without sleep
-                else
-                {
-                    tpc.daysWithoutSleep++;
-                    //player passes out from exhaustion
-                    if(tpc.daysWithoutSleep > tpc.noSleepMax)
-                    {
-                        StartCoroutine(WaitForPlayerToPassOut());
-                    }
-                }
-            }
-        }
-        else if(transform.position.x < middayInterval && transform.position.x > duskInterval)
-        {
-            sun.color = Color.Lerp(sun.color, dusk, Time.deltaTime / 10);
-            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientDusk, Time.deltaTime / 10);
-            //sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
-            isMidday = true;
-            isMorning = false;
-            isDusk = false;
-            isNight = false;
-        }
-        else if (transform.position.x < duskInterval && transform.position.x > nightInterval)
-        {
-            sun.color = Color.Lerp(sun.color, night, Time.deltaTime / 10);
-            RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientNight, Time.deltaTime / 10);
-            //sun.intensity = Mathf.Lerp (sun.intensity, 2, Time.deltaTime);
-            isMidday = false;
-            isMorning = false;
-            isDusk = true;
-            isNight = false;
-        }
-        else if (transform.position.x < nightInterval)
-        {
-            isMorning = false;
-            isMidday = false;
-            isDusk = false;
-            isNight = true;
-            //waterDay.SetActive(false);
-            //waterNight.SetActive(true);
-            
-            //when its night, yesterday catches up to dayCounter
-            yesterday = dayCounter;
-        }
-
+        //always look at center of the map
         transform.LookAt(Vector3.zero);
 
-   
+        CheckSunsRotation();
     }
 
+    void CheckSunsRotation()
+    {
+        //for checking angle
+        Vector3 forward = transform.forward;
+        angleInDegrees = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg;
+
+        //is Morning 
+        if (angleInDegrees > morningInterval || angleInDegrees < middayInterval)
+        {
+            if(timeState != TimeState.MORNING)
+            {
+                //time bool
+                timeState = TimeState.MORNING;
+                //resets day bools and sleep stuff every morning
+                //when its morning increase dayCounter
+                if (dayCounter == yesterday)
+                {
+                    NewDay();
+                }
+                //turn off stars
+                stars.SetActive(false);
+            }
+           
+            //lighting
+            LerpLighting(morn, ambientMorn, skyMorn);
+           
+        }
+        //is Midday
+        else if (angleInDegrees > middayInterval && angleInDegrees < duskInterval)
+        {
+            //lighting
+            LerpLighting(mid, ambientMid, skyMid);
+            //time bool
+            SwitchTimeState(1);
+        }
+        //is Dusk
+        else if (angleInDegrees > duskInterval && angleInDegrees < nightInterval)
+        {
+            //lighting
+            LerpLighting(dusk, ambientDusk, skyDusk);
+            //time bool
+            SwitchTimeState(2);
+        }
+        //is Night
+        else if (angleInDegrees > nightInterval && angleInDegrees < morningInterval)
+        {
+            //lighting
+            LerpLighting(night, ambientNight, skyNight);
+            //time bool
+            SwitchTimeState(3);
+
+            //when its night, yesterday catches up to dayCounter
+            yesterday = dayCounter;
+
+            //turn on stars
+            if (!stars.activeSelf )
+            {
+                stars.SetActive(true);
+            }
+        }
+    }
+
+    //pass the state you want to set true
+    void SwitchTimeState(int state)
+    {
+        switch (state)
+        {
+            //morning
+            case 0:
+                timeState = TimeState.MORNING;
+                break;
+            //midday
+            case 1:
+                timeState = TimeState.MIDDAY;
+                break;
+            //dusk
+            case 2:
+                timeState = TimeState.DUSK;
+                break;
+            //night
+            case 3:
+                timeState = TimeState.NIGHT;
+                break;
+        }
+    }
+
+    //lerps lighting color values
+    void LerpLighting(Color sunC, Color ambientC, Material skyboxC)
+    {
+        sun.color = Color.Lerp(sun.color, sunC, Time.deltaTime / 10);
+        RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientC, Time.deltaTime / 10);
+        RenderSettings.skybox = skyboxC;
+    }
+
+    //called every morning
+    void NewDay()
+    {
+        dayCounter++;
+        // randomize wind && rains
+        RandomizeWinds();
+        RandomizeRains();
+
+        //subtract from player's days to sleep
+        if (tpc.sleeping)
+        {
+            tpc.daysToSleep--;
+            //wake player up if its time
+            if (tpc.daysToSleep <= 0)
+            {
+                tpc.WakeUp();
+            }
+        }
+
+        //add to players days without sleep
+        else
+        {
+            tpc.daysWithoutSleep++;
+            //player passes out from exhaustion
+            if (tpc.daysWithoutSleep > tpc.noSleepMax)
+            {
+                StartCoroutine(WaitForPlayerToPassOut());
+            }
+        }
+    }
+
+    //randomizes the wind generators active, their speeds & direction
     void RandomizeWinds()
     {
-        int randomWind = Random.Range(0, 4);
+        windCounter = Random.Range(0, 4);
 
         for(int i = 0; i < windDirections.Length; i++)
         {
             windDirections[i].SetActive(false);
         }
 
-        windDirections[randomWind].SetActive(true);
+        windDirections[windCounter].SetActive(true);
 
         //randomize time scales of winds
-        for(int i = 0; i < windDirections[randomWind].transform.childCount; i++)
+        for(int i = 0; i < windDirections[windCounter].transform.childCount; i++)
         {
             int randomScale = Random.Range(0, 4);
-            windDirections[randomWind].transform.GetChild(i).GetComponent<WindGen>().timeScale = randomScale;
-            windDirections[randomWind].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
+            windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().timeScale = randomScale;
+            windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
         }
     }
 
+    //randomizes the wind generators active, their speeds & direction
+    void RandomizeRains()
+    {
+        rainCounter = Random.Range(0, 4);
+
+        for (int i = 0; i < rainDirections.Length; i++)
+        {
+            rainDirections[i].SetActive(false);
+        }
+
+        rainDirections[rainCounter].SetActive(true);
+
+        //randomize time scales of winds
+        for (int i = 0; i < rainDirections[rainCounter].transform.childCount; i++)
+        {
+            int randomScale = Random.Range(0, 4);
+            rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().timeScale = randomScale;
+            rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().SwitchTimeScale();
+        }
+    }
+
+    //jst for sleeping 
     IEnumerator WaitForPlayerToPassOut()
     {
         yield return new WaitUntil(() => tpc.controller.isGrounded == true);
