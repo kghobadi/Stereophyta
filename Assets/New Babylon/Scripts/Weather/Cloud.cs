@@ -10,8 +10,9 @@ public class Cloud : MonoBehaviour
     public CloudGenerator _cloudGen;
 
     ParticleSystem cloudSystem;
-    
-    
+
+    PooledObject poolObj;
+
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -19,6 +20,8 @@ public class Cloud : MonoBehaviour
         currentSpeed = _cloudGen.cloudSpeed;
 
         cloudSystem = GetComponent<ParticleSystem>();
+
+        poolObj = GetComponent<PooledObject>();
     }
     
     void Update()
@@ -30,7 +33,7 @@ public class Cloud : MonoBehaviour
         //destroy when it gets far away enough from original generator
         if (Vector3.Distance(transform.position, _cloudGen.transform.position) > _cloudGen.distanceToDestroy)
         {
-            Destroy(gameObject);
+            poolObj.ReturnToPool();
         }
         
         AdjustHeight();
