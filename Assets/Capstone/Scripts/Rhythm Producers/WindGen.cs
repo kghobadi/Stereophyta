@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WindGen : RhythmProducer {
 
-    public GameObject wind;
+    public ObjectPooler windPooler;
     GameObject windClone;
     
     public float windSpeed;
@@ -14,9 +14,12 @@ public class WindGen : RhythmProducer {
 
         if (showRhythm)
         {
-            //base.Update(); only call this if there is a sound produced when rhythm is produced
             //instantiate wind, show particles, etc.
-            windClone = Instantiate(wind, transform.position, Quaternion.Euler(transform.eulerAngles));
+            //grab obj from pool and set pos
+            windClone = windPooler.GrabObject();
+            windClone.transform.SetParent(transform);
+            windClone.transform.position = transform.position;
+            windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles);
             windClone.GetComponent<MovingWind>()._windGen = this;
             showRhythm = false;
         }

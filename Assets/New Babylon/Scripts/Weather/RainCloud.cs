@@ -19,6 +19,8 @@ public class RainCloud : MonoBehaviour
     public int timeScale;
 
     public float dropChance;
+
+    PooledObject poolObj;
     
     void Start()
     {
@@ -38,6 +40,8 @@ public class RainCloud : MonoBehaviour
         currentSpeed = _cloudGen.cloudSpeed;
 
         SwitchTimeScale();
+
+        poolObj = GetComponent<PooledObject>();
     }
     
 
@@ -62,7 +66,7 @@ public class RainCloud : MonoBehaviour
         //destroy when it gets far away enough from original generator
         if (Vector3.Distance(transform.position, _cloudGen.transform.position) > _cloudGen.distanceToDestroy)
         {
-            Destroy(gameObject);
+            poolObj.ReturnToPool();
         }
         
         //when it has rhythm message from clock

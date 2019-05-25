@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CloudGenerator : RhythmProducer
 {
-    public GameObject cloud;
+    public ObjectPooler cloudPooler;
     GameObject cloudClone;
 
     public float cloudSpeed;
@@ -44,7 +44,7 @@ public class CloudGenerator : RhythmProducer
             else
             {
                 //to help trim down cloud count
-                if (cloudCounter < 4)
+                if (cloudCounter < 2)
                 {
                     cloudCounter++;
                 }
@@ -52,9 +52,9 @@ public class CloudGenerator : RhythmProducer
                 {
                     cloudCounter = 0;
 
-                    //SpawnCloud();
+                    SpawnCloud();
                 }
-                SpawnCloud();
+                //SpawnCloud();
             }
           
            
@@ -69,7 +69,11 @@ public class CloudGenerator : RhythmProducer
         //randomize spawn pos a bit
         Vector3 spawnPos = transform.position + Random.insideUnitSphere * 150f;
         spawnPos = new Vector3(spawnPos.x, transform.position.y, spawnPos.z);
-        cloudClone = Instantiate(cloud, spawnPos, Quaternion.Euler(transform.eulerAngles));
+        //grab obj from pool and set pos
+        cloudClone = cloudPooler.GrabObject();
+        cloudClone.transform.SetParent(transform);
+        cloudClone.transform.position = spawnPos;
+        cloudClone.transform.rotation = Quaternion.Euler(transform.eulerAngles);
         //assign refs to rain cloud script
         cloudClone.GetComponent<Cloud>()._cloudGen = this;
 
@@ -92,7 +96,14 @@ public class CloudGenerator : RhythmProducer
     //spawn rain cloud
     void SpawnRainCloud()
     {
-        cloudClone = Instantiate(cloud, transform.position, Quaternion.Euler(transform.eulerAngles));
+        //randomize spawn pos a bit
+        Vector3 spawnPos = transform.position + Random.insideUnitSphere * 25f;
+        spawnPos = new Vector3(spawnPos.x, transform.position.y, spawnPos.z);
+        //grab obj from pool and set pos
+        cloudClone = cloudPooler.GrabObject();
+        cloudClone.transform.SetParent(transform);
+        cloudClone.transform.position = spawnPos;
+        cloudClone.transform.rotation = Quaternion.Euler(transform.eulerAngles);
         //assign refs to rain cloud script
         cloudClone.GetComponent<RainCloud>()._cloudGen = this;
         cloudClone.GetComponent<RainCloud>().timeScale = timeScale;

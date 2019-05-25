@@ -194,10 +194,7 @@ public class PlayerCameraController : MonoBehaviour {
         //pushing stick up moves camera down closer to and behind player, 
         //while moving it down looks down at player and moves camera up? or the reverse...
     }
-
-
     
-
     void ZoomIn(float zoom)
     {
         float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
