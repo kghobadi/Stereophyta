@@ -34,7 +34,7 @@ public class RainDrop : MonoBehaviour {
         cloudParent = transform.parent.transform.parent.GetComponent<RainCloud>();
         //set pos
         transform.localPosition += Random.insideUnitSphere * 25f;
-        transform.localPosition = new Vector3(transform.localPosition.x, 5, transform.localPosition.z);
+        transform.localPosition += new Vector3(0, 15f, 0);
         originalPosition = transform.localPosition;
 
         origMoveSpeed = moveSpeedOverTime;
@@ -59,7 +59,8 @@ public class RainDrop : MonoBehaviour {
         hasSplashed = false;
         //randomize fall speed a bit
         transform.localScale = originalScale * Random.Range(0.5f, 1.25f);
-        moveSpeedOverTime = origMoveSpeed + Random.Range(-5f, 5f);
+        rainBody.mass = 1 * Random.Range(1f, 3f);
+        moveSpeedOverTime = origMoveSpeed + Random.Range(-5f, 50f);
     }
 
 
@@ -87,16 +88,21 @@ public class RainDrop : MonoBehaviour {
         //turn off physics
         rainBody.useGravity = false;
         rainBody.velocity = Vector3.zero;
-        rainTrail.enabled = false;
+        
 
         yield return new WaitForSeconds(0.25f);
 
         //no longer dropping
+        rainTrail.enabled = false;
         dropping = false;
         rainMesh.enabled = false;
 
         //reset position
         transform.localPosition = originalPosition + Random.insideUnitSphere * 3f;
+        if(transform.localPosition.y < 0)
+        {
+            transform.localPosition += new Vector3(0, 15f, 0);
+        }
     }
     
 }

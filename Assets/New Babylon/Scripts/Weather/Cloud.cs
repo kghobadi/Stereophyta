@@ -13,6 +13,8 @@ public class Cloud : MonoBehaviour
 
     PooledObject poolObj;
 
+    public float height;
+
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -33,7 +35,13 @@ public class Cloud : MonoBehaviour
         //destroy when it gets far away enough from original generator
         if (Vector3.Distance(transform.position, _cloudGen.transform.position) > _cloudGen.distanceToDestroy)
         {
-            poolObj.ReturnToPool();
+            cloudSystem.Stop();
+
+            if(cloudSystem.particleCount <= 0)
+            {
+                poolObj.ReturnToPool();
+            }
+           
         }
         
         AdjustHeight();
@@ -48,7 +56,7 @@ public class Cloud : MonoBehaviour
 
         if (Physics.Raycast(transform.position, down, out hit, 500))
         {
-            transform.position = Vector3.MoveTowards(transform.position, hit.point + new Vector3(0, 75f, 0), 5 * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, hit.point + new Vector3(0, height, 0), 5 * Time.deltaTime);
         }
     }
 
