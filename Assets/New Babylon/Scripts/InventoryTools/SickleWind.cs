@@ -62,6 +62,7 @@ public class SickleWind : Rhythm
                 other.GetComponent<Plont>().GrowPlant(false);
                 PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, mySickleDaddy.sickleHits);
                 Debug.Log("played guitar sound");
+                Destroy(gameObject);
             }
 
         }

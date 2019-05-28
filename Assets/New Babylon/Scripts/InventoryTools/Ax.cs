@@ -19,12 +19,15 @@ public class Ax : Tool {
     public float axWindSpeed;
     public float scaleIncrease;
 
+    public TrailRenderer axtrail;
+
     void Start () {
         //all my refs
         myAxBody = GetComponent<Rigidbody>();
         myCollider = GetComponent<BoxCollider>();
         axAnimator = GetComponent<Animator>();
         axSource = GetComponent<AudioSource>();
+        axtrail.enabled = false;
 	}
     
     public override void Update () {
@@ -39,6 +42,7 @@ public class Ax : Tool {
         if (axing && axAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && axAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
         {
             axing = false;
+            StartCoroutine(DisableTrail());
         }
     }
 
@@ -53,6 +57,7 @@ public class Ax : Tool {
         SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
 
         axing = true;
+        axtrail.enabled = true;
 
     }
 
@@ -89,6 +94,12 @@ public class Ax : Tool {
         //GameObject axWindRight = Instantiate(axWindPrefab, spawnPoint, Quaternion.Euler(rightRot));
 
         //axWindRight.GetComponent<AxWind>().myAxDaddy = this;
+    }
+
+    IEnumerator DisableTrail()
+    {
+        yield return new WaitForSeconds(axtrail.time);
+        axtrail.enabled = false;
     }
 
 

@@ -19,12 +19,16 @@ public class Sickle : Tool {
     public float sickleWindSpeed;
     public float scaleIncrease;
 
+    //trail
+    public TrailRenderer sickleTrail;
+
     void Start () {
         //all my refs
         mySickleBody = GetComponent<Rigidbody>();
         myCollider = GetComponent<BoxCollider>();
         sickleAnimator = GetComponent<Animator>();
         sickleSource = GetComponent<AudioSource>();
+        sickleTrail.enabled = false;
 	}
     
     public override void Update () {
@@ -49,6 +53,7 @@ public class Sickle : Tool {
         {
             sickleAnimator.SetBool("sickling", false);
             sickling = false;
+            StartCoroutine(DisableTrail());
         }
 
     }
@@ -59,6 +64,7 @@ public class Sickle : Tool {
         base.MainAction();
         sickleAnimator.SetBool("sickling", true);
         sickling = true;
+        sickleTrail.enabled = true;
     }
     
     
@@ -69,6 +75,13 @@ public class Sickle : Tool {
         GameObject axWindCenter = Instantiate(sickleWindPrefab, spawnPoint, Quaternion.Euler(tpc.transform.localEulerAngles - new Vector3(0, 90, 0)));
 
         axWindCenter.GetComponent<SickleWind>().mySickleDaddy = this;
+    }
+
+
+    IEnumerator DisableTrail()
+    {
+        yield return new WaitForSeconds(sickleTrail.time);
+        sickleTrail.enabled = false;
     }
 
 }
