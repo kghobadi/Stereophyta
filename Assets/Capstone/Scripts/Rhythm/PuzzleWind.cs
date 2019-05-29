@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PuzzleWind : Rhythm
 {
+    PooledObject poolObj;
 
     float currentSpeed;
     public WindMachine _windGen;
@@ -13,6 +14,8 @@ public class PuzzleWind : Rhythm
     void Start()
     {
         currentSpeed = _windGen.windSpeed;
+
+        poolObj = GetComponent<PooledObject>();
     }
 
     void Update()
@@ -21,7 +24,7 @@ public class PuzzleWind : Rhythm
 
         if (Vector3.Distance(transform.position, _windGen.transform.position) > _windGen.distanceToDestroy)
         {
-            Destroy(gameObject);
+            poolObj.ReturnToPool();
         }
 
         AdjustHeight();

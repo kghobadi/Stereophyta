@@ -5,7 +5,7 @@ using UnityEngine;
 public class WindMachine : RhythmProducer {
 
     //WindMachine itself -- pick up and wind gen
-    public GameObject wind;
+    public ObjectPooler fanWindPooler;
     GameObject windClone;
     
     //speed vars 
@@ -96,8 +96,10 @@ public class WindMachine : RhythmProducer {
         {
             if (showRhythm)
             {
-                //instantiate wind, show particles, etc.
-                windClone = Instantiate(wind, transform.position + new Vector3(0, 5, 0), Quaternion.Euler(transform.eulerAngles - new Vector3(0,90,0)));
+                //grab wind from pool, set pos, rotation, ref to this
+                windClone = fanWindPooler.GrabObject();
+                windClone.transform.position = transform.position + new Vector3(0, 5, 0);
+                windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
                 windClone.GetComponent<PuzzleWind>()._windGen = this;
                 showRhythm = false;
             }
