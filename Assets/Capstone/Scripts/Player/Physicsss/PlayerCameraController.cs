@@ -127,13 +127,13 @@ public class PlayerCameraController : MonoBehaviour {
         //zoom in
         if (zoomInput < 0 && heightFromPlayer > heightMin )
         {
-            Debug.Log("zoom in");
+            //Debug.Log("zoom in");
             ZoomIn(zoomInput);
         }
         //and out
         if (zoomInput > 0 && heightFromPlayer < heightMax )
         {
-            Debug.Log("zoom out");
+            //Debug.Log("zoom out");
             ZoomOut(zoomInput);
         }
         

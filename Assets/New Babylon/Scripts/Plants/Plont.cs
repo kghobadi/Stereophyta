@@ -239,13 +239,13 @@ public class Plont : MonoBehaviour {
         {
             if (growOrShrink)
             {
-                newScale = (originalScale * currentStage) / 2;
+                newScale = (originalScale * currentStage) / 1.5f;
                 growing = true;
             }
             //shrink
             else
             {
-                transform.localScale = (originalScale * currentStage) / 2;
+                transform.localScale = (originalScale * currentStage) / 1.5f;
             }
         }
 

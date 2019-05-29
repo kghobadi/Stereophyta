@@ -8,6 +8,7 @@ public class WindMachine : RhythmProducer {
     public GameObject wind;
     GameObject windClone;
     
+    //speed vars 
     public float windSpeed, rotationSpeed;
     public float distanceToDestroy;
 
@@ -25,45 +26,50 @@ public class WindMachine : RhythmProducer {
     public int timeScaleMax;
     public float drawDist;
 
-    bool increasing;
-    public ParticleSystem triRipples;
+    //rhythm indicator
+    public SpriteRenderer rhythmSR;
+    Animator rhythmIndicator;
+    FadeSprite rhythmFader;
 
-    //SpriteRenderer rhythmSR;
+    //change rhythm particle
+    public GameObject changeRhythmObj;
+    ParticleSystem changeRhythmFx;
+    public bool changedRhythm;
+
+    //turn this on & off depending what player is doing with it
+    public bool fanActive;
 
     public void Start () {
         rotationSpeed = 3;
-        
-        disappearTimer = disappearTimerTotal;
-
 
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
         windSpeed = 5;
-        triRipples.Stop();
+
+        //rhythm indicator
+        rhythmIndicator = rhythmSR.GetComponent<Animator>();
+        rhythmFader = rhythmSR.GetComponent<FadeSprite>();
+        rhythmIndicator.SetInteger("Level", timeScale);
+        changeRhythmFx = changeRhythmObj.GetComponent<ParticleSystem>();
+
+        //set bools
+        changedRhythm = true;
+        fanActive = true;
     }
 	
 	public override void Update () {
         base.Update();
 
-        //wind machine drop while holding
-        //if (playerHolding)
-        //{
-        //    if (Input.GetMouseButtonDown(1))
-        //    {
-        //        DropObject();
-                
-        //    }
-        //}
-
-        fanObj.transform.Rotate(0, 0, rotationSpeed);
+        //rotate fan thru code
+        if (fanActive)
+        {
+            fanObj.transform.Rotate(0, 0, rotationSpeed);
+        }
+        
 
         //make windmachine look at mouse pos
         if (playerRotating)
         {
-            triRipples.Play();
-            //tpc.talking = true;
-            //interactable = false;
-
             holdTimer += Time.deltaTime;
 
             float mouseX = Input.mousePosition.x;
@@ -81,8 +87,6 @@ public class WindMachine : RhythmProducer {
             //on click call raycasts. 
             if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
             {
-                //tpc.talking = false;
-                //interactable = true;
                 playerRotating = false;
             }
         }
@@ -99,28 +103,24 @@ public class WindMachine : RhythmProducer {
             }
         }
 
-        //if ((/*tpc.talking ||*/ selectionMenu.enabled) && playerClicked)
-        //{
-        //    rhythmSR.enabled = true;
-        //    disappearTimer = disappearTimerTotal;
-        //}
+        //for rhythm visual
+        if (changedRhythm)
+        {
+            disappearTimer -= Time.deltaTime;
 
-        //if (rhythmSR.enabled)
-        //{
-        //    disappearTimer -= Time.deltaTime;
-        //    if (disappearTimer < 0)
-        //    {
-        //        rhythmSR.enabled = false;
-        //        disappearTimer = disappearTimerTotal;
-        //    }
-        //}
-
+            //fade out visual
+            if(disappearTimer < 0)
+            {
+                rhythmFader.FadeOut();
+                changedRhythm = false;
+            }
+        }
     }
 
 
     public void OnMouseOver()
     {
-        disappearTimer = disappearTimerTotal;
+        //disappearTimer = disappearTimerTotal;
         //rhythmSR.enabled = true;
     }
 
@@ -139,37 +139,7 @@ public class WindMachine : RhythmProducer {
         // nothing here, we don't want sound to play
     }
 
-
-    //Pick Up the WindMachine
-    //public override void Selection_One()
-    //{
-    //    base.Selection_One();
-    //    DeactivateSelectionMenu();
-    //    transform.SetParent(rightArmObj.transform);
-
-    //    transform.localPosition = Vector3.zero;
-    //    transform.localEulerAngles = Vector3.zero;
-
-    //    //tpc.canUseSeed = false;
-    //    //tpc.isHoldingSomething = true;
-    //    playerHolding = true;
-    //    interactable = false;
-
-    //}
-
-    ////Rotate WindMachine 90
-    //public override void Selection_Two()
-    //{
-    //    base.Selection_Two();
-
-    //    //rotating = true;
-    //    transform.localEulerAngles = Vector3.zero;
-    //    playerRotating = true;
-    //    DeactivateSelectionMenu();
-
-    //    if (!soundBoard.isPlaying)
-    //        soundBoard.PlayOneShot(InteractSound);
-    //}
+    
 
     //Increase rhythm
     public void IncreaseTempo()
@@ -180,7 +150,7 @@ public class WindMachine : RhythmProducer {
             timeScale += 1;
             windSpeed += 2;
             rotationSpeed *= 2;
-            Debug.Log("increased tempo");
+            //Debug.Log("increased tempo");
         }
         else
         {
@@ -188,35 +158,20 @@ public class WindMachine : RhythmProducer {
             timeScale = 0;
             windSpeed -= (2 * timeScaleMax);
             rotationSpeed /= (2 * timeScaleMax);
-            Debug.Log("reset tempo");
+            //Debug.Log("reset tempo");
         }
+
+        SetVisualRhythm();
     }
 
-    ////Decrease Rhythm
-    //public override void Selection_Four()
-    //{
-    //    base.Selection_Four();
-    //    if (timeScale > 0)
-    //    {
-    //        windSpeed -= 2;
-    //        timeScale -= 1;
-    //        rhythmIndicator.SetInteger("Level", timeScale);
-    //        rotationSpeed *= 0.5f;
+    //called whenever rhythm is changed;
+    public void SetVisualRhythm()
+    {
+        rhythmFader.FadeIn();
+        rhythmIndicator.SetInteger("Level", timeScale);
+        changeRhythmFx.Play();
 
-    //        if (!soundBoard.isPlaying && playerClicked)
-    //            soundBoard.PlayOneShot(selectLower);
-    //    }
-    //}
-
-    ////Called when player is holding the windMachine and right clicks to drop
-    //public void DropObject()
-    //{
-    //    transform.localPosition -= new Vector3(0, 2, 0);
-    //    transform.SetParent(null);
-
-    //    //tpc.isHoldingSomething = false;
-    //    //tpc.canUseSeed = true;
-    //    playerHolding = false;
-    //    interactable = true;
-    //}
+        changedRhythm = true;
+        disappearTimer = disappearTimerTotal;
+    }
 }

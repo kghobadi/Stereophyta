@@ -28,7 +28,6 @@ public class Sickle : Tool {
         myCollider = GetComponent<BoxCollider>();
         sickleAnimator = GetComponent<Animator>();
         sickleSource = GetComponent<AudioSource>();
-        sickleTrail.enabled = false;
 	}
     
     public override void Update () {
@@ -53,7 +52,6 @@ public class Sickle : Tool {
         {
             sickleAnimator.SetBool("sickling", false);
             sickling = false;
-            StartCoroutine(DisableTrail());
         }
 
     }
@@ -64,7 +62,6 @@ public class Sickle : Tool {
         base.MainAction();
         sickleAnimator.SetBool("sickling", true);
         sickling = true;
-        sickleTrail.enabled = true;
     }
     
     

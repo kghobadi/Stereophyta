@@ -261,7 +261,7 @@ public class Sun : MonoBehaviour
         }
 
         //not raining, just normal clouds!
-        Debug.Log("normal clouds...");
+        //Debug.Log("normal clouds...");
         rainCounter = Random.Range(0, 4);
 
         cloudDirections[rainCounter].SetActive(true);

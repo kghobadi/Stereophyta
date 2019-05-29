@@ -60,7 +60,7 @@ public class AxWind : Rhythm {
                 //shrink plant and play guitar sound
                 other.GetComponent<Plont>().GrowPlant(false);
                 PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
-                Debug.Log("played guitar sound");
+                //Debug.Log("played guitar sound");
             }
 
         }
@@ -69,6 +69,7 @@ public class AxWind : Rhythm {
         if (other.gameObject.tag == "WindMachines")
         {
             other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
+            //Debug.Log("ax inceased tempo");
         }
     }
 

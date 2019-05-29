@@ -30,6 +30,18 @@ public class FadeSprite : MonoBehaviour {
         //automatically fadeIn at start if object has this script
         StartCoroutine(WaitToFadeIn());
 	}
+
+    public void FadeIn()
+    {
+        fadingIn = true;
+        fadingOut = false;
+    }
+
+    public void FadeOut()
+    {
+        fadingIn = false;
+        fadingOut = true;
+    }
 	
 	void Update () {
         //when fadingIn, this is called every frame

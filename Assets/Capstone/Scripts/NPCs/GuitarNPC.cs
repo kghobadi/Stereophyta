@@ -79,7 +79,7 @@ public class GuitarNPC : NPC {
                 windMachine.transform.LookAt(new Vector3(movementPoints[moveCounter].transform.position.x,
                     windMachine.transform.position.y, movementPoints[moveCounter].transform.position.z));
                 //Debug.Log(windMachine.transform.localEulerAngles);
-                windMachine.triRipples.Play();
+                //windMachine.triRipples.Play();
                 yield return new WaitForSeconds(1);
             }
         }
@@ -130,7 +130,7 @@ public class GuitarNPC : NPC {
         //    }
         //}
 
-        windMachine.triRipples.Play();
+        //windMachine.triRipples.Play();
         yield return new WaitForSeconds(1);
 
         currentState = NPCState.LABOR;

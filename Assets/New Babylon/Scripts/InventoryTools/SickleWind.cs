@@ -61,7 +61,7 @@ public class SickleWind : Rhythm
                 //shrink plant and play guitar sound
                 other.GetComponent<Plont>().GrowPlant(false);
                 PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, mySickleDaddy.sickleHits);
-                Debug.Log("played guitar sound");
+                //Debug.Log("played guitar sound");
                 Destroy(gameObject);
             }
 
@@ -71,6 +71,7 @@ public class SickleWind : Rhythm
         if (other.gameObject.tag == "WindMachines")
         {
             other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
+            //Debug.Log("sickle hit wind machine");
         }
     }
 
