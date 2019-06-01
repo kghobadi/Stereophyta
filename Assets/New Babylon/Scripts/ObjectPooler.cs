@@ -43,19 +43,7 @@ public class ObjectPooler : MonoBehaviour {
         GameObject grabbedObject = objects[index];
         index++;
         if (index >= startingNumber) { index = 0; }
-
-
-        // If there are inactive objects in the list, return the top one. Otherwise, instantiate a new one and return that.
-        //if (inactiveObjects.Count > 0) {
-        //grabbedObject = inactiveObjects[0];
-        //} 
-
-        //else {
-        //    Debug.Log("Instantiating new " + objectPrefab.name);
-        //    grabbedObject = InstantiateNew();
-        //    inactiveObjects.Add(grabbedObject);
-        //}
-
+        
         ActivateObject(grabbedObject);
 
         return grabbedObject;
