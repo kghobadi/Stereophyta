@@ -152,7 +152,6 @@ public class WindMachine : RhythmProducer {
             timeScale += 1;
             windSpeed += 2;
             rotationSpeed *= 2;
-            //Debug.Log("increased tempo");
         }
         else
         {
@@ -160,7 +159,6 @@ public class WindMachine : RhythmProducer {
             timeScale = 0;
             windSpeed -= (2 * timeScaleMax);
             rotationSpeed /= (2 * timeScaleMax);
-            //Debug.Log("reset tempo");
         }
 
         SetVisualRhythm();
