@@ -62,16 +62,16 @@ public class Ax : Tool {
     void OnTriggerEnter(Collider other)
     {
         //collided with plant
-        if (other.gameObject.tag == "Plant" && axing)
-        {
-            axing = false;
+        //if (other.gameObject.tag == "Plant" && axing)
+        //{
+        //    axing = false;
 
-            other.gameObject.GetComponent<Plont>().GrowPlant(false);
+        //    other.gameObject.GetComponent<Plont>().GrowPlant(false);
             
-            //virtual play sounds
-            PlaySound(axSource, axHits);
-            SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
-        }
+        //    //virtual play sounds
+        //    PlaySound(axSource, axHits);
+        //    SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
+        //}
     }
 
     //spawns one ax wind
