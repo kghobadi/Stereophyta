@@ -13,14 +13,19 @@ public class Menu : MonoBehaviour {
     //player
     GameObject player;
     ThirdPersonController tpc;
-
+    //overall menu obj
     public GameObject menuObj;
-
+    public GameObject settingsObj;
+    public Book bookScript;
+    //toggle mouse controls
     public Toggle mouseControlsToggle;
     public PlayerCameraController camController;
-
+    //settings volume slider
     public AudioMixerGroup masterGroup;
     public Slider volumeSlider;
+    //menu audio
+    public AudioSource menuAudio;
+    public AudioClip openBook, closeBook;
 
 	void Start ()
     {
@@ -55,6 +60,7 @@ public class Menu : MonoBehaviour {
 
                 //reset sun
                 sunScript.rotationSpeed = lastSunSpeed;
+                menuAudio.PlayOneShot(closeBook);
             }
             //turn on
             else
@@ -70,6 +76,20 @@ public class Menu : MonoBehaviour {
                 //pause sun
                 lastSunSpeed = sunScript.rotationSpeed;
                 sunScript.rotationSpeed = 0;
+                menuAudio.PlayOneShot(openBook);
+            }
+        }
+
+        //toggle settings stuff on and off depending what book page you are on
+        if (menuObj.activeSelf)
+        {
+            if(bookScript.currentPage == 0)
+            {
+                settingsObj.SetActive(true);
+            }
+            else
+            {
+                settingsObj.SetActive(false);
             }
         }
 	}
