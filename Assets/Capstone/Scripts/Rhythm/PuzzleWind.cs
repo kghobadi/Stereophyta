@@ -8,13 +8,14 @@ public class PuzzleWind : Rhythm
 
     float currentSpeed;
     public WindMachine _windGen;
+    ParticleSystem windParticles;
 
     public LayerMask ground;
 
     void Start()
     {
         currentSpeed = _windGen.windSpeed;
-
+        windParticles = GetComponent<ParticleSystem>();
         poolObj = GetComponent<PooledObject>();
     }
 
@@ -24,7 +25,7 @@ public class PuzzleWind : Rhythm
 
         if (Vector3.Distance(transform.position, _windGen.transform.position) > _windGen.distanceToDestroy)
         {
-            poolObj.ReturnToPool();
+            StartCoroutine(DissipateWind());
         }
 
         AdjustHeight();
@@ -47,5 +48,13 @@ public class PuzzleWind : Rhythm
                 transform.position = hit.point + new Vector3(0, 3f, 0);
             }
         }
+    }
+
+    //waits for wind particles to stop fully 
+    IEnumerator DissipateWind()
+    {
+        windParticles.Stop();
+        yield return new WaitForSeconds(windParticles.main.duration);
+        poolObj.ReturnToPool();
     }
 }

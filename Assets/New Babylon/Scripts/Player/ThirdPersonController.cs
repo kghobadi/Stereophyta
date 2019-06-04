@@ -305,6 +305,7 @@ public class ThirdPersonController : MonoBehaviour
 
         //increase sun rotationSpeed
         sunScript.rotationSpeed = sunScript.sleepRotation;
+        //Time.timeScale = 10f;
 
         //play random yawn sound
         int randomYawn = Random.Range(0, yawns.Length);
@@ -339,6 +340,7 @@ public class ThirdPersonController : MonoBehaviour
         sleepParticles.SetActive(false);
 
         //reset sun rotationSpeed
+        //Time.timeScale = 1f;
         sunScript.rotationSpeed = sunScript.normalRotation;
 
         //set animator

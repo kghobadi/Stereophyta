@@ -92,6 +92,21 @@ public class Inventory : MonoBehaviour {
             }
         }
 
+        //fade out quick menus while sleeping
+        if (tpc.sleeping)
+        {
+            for (int i = 0; i < toolsUI.Length; i++)
+            {
+                toolsUI[i].fadingIn = false;
+                toolsUI[i].fadingOut = true;
+            }
+
+            for (int i = 0; i < seedsUI.Length; i++)
+            {
+                seedsUI[i].fadingIn = false;
+                seedsUI[i].fadingOut = true;
+            }
+        }
     }
 
     public void SwitchItem(bool posOrNeg)
