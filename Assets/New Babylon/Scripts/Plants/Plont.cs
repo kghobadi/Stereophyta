@@ -7,6 +7,7 @@ public struct GrowthStages
 {
     public int growthDays;
     public GameObject stageModel;
+    public AudioClip[] stageAudioClips;
 }
 
 public class Plont : MonoBehaviour {
@@ -58,7 +59,7 @@ public class Plont : MonoBehaviour {
     //mostly used for saving / loading 
     public enum PlantType
     {
-        PIANO, SUCCULENTAR, GUITAR, BELL, TRIANGULAR,
+        PIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR,
     }
     
 	void Start () {
@@ -253,7 +254,7 @@ public class Plont : MonoBehaviour {
         //set nextStage
         nextStage = myAge + myGrowthStages[currentStage].growthDays;
         //set current clip
-        currentClip = stageSounds[myAge];
+        currentClip = stageSounds[currentStage];
 
         //set particles duration to our current audio clip's length
         ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
