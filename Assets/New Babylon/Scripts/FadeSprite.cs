@@ -18,6 +18,8 @@ public class FadeSprite : MonoBehaviour {
     //controls the speed of the fade
     public float fadeInWait, fadeOutWait, fadeInSpeed = 0.75f, fadeOutSpeed = 1f;
 
+    public bool fadeInAtStart;
+
 	void Start () {
         //checks privately whether this object has image or text component
         thisSR = GetComponent<SpriteRenderer>();
@@ -28,7 +30,8 @@ public class FadeSprite : MonoBehaviour {
         thisSR.color = alphaValue;
 
         //automatically fadeIn at start if object has this script
-        StartCoroutine(WaitToFadeIn());
+        if(fadeInAtStart)
+            StartCoroutine(WaitToFadeIn());
 	}
 
     public void FadeIn()

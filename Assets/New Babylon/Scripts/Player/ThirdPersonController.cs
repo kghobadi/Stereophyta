@@ -14,6 +14,7 @@ public class ThirdPersonController : MonoBehaviour
     Transform cameraTransform;
     public Animator poopShoes;
     BoxCollider playerRunCollider;
+    public Cloth playerCloak;
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask mask;
@@ -81,6 +82,8 @@ public class ThirdPersonController : MonoBehaviour
 
     //for sleeping
     public bool sleeping;
+    public Transform bedPos;
+    public FadeUI sleepCover;
     public int daysWithoutSleep = 0;
     public int daysToSleep;
     public int noSleepMax = 3;
@@ -100,7 +103,6 @@ public class ThirdPersonController : MonoBehaviour
 
     //save ref
     public SleepSave saveScript;
-
 
     void Awake()
     {
@@ -155,7 +157,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //call sleep -- only works if you haven't slept for a day and you are on the ground
-        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded)
+        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen)
         {
             Sleep(true);
         }
@@ -208,6 +210,7 @@ public class ThirdPersonController : MonoBehaviour
             if(forwardInput.magnitude > 0)
             {
                 runParticles.SetActive(true);
+                poopShoes.speed = 2f;
             }
             else
             {
@@ -221,6 +224,7 @@ public class ThirdPersonController : MonoBehaviour
             playerRunCollider.enabled = false;
             running = false;
             runParticles.SetActive(false);
+            poopShoes.speed = 1f;
         }
 
         //rotate the player's body
@@ -292,7 +296,7 @@ public class ThirdPersonController : MonoBehaviour
         playerCameraController.enabled = false;
         myInventory.gameObject.SetActive(false);
 
-        //player just pressed B
+        //player just pressed Z
         if (pressedOrPassed)
         {
             daysToSleep = 1;
@@ -311,6 +315,19 @@ public class ThirdPersonController : MonoBehaviour
         int randomYawn = Random.Range(0, yawns.Length);
         sleepSource.PlayOneShot(yawns[randomYawn], 1f);
 
+        StartCoroutine(FadeToBed());
+    }
+
+    IEnumerator FadeToBed()
+    {
+        sleepCover.FadeIn();
+
+        yield return new WaitForSeconds(1f);
+       
+        //move player to bed & turn on z particles
+        transform.position = bedPos.position;
+        playerCloak.gameObject.SetActive(false);
+        transform.localEulerAngles = new Vector3(0, 80, 0);
         sleepParticles.SetActive(true);
 
         //set animator
@@ -318,6 +335,11 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("jumping", false);
         poopShoes.SetBool("running", false);
         poopShoes.SetBool("sleeping", true);
+
+        yield return new WaitForSeconds(0.5f);
+
+        sleepCover.FadeOut();
+        playerCloak.gameObject.SetActive(true);
     }
 
     //called by Sun when player's daysToSleep reaches 0 while sleeping is true
@@ -329,7 +351,7 @@ public class ThirdPersonController : MonoBehaviour
         playerCanMove = true;
         playerCameraController.enabled = true;
         //if not in farmhouse
-        myInventory.gameObject.SetActive(true);
+        //myInventory.gameObject.SetActive(true);
         daysWithoutSleep = 0;
 
         //play random yawn sound
@@ -381,12 +403,26 @@ public class ThirdPersonController : MonoBehaviour
                 footStepTimer += Time.deltaTime;
 
                 //play footstep sound
-                if (footStepTimer > runStepTotal)
+                if (running)
                 {
-                    if(currentStep < currentFootsteps.Length)
-                        playerSource.PlayOneShot(currentFootsteps[currentStep]);
-                    IncrementFootsteps();
+                    if (footStepTimer > runStepTotal)
+                    {
+                        if (currentStep < currentFootsteps.Length)
+                            playerSource.PlayOneShot(currentFootsteps[currentStep]);
+                        IncrementFootsteps();
+                    }
                 }
+                //walking
+                else
+                {
+                    if (footStepTimer > walkStepTotal)
+                    {
+                        if (currentStep < currentFootsteps.Length)
+                            playerSource.PlayOneShot(currentFootsteps[currentStep]);
+                        IncrementFootsteps();
+                    }
+                }
+               
             }
         }
         else
@@ -434,7 +470,7 @@ public class ThirdPersonController : MonoBehaviour
                 if (Physics.Raycast(transform.position, -transform.up, out hitD, 10, groundedCheck))
                 {
                     //dust splash
-                    dustSplash.transform.position = hitD.point + new Vector3(0, 1f, 0);
+                    dustSplash.transform.position = hitD.point + new Vector3(0, 2f, 0);
                     splashScript.StartCoroutine(splashScript.Splash(lastJumpType));
                 }
             }

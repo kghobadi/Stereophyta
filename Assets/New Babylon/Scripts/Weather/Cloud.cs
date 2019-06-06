@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class Cloud : MonoBehaviour
 {
+    Sun sunScript;
     GameObject _player;
 
     float currentSpeed;
     public CloudGenerator _cloudGen;
 
     ParticleSystem cloudSystem;
+    ParticleSystem.ColorOverLifetimeModule colorOLmod;
 
     PooledObject poolObj;
 
@@ -17,18 +19,25 @@ public class Cloud : MonoBehaviour
 
     void Start()
     {
+        sunScript = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         _player = GameObject.FindGameObjectWithTag("Player");
 
         currentSpeed = _cloudGen.cloudSpeed;
 
         cloudSystem = GetComponent<ParticleSystem>();
+        colorOLmod = cloudSystem.colorOverLifetime;
 
         poolObj = GetComponent<PooledObject>();
     }
     
     void Update()
     {
-        
+        //at night change gradiaent to night gradient
+        if(sunScript.timeState == Sun.TimeState.NIGHT)
+        {
+            //do something with the color
+        }
+
         //move at current speed
         transform.Translate(currentSpeed * Time.deltaTime, 0, 0);
 

@@ -191,7 +191,7 @@ public class Seed : MonoBehaviour {
     {
         seedSource.PlayOneShot(spawnPlant);
 
-        plantClone = Instantiate(plantPrefab, transform.position, Quaternion.identity);
+        plantClone = Instantiate(plantPrefab, transform.position, Quaternion.Euler(tpc.transform.localEulerAngles));
         plantClone.GetComponent<Plont>().plantPrefab = plantPrefab;
 
         transform.SetParent(inventoryParent);

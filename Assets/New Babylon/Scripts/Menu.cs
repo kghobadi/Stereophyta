@@ -21,8 +21,8 @@ public class Menu : MonoBehaviour {
     public Toggle mouseControlsToggle;
     public PlayerCameraController camController;
     //settings volume slider
-    public AudioMixerGroup masterGroup;
-    public Slider volumeSlider;
+    public AudioMixerGroup[] mixerGroups;
+    public Slider[] volumeSliders;
     //menu audio
     public AudioSource menuAudio;
     public AudioClip openBook, closeBook;
@@ -38,7 +38,10 @@ public class Menu : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
 
         //set initial values
-        volumeSlider.value = 0;
+        for(int i = 0; i < volumeSliders.Length; i++)
+        {
+            volumeSliders[i].value = 0;
+        }
         mouseControlsToggle.isOn = camController.mouseControls;
 
         menuObj.SetActive(false);
@@ -53,6 +56,7 @@ public class Menu : MonoBehaviour {
                 //menu off
                 menuObj.SetActive(false);
                 tpc.menuOpen = false;
+                camController.enabled = true;
 
                 //cursor off
                 Cursor.visible = false;
@@ -72,6 +76,7 @@ public class Menu : MonoBehaviour {
                 //menu on
                 menuObj.SetActive(true);
                 tpc.menuOpen = true;
+                camController.enabled = false;
 
                 //pause sun
                 lastSunSpeed = sunScript.rotationSpeed;
@@ -94,17 +99,40 @@ public class Menu : MonoBehaviour {
         }
 	}
 
-    //function to adjust master volume with a slider
-    public void ChangeVolume()
+    //functions to adjust master volumes with a sliders
+    public void ChangeVolume(int mixer)
     {
-        masterGroup.audioMixer.SetFloat("masterVol", volumeSlider.value);
+        string volumeVar = "";
+
+        switch (mixer)
+        {
+            case 0:
+                volumeVar = "masterVol";
+                break;
+            case 1:
+                volumeVar = "plantVol";
+                break;
+            case 2:
+                volumeVar = "toolVol";
+                break;
+            case 3:
+                volumeVar = "characterVol";
+                break;
+            case 4:
+                volumeVar = "weatherVol";
+                break;
+        }
+
+        mixerGroups[mixer].audioMixer.SetFloat(volumeVar, volumeSliders[mixer].value);
     }
 
+    //for quit button press
     public void QuitGame()
     {
         Application.Quit();
     }
 
+    //this toggles mouse v controller option
     public void SetMouseControlsBool()
     {
         camController.mouseControls = !camController.mouseControls;

@@ -41,6 +41,7 @@ public class AutoFlip : MonoBehaviour {
         float dx = (xl)*2 / AnimationFramesCount;
         StartCoroutine(FlipRTL(xc, xl, h, frameTime, dx));
         bookAudio.PlayOneShot(flipPage);
+      
     }
     public void FlipLeftPage()
     {
@@ -99,6 +100,8 @@ public class AutoFlip : MonoBehaviour {
     }
     IEnumerator FlipRTL(float xc, float xl, float h, float frameTime, float dx)
     {
+        ControledBook.DisableVideos();
+
         float x = xc + xl;
         float y = (-h / (xl * xl)) * (x - xc) * (x - xc);
 
@@ -114,6 +117,8 @@ public class AutoFlip : MonoBehaviour {
     }
     IEnumerator FlipLTR(float xc, float xl, float h, float frameTime, float dx)
     {
+        ControledBook.DisableVideos();
+
         float x = xc - xl;
         float y = (-h / (xl * xl)) * (x - xc) * (x - xc);
         ControledBook.DragLeftPageToPoint(new Vector3(x, y, 0));

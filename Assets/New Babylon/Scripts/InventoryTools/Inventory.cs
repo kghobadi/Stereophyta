@@ -95,6 +95,8 @@ public class Inventory : MonoBehaviour {
         //fade out quick menus while sleeping
         if (tpc.sleeping)
         {
+            StopAllCoroutines();
+
             for (int i = 0; i < toolsUI.Length; i++)
             {
                 toolsUI[i].fadingIn = false;

@@ -33,6 +33,7 @@ public class WaterSplash : Rhythm {
         splashEffect.Stop();
         tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
         splashMain = splashEffect.main;
+        sphereCol.enabled = false;
 	}
     
     public IEnumerator Splash()

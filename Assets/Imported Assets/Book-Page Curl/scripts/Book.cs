@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using UnityEngine.Video;
 
 public enum FlipMode
 {
@@ -15,11 +16,20 @@ public class Book : MonoBehaviour {
     [SerializeField]
     RectTransform BookPanel;
     public Sprite background;
+    //array of sprites of the pages 
     public Sprite[] bookPages;
+    //should be same size as bookPages -- set bool to true if page has video
+    public bool[] doesThisPageHaveVideo;
+    //for playing videos on book pages. bookvideos listed in order
+    public VideoClip[] bookVideos;
+    public VideoPlayer leftVidPlayer, rightVidPlayer;
+    public RawImage leftVideo, rightVideo;
+    //book option toggles
     public bool interactable=true;
     public bool enableShadowEffect=true;
     //represent the index of the sprite shown in the right page
-    public int currentPage = 0;
+    public int currentPage = 0, lastPage;
+    public GameObject buttonNxt, buttonPrev;
     public int TotalPageCount
     {
         get { return bookPages.Length; }
@@ -90,6 +100,8 @@ public class Book : MonoBehaviour {
         Shadow.rectTransform.sizeDelta = new Vector2(scaledPageWidth, scaledPageHeight + scaledPageWidth * 0.6f);
         ShadowLTR.rectTransform.sizeDelta = new Vector2(scaledPageWidth, scaledPageHeight + scaledPageWidth * 0.6f);
         NextPageClip.rectTransform.sizeDelta = new Vector2(scaledPageWidth, scaledPageHeight + scaledPageWidth * 0.6f);
+
+        DisableVideos();
     }
     public Vector3 transformPoint(Vector3 global)
     {
@@ -103,9 +115,100 @@ public class Book : MonoBehaviour {
         {
             UpdateBook();
         }
-        //Debug.Log("mouse local pos:" + transformPoint(Input.mousePosition));
-        //Debug.Log("mouse  pos:" + Input.mousePosition);
+
+        ActivateButtons();
+
+        //we changed pages!
+        if(lastPage != currentPage)
+        {
+            CheckIfPagesHaveVideo();
+        }
+       
+        lastPage = currentPage;
     }
+
+    void ActivateButtons()
+    {
+        //turn on and off button prev when on first page
+        if (currentPage == 0 && buttonPrev.activeSelf)
+        {
+            buttonPrev.SetActive(false);
+        }
+        if (currentPage > 0 && !buttonPrev.activeSelf)
+        {
+            buttonPrev.SetActive(true);
+        }
+        //turn on and off button next when on last page
+        if (currentPage == bookPages.Length && buttonNxt.activeSelf)
+        {
+            buttonNxt.SetActive(false);
+        }
+        if (currentPage < bookPages.Length && !buttonNxt.activeSelf)
+        {
+            buttonNxt.SetActive(true);
+        }
+    }
+
+    public void DisableVideos()
+    {
+        //turn off all video stuff (a page was flipped)
+        leftVidPlayer.enabled = false;
+        rightVidPlayer.enabled = false;
+        leftVideo.enabled = false;
+        rightVideo.enabled = false;
+    }
+
+    //called in update to see if either of current pages has video content
+    public void CheckIfPagesHaveVideo()
+    {
+        DisableVideos();
+
+        Debug.Log("checking " + currentPage);
+     
+        //if this is not the first page
+        if(currentPage > 0)
+        {   
+            //don't want to check if missing the last page but currentPage is one above it
+            if(currentPage < bookPages.Length)
+            {
+                //check current page -- right
+                if (doesThisPageHaveVideo[currentPage])
+                {
+                    LoadNPlayVideos(currentPage, false);
+                }
+            }
+           
+            //check left page too
+            if (doesThisPageHaveVideo[currentPage - 1])
+            {
+                LoadNPlayVideos(currentPage - 1, true);
+            }
+        }
+    }
+
+    //called if check finds video
+    void LoadNPlayVideos(int videoToPlay, bool leftOrRight)
+    {
+        //left
+        if (leftOrRight)
+        {
+            leftVidPlayer.clip = bookVideos[videoToPlay];
+            leftVidPlayer.enabled = true;
+            leftVidPlayer.Play();
+
+            leftVideo.enabled = true;
+        }
+        //right
+        else
+        {
+            rightVidPlayer.clip = bookVideos[videoToPlay];
+            rightVidPlayer.enabled = true;
+            rightVidPlayer.Play();
+
+            rightVideo.enabled = true;
+        }
+    }
+
     public void UpdateBook()
     {
         f= Vector3.Lerp(f,transformPoint( Input.mousePosition), Time.deltaTime * 10);

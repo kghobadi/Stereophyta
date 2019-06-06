@@ -15,18 +15,17 @@ using System.Collections;
 
 public class CameraFacingBillboard : MonoBehaviour
 {
-
 	private GameObject playerBody;
     
-    Camera playerCam;
+    public Camera playerCam;
 
-    Animator myAnim;
+    //Animator myAnim;
 	
 	void Awake(){
         //player refs
         playerBody = GameObject.FindGameObjectWithTag("Player");
-        playerCam = Camera.main;
-        myAnim = GetComponent<Animator>();
+        
+        //myAnim = GetComponent<Animator>();
 	}
 
 	void Update(){
@@ -35,21 +34,21 @@ public class CameraFacingBillboard : MonoBehaviour
 
 
 
-    void OnBecameVisible()
-    {
-        StartCoroutine(Animate());
-    }
+    //void OnBecameVisible()
+    //{
+    //    StartCoroutine(Animate());
+    //}
 
-    void OnBecameInvisible()
-    {
-        myAnim.enabled = false;
-    }
+    //void OnBecameInvisible()
+    //{
+    //    myAnim.enabled = false;
+    //}
 
-    IEnumerator Animate()
-    {
-        float randomWait = Random.Range(0, 0.25f);
-        yield return new WaitForSeconds(randomWait);
-        myAnim.enabled = true;
-    }
+    //IEnumerator Animate()
+    //{
+    //    float randomWait = Random.Range(0, 0.25f);
+    //    yield return new WaitForSeconds(randomWait);
+    //    myAnim.enabled = true;
+    //}
 
 }
