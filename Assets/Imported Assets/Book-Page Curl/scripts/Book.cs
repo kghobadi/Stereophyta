@@ -18,6 +18,10 @@ public class Book : MonoBehaviour {
     public Sprite background;
     //array of sprites of the pages 
     public Sprite[] bookPages;
+    //on first page of book
+    public GameObject settingsObj;
+    //true while flipping pages
+    public bool flipping;
     //should be same size as bookPages -- set bool to true if page has video
     public bool[] doesThisPageHaveVideo;
     //for playing videos on book pages. bookvideos listed in order
@@ -121,9 +125,16 @@ public class Book : MonoBehaviour {
         //we changed pages!
         if(lastPage != currentPage)
         {
+            flipping = false;
             CheckIfPagesHaveVideo();
         }
-       
+
+        //turn on settings on page 0 if not active and not flipping
+        if (currentPage == 0 && !settingsObj.activeSelf && !flipping)
+        {
+            settingsObj.SetActive(true);
+        }
+
         lastPage = currentPage;
     }
 
@@ -156,6 +167,7 @@ public class Book : MonoBehaviour {
         rightVidPlayer.enabled = false;
         leftVideo.enabled = false;
         rightVideo.enabled = false;
+        settingsObj.SetActive(false);
     }
 
     //called in update to see if either of current pages has video content

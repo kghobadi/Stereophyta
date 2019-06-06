@@ -9,13 +9,12 @@ public class Menu : MonoBehaviour {
     GameObject sun;
     Sun sunScript;
     float lastSunSpeed;
-
+    public StartView startViewer;
     //player
     GameObject player;
     ThirdPersonController tpc;
     //overall menu obj
     public GameObject menuObj;
-    public GameObject settingsObj;
     public Book bookScript;
     //toggle mouse controls
     public Toggle mouseControlsToggle;
@@ -51,7 +50,7 @@ public class Menu : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             //turn off
-            if (menuObj.activeSelf)
+            if (menuObj.activeSelf && !bookScript.flipping)
             {
                 //menu off
                 menuObj.SetActive(false);
@@ -67,7 +66,7 @@ public class Menu : MonoBehaviour {
                 menuAudio.PlayOneShot(closeBook);
             }
             //turn on
-            else
+            else if (!menuObj.activeSelf && !startViewer.startView)
             {
                 //cursor on
                 Cursor.visible = true;
@@ -82,19 +81,6 @@ public class Menu : MonoBehaviour {
                 lastSunSpeed = sunScript.rotationSpeed;
                 sunScript.rotationSpeed = 0;
                 menuAudio.PlayOneShot(openBook);
-            }
-        }
-
-        //toggle settings stuff on and off depending what book page you are on
-        if (menuObj.activeSelf)
-        {
-            if(bookScript.currentPage == 0)
-            {
-                settingsObj.SetActive(true);
-            }
-            else
-            {
-                settingsObj.SetActive(false);
             }
         }
 	}

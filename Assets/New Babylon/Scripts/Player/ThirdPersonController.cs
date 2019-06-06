@@ -8,6 +8,9 @@ using UnityEngine.SceneManagement;
 
 public class ThirdPersonController : MonoBehaviour
 {
+    //start viewer ref
+    public StartView startViewer;
+
     //player controller and cam controller ref
     public CharacterController controller;
     PlayerCameraController playerCameraController;
@@ -109,15 +112,7 @@ public class ThirdPersonController : MonoBehaviour
         //grab sun refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
-
-        currentFootsteps = grassSteps;
-
-        //for dirt particles
-        if (walkingEffect != null)
-        {
-            walkingEffect.Stop();
-        }
-
+        
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
@@ -133,15 +128,38 @@ public class ThirdPersonController : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         playerCameraController.enabled = true;
 
+        //set animator state to idle
         poopShoes.SetBool("idle", true);
         poopShoes.SetBool("running", false);
         poopShoes.SetBool("jumping", false);
+        currentFootsteps = grassSteps;
 
+        //set loose particles
         splashScript = dustSplash.GetComponent<DustSplash>();
         sleepParticles.SetActive(false);
         runParticles.SetActive(false);
+        //for dirt particles
+        if (walkingEffect != null)
+        {
+            walkingEffect.Stop();
+        }
 
+        //accounts for start view
+        if (startViewer.startView)
+        {
+            StartCoroutine(WaitToTurnOffMovement());
+        }
+        else
+        {
+            playerCanMove = true;
+        }
+    }
+
+    IEnumerator WaitToTurnOffMovement()
+    {
         playerCanMove = true;
+        yield return new WaitForSeconds(0.25f);
+        playerCanMove = false;
     }
 
     void Update()

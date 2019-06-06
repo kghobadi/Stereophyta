@@ -104,7 +104,7 @@ public class AutoFlip : MonoBehaviour {
 
         float x = xc + xl;
         float y = (-h / (xl * xl)) * (x - xc) * (x - xc);
-
+        ControledBook.flipping = true;
         ControledBook.DragRightPageToPoint(new Vector3(x, y, 0));
         for (int i = 0; i < AnimationFramesCount; i++)
         {
@@ -121,6 +121,7 @@ public class AutoFlip : MonoBehaviour {
 
         float x = xc - xl;
         float y = (-h / (xl * xl)) * (x - xc) * (x - xc);
+        ControledBook.flipping = true;
         ControledBook.DragLeftPageToPoint(new Vector3(x, y, 0));
         for (int i = 0; i < AnimationFramesCount; i++)
         {
