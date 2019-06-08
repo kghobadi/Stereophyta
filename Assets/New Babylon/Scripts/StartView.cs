@@ -104,6 +104,7 @@ public class StartView : MonoBehaviour {
                     playerInventory.SetActive(true);
                     playerCamera.GetComponent<Camera>().enabled = true;
                     sunScript.rotationSpeed = sunScript.normalRotation;
+                    GetComponent<AudioListener>().enabled = false;
                     startCam.enabled = false;
                     startView = false;
                 }
