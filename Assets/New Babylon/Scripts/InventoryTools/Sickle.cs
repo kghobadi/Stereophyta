@@ -6,11 +6,9 @@ public class Sickle : Tool {
     //physics & anim refs
     Rigidbody mySickleBody;
     BoxCollider myCollider;
-    Animator sickleAnimator;
     public bool sickling;
 
     //audio
-    AudioSource sickleSource;
     public AudioClip[] sickleHits;
 
     //for sickle wind vars
@@ -26,32 +24,36 @@ public class Sickle : Tool {
         //all my refs
         mySickleBody = GetComponent<Rigidbody>();
         myCollider = GetComponent<BoxCollider>();
-        sickleAnimator = GetComponent<Animator>();
-        sickleSource = GetComponent<AudioSource>();
 	}
     
     public override void Update () {
+        //pick up logic
+        base.Update();
 
-        //take input 
-        if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !sickling)
+        //only run if has been picked up
+        if (hasBeenAcquired)
         {
-            MainAction();
-        }
+            //take input 
+            if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !sickling)
+            {
+                MainAction();
+            }
 
-        //while sickling && show rhythm is true, spawn 
-        if(showRhythm && sickling)
-        {
-            //virtual play sounds
-            PlaySound(sickleSource, sickleHits);
-            SpawnSickleWind(transform.position + new Vector3(0, 0, 1));
-            showRhythm = false;
-        }
+            //while sickling && show rhythm is true, spawn 
+            if (showRhythm && sickling)
+            {
+                //virtual play sounds
+                PlaySound(toolSource, sickleHits);
+                SpawnSickleWind(transform.position + new Vector3(0, 0, 1));
+                showRhythm = false;
+            }
 
-        //on release
-        if(Input.GetButtonUp("MainAction") && sickling)
-        {
-            sickleAnimator.SetBool("sickling", false);
-            sickling = false;
+            //on release
+            if (Input.GetButtonUp("MainAction") && sickling)
+            {
+                toolAnimator.SetBool("sickling", false);
+                sickling = false;
+            }
         }
 
     }
@@ -60,7 +62,7 @@ public class Sickle : Tool {
     public override void MainAction()
     {
         base.MainAction();
-        sickleAnimator.SetBool("sickling", true);
+        toolAnimator.SetBool("sickling", true);
         sickling = true;
     }
     

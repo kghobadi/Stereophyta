@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Item : MonoBehaviour {
-
+    //types
     public ItemType itemType;
     public ToolType toolType;
     public SeedType seedType;
+
 
     public enum ItemType
     {
@@ -22,4 +23,5 @@ public class Item : MonoBehaviour {
     {
         CROP, TREE,
     }
+
 }

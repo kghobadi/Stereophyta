@@ -48,6 +48,8 @@ public class Sun : MonoBehaviour
     ParticleSystem starParticles;
     //waters 
     public GameObject waterDay, waterNight;
+    //save ref
+    public SleepSave saveScript;
 
     void Start()
     {
@@ -83,8 +85,10 @@ public class Sun : MonoBehaviour
 
         // randomize wind && rains
         RandomizeWinds();
-        RandomizeRains();
-
+        if (!startViewer.startView)
+        {
+            RandomizeRains();
+        }
     }
 
     void Update()
@@ -221,6 +225,8 @@ public class Sun : MonoBehaviour
                 StartCoroutine(WaitForPlayerToPassOut());
             }
         }
+
+        StartCoroutine(WaitToSave());
     }
 
     //randomizes the wind generators active, their speeds & direction
@@ -287,6 +293,14 @@ public class Sun : MonoBehaviour
             rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().SwitchTimeScale();
         }
 
+    }
+
+    IEnumerator WaitToSave()
+    {
+        //so that plants can grow before the save
+        yield return new WaitForSeconds(0.25f);
+        //save game upon waking up
+        saveScript.SaveGameData();
     }
 
     //jst for sleeping 

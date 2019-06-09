@@ -104,9 +104,6 @@ public class ThirdPersonController : MonoBehaviour
     //to shorten if statement
     public List<string> audioTags = new List<string>();
 
-    //save ref
-    public SleepSave saveScript;
-
     void Awake()
     {
         //grab sun refs
@@ -388,18 +385,9 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("running", false);
         poopShoes.SetBool("sleeping", false);
         poopShoes.SetBool("idle", true);
-
-        //call save
-        StartCoroutine(WaitToSave());
     }
 
-    IEnumerator WaitToSave()
-    {
-        //so that plants can grow before the save
-        yield return new WaitForSeconds(0.25f);
-        //save game upon waking up
-        saveScript.SaveGameData();
-    }
+  
 
     //checking if and how we are moving to set vis effects and anims
     void SetPlayerAnimsFootsteps(Vector3 inputToCheck)

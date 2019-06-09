@@ -23,40 +23,53 @@ public class Inventory : MonoBehaviour {
     //UI
     public GameObject toolInvVisual;
     public Image currentToolImg, lastToolImg, nextToolImg;
-    public Sprite[] toolSprites;
+    public List<Sprite> toolSprites = new List<Sprite>();
     public FadeUI[] toolsUI;
     IEnumerator fadeTools;
 
     //seed inv
     public int currentSeed = 0;
     public GameObject currenSeedObj;
-    public GameObject seedInvVisual;
+    public List<SeedStorage> seedStorage = new List<SeedStorage>();
+
     //UI
+    public GameObject seedInvVisual;
     public Image currentSeedImg, lastSeedImg, nextSeedImg;
     public Text seedCounter;
     public Sprite[] seedSprites;
     public FadeUI[] seedsUI;
     IEnumerator fadeSeeds;
+    
+    //for controlling switching
+    public float inputTimer;
+    public bool canSwitchInv;
 
-    public List<SeedStorage> seedStorage = new List<SeedStorage>();
-
-    float inputTimer;
-    bool canSwitchInv;
+    //audio
+    public AudioSource inventoryAudio;
+    public AudioClip switchSeeds, switchTools;
     
     void Start () {
+        //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         
-        currenItemObj = myItems[currentItem];
+        //set current item
         currenSeedObj = seedStorage[currentSeed].seedObj;
         currenSeedObj.GetComponent<Seed>().seedSelected = true;
 
-        //turn off all other items
-        for (int i = 0; i < myItems.Count; i++)
+        //if have tools
+        if(myItems.Count > 0)
         {
-            if(i != currentItem)
-                myItems[i].SetActive(false);
+            //set tool
+            currenItemObj = myItems[currentItem];
+            //turn off all other tools
+            for (int i = 0; i < myItems.Count; i++)
+            {
+                if (i != currentItem)
+                    myItems[i].SetActive(false);
+            }
         }
+       
         toolInvVisual.SetActive(false);
         fadeTools = FadeOutToolsVis();
         
@@ -68,6 +81,8 @@ public class Inventory : MonoBehaviour {
         }
         seedInvVisual.SetActive(false);
         fadeSeeds = FadeOutSeedVis();
+
+        inventoryAudio = GetComponent<AudioSource>();
     }
 	
 	void Update () {
@@ -81,7 +96,7 @@ public class Inventory : MonoBehaviour {
         {
 
             //switch current item +
-            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchInv)
+            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchInv && myItems.Count > 1)
             {
                 SwitchItem(true);
             }
@@ -147,35 +162,47 @@ public class Inventory : MonoBehaviour {
         currenItemObj = myItems[currentItem];
         currenItemObj.SetActive(true);
 
+        SetToolSprite();
+
+        //reset timer so not infinite switch
+        inputTimer = 0.1f;
+        canSwitchInv = false;
+
+        inventoryAudio.PlayOneShot(switchTools);
+    }
+
+    public void SetToolSprite()
+    {
         //change inv visuals
         currentToolImg.sprite = toolSprites[currentItem];
-        //for wrapping counter
-        if(currentItem > 0)
+
+        if(myItems.Count > 1)
         {
-            lastToolImg.sprite = toolSprites[currentItem - 1];
+            //for wrapping counter
+            if (currentItem > 0)
+            {
+                lastToolImg.sprite = toolSprites[currentItem - 1];
+            }
+            else
+            {
+                lastToolImg.sprite = toolSprites[myItems.Count - 1];
+            }
+            //wrapping counter
+            if (currentItem < myItems.Count - 1)
+            {
+                nextToolImg.sprite = toolSprites[currentItem + 1];
+            }
+            else
+            {
+                nextToolImg.sprite = toolSprites[0];
+            }
         }
-        else
-        {
-            lastToolImg.sprite = toolSprites[myItems.Count - 1];
-        }
-        //wrapping counter
-        if(currentItem < myItems.Count - 1)
-        {
-            nextToolImg.sprite = toolSprites[currentItem + 1];
-        }
-        else
-        {
-            nextToolImg.sprite = toolSprites[0];
-        }
+        
 
         //tools vis
         StopCoroutine(fadeTools);
         fadeTools = FadeOutToolsVis();
         StartCoroutine(fadeTools);
-
-        //reset timer so not infinite switch
-        inputTimer = 0.1f;
-        canSwitchInv = false;
     }
 
    public void SwitchSeed(bool posOrNeg)
@@ -238,6 +265,8 @@ public class Inventory : MonoBehaviour {
         //reset timer so not infinite switch
         inputTimer = 0.1f;
         canSwitchInv = false;
+
+        inventoryAudio.PlayOneShot(switchSeeds);
     }
 
     void CountSeedUp()
@@ -312,5 +341,4 @@ public class Inventory : MonoBehaviour {
         }
     }
 
-   
 }

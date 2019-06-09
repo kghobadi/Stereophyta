@@ -6,33 +6,37 @@ public class WateringCan : Tool
 {
     Water waterParticles;
 
-    public Animator wateringCanimator;
-
     public bool watering;
 
     public override void Awake()
     {
         base.Awake();
         waterParticles = transform.GetChild(0).GetComponent<Water>();
-        wateringCanimator = GetComponent<Animator>();
     }
 
  
     public override void Update()
     {
+        //pick up logic
         base.Update();
 
-        if (Input.GetButton("MainAction") && !tpc.menuOpen && waterParticles.showRhythm && !watering)
+        //only runs once player has picked it up
+        if (!hasBeenAcquired)
         {
-            MainAction();
-        }
+            //input -- can hold the water button down and it will do it on rhythm
+            if (Input.GetButton("MainAction") && !tpc.menuOpen && waterParticles.showRhythm && !watering)
+            {
+                MainAction();
+            }
 
-        //if swinging and anim over, switch back to idle
-        if ((watering || wateringCanimator.GetCurrentAnimatorStateInfo(0).IsName("water!")) && wateringCanimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
-        {
-            watering = false;
-            wateringCanimator.SetBool("watering", false);
+            //if swinging and anim over, switch back to idle
+            if ((watering || toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("water!")) && toolAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
+            {
+                watering = false;
+                toolAnimator.SetBool("watering", false);
+            }
         }
+      
     }
 
     public override void MainAction()
@@ -41,8 +45,8 @@ public class WateringCan : Tool
         if (!watering)
         {
             //Debug.Log("water already!1!");
-            wateringCanimator.SetTrigger("water1");
-            wateringCanimator.SetBool("watering", true);
+            toolAnimator.SetTrigger("water1");
+            toolAnimator.SetBool("watering", true);
             waterParticles.waterEffect.Play();
             watering = true;
         }

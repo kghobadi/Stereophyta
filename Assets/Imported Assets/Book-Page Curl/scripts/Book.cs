@@ -17,15 +17,15 @@ public class Book : MonoBehaviour {
     RectTransform BookPanel;
     public Sprite background;
     //array of sprites of the pages 
-    public Sprite[] bookPages;
+    public List<Sprite> bookPages = new List<Sprite>();
     //on first page of book
     public GameObject settingsObj;
     //true while flipping pages
     public bool flipping;
     //should be same size as bookPages -- set bool to true if page has video
-    public bool[] doesThisPageHaveVideo;
+    public List<bool> doesThisPageHaveVideo = new List<bool>();
     //for playing videos on book pages. bookvideos listed in order
-    public VideoClip[] bookVideos;
+    public List<VideoClip> bookVideos = new List<VideoClip>();
     public VideoPlayer leftVidPlayer, rightVidPlayer;
     public RawImage leftVideo, rightVideo;
     //book option toggles
@@ -36,7 +36,7 @@ public class Book : MonoBehaviour {
     public GameObject buttonNxt, buttonPrev;
     public int TotalPageCount
     {
-        get { return bookPages.Length; }
+        get { return bookPages.Count; }
     }
     public Vector3 EndBottomLeft
     {
@@ -150,11 +150,11 @@ public class Book : MonoBehaviour {
             buttonPrev.SetActive(true);
         }
         //turn on and off button next when on last page
-        if (currentPage == bookPages.Length && buttonNxt.activeSelf)
+        if (currentPage == bookPages.Count && buttonNxt.activeSelf)
         {
             buttonNxt.SetActive(false);
         }
-        if (currentPage < bookPages.Length && !buttonNxt.activeSelf)
+        if (currentPage < bookPages.Count && !buttonNxt.activeSelf)
         {
             buttonNxt.SetActive(true);
         }
@@ -181,7 +181,7 @@ public class Book : MonoBehaviour {
         if(currentPage > 0)
         {   
             //don't want to check if missing the last page but currentPage is one above it
-            if(currentPage < bookPages.Length)
+            if(currentPage < bookPages.Count)
             {
                 //check current page -- right
                 if (doesThisPageHaveVideo[currentPage])
@@ -351,7 +351,7 @@ public class Book : MonoBehaviour {
     }
     public void DragRightPageToPoint(Vector3 point)
     {
-        if (currentPage >= bookPages.Length) return;
+        if (currentPage >= bookPages.Count) return;
         pageDragging = true;
         mode = FlipMode.RightToLeft;
         f = point;
@@ -364,15 +364,15 @@ public class Book : MonoBehaviour {
         Left.rectTransform.pivot = new Vector2(0, 0);
         Left.transform.position = RightNext.transform.position;
         Left.transform.eulerAngles = new Vector3(0, 0, 0);
-        Left.sprite = (currentPage < bookPages.Length) ? bookPages[currentPage] : background;
+        Left.sprite = (currentPage < bookPages.Count) ? bookPages[currentPage] : background;
         Left.transform.SetAsFirstSibling();
         
         Right.gameObject.SetActive(true);
         Right.transform.position = RightNext.transform.position;
         Right.transform.eulerAngles = new Vector3(0, 0, 0);
-        Right.sprite = (currentPage < bookPages.Length - 1) ? bookPages[currentPage + 1] : background;
+        Right.sprite = (currentPage < bookPages.Count - 1) ? bookPages[currentPage + 1] : background;
 
-        RightNext.sprite = (currentPage < bookPages.Length - 2) ? bookPages[currentPage + 2] : background;
+        RightNext.sprite = (currentPage < bookPages.Count - 2) ? bookPages[currentPage + 2] : background;
 
         LeftNext.transform.SetAsFirstSibling();
         if (enableShadowEffect) Shadow.gameObject.SetActive(true);
@@ -441,8 +441,8 @@ public class Book : MonoBehaviour {
     Coroutine currentCoroutine;
     void UpdateSprites()
     {
-        LeftNext.sprite= (currentPage > 0 && currentPage <= bookPages.Length) ? bookPages[currentPage-1] : background;
-        RightNext.sprite=(currentPage>=0 &&currentPage<bookPages.Length) ? bookPages[currentPage] : background;
+        LeftNext.sprite= (currentPage > 0 && currentPage <= bookPages.Count) ? bookPages[currentPage-1] : background;
+        RightNext.sprite=(currentPage>=0 &&currentPage<bookPages.Count) ? bookPages[currentPage] : background;
     }
     public void TweenForward()
     {
