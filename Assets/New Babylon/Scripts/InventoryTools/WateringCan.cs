@@ -21,12 +21,19 @@ public class WateringCan : Tool
         base.Update();
 
         //only runs once player has picked it up
-        if (!hasBeenAcquired)
+        if (hasBeenAcquired)
         {
-            //input -- can hold the water button down and it will do it on rhythm
-            if (Input.GetButton("MainAction") && !tpc.menuOpen && waterParticles.showRhythm && !watering)
+            //on click 
+            if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !watering)
             {
                 MainAction();
+            }
+
+            //input -- can hold the water button down and it will do it on rhythm
+            if (Input.GetButton("MainAction") && !tpc.menuOpen && showRhythm && !watering)
+            {
+                MainAction();
+                showRhythm = false;
             }
 
             //if swinging and anim over, switch back to idle

@@ -85,10 +85,7 @@ public class Sun : MonoBehaviour
 
         // randomize wind && rains
         RandomizeWinds();
-        if (!startViewer.startView)
-        {
-            RandomizeRains();
-        }
+        RandomizeRains();
     }
 
     void Update()
@@ -262,8 +259,14 @@ public class Sun : MonoBehaviour
 
         float chanceToRain = Random.Range(0f, 100f);
 
+        //still in start view, set chance to 0
+        if (startViewer.startView)
+        {
+            chanceToRain = 100f;
+        }
+
         //activate rain with 1 / 4 chance
-        if(chanceToRain < 25f)
+        if (chanceToRain < 25f)
         {
             Debug.Log("its raining!");
             rainCounter = Random.Range(0, 4);

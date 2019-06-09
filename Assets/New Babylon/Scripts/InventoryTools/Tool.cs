@@ -20,7 +20,7 @@ public abstract class Tool : MonoBehaviour {
     protected Inventory inventoryScript;
     public Sprite inventorySprite;
     //is true once player picks it up
-    public bool hasBeenAcquired;
+    public bool playerWasNear, hasBeenAcquired;
     public AudioClip pickupSound;
     //for setting local transform under inventory
     public Vector3 localPos, localRot, localScale;
@@ -63,7 +63,11 @@ public abstract class Tool : MonoBehaviour {
         inventoryScript.myItems.Add(gameObject);
         inventoryScript.toolSprites.Add(inventorySprite);
         //set current inventory item to this
-        inventoryScript.currenItemObj.SetActive(false);
+        if(inventoryScript.currenItemObj != null)
+        {
+            inventoryScript.currenItemObj.SetActive(false);
+        }
+          
         inventoryScript.currenItemObj = gameObject;
         inventoryScript.currentItem = inventoryScript.myItems.Count - 1;
         inventoryScript.SetToolSprite();
@@ -135,8 +139,9 @@ public abstract class Tool : MonoBehaviour {
             //dist from player
             float dist = Vector3.Distance(transform.position, player.transform.position);
             //if player is close
-            if(dist < 15f)
+            if(dist < 10f)
             {
+                playerWasNear = true;
                 //so switch inv is not called 
                 inventoryScript.canSwitchInv = false;
                 inventoryScript.inputTimer = 0.25f;
@@ -152,13 +157,13 @@ public abstract class Tool : MonoBehaviour {
                 }
             }
             //player has left
-            else
+            else if(dist > 15f)
             {
-
                 //fade out prompts
-                if (pickUpText.color.a > 0.5f)
+                if (playerWasNear)
                 {
                     DeactivatePrompt();
+                    playerWasNear = false;
                 }
                
             }
@@ -181,6 +186,7 @@ public abstract class Tool : MonoBehaviour {
     //pick up prompt for when player is near 
     void ShowPickupPrompt()
     {
+        Debug.Log("show pickup prompt");
         //set text prompt
         pickUpText.text = pickUpMessage;
 
@@ -194,6 +200,7 @@ public abstract class Tool : MonoBehaviour {
     //turn off prompt
     void DeactivatePrompt()
     {
+        Debug.Log("deactivating prompt");
         //fade em out
         for (int i = 0; i < interactPrompts.Length; i++)
         {

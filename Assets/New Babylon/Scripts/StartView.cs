@@ -45,6 +45,7 @@ public class StartView : MonoBehaviour {
         if (startView)
         {
             playerCamera.GetComponent<Camera>().enabled = false;
+            playerCamera.GetComponent<AudioListener>().enabled = false;
             playerInventory.SetActive(false);
             startCam.fieldOfView = 75f;
             //this means game has never been played before -- turn off inv
@@ -103,6 +104,7 @@ public class StartView : MonoBehaviour {
                     tpc.playerCanMove = true;
                     playerInventory.SetActive(true);
                     playerCamera.GetComponent<Camera>().enabled = true;
+                    playerCamera.GetComponent<AudioListener>().enabled = true;
                     sunScript.rotationSpeed = sunScript.normalRotation;
                     GetComponent<AudioListener>().enabled = false;
                     startCam.enabled = false;

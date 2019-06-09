@@ -52,10 +52,6 @@ public class Inventory : MonoBehaviour {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        
-        //set current item
-        currenSeedObj = seedStorage[currentSeed].seedObj;
-        currenSeedObj.GetComponent<Seed>().seedSelected = true;
 
         //if have tools
         if(myItems.Count > 0)
@@ -72,11 +68,15 @@ public class Inventory : MonoBehaviour {
        
         toolInvVisual.SetActive(false);
         fadeTools = FadeOutToolsVis();
-        
+
+        //set current item
+        currenSeedObj = seedStorage[currentSeed].seedObj;
+        currenSeedObj.GetComponent<Seed>().seedSelected = true;
+
         //turn off other seeds
         for (int i = 0; i < seedStorage.Count; i++)
         {
-            if (i != currentSeed)
+            //if (i != currentSeed)
                 seedStorage[i].seedObj.SetActive(false);
         }
         seedInvVisual.SetActive(false);
