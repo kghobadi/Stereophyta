@@ -64,7 +64,7 @@ public class BoatPlayer : MonoBehaviour
             tpc.transform.SetParent(transform);
             transform.localPosition = new Vector3(0, 0, -1);
             boatBody.isKinematic = false;
-            camControl.inBoat = true;
+            //camControl.inBoat = true;
             boatVariablesSet = true;
         }
 

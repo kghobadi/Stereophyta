@@ -100,7 +100,7 @@ public class Rock : SoundProducer
         soundSources[currentNote].transform.localScale *= 2;
     }
 
-   
+
 
     //Called when player is holding the windMachine and right clicks to drop
     public void DropObject()

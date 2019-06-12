@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Item : MonoBehaviour {
-
+    //types
     public ItemType itemType;
     public ToolType toolType;
     public SeedType seedType;
+
 
     public enum ItemType
     {
@@ -15,11 +16,12 @@ public class Item : MonoBehaviour {
 
     public enum ToolType
     {
-        AX, WATER, PICKAX,
+        AX, WATER, SICKLE, WINDSTAFF, PICKAX,
     }
 
     public enum SeedType
     {
         CROP, TREE,
     }
+
 }

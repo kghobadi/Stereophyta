@@ -16,6 +16,12 @@ public class Farmhouse : MonoBehaviour {
     //only true when player is inside house
     public bool occupied;
     public AudioClip[] lastFootsteps;
+
+    //for bed sleep pop-up
+    public GameObject bed;
+    public bool showingSleepSymbols;
+    public FadeSprite sleepSymbolFade;
+    public ParticleSystem sleepParticles;
     
     void Start () {
         //player refs
@@ -46,8 +52,34 @@ public class Farmhouse : MonoBehaviour {
     //so when you sleep it stays off
     void OnTriggerStay(Collider other)
     {
-        if(playerInventory.activeSelf)
-            playerInventory.SetActive(false);
+        //if(playerInventory.activeSelf)
+        //    playerInventory.SetActive(false);
+
+        //just for turning on sleep stuff over bed 
+        if (Vector3.Distance(player.transform.position, bed.transform.position) < 5)
+        {
+            //check if we are sleeping or not
+            if (!showingSleepSymbols && !tpc.sleeping && tpc.daysWithoutSleep >= 1)
+            {
+                sleepSymbolFade.FadeIn();
+                sleepParticles.Play();
+                showingSleepSymbols = true;
+            }
+
+            //turn it off if player start
+            if(showingSleepSymbols && tpc.sleeping)
+            {
+                FadeOutSleepSymbols();
+            }
+        }
+        //turn off
+        else
+        {
+            if (showingSleepSymbols)
+            {
+                FadeOutSleepSymbols();
+            }
+        }
     }
 
     //player leaving, turn stuff back on
@@ -58,13 +90,29 @@ public class Farmhouse : MonoBehaviour {
             if (occupied)
             {
                 playerCamera.SetActive(true);
+                if(playerCamera.GetComponent<Camera>().enabled == false)
+                {
+                    playerCamera.GetComponent<Camera>().enabled = true;
+                }
                 playerInventory.SetActive(true);
                 walkingEffect.SetActive(true);
                 tpc.currentFootsteps = lastFootsteps;
                 houseCamera.SetActive(false);
                 occupied = false;
+
+                if (showingSleepSymbols)
+                {
+                    FadeOutSleepSymbols();
+                }
             }
         }
        
+    }
+
+    void FadeOutSleepSymbols()
+    {
+        sleepSymbolFade.FadeOut();
+        sleepParticles.Stop();
+        showingSleepSymbols = false;
     }
 }

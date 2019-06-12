@@ -8,18 +8,22 @@ public class MovingWind : Rhythm {
     public WindGen _windGen;
     public LayerMask ground;
 
+    ParticleSystem windParticles;
+    PooledObject poolObj;
+
     void Start () {
         currentSpeed = _windGen.windSpeed;
-	}
+        windParticles = GetComponent<ParticleSystem>();
+        poolObj = GetComponent<PooledObject>();
+    }
 	
 	void Update () {
         transform.Translate(currentSpeed * Time.deltaTime, 0, 0);
 
         if (Vector3.Distance(transform.position, _windGen.transform.position) > _windGen.distanceToDestroy)
         {
-            Destroy(gameObject);
+            StartCoroutine(DissipateWind());
         }
-
         AdjustHeight();
     }
 
@@ -36,5 +40,26 @@ public class MovingWind : Rhythm {
                 transform.position = hit.point + new Vector3(0, 5f, 0);
             }
         }
+    }
+
+    public override void OnTriggerStay(Collider other)
+    {
+        base.OnTriggerStay(other);
+
+        //repeatedly play notes while wind is on it
+        if(other.gameObject.tag == "Plant")
+        {
+            if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+                other.gameObject.GetComponent<Plont>().PlaySound();
+        }
+     
+    }
+
+    //waits for wind particles to stop fully 
+    IEnumerator DissipateWind()
+    {
+        windParticles.Stop();
+        yield return new WaitForSeconds(windParticles.main.duration);
+        poolObj.ReturnToPool();
     }
 }

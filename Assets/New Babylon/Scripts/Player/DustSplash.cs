@@ -48,7 +48,11 @@ public class DustSplash : Rhythm {
             if(!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
                 other.gameObject.GetComponent<Plont>().PlaySound();
         }
-
+        //when u jump on wind fan increase the rhythm
+        if (other.gameObject.tag == "WindMachines")
+        {
+            other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
+        }
         if (other.gameObject.tag == "Animal")
         {
             if (!other.gameObject.GetComponent<Crab>().animalAudio.isPlaying)

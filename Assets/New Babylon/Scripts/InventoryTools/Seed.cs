@@ -16,6 +16,7 @@ public class Seed : MonoBehaviour {
     public Rigidbody seedBody;
     SphereCollider seedCollider;
     public bool seedSelected, planting, falling, vortexing;
+    float vortexSpeed = 7.5f;
 
     //for spawning plant
     Vector3 originalPos;
@@ -24,11 +25,14 @@ public class Seed : MonoBehaviour {
 
     //audio
     public AudioSource seedSource;
-    public AudioClip dropSeed, spawnPlant;
+    public AudioClip dropSeed, spawnPlant, noNO;
 
     Transform inventoryParent;
 
     public bool UIseed;
+
+    //needs to be this far away from other plants
+    public float distFromOtherPlants;
 
     //for planting itself after a few days
     public int daysBeforePlanting;
@@ -97,12 +101,37 @@ public class Seed : MonoBehaviour {
             {
                 if(hit.transform.gameObject.tag == "Ground")
                 {
-                    planting = true;
-                    originalPos = transform.localPosition;
-                    transform.SetParent(null);
-                    seedBody.isKinematic = false;
-                    seedBody.useGravity = true;
-                    seedSource.PlayOneShot(dropSeed);
+
+                    //check in radius of planting point if its too close to others
+                    bool nearOtherPlant = false;
+                    Collider[] hitColliders = Physics.OverlapSphere(hit.point, distFromOtherPlants);
+                    int i = 0;
+                    while (i < hitColliders.Length)
+                    {
+                        if(hitColliders[i].gameObject.tag == "Plant")
+                        {
+                            nearOtherPlant = true;
+                            Debug.Log("hit other plant");
+                        }
+                        i++;
+                    }
+                    
+                    //if remains false
+                    if (!nearOtherPlant)
+                    {
+                        planting = true;
+                        originalPos = transform.localPosition;
+                        transform.SetParent(null);
+                        seedBody.isKinematic = false;
+                        seedBody.useGravity = true;
+                        seedSource.PlayOneShot(dropSeed);
+                    }
+                    else
+                    {
+                        Debug.Log("nono");
+                        seedSource.PlayOneShot(noNO);
+                        //player source play NoNo sound
+                    }
                 }
             }
         }
@@ -125,8 +154,12 @@ public class Seed : MonoBehaviour {
         //succ to player
         if (vortexing)
         {
-            transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * 5);
+            //lerp to the player mon
+            transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * vortexSpeed);
+            //add to vortex speed every frame so player cannot outrun seeds
+            vortexSpeed += 0.25f;
 
+            //when close enough, add to seed inventory
             if (Vector3.Distance(transform.position, player.transform.position) < 1)
             {
                 SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
@@ -155,7 +188,7 @@ public class Seed : MonoBehaviour {
             seedBody.useGravity = false;
             seedBody.isKinematic = true;
             seedCollider.isTrigger = true;
-            Debug.Log("stopped falling");
+            //Debug.Log("stopped falling");
         }
 
      
@@ -165,7 +198,7 @@ public class Seed : MonoBehaviour {
     {
         seedSource.PlayOneShot(spawnPlant);
 
-        plantClone = Instantiate(plantPrefab, transform.position, Quaternion.identity);
+        plantClone = Instantiate(plantPrefab, transform.position, Quaternion.Euler(tpc.transform.localEulerAngles));
         plantClone.GetComponent<Plont>().plantPrefab = plantPrefab;
 
         transform.SetParent(inventoryParent);

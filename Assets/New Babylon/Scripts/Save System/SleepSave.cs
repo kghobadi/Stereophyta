@@ -8,7 +8,7 @@ using System;
 [Serializable]
 public class SaveStorage
 {
-    //for saving plants -- objects, scripts, their positions, and current ages
+    //for saving plants -- objects, scripts, plant type, their positions, and current ages
     public List<GameObject> plants;
     public List<Plont> plantScripts;
     public List<string> plantType;
@@ -55,10 +55,24 @@ public class SleepSave : MonoBehaviour {
         //set plant position and plant ages
         for(int i = 0; i < mySaveStorage.plants.Count; i++)
         {
-            //add plant ages
-            mySaveStorage.plantAges.Add(mySaveStorage.plantScripts[i].myAge);
-            //add plant position
-            mySaveStorage.plantPositions.Add(mySaveStorage.plantScripts[i].transform.position);
+            //check if plantScript stored is null
+            if(mySaveStorage.plantScripts[i] != null)
+            {
+                //add plant ages
+                mySaveStorage.plantAges.Add(mySaveStorage.plantScripts[i].myAge);
+                //add plant position
+                mySaveStorage.plantPositions.Add(mySaveStorage.plantScripts[i].transform.position);
+            }
+            else
+            {
+                Debug.Log("plant was null!");
+                //this plant must have been destroyed, remove if from all the lists
+                mySaveStorage.plantScripts.RemoveAt(i);
+                mySaveStorage.plants.RemoveAt(i);
+                mySaveStorage.plantType.RemoveAt(i);
+                //increment i down 1
+                i--;
+            }
         }
 
         //clear inventory list and readd based on number of seeds in player inventory
@@ -145,7 +159,7 @@ public class SleepSave : MonoBehaviour {
                 inventoryScript.seedStorage[i] = seedStorageTemp;
             }
 
-            Debug.Log("finished loading!");
+            //Debug.Log("finished loading!");
         }
     }
 }

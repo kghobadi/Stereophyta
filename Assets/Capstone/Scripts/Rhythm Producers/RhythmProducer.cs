@@ -15,7 +15,7 @@ public abstract class RhythmProducer : MonoBehaviour {
 
     public int timeScale;
 
-    protected float disappearTimer, disappearTimerTotal = 1f;
+    public float disappearTimer, disappearTimerTotal = 1f;
 
     public virtual void Awake()
     {

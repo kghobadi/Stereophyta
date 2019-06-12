@@ -22,6 +22,7 @@ public class PlayerCameraController : MonoBehaviour {
     public float heightMin, heightMax;
     public float yLookMin, yLookMax;
     public float zoomSpeed;
+    float zoomInput;
 
     //all the ps4 feel variables
     public float cameraRotationSpeedX = 5;
@@ -42,7 +43,8 @@ public class PlayerCameraController : MonoBehaviour {
     public float mTurnSmoothMove = 0.1f, mMovingTurnSmoothMove;
 
     // for boat stuff
-    public bool inBoat;
+    public bool canLook;
+    public LayerMask obstructionMask;
 
     void Start () {
         //player refs set
@@ -78,31 +80,35 @@ public class PlayerCameraController : MonoBehaviour {
         }
 
         //lets set up right analogue stick to enable us to rotate the camera around player and redirect motion as we do so
-        Vector3 horizontalRotation;
-        Vector3 verticalRotation;
+        Vector3 horizontalRotation = Vector3.zero;
+        Vector3 verticalRotation = Vector3.zero;
 
-        //using mouse and WASD
-        if (mouseControls)
+        //not true until out of start view
+        if (canLook)
         {
-            horizontalRotation = new Vector3(0, Input.GetAxis("mouse x") * cameraRotationSpeedXMouse, 0);
-            verticalRotation = new Vector3(0, Input.GetAxis("mouse y") * cameraRotationSpeedYMouse, 0);
-        }
-        //using ps4 controller
-        else
-        {
-            horizontalRotation = new Vector3(0, Input.GetAxis("Mouse X") * cameraRotationSpeedX, 0);
-            verticalRotation = new Vector3(0, Input.GetAxis("Mouse Y") * cameraRotationSpeedY, 0);
-        }
+            //using mouse and WASD
+            if (mouseControls)
+            {
+                horizontalRotation = new Vector3(0, Input.GetAxis("mouse x") * cameraRotationSpeedXMouse, 0);
+                verticalRotation = new Vector3(0, Input.GetAxis("mouse y") * cameraRotationSpeedYMouse, 0);
+            }
+            //using ps4 controller
+            else
+            {
+                horizontalRotation = new Vector3(0, Input.GetAxis("Mouse X") * cameraRotationSpeedX, 0);
+                verticalRotation = new Vector3(0, Input.GetAxis("Mouse Y") * cameraRotationSpeedY, 0);
+            }
 
-        //if mouse up and yLook is less than yLookMax
-        if(verticalRotation.y > 0.25f && yLook.y < yLookMax)
-        {
-            yLook += verticalRotation;
-        }
-        //if mouse down and yLook is greater than yLookMin
-        if (verticalRotation.y < -0.25f && yLook.y > yLookMin)
-        {
-            yLook += verticalRotation;
+            //if mouse up and yLook is less than yLookMax
+            if (verticalRotation.y > 0.25f && yLook.y < yLookMax)
+            {
+                yLook += verticalRotation;
+            }
+            //if mouse down and yLook is greater than yLookMin
+            if (verticalRotation.y < -0.25f && yLook.y > yLookMin)
+            {
+                yLook += verticalRotation;
+            }
         }
 
         //add yLook to the player pos, then subtract cam pos to get the forward look
@@ -119,32 +125,28 @@ public class PlayerCameraController : MonoBehaviour {
            
         }
 
-        float zoomInput = Input.GetAxis("Mouse ScrollWheel");
+        //grab input from scroll wheel axis
+        zoomInput = Input.GetAxis("Mouse ScrollWheel");
 
         //zoom in
-        if (zoomInput < 0 && heightFromPlayer > heightMin)
+        if (zoomInput < 0 && heightFromPlayer > heightMin )
         {
-            float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoomInput);
-            heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime );
-            //see fuurther as it zooms in
-            if (actualCam.farClipPlane < 1000)
-                actualCam.farClipPlane += zoomSpeed * Time.deltaTime * 3;
+            //Debug.Log("zoom in");
+            ZoomIn(zoomInput);
         }
         //and out
-        if (zoomInput > 0 && heightFromPlayer < heightMax)
+        if (zoomInput > 0 && heightFromPlayer < heightMax )
         {
-            float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoomInput);
-            heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
-            //see less as it zooms out
-            if(actualCam.farClipPlane > 500)
-                actualCam.farClipPlane -= zoomSpeed * Time.deltaTime * 3;
+            //Debug.Log("zoom out");
+            ZoomOut(zoomInput);
         }
+        
+        heightFromPlayer = Mathf.Clamp(heightFromPlayer, heightMin, heightMax);
+
+        CastToPlayer();
 
         //rotate the player's body
         playerTransform.Rotate(horizontalRotation);
-
-        //Debug.Log(verticalRotation);
-        //transform.Rotate(-verticalRotation, 0, 0);
 
         //ps4 smooth move 
         if (!mouseControls)
@@ -190,11 +192,49 @@ public class PlayerCameraController : MonoBehaviour {
                 mSmoothMove = mSmoothMoveOriginal;
             }
         }
-       
+        
 
         //for y axis of right analogue, want to be able to set camera look up and down.
         //pushing stick up moves camera down closer to and behind player, 
         //while moving it down looks down at player and moves camera up? or the reverse...
+    }
+    
+    void ZoomIn(float zoom)
+    {
+        float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
+        heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
+        //see fuurther as it zooms in
+        if (actualCam.farClipPlane < 1000)
+            actualCam.farClipPlane += zoomSpeed * Time.deltaTime * 3;
+    }
 
+    void ZoomOut(float zoom)
+    {
+        float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
+        heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
+
+        //see less as it zooms out
+        if (actualCam.farClipPlane > 500)
+            actualCam.farClipPlane -= zoomSpeed * Time.deltaTime * 3;
+    }
+
+    //detects whether cam is seeing ground in front of player somehw
+    void CastToPlayer()
+    {
+        RaycastHit hit = new RaycastHit();
+        float radius = 1f;
+        Vector3 dir = playerTransform.position - transform.position;
+        float dist = Vector3.Distance(transform.position, playerTransform.position);
+        //send raycast
+        if (Physics.Raycast(transform.position, dir, out hit, dist , obstructionMask))
+        {
+            //anything on layer mask that is not player
+            if(hit.transform.gameObject.layer != 8 )
+            {
+                ZoomOut(0.025f);
+
+                Debug.Log("cam hitting " + hit.transform.gameObject.name);
+            }
+        }
     }
 }

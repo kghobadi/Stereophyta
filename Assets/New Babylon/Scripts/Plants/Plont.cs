@@ -7,6 +7,7 @@ public struct GrowthStages
 {
     public int growthDays;
     public GameObject stageModel;
+    public AudioClip[] stageAudioClips;
 }
 
 public class Plont : MonoBehaviour {
@@ -54,10 +55,11 @@ public class Plont : MonoBehaviour {
 
     public PlantType myPlantType;
 
+   
     //mostly used for saving / loading 
     public enum PlantType
     {
-        PIANO, SUCCULENTAR, GUITAR, BELL, TRIANGULAR,
+        PIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR, TRUMPET
     }
     
 	void Start () {
@@ -73,7 +75,11 @@ public class Plont : MonoBehaviour {
             saveScript.mySaveStorage.plantScripts.Add(this);
             saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
 
-            Debug.Log("added this plant to save storage");
+            //Debug.Log("added this plant to save storage");
+        }
+        else
+        {
+            AdjustHeight();
         }
 
         //colliders and rigibodys
@@ -199,9 +205,9 @@ public class Plont : MonoBehaviour {
             //has seeds to drop
             if (hasCropBundles)
             {
-                //high chance to spawn seed when cut
+                //high chance to spawn seed when cut // always drops when plant is on last life
                 float randomChance = Random.Range(0, 100);
-                if(randomChance > 50)
+                if(randomChance > 50 || currentStage == 1)
                 {
                     CutCrop();
                 }
@@ -238,13 +244,13 @@ public class Plont : MonoBehaviour {
         {
             if (growOrShrink)
             {
-                newScale = (originalScale * currentStage) / 2;
+                newScale = (originalScale * currentStage) / 1.5f;
                 growing = true;
             }
             //shrink
             else
             {
-                transform.localScale = (originalScale * currentStage) / 2;
+                transform.localScale = (originalScale * currentStage) / 1.5f;
             }
         }
 
@@ -252,11 +258,20 @@ public class Plont : MonoBehaviour {
         //set nextStage
         nextStage = myAge + myGrowthStages[currentStage].growthDays;
         //set current clip
-        currentClip = stageSounds[myAge];
+        currentClip = stageSounds[currentStage];
 
         //set particles duration to our current audio clip's length
+        StartCoroutine(WaitToSetParticles());
+    }
+
+    //this is to fix that assertion error i was getting constantly
+    IEnumerator WaitToSetParticles()
+    {
         ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
         soundPlaying.Stop();
+
+        yield return new WaitUntil(() => soundPlaying.isStopped == true);
+
         soundsPlayer.duration = currentClip.length;
     }
 
@@ -348,6 +363,20 @@ public class Plont : MonoBehaviour {
             if(randomChanceToDropSeed < 1f)
             {
                 SpawnSeed();
+            }
+        }
+    }
+
+    void AdjustHeight()
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 35f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                //Debug.Log("adjusting " + hit.point);
+                transform.position = hit.point;
             }
         }
     }
