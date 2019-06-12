@@ -44,7 +44,7 @@ public class CloudGenerator : RhythmProducer
             else
             {
                 //to help trim down cloud count
-                if (cloudCounter < 2)
+                if (cloudCounter < 3)
                 {
                     cloudCounter++;
                 }

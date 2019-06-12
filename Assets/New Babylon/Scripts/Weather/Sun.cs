@@ -71,6 +71,12 @@ public class Sun : MonoBehaviour
 
         SwitchTimeState(0);
 
+        //set dayCounter to saved player pref
+        if(PlayerPrefs.GetInt("dayCounter") > 0)
+        {
+            dayCounter = PlayerPrefs.GetInt("dayCounter");
+        }
+
         //if we are in start view, set to quicker rotation
         if (startViewer.startView)
         {
@@ -197,6 +203,9 @@ public class Sun : MonoBehaviour
     void NewDay()
     {
         dayCounter++;
+        //set day counter player pref
+        PlayerPrefs.SetInt("dayCounter", dayCounter);
+
         // randomize wind && rains
         RandomizeWinds();
         RandomizeRains();
