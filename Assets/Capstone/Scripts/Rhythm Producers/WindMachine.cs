@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WindMachine : RhythmProducer {
+public class WindMachine : Tool {
 
     //WindMachine itself -- pick up and wind gen
     public ObjectPooler fanWindPooler;
@@ -12,24 +12,23 @@ public class WindMachine : RhythmProducer {
     public float windSpeed, rotationSpeed;
     public float distanceToDestroy;
 
+    //audio
     public AudioClip selectLower;
+    public AudioClip placementSound, noNo;
+    Vector3 placeMentSpot;
 
-    Animator windFanAnimator;
+    //animator
     public Transform fanObj;
-
-    //Rotation var -- not being used currently
-    public bool playerRotating;
-
-    public float holdTimer = 0, holdTimerWait = 0.25f;
 
     //Rhythm lever vars
     public int timeScaleMax;
-    public float drawDist;
 
     //rhythm indicator
     public SpriteRenderer rhythmSR;
     Animator rhythmIndicator;
     FadeSprite rhythmFader;
+    //timers for how long indicator appears
+    public float disappearTimer, disappearTimerTotal = 1.5f;
 
     //change rhythm particle
     public GameObject changeRhythmObj;
@@ -40,10 +39,9 @@ public class WindMachine : RhythmProducer {
     public bool fanActive;
 
     public void Start () {
-        rotationSpeed = 3;
-
         //rhythm lever state -- timeScale should never exceed timeScaleMax 
         timeScale = 2;
+        rotationSpeed = 3f;
         windSpeed = 5;
 
         //rhythm indicator
@@ -54,94 +52,183 @@ public class WindMachine : RhythmProducer {
 
         //set bools
         changedRhythm = true;
-        fanActive = true;
+       
+        //this means we have set it before, so we have saved before
+        if (PlayerPrefs.GetString("hasWindStaff") == "yes")
+        {
+            PickUpTool(false);
+            //Debug.Log("picked up windstaff on start");
+            toolAnimator.SetBool("fan", false);
+            fanActive = false;
+        }
+        //wind fan still active
+        else
+        {
+            toolAnimator.SetBool("fan", true);
+            toolAnimator.enabled = false;
+            fanActive = true;
+        }
     }
-	
-	public override void Update () {
-        base.Update();
 
+
+    public override void PickUpTool(bool playSound)
+    {
+        base.PickUpTool(playSound);
+
+        PlayerPrefs.SetString("hasWindStaff", "yes");
+
+        toolAnimator.enabled = true;
+
+        toolAnimator.SetBool("fan", false);
+
+        fanActive = false;
+    }
+
+    public override void Update () {
         //rotate fan thru code
         if (fanActive)
         {
+            //run pick up logic 
+            base.Update();
+
             fanObj.transform.Rotate(0, 0, rotationSpeed);
+
+            //if player is nearby, generate wind rhythm at timeInterval (look in Rhythm Producer)
+            if (Vector3.Distance(player.transform.position, transform.position) < 100)
+            {
+                if (showRhythm)
+                {
+                    //grab wind from pool, set pos, rotation, ref to this
+                    windClone = fanWindPooler.GrabObject();
+                    windClone.transform.position = transform.position + new Vector3(0, 5, 0);
+                    windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
+                    windClone.GetComponent<PuzzleWind>()._windGen = this;
+                    showRhythm = false;
+                }
+            }
+
+            //for rhythm visual
+            if (changedRhythm)
+            {
+                disappearTimer -= Time.deltaTime;
+
+                //fade out visual
+                if (disappearTimer < 0)
+                {
+                    rhythmFader.FadeOut();
+                    changedRhythm = false;
+                }
+            }
         }
+
+        //holding wind staff
+        else 
+        {
+            //on click 
+            if (Input.GetButtonDown("MainAction") && !tpc.menuOpen)
+            {
+                MainAction();
+            }
+        }
+    }
+
+    //WIND STAFF FUNCTIONS
+    public override void MainAction()
+    {
+        //can place
+        if (CheckCanPlaceFan() == true)
+        {
+            PlaceFan();
+        }
+        //blocked
+        else
+        {
+            toolSource.PlayOneShot(noNo);
+        }
+    }
+
+    //this function lets us know if user can place the windfan in this spot
+    bool CheckCanPlaceFan()
+    {
+        RaycastHit hit;
+        // Does the ray intersect any objects excluding the player layer
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                //check in radius of planting point if its too close to others
+                bool nearBuilding = false;
+                Collider[] hitColliders = Physics.OverlapSphere(hit.point, 3f);
+                int i = 0;
+                while (i < hitColliders.Length)
+                {
+                    if (hitColliders[i].gameObject.tag == "Building")
+                    {
+                        nearBuilding = true;
+                    }
+                    i++;
+                }
+
+
+                if (nearBuilding)
+                {
+                    return false;
+                }
+                //can place
+                else
+                {
+                    placeMentSpot = hit.point;
+                    return true;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    void PlaceFan()
+    {
+        //animate to become fan
+        toolAnimator.SetBool("fan", true);
+        toolSource.PlayOneShot(placementSound, 0.1f);
+
+        //set parent null, position
+        transform.SetParent(null);
+        transform.position = placeMentSpot;
+
+        inventoryScript.SwitchItem(true);
+
+        gameObject.SetActive(true);
+
+        //remove from inventory lists
+        int index = inventoryScript.myItems.IndexOf(gameObject);
+
+        inventoryScript.myItems.Remove(gameObject);
+        inventoryScript.toolSprites.RemoveAt(index);
         
-
-        //make windmachine look at mouse pos
-        if (playerRotating)
-        {
-            holdTimer += Time.deltaTime;
-
-            float mouseX = Input.mousePosition.x;
-
-            float mouseY = Input.mousePosition.y;
-
-            float cameraDif = Camera.main.transform.position.y - transform.position.y;
-
-            Vector3 worldpos = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, cameraDif + 5f));
-
-            Vector3 hoverLocation = new Vector3(worldpos.x, transform.position.y, worldpos.z);
-
-            transform.LookAt(hoverLocation);
-
-            //on click call raycasts. 
-            if (Input.GetMouseButtonDown(0) && holdTimer > holdTimerWait)
-            {
-                playerRotating = false;
-            }
-        }
-
-        //if player is nearby, generate wind rhythm at timeInterval (look in Rhythm Producer)
-        if (Vector3.Distance(player.transform.position, transform.position) < 100)
-        {
-            if (showRhythm)
-            {
-                //grab wind from pool, set pos, rotation, ref to this
-                windClone = fanWindPooler.GrabObject();
-                windClone.transform.position = transform.position + new Vector3(0, 5, 0);
-                windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
-                windClone.GetComponent<PuzzleWind>()._windGen = this;
-                showRhythm = false;
-            }
-        }
-
-        //for rhythm visual
-        if (changedRhythm)
-        {
-            disappearTimer -= Time.deltaTime;
-
-            //fade out visual
-            if(disappearTimer < 0)
-            {
-                rhythmFader.FadeOut();
-                changedRhythm = false;
-            }
-        }
+        StartCoroutine(WaitToSetFanActive());
     }
 
-
-    public void OnMouseOver()
+    //waits until windFan animator state active
+    IEnumerator WaitToSetFanActive()
     {
-        //disappearTimer = disappearTimerTotal;
-        //rhythmSR.enabled = true;
+        yield return new WaitUntil(() => toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("windFan") == true);
+
+        toolAnimator.enabled = false;
+
+        fanActive = true;
+
+        hasBeenAcquired = false;
     }
 
-    public void OnMouseExit()
-    {
-        //rhythmSR.enabled = false;
-    }
 
-    public override void AudioRhythm()
-    {
-        // nothing here, no sound on rhythm
-    }
-
-    public override void SwitchTimeScale()
-    {
-        // nothing here, we don't want sound to play
-    }
-
-    
+    //WIND FAN FUNCTIONS
 
     //Increase rhythm
     public void IncreaseTempo()
@@ -167,11 +254,18 @@ public class WindMachine : RhythmProducer {
     //called whenever rhythm is changed;
     public void SetVisualRhythm()
     {
-        rhythmFader.FadeIn();
+        if (fanActive)
+        {
+            rhythmFader.FadeIn();
+        }
+      
         rhythmIndicator.SetInteger("Level", timeScale);
         changeRhythmFx.Play();
 
         changedRhythm = true;
         disappearTimer = disappearTimerTotal;
+
+        //sound to indicate dif rhythm
+        toolSource.PlayOneShot(selectLower);
     }
 }

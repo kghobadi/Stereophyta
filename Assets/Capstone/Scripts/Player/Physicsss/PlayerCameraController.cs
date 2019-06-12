@@ -43,7 +43,7 @@ public class PlayerCameraController : MonoBehaviour {
     public float mTurnSmoothMove = 0.1f, mMovingTurnSmoothMove;
 
     // for boat stuff
-    public bool inBoat;
+    public bool canLook;
     public LayerMask obstructionMask;
 
     void Start () {
@@ -80,31 +80,35 @@ public class PlayerCameraController : MonoBehaviour {
         }
 
         //lets set up right analogue stick to enable us to rotate the camera around player and redirect motion as we do so
-        Vector3 horizontalRotation;
-        Vector3 verticalRotation;
+        Vector3 horizontalRotation = Vector3.zero;
+        Vector3 verticalRotation = Vector3.zero;
 
-        //using mouse and WASD
-        if (mouseControls)
+        //not true until out of start view
+        if (canLook)
         {
-            horizontalRotation = new Vector3(0, Input.GetAxis("mouse x") * cameraRotationSpeedXMouse, 0);
-            verticalRotation = new Vector3(0, Input.GetAxis("mouse y") * cameraRotationSpeedYMouse, 0);
-        }
-        //using ps4 controller
-        else
-        {
-            horizontalRotation = new Vector3(0, Input.GetAxis("Mouse X") * cameraRotationSpeedX, 0);
-            verticalRotation = new Vector3(0, Input.GetAxis("Mouse Y") * cameraRotationSpeedY, 0);
-        }
+            //using mouse and WASD
+            if (mouseControls)
+            {
+                horizontalRotation = new Vector3(0, Input.GetAxis("mouse x") * cameraRotationSpeedXMouse, 0);
+                verticalRotation = new Vector3(0, Input.GetAxis("mouse y") * cameraRotationSpeedYMouse, 0);
+            }
+            //using ps4 controller
+            else
+            {
+                horizontalRotation = new Vector3(0, Input.GetAxis("Mouse X") * cameraRotationSpeedX, 0);
+                verticalRotation = new Vector3(0, Input.GetAxis("Mouse Y") * cameraRotationSpeedY, 0);
+            }
 
-        //if mouse up and yLook is less than yLookMax
-        if(verticalRotation.y > 0.25f && yLook.y < yLookMax)
-        {
-            yLook += verticalRotation;
-        }
-        //if mouse down and yLook is greater than yLookMin
-        if (verticalRotation.y < -0.25f && yLook.y > yLookMin)
-        {
-            yLook += verticalRotation;
+            //if mouse up and yLook is less than yLookMax
+            if (verticalRotation.y > 0.25f && yLook.y < yLookMax)
+            {
+                yLook += verticalRotation;
+            }
+            //if mouse down and yLook is greater than yLookMin
+            if (verticalRotation.y < -0.25f && yLook.y > yLookMin)
+            {
+                yLook += verticalRotation;
+            }
         }
 
         //add yLook to the player pos, then subtract cam pos to get the forward look
@@ -222,14 +226,14 @@ public class PlayerCameraController : MonoBehaviour {
         Vector3 dir = playerTransform.position - transform.position;
         float dist = Vector3.Distance(transform.position, playerTransform.position);
         //send raycast
-        if (Physics.SphereCast(transform.position, radius, dir, out hit, dist , obstructionMask))
+        if (Physics.Raycast(transform.position, dir, out hit, dist , obstructionMask))
         {
             //anything on layer mask that is not player
-            if(hit.transform.tag != "Player")
+            if(hit.transform.gameObject.layer != 8 )
             {
                 ZoomOut(0.025f);
 
-                Debug.Log("cam hitting obstruction");
+                Debug.Log("cam hitting " + hit.transform.gameObject.name);
             }
         }
     }

@@ -17,6 +17,7 @@ public class PuzzleWind : Rhythm
         currentSpeed = _windGen.windSpeed;
         windParticles = GetComponent<ParticleSystem>();
         poolObj = GetComponent<PooledObject>();
+        transform.SetParent(null);
     }
 
     void Update()
