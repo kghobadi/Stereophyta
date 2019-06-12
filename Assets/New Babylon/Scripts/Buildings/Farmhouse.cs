@@ -90,6 +90,10 @@ public class Farmhouse : MonoBehaviour {
             if (occupied)
             {
                 playerCamera.SetActive(true);
+                if(playerCamera.GetComponent<Camera>().enabled == false)
+                {
+                    playerCamera.GetComponent<Camera>().enabled = true;
+                }
                 playerInventory.SetActive(true);
                 walkingEffect.SetActive(true);
                 tpc.currentFootsteps = lastFootsteps;

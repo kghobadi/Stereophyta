@@ -16,6 +16,7 @@ public class Seed : MonoBehaviour {
     public Rigidbody seedBody;
     SphereCollider seedCollider;
     public bool seedSelected, planting, falling, vortexing;
+    float vortexSpeed = 7.5f;
 
     //for spawning plant
     Vector3 originalPos;
@@ -24,7 +25,7 @@ public class Seed : MonoBehaviour {
 
     //audio
     public AudioSource seedSource;
-    public AudioClip dropSeed, spawnPlant;
+    public AudioClip dropSeed, spawnPlant, noNO;
 
     Transform inventoryParent;
 
@@ -110,6 +111,7 @@ public class Seed : MonoBehaviour {
                         if(hitColliders[i].gameObject.tag == "Plant")
                         {
                             nearOtherPlant = true;
+                            Debug.Log("hit other plant");
                         }
                         i++;
                     }
@@ -127,6 +129,7 @@ public class Seed : MonoBehaviour {
                     else
                     {
                         Debug.Log("nono");
+                        seedSource.PlayOneShot(noNO);
                         //player source play NoNo sound
                     }
                 }
@@ -151,8 +154,12 @@ public class Seed : MonoBehaviour {
         //succ to player
         if (vortexing)
         {
-            transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * 7.5f);
+            //lerp to the player mon
+            transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * vortexSpeed);
+            //add to vortex speed every frame so player cannot outrun seeds
+            vortexSpeed += 0.25f;
 
+            //when close enough, add to seed inventory
             if (Vector3.Distance(transform.position, player.transform.position) < 1)
             {
                 SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];

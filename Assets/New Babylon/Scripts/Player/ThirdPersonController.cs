@@ -10,6 +10,8 @@ public class ThirdPersonController : MonoBehaviour
 {
     //start viewer ref
     public StartView startViewer;
+    //alternate start Pos based on if you have played before
+    public Vector3 firstTimeStartPos, returningStartPos;
 
     //player controller and cam controller ref
     public CharacterController controller;
@@ -139,6 +141,19 @@ public class ThirdPersonController : MonoBehaviour
         if (walkingEffect != null)
         {
             walkingEffect.Stop();
+        }
+
+        //returning start pos
+        if(PlayerPrefs.GetString("hasBook") == "yes")
+        {
+            transform.position = returningStartPos;
+            transform.localEulerAngles = new Vector3(0, -90f, 0);
+        }
+        //initial start pos
+        else
+        {
+            transform.position = firstTimeStartPos;
+            transform.localEulerAngles = new Vector3(0, 0, 0);
         }
 
         //accounts for start view

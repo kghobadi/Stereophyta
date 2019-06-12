@@ -29,6 +29,8 @@ public abstract class Tool : MonoBehaviour {
     public string pickUpMessage;
     public FadeUI[] interactPrompts;
 
+    public float interactDist = 10f, leaveDist = 15f;
+
     //set tool refs in awake so that inventory can disable them at start
     public virtual void Awake()
     {
@@ -46,7 +48,7 @@ public abstract class Tool : MonoBehaviour {
     }
 
     //called to pick up tool for the first time
-    public virtual void PickUpTool()
+    public virtual void PickUpTool(bool playSound)
     {
         hasBeenAcquired = true;
       
@@ -72,8 +74,11 @@ public abstract class Tool : MonoBehaviour {
         inventoryScript.currentItem = inventoryScript.myItems.Count - 1;
         inventoryScript.SetToolSprite();
 
-        //play this tools pickup sound
-        inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
+        if (playSound)
+        {
+            //play this tools pickup sound
+            inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
+        }
 
         DeactivatePrompt();
         //book notification??
@@ -139,7 +144,7 @@ public abstract class Tool : MonoBehaviour {
             //dist from player
             float dist = Vector3.Distance(transform.position, player.transform.position);
             //if player is close
-            if(dist < 10f)
+            if(dist < interactDist)
             {
                 playerWasNear = true;
                 //so switch inv is not called 
@@ -153,11 +158,11 @@ public abstract class Tool : MonoBehaviour {
                 //pick up when player presses E
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    PickUpTool();
+                    PickUpTool(true);
                 }
             }
             //player has left
-            else if(dist > 15f)
+            else if(dist > leaveDist)
             {
                 //fade out prompts
                 if (playerWasNear)
@@ -186,7 +191,7 @@ public abstract class Tool : MonoBehaviour {
     //pick up prompt for when player is near 
     void ShowPickupPrompt()
     {
-        Debug.Log("show pickup prompt");
+        //Debug.Log("show pickup prompt");
         //set text prompt
         pickUpText.text = pickUpMessage;
 
@@ -200,7 +205,7 @@ public abstract class Tool : MonoBehaviour {
     //turn off prompt
     void DeactivatePrompt()
     {
-        Debug.Log("deactivating prompt");
+        //Debug.Log("deactivating prompt");
         //fade em out
         for (int i = 0; i < interactPrompts.Length; i++)
         {

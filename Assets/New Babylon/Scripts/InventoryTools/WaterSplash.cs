@@ -57,7 +57,7 @@ public class WaterSplash : Rhythm {
         //only trigger stuff when i am splashing from watering can
         if (splashing)
         {
-            Debug.Log("spash triggering");
+            //Debug.Log("spash triggering");
             //for plants
             if (other.gameObject.tag == "Plant")
             {

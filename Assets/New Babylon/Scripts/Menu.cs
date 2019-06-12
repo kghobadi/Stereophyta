@@ -26,6 +26,9 @@ public class Menu : MonoBehaviour {
     public AudioSource menuAudio;
     public AudioClip openBook, closeBook;
 
+    //for first time opening Book
+    public FadeUI[] escNotices;
+
 	void Start ()
     {
         //grab sun refs
@@ -47,43 +50,63 @@ public class Menu : MonoBehaviour {
     }
 	
 	void Update () {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        //only works if we have picked up the book
+        if (Input.GetKeyDown(KeyCode.Escape) && PlayerPrefs.GetString("hasBook") == "yes")
         {
             //turn off
             if (menuObj.activeSelf && !bookScript.flipping)
             {
-                //menu off
-                menuObj.SetActive(false);
-                tpc.menuOpen = false;
-                camController.enabled = true;
-
-                //cursor off
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked;
-
-                //reset sun
-                sunScript.rotationSpeed = lastSunSpeed;
-                menuAudio.PlayOneShot(closeBook);
+                TurnOffMenu();
             }
             //turn on
             else if (!menuObj.activeSelf && !startViewer.startView)
             {
-                //cursor on
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
-
-                //menu on
-                menuObj.SetActive(true);
-                tpc.menuOpen = true;
-                camController.enabled = false;
-
-                //pause sun
-                lastSunSpeed = sunScript.rotationSpeed;
-                sunScript.rotationSpeed = 0;
-                menuAudio.PlayOneShot(openBook);
+                TurnOnMenu();
             }
         }
 	}
+
+    public void TurnOnMenu()
+    {
+        //cursor on
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        //menu on
+        menuObj.SetActive(true);
+        tpc.menuOpen = true;
+        camController.enabled = false;
+
+        //pause sun
+        lastSunSpeed = sunScript.rotationSpeed;
+        sunScript.rotationSpeed = 0;
+        menuAudio.PlayOneShot(openBook);
+    }
+
+    public void TurnOffMenu()
+    {
+        //menu off
+        menuObj.SetActive(false);
+        tpc.menuOpen = false;
+        camController.enabled = true;
+
+        //cursor off
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
+        //reset sun
+        sunScript.rotationSpeed = lastSunSpeed;
+        menuAudio.PlayOneShot(closeBook);
+
+        //fade out escape notices
+        if (escNotices[0].gameObject.activeSelf)
+        {
+            for (int i = 0; i < escNotices.Length; i++)
+            {
+                escNotices[i].FadeOut();
+            }
+        }
+    }
 
     //functions to adjust master volumes with a sliders
     public void ChangeVolume(int mixer)

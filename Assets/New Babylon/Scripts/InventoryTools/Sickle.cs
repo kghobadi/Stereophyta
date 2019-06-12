@@ -24,8 +24,22 @@ public class Sickle : Tool {
         //all my refs
         mySickleBody = GetComponent<Rigidbody>();
         myCollider = GetComponent<BoxCollider>();
-	}
-    
+
+        //this means we have set it before, so we have saved before
+        if (PlayerPrefs.GetString("hasSickle") == "yes")
+        {
+            PickUpTool(false);
+            //Debug.Log("picked up sickle on start");
+        }
+    }
+
+    public override void PickUpTool(bool playSound)
+    {
+        base.PickUpTool(playSound);
+
+        PlayerPrefs.SetString("hasSickle", "yes");
+    }
+
     public override void Update () {
         //pick up logic
         base.Update();

@@ -24,6 +24,7 @@ public class Inventory : MonoBehaviour {
     public GameObject toolInvVisual;
     public Image currentToolImg, lastToolImg, nextToolImg;
     public List<Sprite> toolSprites = new List<Sprite>();
+    public Sprite nadaSprite;
     public FadeUI[] toolsUI;
     IEnumerator fadeTools;
 
@@ -101,7 +102,13 @@ public class Inventory : MonoBehaviour {
                 SwitchItem(true);
             }
             //switch current item -
-            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv && !currenSeedObj.GetComponent<Seed>().planting)
+            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv && !currenSeedObj.GetComponent<Seed>().planting && CheckPlayerHasSeed() >= 2)
+            {
+                SwitchSeed(true);
+            }
+
+            //auto switch to next seed with a count if you run out of seeds
+            if(seedStorage[currentSeed].seedCount == 0 && CheckPlayerHasSeed() >= 1)
             {
                 SwitchSeed(true);
             }
@@ -124,6 +131,9 @@ public class Inventory : MonoBehaviour {
                 seedsUI[i].fadingOut = true;
             }
         }
+
+        //set seed counter in inv UI
+        seedCounter.text = seedStorage[currentSeed].seedCount.ToString();
     }
 
     public void SwitchItem(bool posOrNeg)
@@ -175,7 +185,8 @@ public class Inventory : MonoBehaviour {
     {
         //change inv visuals
         currentToolImg.sprite = toolSprites[currentItem];
-
+        
+        //more than one item
         if(myItems.Count > 1)
         {
             //for wrapping counter
@@ -197,18 +208,29 @@ public class Inventory : MonoBehaviour {
                 nextToolImg.sprite = toolSprites[0];
             }
         }
+        //only one item so all the sprites are nothing
+        else if(myItems.Count == 1)
+        {
+            lastToolImg.sprite = nadaSprite;
+            nextToolImg.sprite = nadaSprite;
+        }
         
 
         //tools vis
-        StopCoroutine(fadeTools);
+        if(fadeTools != null)
+            StopCoroutine(fadeTools);
         fadeTools = FadeOutToolsVis();
-        StartCoroutine(fadeTools);
+        if(gameObject.activeSelf)
+            StartCoroutine(fadeTools);
     }
 
    public void SwitchSeed(bool posOrNeg)
     {
-        currenSeedObj.GetComponent<Seed>().seedSelected = false;
-        currenSeedObj.SetActive(false);
+        if(currenSeedObj.activeSelf)
+        {
+            currenSeedObj.GetComponent<Seed>().seedSelected = false;
+            currenSeedObj.SetActive(false);
+        }
 
         //switch pos
         if (posOrNeg)
@@ -235,6 +257,17 @@ public class Inventory : MonoBehaviour {
             SwitchSeed(true);
         }
 
+        SetSeedSprite();
+      
+        //reset timer so not infinite switch
+        inputTimer = 0.1f;
+        canSwitchInv = false;
+
+        inventoryAudio.PlayOneShot(switchSeeds);
+    }
+
+    public void SetSeedSprite()
+    {
         //change inv visuals
         currentSeedImg.sprite = seedSprites[currentSeed];
         //for wrapping counter
@@ -255,18 +288,14 @@ public class Inventory : MonoBehaviour {
         {
             nextSeedImg.sprite = seedSprites[0];
         }
-        //set seed counter in inv UI
-        seedCounter.text = seedStorage[currentSeed].seedCount.ToString();
+
 
         //seed vis 
-        StopCoroutine(fadeSeeds);
+        if(fadeSeeds != null)
+            StopCoroutine(fadeSeeds);
         fadeSeeds = FadeOutSeedVis();
-        StartCoroutine(fadeSeeds);
-        //reset timer so not infinite switch
-        inputTimer = 0.1f;
-        canSwitchInv = false;
-
-        inventoryAudio.PlayOneShot(switchSeeds);
+        if (gameObject.activeSelf)
+            StartCoroutine(fadeSeeds);
     }
 
     void CountSeedUp()
@@ -293,6 +322,22 @@ public class Inventory : MonoBehaviour {
         {
             currentSeed = seedStorage.Count - 1;
         }
+    }
+
+    //called to check seed counts
+    int CheckPlayerHasSeed()
+    {
+        int seedCounter = 0;
+        //loop thru seed counts
+        for(int i = 0; i < seedStorage.Count; i++)
+        {
+            if(seedStorage[i].seedCount > 0)
+            {
+                seedCounter++;
+            }
+        }
+
+        return seedCounter;
     }
 
     //fade in and out Tools inv

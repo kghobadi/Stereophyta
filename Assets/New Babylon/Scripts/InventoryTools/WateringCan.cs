@@ -12,9 +12,22 @@ public class WateringCan : Tool
     {
         base.Awake();
         waterParticles = transform.GetChild(0).GetComponent<Water>();
+
+        //this means we have set it before, so we have saved before
+        if (PlayerPrefs.GetString("hasWaterCan") == "yes")
+        {
+            PickUpTool(false);
+            //Debug.Log("picked up water on start");
+        }
     }
 
- 
+    public override void PickUpTool(bool playSound)
+    {
+        base.PickUpTool(playSound);
+
+        PlayerPrefs.SetString("hasWaterCan", "yes");
+    }
+
     public override void Update()
     {
         //pick up logic

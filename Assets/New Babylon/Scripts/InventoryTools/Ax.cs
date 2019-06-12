@@ -23,8 +23,22 @@ public class Ax : Tool {
         //all my refs
         myAxBody = GetComponent<Rigidbody>();
         myCollider = GetComponent<BoxCollider>();
-	}
-    
+
+        //this means we have set it before, so we have saved before
+        if (PlayerPrefs.GetString("hasAx") == "yes")
+        {
+            PickUpTool(false);
+            //Debug.Log("picked up ax on start");
+        }
+    }
+
+    public override void PickUpTool(bool playSound)
+    {
+        base.PickUpTool(playSound);
+
+        PlayerPrefs.SetString("hasAx", "yes");
+    }
+
     public override void Update () {
         //pick up logic
         base.Update();

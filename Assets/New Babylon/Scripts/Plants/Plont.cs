@@ -59,7 +59,7 @@ public class Plont : MonoBehaviour {
     //mostly used for saving / loading 
     public enum PlantType
     {
-        PIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR,
+        PIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR, TRUMPET
     }
     
 	void Start () {
@@ -76,6 +76,10 @@ public class Plont : MonoBehaviour {
             saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
 
             //Debug.Log("added this plant to save storage");
+        }
+        else
+        {
+            AdjustHeight();
         }
 
         //colliders and rigibodys
@@ -257,8 +261,17 @@ public class Plont : MonoBehaviour {
         currentClip = stageSounds[currentStage];
 
         //set particles duration to our current audio clip's length
+        StartCoroutine(WaitToSetParticles());
+    }
+
+    //this is to fix that assertion error i was getting constantly
+    IEnumerator WaitToSetParticles()
+    {
         ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
         soundPlaying.Stop();
+
+        yield return new WaitUntil(() => soundPlaying.isStopped == true);
+
         soundsPlayer.duration = currentClip.length;
     }
 
@@ -350,6 +363,20 @@ public class Plont : MonoBehaviour {
             if(randomChanceToDropSeed < 1f)
             {
                 SpawnSeed();
+            }
+        }
+    }
+
+    void AdjustHeight()
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 35f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                //Debug.Log("adjusting " + hit.point);
+                transform.position = hit.point;
             }
         }
     }
