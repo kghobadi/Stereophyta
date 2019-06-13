@@ -259,6 +259,10 @@ public class ThirdPersonController : MonoBehaviour
 
         //rotate the player's body
         transform.Rotate(horizontalInput * rotateSpeedMouse * Time.deltaTime);
+        //instead of just using horizontal input to rotate (which seems pretty janky and confusing to some people)
+        //i can use it to move the player directly left, or directly right of where you are facing forward
+        //in other words those keys would not alter rotation at all, leaving that up to that mouse and the mouse alone
+        //would probably need a side stepping animation for this to make it look natural
 
         JumpCheck();
 
