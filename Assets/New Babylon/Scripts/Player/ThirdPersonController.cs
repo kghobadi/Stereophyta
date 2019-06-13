@@ -17,6 +17,7 @@ public class ThirdPersonController : MonoBehaviour
     public CharacterController controller;
     PlayerCameraController playerCameraController;
     Transform cameraTransform;
+    public Transform characterBody;
     public Animator poopShoes;
     BoxCollider playerRunCollider;
     public Cloth playerCloak;
@@ -116,7 +117,7 @@ public class ThirdPersonController : MonoBehaviour
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
-        myInventory = transform.GetChild(0).GetComponent<Inventory>();
+        myInventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
         playerRunCollider = GetComponent<BoxCollider>();
         playerRunCollider.enabled = false;
 
@@ -128,9 +129,8 @@ public class ThirdPersonController : MonoBehaviour
         playerCameraController.enabled = true;
 
         //set animator state to idle
-        poopShoes.SetBool("idle", true);
-        poopShoes.SetBool("running", false);
-        poopShoes.SetBool("jumping", false);
+        SetAnimator("idle");
+        characterBody = poopShoes.transform;
         currentFootsteps = grassSteps;
 
         //set loose particles
@@ -214,27 +214,52 @@ public class ThirdPersonController : MonoBehaviour
     void MouseMovement()
     {
         //grab inputs from our axes
+        //z
         forwardInput = new Vector3(0, 0, Input.GetAxis("Vertical"));
-        horizontalInput = new Vector3(0, Input.GetAxis("Horizontal"), 0);
+        //x
+        horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
 
-        if (horizontalInput.magnitude > 1)
-        {
-            horizontalInput.Normalize();
-        }
-
-        SetPlayerAnimsFootsteps(forwardInput);
-
-        //actual movement (tanky boy)
+        //forward movement calculations
         Vector3 targetForwardMovement = forwardInput;
         targetForwardMovement = transform.rotation * forwardInput;
         targetForwardMovement.y = 0;
         targetForwardMovement.Normalize();
         targetForwardMovement *= forwardInput.magnitude;
 
-        //run
-        if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        //horizontal movement calculations
+        Vector3 targetHorizontalMovement = horizontalInput;
+        targetHorizontalMovement = transform.rotation * horizontalInput;
+        targetHorizontalMovement.y = 0;
+        targetHorizontalMovement.Normalize();
+        targetHorizontalMovement *= horizontalInput.magnitude;
+
+        //add the 2 axes together
+        Vector3 targetMovementTotal = targetForwardMovement + targetHorizontalMovement;
+
+        //add yLook to the player pos, then subtract cam pos to get the forward look
+        Quaternion targetLook;
+
+        //movement input
+        if (targetMovementTotal.magnitude > 0)
         {
-            currentMovement = Vector3.SmoothDamp(currentMovement, targetForwardMovement * runSpeed, ref currentMovementV, moveSmoothUse);
+            targetLook = Quaternion.LookRotation(targetMovementTotal);
+            characterBody.rotation = Quaternion.Lerp(characterBody.rotation, targetLook, 10f * Time.deltaTime);
+        }
+        else
+        {
+            //dont rotate mc
+        }
+
+       
+
+        //set animation based on target movement
+        SetPlayerAnimsFootsteps(targetMovementTotal);
+
+
+        //run
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
             playerRunCollider.enabled = true;
             running = true;
             if(forwardInput.magnitude > 0)
@@ -250,19 +275,15 @@ public class ThirdPersonController : MonoBehaviour
         //walk
         else
         {
-            currentMovement = Vector3.SmoothDamp(currentMovement, targetForwardMovement * movespeed, ref currentMovementV, moveSmoothUse);
+            currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
             playerRunCollider.enabled = false;
             running = false;
             runParticles.SetActive(false);
             poopShoes.speed = 1f;
         }
 
-        //rotate the player's body
-        transform.Rotate(horizontalInput * rotateSpeedMouse * Time.deltaTime);
-        //instead of just using horizontal input to rotate (which seems pretty janky and confusing to some people)
-        //i can use it to move the player directly left, or directly right of where you are facing forward
-        //in other words those keys would not alter rotation at all, leaving that up to that mouse and the mouse alone
-        //would probably need a side stepping animation for this to make it look natural
+        //OLD rotate the player's body OLD
+        //transform.Rotate(horizontalInput * rotateSpeedMouse * Time.deltaTime);
 
         JumpCheck();
 
@@ -365,10 +386,7 @@ public class ThirdPersonController : MonoBehaviour
         sleepParticles.SetActive(true);
 
         //set animator
-        poopShoes.SetBool("idle", false);
-        poopShoes.SetBool("jumping", false);
-        poopShoes.SetBool("running", false);
-        poopShoes.SetBool("sleeping", true);
+        SetAnimator("sleeping");
 
         yield return new WaitForSeconds(0.5f);
 
@@ -400,10 +418,7 @@ public class ThirdPersonController : MonoBehaviour
         sunScript.rotationSpeed = sunScript.normalRotation;
 
         //set animator
-        poopShoes.SetBool("jumping", false);
-        poopShoes.SetBool("running", false);
-        poopShoes.SetBool("sleeping", false);
-        poopShoes.SetBool("idle", true);
+        SetAnimator("idle");
     }
 
   
@@ -411,11 +426,11 @@ public class ThirdPersonController : MonoBehaviour
     //checking if and how we are moving to set vis effects and anims
     void SetPlayerAnimsFootsteps(Vector3 inputToCheck)
     {
+        //need input to set movement anim
         if (inputToCheck.magnitude > 0)
         {
-            poopShoes.SetBool("idle", false);
-            poopShoes.SetBool("jumping", false);
-            poopShoes.SetBool("running", true);
+            SetAnimator("running");
+
 
             if (!jumping)
             {
@@ -452,9 +467,7 @@ public class ThirdPersonController : MonoBehaviour
         }
         else
         {
-            poopShoes.SetBool("idle", true);
-            poopShoes.SetBool("jumping", false);
-            poopShoes.SetBool("running", false);
+            SetAnimator("idle");
 
             //dirt particles stop
             if (walkingEffect.isPlaying)
@@ -464,6 +477,19 @@ public class ThirdPersonController : MonoBehaviour
 
             footStepTimer = 0;
         }
+    }
+
+    void SetAnimator(string newState)
+    {
+        //turn off all states
+        poopShoes.SetBool("jumping", false);
+        poopShoes.SetBool("running", false);
+        poopShoes.SetBool("sleeping", false);
+        poopShoes.SetBool("idle", false);
+        poopShoes.SetBool("sidestepping", false);
+
+        //set new state
+        poopShoes.SetBool(newState, true);
     }
 
     void IncrementFootsteps()
@@ -505,9 +531,7 @@ public class ThirdPersonController : MonoBehaviour
             //if animator still jumping, set back to idle
             if (poopShoes.GetBool("jumping") == true)
             {
-                poopShoes.SetBool("idle", true);
-                poopShoes.SetBool("running", false);
-                poopShoes.SetBool("jumping", false);
+                SetAnimator("idle");
             }
             //SlideCheck();
         }
@@ -569,9 +593,7 @@ public class ThirdPersonController : MonoBehaviour
                 verticalSpeed = bigJump;
                 break;
         }
-        poopShoes.SetBool("idle", false);
-        poopShoes.SetBool("running", false);
-        poopShoes.SetBool("jumping", true);
+        SetAnimator("jumping");
         jumping = true;
         jumpWaitTimer = jumpWaitTime;
         jumpCharger = 0;

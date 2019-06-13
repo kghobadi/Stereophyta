@@ -64,6 +64,7 @@ public abstract class Tool : MonoBehaviour {
         //add to tools list,
         inventoryScript.myItems.Add(gameObject);
         inventoryScript.toolSprites.Add(inventorySprite);
+
         //set current inventory item to this
         if(inventoryScript.currenItemObj != null)
         {
@@ -148,8 +149,8 @@ public abstract class Tool : MonoBehaviour {
             {
                 playerWasNear = true;
                 //so switch inv is not called 
-                inventoryScript.canSwitchInv = false;
-                inventoryScript.inputTimer = 0.25f;
+                inventoryScript.canSwitchTools = false;
+                inventoryScript.inputTimerT = 0.25f;
 
                 //fade in those prompts
                 if (pickUpText.color.a < 0.5f)

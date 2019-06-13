@@ -94,7 +94,7 @@ public class Ax : Tool {
     //spawns one ax wind
     void SpawnAxWinds(Vector3 spawnPoint)
     {
-        GameObject axWindCenter = Instantiate(axWindPrefab, spawnPoint, Quaternion.Euler(tpc.transform.localEulerAngles - new Vector3(0, 90, 0)));
+        GameObject axWindCenter = Instantiate(axWindPrefab, spawnPoint, tpc.characterBody.rotation);
 
         axWindCenter.GetComponent<AxWind>().myAxDaddy = this;
 

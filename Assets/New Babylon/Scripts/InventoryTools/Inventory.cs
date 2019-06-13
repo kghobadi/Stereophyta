@@ -42,8 +42,8 @@ public class Inventory : MonoBehaviour {
     IEnumerator fadeSeeds;
     
     //for controlling switching
-    public float inputTimer;
-    public bool canSwitchInv;
+    public float inputTimerT, inputTimerS;
+    public bool canSwitchTools, canSwitchSeeds;
 
     //audio
     public AudioSource inventoryAudio;
@@ -87,22 +87,28 @@ public class Inventory : MonoBehaviour {
     }
 	
 	void Update () {
-        inputTimer -= Time.deltaTime;
-        if(inputTimer < 0)
+        inputTimerT -= Time.deltaTime;
+        if(inputTimerT < 0)
         {
-            canSwitchInv = true;
+            canSwitchTools = true;
+        }
+
+        inputTimerS -= Time.deltaTime;
+        if (inputTimerS < 0)
+        {
+            canSwitchSeeds = true;
         }
 
         if (!tpc.menuOpen)
         {
 
             //switch current item +
-            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchInv && myItems.Count > 1)
+            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchTools && myItems.Count > 1)
             {
                 SwitchItem(true);
             }
             //switch current item -
-            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv && !currenSeedObj.GetComponent<Seed>().planting && CheckPlayerHasSeed() >= 2)
+            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchSeeds && !currenSeedObj.GetComponent<Seed>().planting && CheckPlayerHasSeed() >= 2)
             {
                 SwitchSeed(true);
             }
@@ -136,6 +142,7 @@ public class Inventory : MonoBehaviour {
         seedCounter.text = seedStorage[currentSeed].seedCount.ToString();
     }
 
+    //switches thru tools
     public void SwitchItem(bool posOrNeg)
     {
         currenItemObj.SetActive(false);
@@ -175,8 +182,8 @@ public class Inventory : MonoBehaviour {
         SetToolSprite();
 
         //reset timer so not infinite switch
-        inputTimer = 0.1f;
-        canSwitchInv = false;
+        inputTimerT = 0.1f;
+        canSwitchTools = false;
 
         inventoryAudio.PlayOneShot(switchTools);
     }
@@ -224,6 +231,7 @@ public class Inventory : MonoBehaviour {
             StartCoroutine(fadeTools);
     }
 
+    //switch thru seeds
    public void SwitchSeed(bool posOrNeg)
     {
         if(currenSeedObj.activeSelf)
@@ -260,8 +268,8 @@ public class Inventory : MonoBehaviour {
         SetSeedSprite();
       
         //reset timer so not infinite switch
-        inputTimer = 0.1f;
-        canSwitchInv = false;
+        inputTimerS = 0.1f;
+        canSwitchSeeds = false;
 
         inventoryAudio.PlayOneShot(switchSeeds);
     }
