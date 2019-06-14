@@ -403,6 +403,7 @@ public class ThirdPersonController : MonoBehaviour
         transform.position = bedPos.position;
         playerCloak.gameObject.SetActive(false);
         transform.localEulerAngles = new Vector3(0, 80, 0);
+        characterBody.localEulerAngles = new Vector3(0, 0, 0);
         sleepParticles.SetActive(true);
 
         //set animator

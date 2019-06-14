@@ -51,6 +51,10 @@ public class Sun : MonoBehaviour
     //save ref
     public SleepSave saveScript;
 
+    //sun saver anim
+    public FadeUI sunSaver;
+    public FadeUItmp sunSavingText;
+
     void Start()
     {
         //player refs
@@ -231,6 +235,10 @@ public class Sun : MonoBehaviour
                 StartCoroutine(WaitForPlayerToPassOut());
             }
         }
+
+        //fade in and out sun saver
+        sunSaver.FadeIn();
+        sunSavingText.FadeIn();
 
         StartCoroutine(WaitToSave());
     }
