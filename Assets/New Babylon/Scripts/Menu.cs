@@ -19,6 +19,11 @@ public class Menu : MonoBehaviour {
     //toggle mouse controls
     public Toggle mouseControlsToggle;
     public PlayerCameraController camController;
+    public Slider mouseSensitivity;
+    //store cam sensitivity values 
+    public float omTurnSmoothLook, omTurnSmoothMove;
+    public float omMovingTurnLook, omMovingTurnMove;
+    public float omSmoothLookOrig, omSmoothMoveOrig;
     //settings volume slider
     public AudioMixerGroup[] mixerGroups;
     public Slider[] volumeSliders;
@@ -45,6 +50,19 @@ public class Menu : MonoBehaviour {
             volumeSliders[i].value = 0;
         }
         mouseControlsToggle.isOn = camController.mouseControls;
+
+        //SET original sensitivity values
+        //fast
+        omTurnSmoothLook = camController.mTurnSmoothLook ;
+        omTurnSmoothMove = camController.mTurnSmoothMove ;
+
+        //medium
+        omMovingTurnLook = camController.mMovingTurnSmoothLook ;
+        omMovingTurnMove = camController.mMovingTurnSmoothMove ;
+
+        //original
+        omSmoothLookOrig = camController.mSmoothLookOriginal;
+        omSmoothMoveOrig = camController.mSmoothMoveOriginal;
 
         menuObj.SetActive(false);
     }
@@ -133,6 +151,23 @@ public class Menu : MonoBehaviour {
         }
 
         mixerGroups[mixer].audioMixer.SetFloat(volumeVar, volumeSliders[mixer].value);
+    }
+
+    //for mouse sensitivity slider
+    //sets the cam sensitivity values to their orig at start + value of the slider
+    public void SetMouseSensitivity()
+    {
+        //fast
+        camController.mTurnSmoothLook = omTurnSmoothLook + mouseSensitivity.value;
+        camController.mTurnSmoothMove = omTurnSmoothMove + mouseSensitivity.value;
+
+        //medium
+        camController.mMovingTurnSmoothLook = omMovingTurnLook + mouseSensitivity.value;
+        camController.mMovingTurnSmoothMove = omMovingTurnMove + mouseSensitivity.value;
+
+        //original
+        camController.mSmoothLookOriginal = omSmoothLookOrig + mouseSensitivity.value;
+        camController.mSmoothMoveOriginal = omSmoothMoveOrig + mouseSensitivity.value;
     }
 
     //for quit button press

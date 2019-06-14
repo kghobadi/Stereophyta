@@ -28,6 +28,8 @@ public class ThirdPersonController : MonoBehaviour
 
     //PS4 move variables
     public bool playerCanMove, menuOpen;
+    public bool indoors;
+    public Transform houseCam;
     public bool running;
     public GameObject runParticles;
     Vector3 currentMovement;
@@ -225,14 +227,28 @@ public class ThirdPersonController : MonoBehaviour
 
         //forward movement calculations
         Vector3 targetForwardMovement = forwardInput;
-        targetForwardMovement = transform.rotation * forwardInput;
+        if (indoors)
+        {
+            targetForwardMovement = houseCam.rotation * forwardInput;
+        }
+        else
+        {
+            targetForwardMovement = transform.rotation * forwardInput;
+        }
         targetForwardMovement.y = 0;
         targetForwardMovement.Normalize();
         targetForwardMovement *= forwardInput.magnitude;
 
         //horizontal movement calculations
         Vector3 targetHorizontalMovement = horizontalInput;
-        targetHorizontalMovement = transform.rotation * horizontalInput;
+        if (indoors)
+        {
+            targetHorizontalMovement = houseCam.rotation * horizontalInput;
+        }
+        else
+        {
+            targetHorizontalMovement = transform.rotation * horizontalInput;
+        }
         targetHorizontalMovement.y = 0;
         targetHorizontalMovement.Normalize();
         targetHorizontalMovement *= horizontalInput.magnitude;
@@ -266,7 +282,7 @@ public class ThirdPersonController : MonoBehaviour
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
             playerRunCollider.enabled = true;
             running = true;
-            if(forwardInput.magnitude > 0)
+            if(targetMovementTotal.magnitude > 0)
             {
                 runParticles.SetActive(true);
                 poopShoes.speed = 2f;
