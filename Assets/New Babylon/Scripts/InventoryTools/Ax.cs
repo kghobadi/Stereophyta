@@ -96,6 +96,8 @@ public class Ax : Tool {
     {
         GameObject axWindCenter = Instantiate(axWindPrefab, spawnPoint, tpc.characterBody.rotation);
 
+        axWindCenter.transform.localEulerAngles += new Vector3(0, -90, 0);
+
         axWindCenter.GetComponent<AxWind>().myAxDaddy = this;
 
         //Vector3 leftRot = new Vector3(tpc.transform.localEulerAngles.x, tpc.transform.localEulerAngles.y - 45, tpc.transform.localEulerAngles.z);

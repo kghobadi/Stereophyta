@@ -82,12 +82,14 @@ public class Sickle : Tool {
     
     
 
-    //spawns one ax wind
+    //spawns one sickle wind
     void SpawnSickleWind (Vector3 spawnPoint)
     {
-        GameObject axWindCenter = Instantiate(sickleWindPrefab, spawnPoint, Quaternion.Euler(tpc.characterBody.localEulerAngles - new Vector3(0, 90, 0)));
+        GameObject sickleWind = Instantiate(sickleWindPrefab, spawnPoint, tpc.characterBody.rotation);
 
-        axWindCenter.GetComponent<SickleWind>().mySickleDaddy = this;
+        sickleWind.transform.localEulerAngles += new Vector3(0, -90, 0);
+
+        sickleWind.GetComponent<SickleWind>().mySickleDaddy = this;
     }
 
 

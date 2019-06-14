@@ -109,6 +109,9 @@ public class PlayerCameraController : MonoBehaviour {
             {
                 yLook += verticalRotation;
             }
+
+            //grab input from scroll wheel axis
+            zoomInput = Input.GetAxis("Mouse ScrollWheel");
         }
 
         //add yLook to the player pos, then subtract cam pos to get the forward look
@@ -125,8 +128,7 @@ public class PlayerCameraController : MonoBehaviour {
            
         }
 
-        //grab input from scroll wheel axis
-        zoomInput = Input.GetAxis("Mouse ScrollWheel");
+        //ONLY GETS ZOOM INPUT IN CANLOOK
 
         //zoom in
         if (zoomInput < 0 && heightFromPlayer > heightMin )

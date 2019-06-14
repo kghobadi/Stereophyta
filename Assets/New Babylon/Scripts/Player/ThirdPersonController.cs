@@ -53,6 +53,10 @@ public class ThirdPersonController : MonoBehaviour
     float rotationV;
     float verticalSpeed;
     Vector3 currentMovementV;
+    //for jump trails
+    public ObjectPooler jumpTrailPool;
+    GameObject jumpTrail;
+    public Material smallJMat, midJMat, bigJMat;
 
     //dust splash
     public GameObject dustSplash;
@@ -513,6 +517,10 @@ public class ThirdPersonController : MonoBehaviour
             if (jumping)
             {
                 jumping = false;
+
+                //start jump trail deactivation
+                jumpTrail.transform.SetParent(null);
+                jumpTrail.GetComponent<JumpTrail>().StartCoroutine(jumpTrail.GetComponent<JumpTrail>().Deactivate());
                 //dust fall rhythm
                 //hit down
                 RaycastHit hitD;
@@ -580,24 +588,36 @@ public class ThirdPersonController : MonoBehaviour
     void SetJump(int jumpType)
     {
         PlayJumpSound();
+        //jump trail activation
+        jumpTrail = jumpTrailPool.GrabObject();
+        jumpTrail.transform.SetParent(characterBody);
+        jumpTrail.transform.localPosition = Vector3.zero;
         //set various jump speeds
         switch (jumpType)
         {
             case 0:
                 verticalSpeed = smallJump;
+                jumpTrail.GetComponent<TrailRenderer>().material = smallJMat;
                 break;
             case 1:
                 verticalSpeed = midJump;
+                jumpTrail.GetComponent<TrailRenderer>().material = midJMat;
                 break;
             case 2:
                 verticalSpeed = bigJump;
+                jumpTrail.GetComponent<TrailRenderer>().material = bigJMat;
                 break;
         }
         SetAnimator("jumping");
         jumping = true;
+        jumpTrail.GetComponent<TrailRenderer>().enabled = true;
         jumpWaitTimer = jumpWaitTime;
         jumpCharger = 0;
         lastJumpType = jumpType;
+
+        
+        
+        
     }
 
     //for ps4 move
