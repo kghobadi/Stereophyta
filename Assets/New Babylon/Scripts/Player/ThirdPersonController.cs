@@ -209,6 +209,12 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
 
+        //in case of weird sleep/ wake up bug
+        if(indoors && !sleeping)
+        {
+            sleepParticles.SetActive(false);
+        }
+
         //Restart game
         if (Input.GetKeyDown(KeyCode.Delete))
         {

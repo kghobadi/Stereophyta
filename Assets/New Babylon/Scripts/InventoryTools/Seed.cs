@@ -29,7 +29,7 @@ public class Seed : MonoBehaviour {
 
     Transform inventoryParent;
 
-    public bool UIseed;
+    public bool UIseed, startingSeed;
 
     //needs to be this far away from other plants
     public float distFromOtherPlants;
@@ -37,6 +37,9 @@ public class Seed : MonoBehaviour {
     //for planting itself after a few days
     public int daysBeforePlanting;
     public bool dayPassed;
+
+    public ObjectPooler seedPooler;
+    PooledObject _pooledObj;
 
 	void Start () {
         //grab refs
@@ -50,6 +53,8 @@ public class Seed : MonoBehaviour {
         seedBody.isKinematic = true;
         seedCollider = GetComponent<SphereCollider>();
         seedSource = GetComponent<AudioSource>();
+
+        _pooledObj = GetComponent<PooledObject>();
 
         if (!UIseed)
         {
@@ -72,6 +77,7 @@ public class Seed : MonoBehaviour {
                 {
                     daysBeforePlanting--;
 
+                    //plant spawned seed 
                     if (daysBeforePlanting == 0)
                     {
                         planting = true;
@@ -85,6 +91,7 @@ public class Seed : MonoBehaviour {
 
             }
 
+            //reset dayPassed 
             if (sunScript.yesterday == sunScript.dayCounter)
             {
                 dayPassed = false;
@@ -162,25 +169,20 @@ public class Seed : MonoBehaviour {
             //when close enough, add to seed inventory
             if (Vector3.Distance(transform.position, player.transform.position) < 1)
             {
-                SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
-                seedStorageTemp.seedCount++;
-
-                inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
-
-                tpc.SeedCollect();
-
-                Destroy(gameObject);
+                CollectSeed();
             }
         }
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        //ui seed hitting ground
         if(collision.gameObject.tag == "Ground" && planting)
         {
             SpawnPlant();
         }
 
+        //spawned seed falling from plant
         if (collision.gameObject.tag == "Ground" && falling)
         {
             falling = false;
@@ -194,12 +196,14 @@ public class Seed : MonoBehaviour {
      
     }
 
+    //called when UI seed reaches the ground
     void SpawnPlant()
     {
         seedSource.PlayOneShot(spawnPlant);
 
         plantClone = Instantiate(plantPrefab, transform.position, Quaternion.Euler(tpc.transform.localEulerAngles));
         plantClone.GetComponent<Plont>().plantPrefab = plantPrefab;
+        plantClone.GetComponent<Plont>().seedPooler = seedPooler;
 
         transform.SetParent(inventoryParent);
         transform.localPosition = originalPos;
@@ -231,6 +235,28 @@ public class Seed : MonoBehaviour {
         seedBody.AddRelativeForce(0, 15, 5);
 
         falling = true;
+    }
+
+    //called when vortexing reaches player
+    void CollectSeed()
+    {
+        SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
+        seedStorageTemp.seedCount++;
+
+        inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
+
+        tpc.SeedCollect();
+
+        //because of those pesky starting seeds
+        if (startingSeed)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            _pooledObj.ReturnToPool();
+        }
+        
     }
 
 }

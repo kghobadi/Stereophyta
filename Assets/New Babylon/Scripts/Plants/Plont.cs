@@ -52,6 +52,7 @@ public class Plont : MonoBehaviour {
     public float growthSpeed;
     Vector3 newScale;
     public float seedSpawnChance = 10;
+    public ObjectPooler seedPooler;
 
     public PlantType myPlantType;
 
@@ -68,6 +69,7 @@ public class Plont : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+
         //add data to save script
         if (!startingPlant)
         {
@@ -111,9 +113,45 @@ public class Plont : MonoBehaviour {
             }
         }
 
+        //get the obj pooler
+        FindObjPoolers();
+
         //call funcs
         PlayPlantingEffect();
         GrowPlant(true);
+    }
+
+    //shitty method but fuck it it finds the object pooler scripts easy
+    void FindObjPoolers()
+    {
+        if(myPlantType == PlantType.BELL)
+        {
+            seedPooler = GameObject.Find("BellPepperSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.PIANO)
+        {
+            seedPooler = GameObject.Find("PianoSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.GUITAR)
+        {
+            seedPooler = GameObject.Find("GuitarSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.EGUITAR)
+        {
+            seedPooler = GameObject.Find("EguitarSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.SUCCULENTAR)
+        {
+            seedPooler = GameObject.Find("SucculentarSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.TRIANGULAR)
+        {
+            seedPooler = GameObject.Find("TriangulationSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.TRUMPET)
+        {
+            seedPooler = GameObject.Find("TrumpetSeedPool").GetComponent<ObjectPooler>();
+        }
     }
 
     public void Update() {
@@ -328,10 +366,12 @@ public class Plont : MonoBehaviour {
         Destroy(gameObject);
     }
 
+    //spawn seed from object pooler script 
     void SpawnSeed()
     {
         Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
-        GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
+        GameObject newSeed = seedPooler.GrabObject();
+        newSeed.transform.position = spawnPos;
     }
 
     //plays the dirt planting effect at start
