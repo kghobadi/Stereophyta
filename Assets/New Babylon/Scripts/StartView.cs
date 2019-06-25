@@ -60,6 +60,13 @@ public class StartView : MonoBehaviour {
                 menuFades[i].FadeIn();
             }
         }
+        //not start view 
+        else
+        {
+            GetComponent<AudioListener>().enabled = false;
+            startCam.enabled = false;
+            playerCamera.GetComponent<PlayerCameraController>().canLook = true;
+        }
     }
 	
 	void Update () {

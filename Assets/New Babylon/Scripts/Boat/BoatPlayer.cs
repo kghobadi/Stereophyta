@@ -12,15 +12,15 @@ public class BoatPlayer : MonoBehaviour
     GameObject player;
     ThirdPersonController tpc;
 
-    //set when player is inBoat
-    public bool inBoat; 
-
     //Camera ref variables
     AudioSource cameraAudSource;
     PlayerCameraController camControl;
 
+    //set when player is inBoat
+    public bool inBoat; 
+
     //vars for footstep audio
-    public AudioSource playerSource;
+    public AudioSource boatSource;
     public AudioClip[] paddles;
     int currentPaddle = 0;
 
@@ -29,146 +29,156 @@ public class BoatPlayer : MonoBehaviour
     
     //store this mouse pos
     Vector3 lastPosition;
-    
+
+    //physics vars 
+    public CapsuleCollider boatCol;
     public Rigidbody boatBody;
     public float boatSpeedX, boatSpeedZ;
     float paddleIdleTimer, holdPaddle = 1f;
-    
-    public bool boatVariablesSet, boatRotating;
+
+    public Animator oarAnimator;
+
+    UseBoat useBoatScript;
+
+    public Vector3 exitSpot;
 
     void Start()
     {
+        //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        //walking UI
-        playerSource = GetComponent<AudioSource>();
+
+        //audio
+        boatSource = GetComponent<AudioSource>();
 
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         camControl = Camera.main.GetComponent<PlayerCameraController>();
 
-        //turn off walking sprites at start
-        //ChangeAnimState(idle);
-    }
-
-    void OnEnable()
-    {
+        //ref to pickup script
+        useBoatScript = GetComponent<UseBoat>();
+        boatBody = GetComponent<Rigidbody>();
+        boatBody.isKinematic = false;
+        boatCol = GetComponent<CapsuleCollider>();
+        boatCol.enabled = false;
         
     }
 
     void Update()
     {
-        //what happens when the player is in the boat?
-        if (!boatVariablesSet)
+        //only run this update code if the player is in the boat
+        if (inBoat)
         {
-            tpc.transform.SetParent(transform);
-            transform.localPosition = new Vector3(0, 0, -1);
-            boatBody.isKinematic = false;
-            //camControl.inBoat = true;
-            boatVariablesSet = true;
-        }
+            paddleIdleTimer += Time.deltaTime;
 
-        paddleIdleTimer += Time.deltaTime;
-
-        if (paddleIdleTimer > holdPaddle)
-        {
-            //ChangeAnimState(boatIdle);
-        }
-
-        Debug.Log(boatBody.velocity);
-
-        //click to move to point
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            //raycast info
-            if (Physics.Raycast(ray, out hit, 100, boatMask))
+            if (paddleIdleTimer > holdPaddle)
             {
-                if (hit.transform.gameObject.tag == "Water")
+                //ChangeAnimState(boatIdle);
+            }
+
+            Debug.Log(boatBody.velocity);
+
+            //click to move to point
+            if (Input.GetMouseButtonDown(0))
+            {
+                //use raycast from cam to screen point
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+
+                //raycast info
+                if (Physics.Raycast(ray, out hit, 100, boatMask))
                 {
-                    //directions to move in the water
-
-                    //forward right paddle
-                    if (hit.point.x > transform.position.x && hit.point.z > transform.position.z)
+                    if (hit.transform.gameObject.tag == "Water")
                     {
-                        Vector3 force = new Vector3(-boatSpeedX, 0, boatSpeedZ);
-                        Vector3 position = hit.point;
-                        boatBody.AddForceAtPosition(force, position);
-                        paddleIdleTimer = 0;
-                        //ChangeAnimState(paddleRightFwd);
+                        Paddle(hit);
                     }
-
-                    //forward left paddle
-                    else if (hit.point.x < transform.position.x && hit.point.z > transform.position.z)
-                    {
-                        Vector3 force = new Vector3(boatSpeedX, 0, boatSpeedZ);
-                        Vector3 position = hit.point;
-                        boatBody.AddForceAtPosition(force, position);
-                        paddleIdleTimer = 0;
-                        //ChangeAnimState(paddleLeftFwd);
-                    }
-
-                    //backward right paddle
-                    else if (hit.point.x > transform.position.x && hit.point.z < transform.position.z)
-                    {
-                        Vector3 force = new Vector3(-boatSpeedX, 0, -boatSpeedZ);
-                        Vector3 position = hit.point;
-                        boatBody.AddForceAtPosition(force, position);
-                        paddleIdleTimer = 0;
-                        //ChangeAnimState(paddleRightBkwd);
-                    }
-
-                    //backward left paddle
-                    else if (hit.point.x < transform.position.x && hit.point.z < transform.position.z)
-                    {
-                        Vector3 force = new Vector3(boatSpeedX, 0, -boatSpeedZ);
-                        Vector3 position = hit.point;
-                        boatBody.AddForceAtPosition(force, position);
-                        paddleIdleTimer = 0;
-                        //ChangeAnimState(paddleLeftBkwd);
-                    }
-
-                    //play a paddle sound effect
-                    //if (!playerSource.isPlaying)
-                    //{
-                    //count through paddle sound array
-                    if (currentPaddle < paddles.Length)
-                    {
-                        currentPaddle++;
-                    }
-                    else
-                    {
-                        currentPaddle = 0;
-                    }
-
-                    //play one shot of current sound
-                    playerSource.PlayOneShot(paddles[currentPaddle]);
-                    //}
                 }
+            }
 
-                //when in boat next to ground, exit boat
-                else if (hit.transform.gameObject.tag == "Ground" && Vector3.Distance(transform.position, hit.point) < 10 && paddleIdleTimer > 1)
+            //if raycaster hits the ground nearby, can press E to exit boat
+            if (GroundCheck())
+            {
+                if (Input.GetKeyDown(KeyCode.E) && paddleIdleTimer > 0.5f)
                 {
-                    inBoat = false;
-                    transform.position = new Vector3(hit.point.x, hit.point.y + 1.5f, hit.point.z);
-                    boatBody.isKinematic = true;
-                    //ChangeAnimState(idle);
+                    useBoatScript.ExitBoat(exitSpot);
                 }
             }
         }
     }
+
+    void Paddle(RaycastHit hit)
+    {
+        //directions to move in the water
+
+        //Calculate and monitor input
+
+        //want to allow the player to paddle only while clicking on water,
+        //so at least the raycast is still relevant
+        //while holding the mouse button (left or right)
+        //drag the mouse either down or up on the screen
+        //to create a force going in the opposite direction
+        //force will be dependent on the length of the row
+        //need a forward force -- greater than the x the longer the row is
+        //x force depending on whether your mouse Input X pos is to the left or right of boat
+        //calculate row by taking the start mouse Input pos 
+        //and the ending mouse input pos 
+        //see which one's Y pos is greater
+        //out put force values
+
+        // now that we have our inputs, we need to 
+        //Apply Physical Forces
+        //z forward force applied with AddForce (0, 0, zForce);
+        //x force applied with AddTorqur(0, xTorque, 0) 
+        //will need to calculate the boats true angle like in waddle ski for finding proper Torque angles.
+
+
+        PlayPaddleSound();
+    }
    
-  
-    //public void ChangeAnimState (GameObject desiredAnim)
-    //{
-    //    if(desiredAnim != currentAnimation)
-    //    {
-    //        //set active this anim
-    //        desiredAnim.SetActive(true);
-    //        currentAnimation = desiredAnim;
-    //    }
-    //}
-    
+ 
+    //called every time we paddle
+    void PlayPaddleSound()
+    {
+        //count through paddle sound array
+        if (currentPaddle < paddles.Length - 1)
+        {
+            currentPaddle++;
+        }
+        else
+        {
+            currentPaddle = 0;
+        }
+
+        //play one shot of current sound
+        boatSource.PlayOneShot(paddles[currentPaddle]);
+    }
+
+
+    //we want to see if we are on terrain that should make us slide downward
+    //only gets called while Player is considered to be grounded
+    bool GroundCheck()
+    {
+        //store hit and point
+        RaycastHit hit;
+
+        bool nearGround = false;
+
+        for (int i = 0; i < 30; i++)
+        {
+            //raycast forward to see if we hit terrain 
+            if (Physics.Raycast(tpc.physicsRaycaster.transform.position, tpc.physicsRaycaster.transform.forward, out hit, 10f, tpc.groundedCheck))
+            {
+                exitSpot = hit.point;
+
+                nearGround = true;
+            }
+
+            //spin physics raycaster 1/30th of the way around y axis to shoot ray again
+            tpc.physicsRaycaster.transform.Rotate(0, 12, 0);
+        }
+
+        Debug.Log("boat near ground: " + nearGround);
+
+        return nearGround;
+    }
 }
