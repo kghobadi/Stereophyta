@@ -48,7 +48,10 @@ public class Inventory : MonoBehaviour {
     //audio
     public AudioSource inventoryAudio;
     public AudioClip switchSeeds, switchTools;
-    
+    //for altering seed count text
+    public float seedTxtScale1 = 1f, seedTxtScale2 = 0.8f, seedTxtScale3 = 0.6f;
+    public float seedTxtPos1 = 69f, seedTxtPos2 = 50f, seedTxtPos3 = 45f;
+
     void Start () {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
@@ -138,8 +141,34 @@ public class Inventory : MonoBehaviour {
             }
         }
 
+        SetSeedText();
+    }
+
+    //alter count of current seed
+    void SetSeedText()
+    {
         //set seed counter in inv UI
         seedCounter.text = seedStorage[currentSeed].seedCount.ToString();
+
+        switch (seedCounter.text.Length)
+        {
+            case 0:
+                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale1, seedTxtScale1, seedTxtScale1);
+                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos1, -60.5f, 0);
+                break;
+            case 1:
+                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale1, seedTxtScale1, seedTxtScale1);
+                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos1, -60.5f, 0);
+                break;
+            case 2:
+                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale2, seedTxtScale2, seedTxtScale2);
+                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos2, -60.5f, 0);
+                break;
+            case 3:
+                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale3, seedTxtScale3, seedTxtScale3);
+                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos3, -60.5f, 0);
+                break;
+        }
     }
 
     //switches thru tools

@@ -33,6 +33,7 @@ public class Menu : MonoBehaviour {
 
     //for first time opening Book
     public FadeUI[] escNotices;
+    public GameObject cursor;
 
 	void Start ()
     {
@@ -64,7 +65,9 @@ public class Menu : MonoBehaviour {
         omSmoothLookOrig = camController.mSmoothLookOriginal;
         omSmoothMoveOrig = camController.mSmoothMoveOriginal;
 
+        //turn off
         menuObj.SetActive(false);
+        cursor.SetActive(false);
     }
 	
 	void Update () {
@@ -87,8 +90,8 @@ public class Menu : MonoBehaviour {
     public void TurnOnMenu()
     {
         //cursor on
-        Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        cursor.SetActive(true);
 
         //menu on
         menuObj.SetActive(true);
@@ -109,8 +112,8 @@ public class Menu : MonoBehaviour {
         camController.enabled = true;
 
         //cursor off
-        Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        cursor.SetActive(false);
 
         //reset sun
         sunScript.rotationSpeed = lastSunSpeed;

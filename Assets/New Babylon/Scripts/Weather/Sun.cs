@@ -53,7 +53,7 @@ public class Sun : MonoBehaviour
 
     //sun saver anim
     public FadeUI sunSaver;
-    public FadeUItmp sunSavingText;
+    public FadeUItmp sunSavingText, sunSavingOutline;
 
     void Start()
     {
@@ -239,6 +239,7 @@ public class Sun : MonoBehaviour
         //fade in and out sun saver
         sunSaver.FadeIn();
         sunSavingText.FadeIn();
+        sunSavingOutline.FadeIn();
 
         StartCoroutine(WaitToSave());
     }
