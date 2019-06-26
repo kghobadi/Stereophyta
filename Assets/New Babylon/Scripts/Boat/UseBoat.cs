@@ -7,7 +7,7 @@ public class UseBoat : PickUp {
     //position player should be teleported to
     public Vector3 playerLocalPos;
     BoatPlayer boatScript;
-
+    //cursor ref
     public GameObject cursor;
 
     void Start()
@@ -18,6 +18,9 @@ public class UseBoat : PickUp {
 
     public override void PickUpTool(bool playSound)
     {
+        //so we can deactivate stuff
+        hasBeenAcquired = true;
+
         //play this tools pickup sound
         inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
         cursor.SetActive(true);
@@ -37,10 +40,14 @@ public class UseBoat : PickUp {
         boatScript.inBoat = true;
         boatScript.boatBody.isKinematic = false;
         boatScript.boatCol.enabled = true;
+
+        DeactivatePrompt();
     }
 
     public void ExitBoat(Vector3 exitPos)
     {
+        hasBeenAcquired = false;
+
         //turn off and lock cursor
         cursor.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
@@ -57,5 +64,7 @@ public class UseBoat : PickUp {
         boatScript.inBoat = false;
         boatScript.boatBody.isKinematic = true;
         boatScript.boatCol.enabled = false;
+
+        ShowPickupPrompt();
     }
 }

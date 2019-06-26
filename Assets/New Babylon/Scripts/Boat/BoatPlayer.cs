@@ -26,14 +26,21 @@ public class BoatPlayer : MonoBehaviour
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask boatMask;
-    
-    //store this mouse pos
-    Vector3 lastPosition;
+
+    //only true once player has clicked on waters
+    public bool checkingPaddle;
+    //mouse pos variables for calculating paddle forces
+    Vector3 characterPosOnSreen;
+    Vector3 origMousePos, currentMousePos, lastMousePos, finalMousePos;
+    public float angleInDegrees;
 
     //physics vars 
     public CapsuleCollider boatCol;
     public Rigidbody boatBody;
     public float boatSpeedX, boatSpeedZ;
+    public float paddleForceX, paddleForceZ;
+    public float waterResistanceFwd, waterResistanceAng;
+
     float paddleIdleTimer, holdPaddle = 1f;
 
     public Animator oarAnimator;
@@ -69,6 +76,14 @@ public class BoatPlayer : MonoBehaviour
         //only run this update code if the player is in the boat
         if (inBoat)
         {
+            //for checking angle
+            Vector3 forward = transform.forward;
+            angleInDegrees = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg;
+
+            //get the current mouse pos
+            currentMousePos = Input.mousePosition;
+            characterPosOnSreen = Camera.main.WorldToScreenPoint(tpc.transform.position);
+
             paddleIdleTimer += Time.deltaTime;
 
             if (paddleIdleTimer > holdPaddle)
@@ -90,11 +105,32 @@ public class BoatPlayer : MonoBehaviour
                 {
                     if (hit.transform.gameObject.tag == "Water")
                     {
-                        Paddle(hit);
+                        origMousePos = currentMousePos;
+                        checkingPaddle = true;
                     }
                 }
             }
 
+            //called to adjust the oar in space while row is happening
+            if (checkingPaddle)
+            {
+                AdjustOarAnim();
+            }
+            //apply slow down to boat
+            else
+            {
+                boatBody.velocity = Vector3.Lerp(boatBody.velocity, Vector3.zero, waterResistanceFwd * Time.deltaTime);
+                boatBody.angularVelocity = Vector3.Lerp(boatBody.angularVelocity, Vector3.zero, waterResistanceAng * Time.deltaTime);
+            }
+
+            //mouse button is being released
+            if (Input.GetMouseButtonUp(0))
+            {
+                ApplyPaddleForce();
+            }
+
+
+            //For exiting boat
             //if raycaster hits the ground nearby, can press E to exit boat
             if (GroundCheck())
             {
@@ -103,34 +139,46 @@ public class BoatPlayer : MonoBehaviour
                     useBoatScript.ExitBoat(exitSpot);
                 }
             }
+
+            //set last mouse pos to current 
+            lastMousePos = currentMousePos;
         }
     }
 
-    void Paddle(RaycastHit hit)
+    //Calculate and monitor input while In Boat and only once player has clicked on water
+    void AdjustOarAnim()
     {
-        //directions to move in the water
 
-        //Calculate and monitor input
+    }
 
-        //want to allow the player to paddle only while clicking on water,
-        //so at least the raycast is still relevant
-        //while holding the mouse button (left or right)
-        //drag the mouse either down or up on the screen
-        //to create a force going in the opposite direction
-        //force will be dependent on the length of the row
-        //need a forward force -- greater than the x the longer the row is
-        //x force depending on whether your mouse Input X pos is to the left or right of boat
-        //calculate row by taking the start mouse Input pos 
-        //and the ending mouse input pos 
-        //see which one's Y pos is greater
-        //out put force values
+    // now that we have our inputs, we need to 
+    //Apply Physical Forces
+    void ApplyPaddleForce()
+    {
+        //stop checking paddle and set final mouse pos
+        checkingPaddle = false;
+        finalMousePos = currentMousePos;
 
-        // now that we have our inputs, we need to 
-        //Apply Physical Forces
+        //how far did the player drag mouse on input Y? could be either pos or neg
+        float paddleDistY =  origMousePos.y - finalMousePos.y;
+        //calc z force based on this ^
+        paddleForceZ = paddleDistY * boatSpeedZ;
+
+        //how far on the x?
+        float paddleDistX = finalMousePos.x - origMousePos.x ;
+        //calc x force 
+        paddleForceX = (Mathf.Abs(paddleDistY) * boatSpeedX ) + (Mathf.Abs(paddleDistX) * boatSpeedX);
+        //check if the row was on left or right
+        if(characterPosOnSreen.x < origMousePos.x)
+        {
+            //was left of player, so make x force negative
+            paddleForceX *= -1;
+        }
+
         //z forward force applied with AddForce (0, 0, zForce);
+        boatBody.AddRelativeForce(0, paddleForceZ, 0);
         //x force applied with AddTorqur(0, xTorque, 0) 
-        //will need to calculate the boats true angle like in waddle ski for finding proper Torque angles.
-
+        boatBody.AddTorque(0, paddleForceX, 0);
 
         PlayPaddleSound();
     }
