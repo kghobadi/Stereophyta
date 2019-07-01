@@ -28,7 +28,15 @@ public class UseBoat : PickUp {
 
         //turn off player movment
         tpc.playerCanMove = false;
+        tpc.poopShoes.SetBool("idle", true);
+        tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
         camController.canLook = false;
+        //child cam to boat
+        camController.transform.SetParent(transform);
+        //adjust cam height & rotation
+        camController.transform.localPosition = new Vector3(0f, -10f, -8f);
+        camController.transform.localEulerAngles = new Vector3(-75f, 0f, 0f);
+        camController.LerpFOV(75f);
        
         //set boat as parent & position
         tpc.transform.SetParent(transform);
@@ -40,6 +48,9 @@ public class UseBoat : PickUp {
         boatScript.inBoat = true;
         boatScript.boatBody.isKinematic = false;
         boatScript.boatCol.enabled = true;
+        //set oar anim
+        boatScript.oarAnimator.SetTrigger("activateBoat");
+        boatScript.oarAnimator.SetBool("rightOrLeft", true);
 
         DeactivatePrompt();
     }
@@ -55,6 +66,9 @@ public class UseBoat : PickUp {
         //turn off player movment
         tpc.playerCanMove = true;
         camController.canLook = true;
+        camController.transform.SetParent(null);
+        camController.LerpFOV(50f);
+
         //set boat as parent & position
         tpc.transform.SetParent(null);
         tpc.transform.position = exitPos;
@@ -64,6 +78,9 @@ public class UseBoat : PickUp {
         boatScript.inBoat = false;
         boatScript.boatBody.isKinematic = true;
         boatScript.boatCol.enabled = false;
+
+        //set oar anim
+        boatScript.oarAnimator.SetTrigger("deactivateBoat");
 
         ShowPickupPrompt();
     }

@@ -91,7 +91,7 @@ public class BoatPlayer : MonoBehaviour
                 //ChangeAnimState(boatIdle);
             }
 
-            Debug.Log(boatBody.velocity);
+            //Debug.Log(boatBody.velocity);
 
             //click to move to point
             if (Input.GetMouseButtonDown(0))
@@ -168,19 +168,71 @@ public class BoatPlayer : MonoBehaviour
         float paddleDistX = finalMousePos.x - origMousePos.x ;
         //calc x force 
         paddleForceX = (Mathf.Abs(paddleDistY) * boatSpeedX ) + (Mathf.Abs(paddleDistX) * boatSpeedX);
+
         //check if the row was on left or right
         if(characterPosOnSreen.x < origMousePos.x)
         {
             //was left of player, so make x force negative
             paddleForceX *= -1;
+
+            oarAnimator.SetBool("rightOrLeft", true);
+
+            //right f 2 b
+            if (paddleForceZ > 0)
+            {
+                oarAnimator.SetTrigger("rowRightF2B");
+            }
+            //right b 2 f
+            else
+            {
+                oarAnimator.SetTrigger("rowRightB2F");
+            }
+
         }
+        //was right of player
+        else
+        {
+            oarAnimator.SetBool("rightOrLeft", false);
+
+            //left f 2 b
+            if (paddleForceZ > 0)
+            {
+                oarAnimator.SetTrigger("rowLeftF2B");
+            }
+            //left b 2 f
+            else
+            {
+                oarAnimator.SetTrigger("rowLeftB2F");
+            }
+        }
+
+        StartCoroutine(WaitToApplyForce());
+    }
+
+    //wait for anim to play then apply forces
+    IEnumerator WaitToApplyForce()
+    {
+        yield return new WaitForSeconds(0.8f);
 
         //z forward force applied with AddForce (0, 0, zForce);
         boatBody.AddRelativeForce(0, paddleForceZ, 0);
         //x force applied with AddTorqur(0, xTorque, 0) 
-        boatBody.AddTorque(0, paddleForceX, 0);
+        StartCoroutine(AddTorqueOverTime(paddleForceX, 12));
 
         PlayPaddleSound();
+    }
+
+    //allows us to apply force over time
+    IEnumerator AddTorqueOverTime(float totalForce, int division)
+    {
+        float indForce = totalForce / division;
+        float time = 1f / division;
+
+        for(int i = 0; i < division; i++)
+        {
+            boatBody.AddTorque(0, indForce, 0);
+            yield return new WaitForSeconds(time);
+        }
     }
    
  
@@ -214,7 +266,7 @@ public class BoatPlayer : MonoBehaviour
         for (int i = 0; i < 30; i++)
         {
             //raycast forward to see if we hit terrain 
-            if (Physics.Raycast(tpc.physicsRaycaster.transform.position, tpc.physicsRaycaster.transform.forward, out hit, 10f, tpc.groundedCheck))
+            if (Physics.Raycast(tpc.physicsRaycaster.transform.position, tpc.physicsRaycaster.transform.forward, out hit, 15f, tpc.groundedCheck))
             {
                 exitSpot = hit.point;
 
