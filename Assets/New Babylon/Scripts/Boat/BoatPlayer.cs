@@ -49,6 +49,11 @@ public class BoatPlayer : MonoBehaviour
 
     public Vector3 exitSpot;
 
+    Vector3 origRotation;
+
+    //dock boat prompt
+    public FadeUI[] dockprompts;
+
     void Start()
     {
         //player refs
@@ -68,7 +73,7 @@ public class BoatPlayer : MonoBehaviour
         boatBody.isKinematic = false;
         boatCol = GetComponent<CapsuleCollider>();
         boatCol.enabled = false;
-        
+        origRotation = transform.localEulerAngles;
     }
 
     void Update()
@@ -76,6 +81,14 @@ public class BoatPlayer : MonoBehaviour
         //only run this update code if the player is in the boat
         if (inBoat)
         {
+            //if player anim not idle
+            if(tpc.poopShoes.GetNextAnimatorStateInfo(0).IsName("idle") != true)
+            {
+                tpc.poopShoes.SetBool("idle", true);
+            }
+
+            //transform.localEulerAngles = new Vector3(origRotation.x, origRotation.y, transform.localEulerAngles.z);
+
             //for checking angle
             Vector3 forward = transform.forward;
             angleInDegrees = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg;
@@ -84,6 +97,7 @@ public class BoatPlayer : MonoBehaviour
             currentMousePos = Input.mousePosition;
             characterPosOnSreen = Camera.main.WorldToScreenPoint(tpc.transform.position);
 
+            //so we can't immediately exit boat
             paddleIdleTimer += Time.deltaTime;
 
             if (paddleIdleTimer > holdPaddle)
@@ -137,6 +151,7 @@ public class BoatPlayer : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.E) && paddleIdleTimer > 0.5f)
                 {
                     useBoatScript.ExitBoat(exitSpot);
+                    paddleIdleTimer = 0;
                 }
             }
 
@@ -266,18 +281,37 @@ public class BoatPlayer : MonoBehaviour
         for (int i = 0; i < 30; i++)
         {
             //raycast forward to see if we hit terrain 
-            if (Physics.Raycast(tpc.physicsRaycaster.transform.position, tpc.physicsRaycaster.transform.forward, out hit, 15f, tpc.groundedCheck))
+            if (Physics.SphereCast(tpc.physicsRaycaster.transform.position, 5f, tpc.physicsRaycaster.transform.forward, out hit, 15f, tpc.groundedCheck))
             {
                 exitSpot = hit.point;
 
                 nearGround = true;
+
             }
 
             //spin physics raycaster 1/30th of the way around y axis to shoot ray again
             tpc.physicsRaycaster.transform.Rotate(0, 12, 0);
+            
         }
 
         Debug.Log("boat near ground: " + nearGround);
+
+        if (nearGround)
+        {
+            //fade in dock prompt
+            for (int d = 0; d < dockprompts.Length; d++)
+            {
+                dockprompts[d].FadeIn();
+            }
+        }
+        else
+        {
+            //fade out dock prompt
+            for (int d = 0; d < dockprompts.Length; d++)
+            {
+                dockprompts[d].FadeOut();
+            }
+        }
 
         return nearGround;
     }

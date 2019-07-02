@@ -82,6 +82,12 @@ public class UseBoat : PickUp {
         //set oar anim
         boatScript.oarAnimator.SetTrigger("deactivateBoat");
 
+        //fade out dock prompt
+        for (int d = 0; d < boatScript.dockprompts.Length; d++)
+        {
+            boatScript.dockprompts[d].FadeOut();
+        }
+
         ShowPickupPrompt();
     }
 }
