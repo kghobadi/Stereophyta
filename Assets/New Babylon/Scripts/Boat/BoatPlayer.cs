@@ -21,8 +21,8 @@ public class BoatPlayer : MonoBehaviour
 
     //vars for footstep audio
     public AudioSource boatSource;
-    public AudioClip[] paddles;
-    int currentPaddle = 0;
+    public AudioClip[] paddles, bigPaddles;
+    int currentPaddle = 0, currentBigPaddle = 0;
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask boatMask;
@@ -40,10 +40,17 @@ public class BoatPlayer : MonoBehaviour
     public float boatSpeedX, boatSpeedZ;
     public float paddleForceX, paddleForceZ;
     public float waterResistanceFwd, waterResistanceAng;
+    //min z force for big paddle sound
+    public float bigPaddleMin;
 
     float paddleIdleTimer, holdPaddle = 1f;
 
     public Animator oarAnimator;
+    //extra fx
+    public Transform oarHead;
+    public OarTrail[] oarTrails;
+    public ParticleSystem[] splashParticles;
+    int fxCounter = 0;
 
     UseBoat useBoatScript;
 
@@ -84,7 +91,7 @@ public class BoatPlayer : MonoBehaviour
             //if player anim not idle
             if(tpc.poopShoes.GetNextAnimatorStateInfo(0).IsName("idle") != true)
             {
-                tpc.poopShoes.SetBool("idle", true);
+                tpc.SetAnimator("idle");
             }
 
             //transform.localEulerAngles = new Vector3(origRotation.x, origRotation.y, transform.localEulerAngles.z);
@@ -142,8 +149,7 @@ public class BoatPlayer : MonoBehaviour
             {
                 ApplyPaddleForce();
             }
-
-
+            
             //For exiting boat
             //if raycaster hits the ground nearby, can press E to exit boat
             if (GroundCheck())
@@ -187,8 +193,11 @@ public class BoatPlayer : MonoBehaviour
         //check if the row was on left or right
         if(characterPosOnSreen.x < origMousePos.x)
         {
-            //was left of player, so make x force negative
-            paddleForceX *= -1;
+            //was left of player and trying to move forward, so make x force negative
+            if(paddleForceZ > 0)
+            {
+                paddleForceX *= -1;
+            }
 
             oarAnimator.SetBool("rightOrLeft", true);
 
@@ -204,9 +213,16 @@ public class BoatPlayer : MonoBehaviour
             }
 
         }
+
         //was right of player
         else
         {
+            //trying to move backward so now right is left
+            if (paddleForceZ < 0)
+            {
+                paddleForceX *= -1;
+            }
+
             oarAnimator.SetBool("rightOrLeft", false);
 
             //left f 2 b
@@ -221,7 +237,44 @@ public class BoatPlayer : MonoBehaviour
             }
         }
 
+        StartPaddleFX();
+        
         StartCoroutine(WaitToApplyForce());
+    }
+
+    //grab trail & splash particles
+    void StartPaddleFX()
+    {
+        //increment counter
+        if(fxCounter < oarTrails.Length - 1)
+        {
+            fxCounter++;
+        }
+        else
+        {
+            fxCounter = 0;
+        }
+
+        //oar trail
+        oarTrails[fxCounter].StartCoroutine(oarTrails[fxCounter].TrailOar());
+
+        //splash particle
+        splashParticles[fxCounter].transform.position = oarHead.position;
+        ParticleSystem.MainModule splashMain = splashParticles[fxCounter].main;
+
+        //set forward speed of particles as opposite of paddle force 
+        if(paddleForceZ > 0)
+        {
+            splashMain.startSpeed = -5;
+        }
+        else
+        {
+            splashMain.startSpeed = 5;
+        }
+
+        splashParticles[fxCounter].Play();
+        //move alongside oarhead
+        splashParticles[fxCounter].GetComponent<PaddleSplashes>().StartCoroutine(splashParticles[fxCounter].GetComponent<PaddleSplashes>().Paddle());
     }
 
     //wait for anim to play then apply forces
@@ -234,7 +287,17 @@ public class BoatPlayer : MonoBehaviour
         //x force applied with AddTorqur(0, xTorque, 0) 
         StartCoroutine(AddTorqueOverTime(paddleForceX, 12));
 
-        PlayPaddleSound();
+        //decide which paddle sound
+        if(Mathf.Abs(paddleForceZ) > bigPaddleMin)
+        {
+            PlayBigPaddleSound();
+        }
+        //normal paddle
+        else
+        {
+            PlayPaddleSound();
+        }
+        
     }
 
     //allows us to apply force over time
@@ -266,6 +329,23 @@ public class BoatPlayer : MonoBehaviour
 
         //play one shot of current sound
         boatSource.PlayOneShot(paddles[currentPaddle]);
+    }
+
+    //called every time we paddle
+    void PlayBigPaddleSound()
+    {
+        //count through paddle sound array
+        if (currentBigPaddle < bigPaddles.Length - 1)
+        {
+            currentBigPaddle++;
+        }
+        else
+        {
+            currentBigPaddle = 0;
+        }
+
+        //play one shot of current sound
+        boatSource.PlayOneShot(bigPaddles[currentBigPaddle]);
     }
 
 

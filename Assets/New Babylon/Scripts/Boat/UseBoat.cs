@@ -9,9 +9,11 @@ public class UseBoat : PickUp {
     BoatPlayer boatScript;
     //cursor ref
     public GameObject cursor;
+    public bool firstTime;
 
     void Start()
     {
+        firstTime = true;
         boatScript = GetComponent<BoatPlayer>();
         camController = Camera.main.GetComponent<PlayerCameraController>();
     }
@@ -26,9 +28,18 @@ public class UseBoat : PickUp {
         cursor.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
 
+        //set boats rotation to player's current forward
+        if (!firstTime)
+        {
+            transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, tpc.characterBody.rotation.y);
+            transform.localPosition += new Vector3(0, 0, 5f);
+        }
+
         //turn off player movment
         tpc.playerCanMove = false;
-        tpc.poopShoes.SetBool("idle", true);
+        tpc.SetAnimator("idle");
+        tpc.runParticles.SetActive(false);
+        tpc.walkingEffect.Stop();
         tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
         camController.canLook = false;
         //child cam to boat
@@ -37,6 +48,7 @@ public class UseBoat : PickUp {
         camController.transform.localPosition = new Vector3(0f, -10f, -8f);
         camController.transform.localEulerAngles = new Vector3(-75f, 0f, 0f);
         camController.LerpFOV(75f);
+
        
         //set boat as parent & position
         tpc.transform.SetParent(transform);
@@ -51,6 +63,7 @@ public class UseBoat : PickUp {
         //set oar anim
         boatScript.oarAnimator.SetTrigger("activateBoat");
         boatScript.oarAnimator.SetBool("rightOrLeft", true);
+        firstTime = false;
 
         DeactivatePrompt();
     }

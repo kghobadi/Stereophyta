@@ -506,7 +506,7 @@ public class ThirdPersonController : MonoBehaviour
         }
     }
 
-    void SetAnimator(string newState)
+    public void SetAnimator(string newState)
     {
         //turn off all states
         poopShoes.SetBool("jumping", false);
