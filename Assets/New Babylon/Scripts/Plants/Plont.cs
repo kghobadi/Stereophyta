@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TGS;
 
 [System.Serializable]
 public struct GrowthStages
@@ -17,6 +18,17 @@ public class Plont : MonoBehaviour {
     ThirdPersonController tpc;
     SleepSave saveScript;
     public bool startingPlant;
+
+    //tgs logic
+    public TerrainGridSystem tgs;
+    public bool plantedOnGrid;
+    public Cell cell;
+    public int cellIndex;
+
+    //All possible texture references. 
+    public Texture2D groundTexture;
+    public Texture2D plantedTexture;
+    public Texture2D wateredTexture;
 
     //physics 
     Rigidbody plantBody;
@@ -65,6 +77,7 @@ public class Plont : MonoBehaviour {
     
 	void Start () {
         //hail the sun
+        tgs = TerrainGridSystem.instance;
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
@@ -155,15 +168,25 @@ public class Plont : MonoBehaviour {
     }
 
     public void Update() {
+
         //counting days is hard work
         if (sun.dayCounter > sun.yesterday)
         {
             if (!dayPassed)
             {
+                //increment age (within stage)
                 myAge++;
 
+                //reset watered vars
                 hasBeenWatered = false;
 
+                //ground texture
+                if (plantedOnGrid)
+                {
+                    tgs.CellToggleRegionSurface(cellIndex, true, plantedTexture);
+                }
+                
+                //reached next stage, grow
                 if (myAge == nextStage)
                 {
                     GrowPlant(true);
@@ -345,8 +368,25 @@ public class Plont : MonoBehaviour {
         SpawnSeed();
     }
 
+    //called by water or rains
+    public void WaterPlant()
+    {
+        GrowPlant(true);
+        tgs.CellToggleRegionSurface(cellIndex, true, wateredTexture);
+        hasBeenWatered = true;
+    }
+
     void Die()
     {
+        //remove plant from grid
+        if (plantedOnGrid)
+        {
+            //nothing planted tag
+            tgs.CellSetTag(cell, 0);
+            //ground texture
+            tgs.CellToggleRegionSurface(cellIndex, true, groundTexture);
+        }
+
         //Debug.Log("Rip " + gameObject.name);
         if (!startingPlant)
         {

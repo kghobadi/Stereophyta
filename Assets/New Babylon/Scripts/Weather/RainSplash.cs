@@ -78,8 +78,7 @@ public class RainSplash : Rhythm
             //if it hasn't been watered, grow and water
             if (!other.gameObject.GetComponent<Plont>().hasBeenWatered)
             {
-                other.gameObject.GetComponent<Plont>().GrowPlant(true);
-                other.gameObject.GetComponent<Plont>().hasBeenWatered = true;
+                other.gameObject.GetComponent<Plont>().WaterPlant();
             }
 
             //if (other.gameObject.tag == "Animal")

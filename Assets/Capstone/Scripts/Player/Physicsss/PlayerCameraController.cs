@@ -215,7 +215,7 @@ public class PlayerCameraController : MonoBehaviour {
             {
                 ZoomOut(0.025f);
 
-                Debug.Log("cam hitting " + hit.transform.gameObject.name);
+                //Debug.Log("cam hitting " + hit.transform.gameObject.name);
             }
         }
     }

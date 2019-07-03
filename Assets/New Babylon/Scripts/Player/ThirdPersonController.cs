@@ -413,7 +413,7 @@ public class ThirdPersonController : MonoBehaviour
         sleepParticles.SetActive(true);
 
         //set animator
-        SetAnimator("sleeping");
+        //SetAnimator("sleeping");
 
         yield return new WaitForSeconds(0.5f);
 
@@ -424,7 +424,7 @@ public class ThirdPersonController : MonoBehaviour
     //called by Sun when player's daysToSleep reaches 0 while sleeping is true
     public void WakeUp()
     {
-        Debug.Log("wake up time");
+        //Debug.Log("wake up time");
         //set bools
         sleeping = false;
         playerCanMove = true;
