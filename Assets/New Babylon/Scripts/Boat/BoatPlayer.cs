@@ -374,7 +374,7 @@ public class BoatPlayer : MonoBehaviour
             
         }
 
-        Debug.Log("boat near ground: " + nearGround);
+        //Debug.Log("boat near ground: " + nearGround);
 
         if (nearGround)
         {

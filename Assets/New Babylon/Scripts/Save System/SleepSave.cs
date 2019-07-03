@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
+using TGS;
 
 
 [Serializable]
@@ -14,10 +15,12 @@ public class SaveStorage
     public List<string> plantType;
     public List<Vector3> plantPositions;
     public List<int> plantAges;
+    //for saving plants on a grid
+    public List<bool> plantedOnGrid;
+    public List<int> cellIndeces;
 
     //for saving count of seeds in inventory
     public List<int> inventorySeedCounts;
-   
 }
 
 [Serializable]
@@ -36,7 +39,10 @@ public class SleepSave : MonoBehaviour {
     public List<string> plantTypes;
     public List<GameObject> plantPrefabs;
 
+    TerrainGridSystem tgs;
+
     void Start () {
+        tgs = TerrainGridSystem.instance;
         inventoryScript = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
 
         //this means we have set it before, so we have saved before
@@ -51,9 +57,12 @@ public class SleepSave : MonoBehaviour {
         //clear plants lists besides the initial game obj/script storage (these ones change)
         mySaveStorage.plantPositions.Clear();
         mySaveStorage.plantAges.Clear();
+        //grid clear
+        mySaveStorage.plantedOnGrid.Clear();
+        mySaveStorage.cellIndeces.Clear();
 
         //set plant position and plant ages
-        for(int i = 0; i < mySaveStorage.plants.Count; i++)
+        for (int i = 0; i < mySaveStorage.plants.Count; i++)
         {
             //check if plantScript stored is null
             if(mySaveStorage.plantScripts[i] != null)
@@ -62,6 +71,20 @@ public class SleepSave : MonoBehaviour {
                 mySaveStorage.plantAges.Add(mySaveStorage.plantScripts[i].myAge);
                 //add plant position
                 mySaveStorage.plantPositions.Add(mySaveStorage.plantScripts[i].transform.position);
+
+                //is this plant on the grid?
+                //on Grid
+                if (mySaveStorage.plantScripts[i].plantedOnGrid)
+                {
+                    mySaveStorage.plantedOnGrid.Add(true);
+                    mySaveStorage.cellIndeces.Add(mySaveStorage.plantScripts[i].cellIndex);
+                }
+                //off grid
+                else
+                {
+                    mySaveStorage.plantedOnGrid.Add(false);
+                    mySaveStorage.cellIndeces.Add(0);
+                }
             }
             else
             {
@@ -135,15 +158,32 @@ public class SleepSave : MonoBehaviour {
 
                 //generate
                 GameObject plont = Instantiate(pPrefab, spawnPos, Quaternion.identity);
+                Plont plontScript = plont.GetComponent<Plont>();
                 //don't want it to add itself to save storage 
-                plont.GetComponent<Plont>().startingPlant = true;
+                plontScript.startingPlant = true;
 
                 //instead we reset the first 2 lists with this new gameobjects info
                 mySaveStorage.plants[i] = plont;
-                mySaveStorage.plantScripts[i] = plont.GetComponent<Plont>();
+                mySaveStorage.plantScripts[i] = plontScript;
 
                 //age the plant the number of timems stored in the age list
-                plont.GetComponent<Plont>().StartCoroutine(plont.GetComponent<Plont>().AgeAtStart(mySaveStorage.plantAges[i]));
+                plontScript.StartCoroutine(plontScript.AgeAtStart(mySaveStorage.plantAges[i]));
+
+                //check if the plant is on grid
+                if (mySaveStorage.plantedOnGrid[i])
+                {
+                    //this is on the grid!
+                    plontScript.plantedOnGrid = true;
+
+                    //set cell & index
+                    plontScript.cellIndex = mySaveStorage.cellIndeces[i];
+
+                    //planted tag
+                    tgs.CellSetTag(plontScript.cellIndex, 1);
+
+                    //Sets texture to planted
+                    tgs.CellToggleRegionSurface(plontScript.cellIndex, true, plontScript.plantedTexture);
+                }
             }
 
             //Debug.Log("regenerated plants!");

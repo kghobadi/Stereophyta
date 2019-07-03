@@ -127,76 +127,14 @@ public class Seed : MonoBehaviour {
                     //we have a grid cell
                     if(currentCell != null)
                     {
-                        //get the index of this cell
-                        int cellIndex = tgs.CellGetIndex(currentCell);
-                        currentCellIndex = cellIndex;
-
-                        //compare to previous cell 
-                        if (currentCellIndex != previousCellIndex)
-                        {
-                            previousCellIndex = currentCellIndex;
-                        }
-
-                        //checks if cell is fertile 
-                        if (tgs.CellGetTag(cellIndex) == 0)
-                        {
-                            //Sets texture to clickable
-                            tgs.CellToggleRegionSurface(cellIndex, true, canClickTexture);
-
-                            //If player clicks, we plant seed and clear up Equip slot
-                            if (Input.GetButton("Plant"))
-                            {
-                                DropSeed();
-                                plantingOnGrid = true;
-                            }
-
-                        }
-                        else
-                        {
-                            // cant plant here, grid spot is taken or not fertile
-                            if (Input.GetButton("Plant"))
-                            {
-                                Debug.Log("nono");
-                                seedSource.PlayOneShot(noNO);
-                            }
-                        }
-
-                        //If it's a new cell, set last cell back to fertileTexture
-                        if (tgs.CellGetTag(previousCellIndex) == 0)
-                            StartCoroutine(ChangeTexture(currentCellIndex, groundTexture));
+                        //Debug.Log("tgs planting");
+                        CheckCanPlantGrid();
                     }
 
                     //no grid -- just terrain 
                     else
                     {
-                        if (Input.GetButton("Plant"))
-                        {
-                            //check in radius of planting point if its too close to others
-                            bool nearOtherPlant = false;
-                            Collider[] hitColliders = Physics.OverlapSphere(hit.point, distFromOtherPlants);
-                            int i = 0;
-                            while (i < hitColliders.Length)
-                            {
-                                if (hitColliders[i].gameObject.tag == "Plant")
-                                {
-                                    nearOtherPlant = true;
-                                    Debug.Log("hit other plant");
-                                }
-                                i++;
-                            }
-
-                            //if remains false
-                            if (!nearOtherPlant)
-                            {
-                                DropSeed();
-                            }
-                            else
-                            {
-                                Debug.Log("nono");
-                                seedSource.PlayOneShot(noNO);
-                                //player source play NoNo sound
-                            }
-                        }
+                        CheckCanPlant(hit);
                     }
                 }
             }
@@ -229,6 +167,81 @@ public class Seed : MonoBehaviour {
             if (Vector3.Distance(transform.position, player.transform.position) < 1)
             {
                 CollectSeed();
+            }
+        }
+    }
+
+    //planting on terrain grid
+    void CheckCanPlantGrid()
+    {
+        //get the index of this cell
+        int cellIndex = tgs.CellGetIndex(currentCell);
+        currentCellIndex = cellIndex;
+
+        //compare to previous cell 
+        if (currentCellIndex != previousCellIndex)
+        {
+            previousCellIndex = currentCellIndex;
+        }
+
+        //checks if cell is fertile 
+        if (tgs.CellGetTag(cellIndex) == 0)
+        {
+            //Sets texture to clickable
+            tgs.CellToggleRegionSurface(cellIndex, true, canClickTexture);
+
+            //If player clicks, we plant seed and clear up Equip slot
+            if (Input.GetButton("Plant"))
+            {
+                DropSeed();
+                plantingOnGrid = true;
+            }
+
+        }
+        else
+        {
+            // cant plant here, grid spot is taken or not fertile
+            if (Input.GetButton("Plant"))
+            {
+                //Debug.Log("nono");
+                seedSource.PlayOneShot(noNO);
+            }
+        }
+
+        //If it's a new cell, set last cell back to fertileTexture
+        if (tgs.CellGetTag(previousCellIndex) == 0)
+            StartCoroutine(ChangeTexture(currentCellIndex, groundTexture));
+    }
+
+    //planting on terrain without grid
+    void CheckCanPlant(RaycastHit hit)
+    {
+        if (Input.GetButton("Plant"))
+        {
+            //check in radius of planting point if its too close to others
+            bool nearOtherPlant = false;
+            Collider[] hitColliders = Physics.OverlapSphere(hit.point, distFromOtherPlants);
+            int i = 0;
+            while (i < hitColliders.Length)
+            {
+                if (hitColliders[i].gameObject.tag == "Plant")
+                {
+                    nearOtherPlant = true;
+                    Debug.Log("hit other plant");
+                }
+                i++;
+            }
+
+            //if remains false
+            if (!nearOtherPlant)
+            {
+                DropSeed();
+            }
+            else
+            {
+                Debug.Log("nono");
+                seedSource.PlayOneShot(noNO);
+                //player source play NoNo sound
             }
         }
     }
@@ -297,10 +310,12 @@ public class Seed : MonoBehaviour {
         plontScript.seedPooler = seedPooler;
 
         //add info to Plont if on Grid 
-        plontScript.plantedOnGrid = true;
-        plontScript.cell = currentCell;
-        plontScript.cellIndex = currentCellIndex;
-
+        if (plantingOnGrid)
+        {
+            plontScript.plantedOnGrid = true;
+            plontScript.cellIndex = currentCellIndex;
+        }
+     
         //reset seed parent & pos, physics and planting bool
         transform.SetParent(inventoryParent);
         transform.localPosition = originalPos;

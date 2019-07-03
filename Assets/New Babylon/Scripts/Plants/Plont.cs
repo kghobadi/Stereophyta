@@ -22,7 +22,6 @@ public class Plont : MonoBehaviour {
     //tgs logic
     public TerrainGridSystem tgs;
     public bool plantedOnGrid;
-    public Cell cell;
     public int cellIndex;
 
     //All possible texture references. 
@@ -89,7 +88,6 @@ public class Plont : MonoBehaviour {
             saveScript.mySaveStorage.plants.Add(gameObject);
             saveScript.mySaveStorage.plantScripts.Add(this);
             saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
-
             //Debug.Log("added this plant to save storage");
         }
         else
@@ -168,7 +166,7 @@ public class Plont : MonoBehaviour {
     }
 
     public void Update() {
-
+        
         //counting days is hard work
         if (sun.dayCounter > sun.yesterday)
         {
@@ -382,7 +380,7 @@ public class Plont : MonoBehaviour {
         if (plantedOnGrid)
         {
             //nothing planted tag
-            tgs.CellSetTag(cell, 0);
+            tgs.CellSetTag(cellIndex, 0);
             //ground texture
             tgs.CellToggleRegionSurface(cellIndex, true, groundTexture);
         }

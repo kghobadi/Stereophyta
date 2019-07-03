@@ -413,7 +413,7 @@ public class ThirdPersonController : MonoBehaviour
         sleepParticles.SetActive(true);
 
         //set animator
-        //SetAnimator("sleeping");
+        SetAnimator("sleeping");
 
         yield return new WaitForSeconds(0.5f);
 
