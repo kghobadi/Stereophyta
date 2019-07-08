@@ -37,7 +37,7 @@ public class Inventory : MonoBehaviour {
     public GameObject seedInvVisual;
     public Image currentSeedImg, lastSeedImg, nextSeedImg;
     public Text seedCounter;
-    public Sprite[] seedSprites;
+    public List<Sprite> seedSprites = new List<Sprite>();
     public FadeUI[] seedsUI;
     IEnumerator fadeSeeds;
     

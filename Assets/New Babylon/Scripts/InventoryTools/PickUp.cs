@@ -23,6 +23,7 @@ public abstract class PickUp : MonoBehaviour {
     public FadeUI[] interactPrompts;
 
     void Awake () {
+
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();

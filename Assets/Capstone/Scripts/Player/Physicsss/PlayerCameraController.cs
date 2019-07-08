@@ -272,6 +272,7 @@ public class PlayerCameraController : MonoBehaviour {
     public void LerpFOV(float newFOV)
     {
         desiredFOV = newFOV;
+        lerpCounter = 0;
         lerpingFOV = true;
     }
 }
