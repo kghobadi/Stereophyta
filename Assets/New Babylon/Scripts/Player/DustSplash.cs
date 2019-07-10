@@ -60,8 +60,22 @@ public class DustSplash : Rhythm {
         base.OnTriggerEnter(other);
         if (other.gameObject.tag == "Plant")
         {
-            if(!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-                other.gameObject.GetComponent<Plont>().PlaySound();
+            //plant
+            if (other.GetComponent<Plont>())
+            {
+                //not already playing sound 
+                if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+                    other.gameObject.GetComponent<Plont>().PlaySound();
+            }
+            //shroom
+            if (other.GetComponent<Shroom>())
+            {
+                //change rhythm possible
+                if(!other.GetComponent<Shroom>().changedRhythm)
+                    other.GetComponent<Shroom>().SwitchRhythm();
+
+                other.GetComponent<Shroom>().ReleaseSpores();
+            }
         }
         //when u jump on wind fan increase the rhythm
         if (other.gameObject.tag == "WindMachines")
