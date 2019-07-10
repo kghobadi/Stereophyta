@@ -29,6 +29,7 @@ public class Inventory : MonoBehaviour {
     IEnumerator fadeTools;
 
     //seed inv
+    public Vector3 localSeedSpot;
     public int currentSeed = 0;
     public GameObject currenSeedObj;
     public List<SeedStorage> seedStorage = new List<SeedStorage>();
@@ -111,7 +112,8 @@ public class Inventory : MonoBehaviour {
                 SwitchItem(true);
             }
             //switch current item -
-            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchSeeds && !currenSeedObj.GetComponent<Seed>().planting && CheckPlayerHasSeed() >= 2)
+            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchSeeds 
+                && currenSeedObj.GetComponent<Item>().CheckSeedPlanting() && CheckPlayerHasSeed() >= 2)
             {
                 SwitchSeed(true);
             }
@@ -265,7 +267,7 @@ public class Inventory : MonoBehaviour {
     {
         if(currenSeedObj.activeSelf)
         {
-            currenSeedObj.GetComponent<Seed>().seedSelected = false;
+            currenSeedObj.GetComponent<Item>().DeselectSeed();
             currenSeedObj.SetActive(false);
         }
 
@@ -286,7 +288,7 @@ public class Inventory : MonoBehaviour {
         if(seedStorage[currentSeed].seedCount > 0)
         {
             currenSeedObj.SetActive(true);
-            currenSeedObj.GetComponent<Seed>().seedSelected = true;
+            currenSeedObj.GetComponent<Item>().SelectSeed();
         }
         //switch seed again -- this causes a StackOverflow if there's no seeds in your inv
         else
@@ -375,6 +377,36 @@ public class Inventory : MonoBehaviour {
         }
 
         return seedCounter;
+    }
+
+    //adds seed type to inv
+    public void AddSeedToInventory(GameObject seed, Sprite seedInvSprite)
+    {
+        //new seed seedstorage struct
+        SeedStorage newSeed;
+        newSeed.seedObj = seed;
+        newSeed.seedCount = 1;
+
+        //add to lists
+        seedStorage.Add(newSeed);
+        seedSprites.Add(seedInvSprite);
+
+        //set parent and pos
+        seed.transform.SetParent(transform);
+        seed.transform.localPosition = localSeedSpot;
+
+        //set new seed index in seed & plant
+        seed.GetComponent<Item>().SetSeedIndex(seedStorage.Count - 1);
+    }
+
+    //remove seed type from inv
+    public void RemoveSeedFromInventory(int index)
+    {
+        //turn off
+        seedStorage[index].seedObj.SetActive(false);
+        //remove from lists
+        seedStorage.RemoveAt(index);
+        seedSprites.RemoveAt(index);
     }
 
     //fade in and out Tools inv

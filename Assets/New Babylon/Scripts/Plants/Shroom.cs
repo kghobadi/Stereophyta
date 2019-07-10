@@ -19,42 +19,76 @@ using System.Collections.Generic;
 using UnityEngine;
 using TGS;
 
-public class Shroom : PickUpMaterial
-{
+public class Shroom : MonoBehaviour
+{ 
+    //for spawning shrooms
+    public GameObject shroomPrefab;
+
+    //player and sun ref
+    Sun sun;
+    GameObject player;
+    ThirdPersonController tpc;
+
+    //for inv
+    Inventory inventoryScript;
+    public int mySeedIndex;
+
     //tgs logic
     TerrainGridSystem tgs;
-    Cell currentCell;
-    int currentCellIndex, previousCellIndex;
+    public bool plantedOnGrid;
+    public int cellIndex;
+
     //All possible texture references. 
     public Texture2D groundTexture;
     public Texture2D plantedTexture;
-    public Texture2D canClickTexture;
 
-    //
-    AudioObjectPool aop;
+    //size and transform storage
     Vector3 originalSize, largeSize, originalPosition;
-
+    
     //physics
     Rigidbody shroomBody;
     BoxCollider shroomCol;
+    float vortexSpeed = 7.5f;
 
     //lerp bools
-    public bool planted, planting, plantingOnGrid;
+    public enum PlantingState
+    {
+        PLANTED, UNPLANTED, VORTEXING,
+    }
+    public PlantingState plantingState;
+
+
+    //for checking shroom type
+    public ShroomType shroomType;
+    public enum ShroomType
+    {
+        OCTA, CUBIE, 
+    }
+
+    //active planted bools
     bool breathingIn, breathingOut;
-    public float shroomGroupDist;
     public float breatheSpeed, breatheDistance;
-    public int rhythm, shroomGroupMax;
+    public int rhythm;
+
+    //for shroom growth 
+    public int myAge, deathDay;
+    public bool dayPassed;
 
     //audio for shroom
-    public AudioClip[] breathIn, breathOut;
-    public AudioClip eatingSound, dropShroom, noNo;
+    public AudioSource shroomSource;
+    public AudioClip[] breathingSounds;
+    public int mushroomSize;
+    public AudioClip mushroomSound;
+    public AudioClip dropShroom, noNo, uprootSound;
 
     //for player to take!!
+    public Animator shroomAnimator;
     public MeshRenderer shroomMR;
-    public Material myShroomShader;
+    public Material myShroomShader, uprootMat;
 
-    //player interactin bool
-    public bool playerHolding, returning;
+    //for obj pooling 
+    public ObjectPooler shroomPooler;
+    PooledObject _pooledObj;
 
     //layermasks
     public LayerMask ground;
@@ -62,33 +96,34 @@ public class Shroom : PickUpMaterial
     void Start()
     {
         //player refs
+        tgs = TerrainGridSystem.instance;
+        sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        inventoryScript = tpc.myInventory;
 
-        //audio obj pool and material ref
-        aop = GameObject.FindGameObjectWithTag("AudioObjPool").GetComponent<AudioObjectPool>();
+        //obj refs
+        shroomCol = GetComponent<BoxCollider>();
+        shroomBody = GetComponent<Rigidbody>();
+        shroomAnimator = GetComponent<Animator>();
         shroomMR = GetComponent<MeshRenderer>();
         myShroomShader = shroomMR.material;
+        shroomSource = GetComponent<AudioSource>();
 
         SetShroom();
     }
 
-    void OnEnable()
+    void Update()
     {
-        BreatheIn();
-    }
-
-    public override void Update()
-    {
-        //pickup logic
-        base.Update();
-
         //they are alive and breathing --- not in inventory 
-        if (planted)
+        if (plantingState == PlantingState.PLANTED)
         {
+            CheckGrowth();
+            
             //distance check 
             if (Vector3.Distance(transform.position, player.transform.position) < breatheDistance)
             {
+                //increasing in size
                 if (breathingIn)
                 {
                     transform.localScale = Vector3.Lerp(transform.localScale, largeSize, breatheSpeed * Time.deltaTime);
@@ -100,6 +135,7 @@ public class Shroom : PickUpMaterial
 
                 }
 
+                //decreasing in size
                 if (breathingOut)
                 {
                     transform.localScale = Vector3.Lerp(transform.localScale, originalSize, breatheSpeed * Time.deltaTime);
@@ -112,194 +148,137 @@ public class Shroom : PickUpMaterial
                 }
             }
         }
-        
+
+        //after they have been cut up by player (waiting to be vortexed)
+        else if(plantingState == PlantingState.UNPLANTED)
+        {
+            if (Vector3.Distance(transform.position, player.transform.position) < 5)
+            {
+                plantingState = PlantingState.VORTEXING;
+            }
+        }
+
+        //succ into player
+        else if(plantingState == PlantingState.VORTEXING)
+        {
+            //lerp to the player mon
+            transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * vortexSpeed);
+            //add to vortex speed every frame so player cannot outrun seeds
+            vortexSpeed += 0.25f;
+
+            //when close enough, add to seed inventory
+            if (Vector3.Distance(transform.position, player.transform.position) < 1)
+            {
+                CollectShroom();
+            }
+        }
     }
 
+    void CheckGrowth()
+    {
+        //counting days is hard work
+        if (sun.dayCounter > sun.yesterday)
+        {
+            if (!dayPassed)
+            {
+                //increment age (within stage)
+                myAge++;
+
+                //reached next stage, grow
+                if (myAge == deathDay)
+                {
+                    Destroy(gameObject);
+                }
+
+                dayPassed = true;
+            }
+        }
+
+        //resets day passed when sun increments its day counter ahead of its yesterday int
+        if (sun.yesterday == sun.dayCounter)
+        {
+            dayPassed = false;
+        }
+    }
+
+    //switches states and plays sound
     void BreatheIn()
     {
-        AudioSource shroomAudio = GetComponentInChildren<AudioSource>();
-
         breathingIn = true;
         breathingOut = false;
 
-        if (shroomAudio != null)
-        {
-            if (!shroomAudio.isPlaying)
-            {
-                PlaySoundArray(breathIn);
-            }
-        }
+        PlaySound(mushroomSound);
     }
 
+    //switches states and plays sound
     void BreatheOut()
     {
-        AudioSource shroomAudio = GetComponentInChildren<AudioSource>();
-
         breathingIn = false;
         breathingOut = true;
 
-        if (shroomAudio != null)
-        {
-            if (!shroomAudio.isPlaying)
-            {
-                PlaySoundArray(breathOut);
-            }
-        }
+        PlaySound(mushroomSound);
     }
-
-    //planting on terrain grid
-    void CheckCanPlantGrid()
+    
+    //play single sound
+    public void PlaySound(AudioClip sound)
     {
-        //get the index of this cell
-        int cellIndex = tgs.CellGetIndex(currentCell);
-        currentCellIndex = cellIndex;
-
-        //compare to previous cell 
-        if (currentCellIndex != previousCellIndex)
-        {
-            previousCellIndex = currentCellIndex;
-        }
-
-        //checks if cell is fertile 
-        if (tgs.CellGetTag(cellIndex) == 0)
-        {
-            //Sets texture to clickable
-            tgs.CellToggleRegionSurface(cellIndex, true, canClickTexture);
-
-            //If player clicks, we plant seed and clear up Equip slot
-            if (Input.GetButton("Plant"))
-            {
-                DropShroom();
-                plantingOnGrid = true;
-            }
-
-        }
-        else
-        {
-            // cant plant here, grid spot is taken or not fertile
-            if (Input.GetButton("Plant"))
-            {
-                PlaySound(noNo);
-            }
-        }
-
-        //If it's a new cell, set last cell back to fertileTexture
-        if (tgs.CellGetTag(previousCellIndex) == 0)
-            StartCoroutine(ChangeTexture(currentCellIndex, groundTexture));
-    }
-
-    //planting on terrain without grid
-    void CheckCanPlant(RaycastHit hit)
-    {
-        if (Input.GetButton("Plant"))
-        {
-            //check in radius of planting point if it theres too many other shrooms
-            int otherShrooms = 0;
-            Collider[] hitColliders = Physics.OverlapSphere(hit.point, shroomGroupDist);
-            int i = 0;
-            while (i < hitColliders.Length)
-            {
-                if (hitColliders[i].gameObject.tag == "Plant")
-                {
-                    otherShrooms ++;
-                    Debug.Log("hit other plant");
-                }
-                i++;
-            }
-
-            //if there is not too many shrooms
-            if (otherShrooms < shroomGroupMax)
-            {
-                DropShroom();
-            }
-            //too many shroooms...
-            else
-            {
-                PlaySound(noNo);
-            }
-        }
-    }
-
-    //Sets texture back to normal
-    IEnumerator ChangeTexture(int index, Texture2D texture)
-    {
-        yield return new WaitForEndOfFrame();
-        tgs.CellToggleRegionSurface(index, true, texture);
-    }
-
-    //called when click to plant really goes through
-    void DropShroom()
-    {
-        planting = true;
-        transform.SetParent(null);
-        shroomBody.isKinematic = false;
-        shroomBody.useGravity = true;
-        PlaySound(dropShroom);
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        //ui seed hitting ground
-        if (collision.gameObject.tag == "Ground" && planting)
-        {
-            SetShroom();
-        }
+        shroomSource.PlayOneShot(sound);
     }
 
     //called when shroom is first planted
     void SetShroom()
     {
-        //turn off physics
-        shroomBody.useGravity = false;
-        shroomBody.isKinematic = true;
-        shroomCol.isTrigger = true;
+        //random mushroom sound
+        int mushroomSize = Random.Range(0, breathingSounds.Length);
+        mushroomSound = breathingSounds[mushroomSize];
 
-        //need to figure out how best to randomize size, sound, and rhythm logic
-        float randomScale = Random.Range(0.75f, 1.5f);
+        //find size increments
+        float totalRange = 1.5f;
+        float increment = totalRange / breathingSounds.Length;
 
-        transform.localScale *= randomScale;
-
-        originalSize = transform.localScale;
-
-        largeSize = originalSize * 2;
-
-        float randomRotate = Random.Range(0, 360);
-
-        transform.Rotate(0, randomRotate, 0);
-
-        rhythm = Random.Range(1, 5);
-
-        breatheDistance = 15;
-        //end
-
-        planting = false;
-        planted = true;
-    }
-
-    public void PlaySound(AudioClip sound)
-    {
-        GetComponentInChildren<AudioSource>().PlayOneShot(sound);
-    }
-
-    public void PlaySoundArray (AudioClip[] sounds)
-    {
-        int randomSound = Random.Range(0, sounds.Length);
-        GetComponentInChildren<AudioSource>().PlayOneShot(sounds[randomSound]);
-    }
-
-    public void SetYPos()
-    {
-        //adjust trees height
-        RaycastHit hit;
-
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity, ground))
+        //random scale
+        float randomScale;
+        //smallest size
+        if(mushroomSize == 0)
         {
-            transform.position = hit.point;
-
-            transform.position = new Vector3(transform.position.x,
-               transform.position.y + (transform.localScale.y / 2),
-               transform.position.z);
+            randomScale = 0.5f;
         }
+        //all other sizes
+        else
+        {
+            randomScale = 0.5f + (increment * mushroomSize);
+        }
+        
+        //set scale
+        transform.localScale *= randomScale;
+        originalSize = transform.localScale;
+        largeSize = originalSize * 2;
+        
+        //randomize rotation
+        float randomRotate = Random.Range(0, 360);
+        transform.localEulerAngles = new Vector3(0, randomRotate, 0);
+        rhythm = Random.Range(1, 5);
+        breatheSpeed *= rhythm;
+
+        deathDay = Random.Range(2, 4);
+
+        //end
+        plantingState = PlantingState.PLANTED;
+        shroomAnimator.SetBool("planted", true);
+        BreatheIn();
+    }
+
+    //called to move shroom to unplanted state so player can harvest
+    public void UprootShroom()
+    {
+        plantingState = PlantingState.UNPLANTED;
+
+        shroomAnimator.SetBool("planted", false);
+
+        shroomMR.material = uprootMat;
+
+        shroomSource.pitch = Random.Range(0.8f, 1.2f);
+        shroomSource.PlayOneShot(uprootSound);
     }
 
     //called when hit by rhythm
@@ -309,8 +288,26 @@ public class Shroom : PickUpMaterial
         //(apply velocity to them based on inc rhythm)
 
         //wiggle animation 
+        shroomAnimator.SetTrigger("wiggle");
 
         //glow material 
+
+        //if on grid, auto plant spore on vertex pos of This Cell # 
+        //if no vertex pos open, spores can't plant here & die
+    }
+
+    //called when vortexing reaches player
+    void CollectShroom()
+    {
+        SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
+        seedStorageTemp.seedCount++;
+
+        inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
+
+        tpc.SeedCollect();
+
+        //because of those pesky starting seeds
+        Destroy(gameObject);
     }
 
 }

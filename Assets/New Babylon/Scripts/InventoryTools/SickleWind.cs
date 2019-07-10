@@ -55,16 +55,24 @@ public class SickleWind : Rhythm
 
         if (other.gameObject.tag == "Plant")
         {
-
-            if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
+            //if it is plont
+            if (other.GetComponent<Plont>())
             {
-                //shrink plant and play guitar sound
-                other.GetComponent<Plont>().GrowPlant(false);
-                PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, mySickleDaddy.sickleHits);
-                //Debug.Log("played guitar sound");
-                Destroy(gameObject);
+                if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
+                {
+                    //shrink plant and play guitar sound
+                    other.GetComponent<Plont>().GrowPlant(false);
+                    PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, mySickleDaddy.sickleHits);
+                }
+            }
+          
+            //is it a shroom?
+            if (other.GetComponent<Shroom>())
+            {
+                other.GetComponent<Shroom>().UprootShroom();
             }
 
+            Destroy(gameObject);
         }
 
         //when u hit on wind fan increase the rhythm

@@ -9,7 +9,15 @@ public class Rhythm : MonoBehaviour {
     {
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<Plont>().PlaySound();
+            if (other.gameObject.GetComponent<Plont>())
+            {
+                other.gameObject.GetComponent<Plont>().PlaySound();
+            }
+
+            if (other.gameObject.GetComponent<Shroom>())
+            {
+                other.gameObject.GetComponent<Shroom>().ReleaseSpores();
+            }
         }
         else if (other.gameObject.tag == "Tree")
         {

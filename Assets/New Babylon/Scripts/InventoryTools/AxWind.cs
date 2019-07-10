@@ -52,17 +52,26 @@ public class AxWind : Rhythm {
     {
         base.OnTriggerEnter(other);
 
+        //has plant tag
         if(other.gameObject.tag == "Plant" )
         {
-
-            if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
+            //is it plont?
+            if (other.gameObject.GetComponent<Plont>())
             {
-                //shrink plant and play guitar sound
-                other.GetComponent<Plont>().GrowPlant(false);
-                PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
-                //Debug.Log("played guitar sound");
+                if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
+                {
+                    //shrink plant and play guitar sound
+                    other.GetComponent<Plont>().GrowPlant(false);
+                    PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
+                    //Debug.Log("played guitar sound");
+                }
             }
 
+            //is it a shroom?
+            if (other.gameObject.GetComponent<Shroom>())
+            {
+                other.GetComponent<Shroom>().UprootShroom();
+            }
         }
 
         //when u hit on wind fan increase the rhythm
