@@ -124,12 +124,64 @@ public class ShroomSeed : MonoBehaviour {
             }
 
         }
-        else
+
+        //something planted
+        if(tgs.CellGetTag(cellIndex) == 1)
         {
-            // cant plant here, grid spot is taken or not fertile
+            //If player clicks, we plant seed and clear up Equip slot
             if (Input.GetButton("Plant"))
             {
-                shroomSource.PlayOneShot(noNO);
+                //check in center of cell for shroom
+                int vertexCount = tgs.CellGetVertexCount(cellIndex);
+
+                //loop through verteces
+                int vertexToPlant = -1;
+                bool foundShroomVertex = false;
+                for (int i = 0; i < vertexCount; i++)
+                {
+                    //only run if we have not found an open vertex
+                    if (!foundShroomVertex)
+                    {
+                        //cast overlap sphere around vertex
+                        Collider[] hitColliders = Physics.OverlapSphere(tgs.CellGetVertexPosition(cellIndex, i), 1f);
+                        int v = 0;
+                        int shroomCount = 0;
+                        //loop through hit cols
+                        while (v < hitColliders.Length)
+                        {
+                            //found a plant 
+                            if (hitColliders[v].gameObject.tag == "Plant")
+                            {
+                                //found a shroom
+                                if (hitColliders[v].gameObject.GetComponent<Shroom>())
+                                {
+                                    shroomCount++;
+                                }
+                            }
+                            v++;
+                        }
+
+                        //no shrooms were found 
+                        if (shroomCount == 0)
+                        {
+                            foundShroomVertex = true;
+                            vertexToPlant = i;
+                        }
+                    }
+                }
+
+                //found an open vertex 
+                if (foundShroomVertex)
+                {
+                    //set shroom pos 
+                    transform.position = tgs.CellGetVertexPosition(cellIndex, vertexToPlant) + new Vector3(0f, 3f, 0f);
+                    DropShroom();
+                }
+                //there is no open verteces here 
+                else
+                {
+                    shroomSource.PlayOneShot(noNO);
+                }
             }
         }
 
@@ -192,6 +244,7 @@ public class ShroomSeed : MonoBehaviour {
         shroomSource.PlayOneShot(dropShroom);
     }
 
+    //checks when it has hit the ground after dropping
     void OnCollisionEnter(Collision collision)
     {
         //ui seed hitting ground

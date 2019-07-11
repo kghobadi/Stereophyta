@@ -193,7 +193,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //call sleep -- only works if you haven't slept for a day and you are on the ground
-        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen)
+        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen && playerCanMove)
         {
             Sleep(true);
         }
@@ -210,7 +210,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //in case of weird sleep/ wake up bug
-        if(indoors && !sleeping)
+        if(!sleeping)
         {
             sleepParticles.SetActive(false);
         }
@@ -396,9 +396,21 @@ public class ThirdPersonController : MonoBehaviour
         int randomYawn = Random.Range(0, yawns.Length);
         sleepSource.PlayOneShot(yawns[randomYawn], 1f);
 
-        StartCoroutine(FadeToBed());
+        //is player somewhere other than home island?
+        if(Vector3.Distance(transform.position, bedPos.position) > 250f)
+        {
+            //sleep where player is standing
+            SetAnimator("sleeping");
+            sleepParticles.SetActive(true);
+        }
+        //on home island, return to bed 
+        else
+        {
+            StartCoroutine(FadeToBed());
+        }
     }
 
+    //only called when player is on home island
     IEnumerator FadeToBed()
     {
         sleepCover.FadeIn();
@@ -430,7 +442,11 @@ public class ThirdPersonController : MonoBehaviour
         playerCanMove = true;
         playerCameraController.enabled = true;
         //if not in farmhouse
-        //myInventory.gameObject.SetActive(true);
+        if (Vector3.Distance(transform.position, bedPos.position) > 250f)
+        {
+            myInventory.gameObject.SetActive(true);
+        }
+          
         daysWithoutSleep = 0;
 
         //play random yawn sound

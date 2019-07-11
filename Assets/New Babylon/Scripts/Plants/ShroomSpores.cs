@@ -21,7 +21,6 @@ public class ShroomSpores : MonoBehaviour {
 
     //tgs stuff
     TerrainGridSystem tgs;
-    public int cellIndex;
 
     //All possible texture references. 
     Texture2D groundTexture;
@@ -45,12 +44,68 @@ public class ShroomSpores : MonoBehaviour {
 
 
     //planting on terrain grid
-    void CheckCanPlantGrid(Vector3 point)
+    void CheckCanPlantGrid(Vector3 point, int cellIndex)
     {
         //checks if cell is fertile 
         if (tgs.CellGetTag(cellIndex) == 0)
         {
-            SpawnShroom(point, true);
+            SpawnShroom(point, true, cellIndex);
+        }
+
+        //something is already planted
+        else if(tgs.CellGetTag(cellIndex) == 1)
+        {
+            Debug.Log("cell taken, looking for verteces");
+            //check in center of cell for shroom
+            int vertexCount = tgs.CellGetVertexCount(cellIndex);
+
+            //loop through verteces
+            int vertexToPlant = -1;
+            bool foundShroomVertex = false;
+            for (int i = 0; i < vertexCount; i++)
+            {
+                //only run if we have not found an open vertex
+                if (!foundShroomVertex)
+                {
+                    //cast overlap sphere around vertex
+                    Collider[] hitColliders = Physics.OverlapSphere(tgs.CellGetVertexPosition(cellIndex, i), 1f);
+                    int v = 0;
+                    int shroomCount = 0;
+                    //loop through hit cols
+                    while (v < hitColliders.Length)
+                    {
+                        //found a plant 
+                        if (hitColliders[v].gameObject.tag == "Plant")
+                        {
+                            //found a shroom
+                            if (hitColliders[v].gameObject.GetComponent<Shroom>())
+                            {
+                                shroomCount++;
+                            }
+                        }
+                        v++;
+                    }
+
+                    //no shrooms were found 
+                    if (shroomCount == 0)
+                    {
+                        foundShroomVertex = true;
+                        vertexToPlant = i;
+                    }
+                }
+            }
+
+            //found an open vertex 
+            if (foundShroomVertex)
+            {
+                //set shroom pos 
+                SpawnShroom(tgs.CellGetVertexPosition(cellIndex, vertexToPlant), false, cellIndex);
+            }
+            //there is no open verteces here 
+            else
+            {
+                Debug.Log("this grid cell is full of shrooms!");
+            }
         }
     }
 
@@ -70,20 +125,16 @@ public class ShroomSpores : MonoBehaviour {
                     if (hitColliders[i].gameObject.GetComponent<Shroom>().shroomType == shroomParent.shroomType)
                     {
                         otherShrooms++;
-                        Debug.Log("found shroom");
                     }
                 }
             }
             i++;
         }
-
-        Debug.Log(otherShrooms);
-
+        
         //if there is not too many shrooms
         if (otherShrooms < shroomGroupMax)
         {
-            SpawnShroom(point, false);
-            Debug.Log("spawning");
+            SpawnShroom(point, false, -1);
         }
     }
 
@@ -102,14 +153,17 @@ public class ShroomSpores : MonoBehaviour {
                 spawnPos = collisionEvents[i].intersection;
 
                 //check if theres a cell here
-                Cell cell = tgs.CellGetAtPosition(spawnPos);
+                Cell cell = tgs.CellGetAtPosition(spawnPos, true);
+
+                Debug.Log(cell);
 
                 //got a cell on the grid
                 if(cell != null)
                 {
-                    cellIndex = tgs.CellGetIndex(cell);
+                    Debug.Log("spore on grid");
+                    int cellIndex = tgs.CellGetIndex(cell);
 
-                    CheckCanPlantGrid(spawnPos);
+                    CheckCanPlantGrid(spawnPos, cellIndex);
                 }
                 //not on grid
                 else
@@ -123,7 +177,7 @@ public class ShroomSpores : MonoBehaviour {
     }
 
     //spawns a shroom!
-    void SpawnShroom(Vector3 plantingPos, bool plantingOnGrid)
+    void SpawnShroom(Vector3 plantingPos, bool plantingOnGrid, int cellIndex)
     {
         //if planting on grid, set pos and cell stuff
         if (plantingOnGrid)

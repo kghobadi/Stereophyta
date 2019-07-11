@@ -188,6 +188,8 @@ public class Shroom : MonoBehaviour
         //after they have been cut up by player (waiting to be vortexed)
         else if(plantingState == PlantingState.UNPLANTED)
         {
+            CheckGrowth();
+
             //hard coded spin animation
             transform.localEulerAngles = new Vector3(70f, transform.localEulerAngles.y + (Time.deltaTime * currentBreatheSpeed * 15), 0);
 
@@ -226,8 +228,37 @@ public class Shroom : MonoBehaviour
                 //reset spore release
                 hasReleasedSpores = false;
 
+                SwitchRhythm();
+
                 //reached next stage, grow
                 if (myAge == deathDay)
+                {
+                    float chanceToUproot = Random.Range(0f, 100f);
+
+                    //50% chance to uproot
+                    if(chanceToUproot > 50f)
+                    {
+                        //uproot shroom for 1 day
+                        UprootShroom();
+                    }
+                    //otherwise destroy right away
+                    else
+                    {
+                        //remove plant from grid
+                        if (plantedOnGrid)
+                        {
+                            //nothing planted tag
+                            tgs.CellSetTag(cellIndex, 0);
+                            //ground texture
+                            tgs.CellToggleRegionSurface(cellIndex, true, groundTexture);
+                        }
+
+                        Destroy(gameObject);
+                    }
+                }
+
+                //destroy...
+                if(myAge > deathDay || plantingState == PlantingState.UNPLANTED)
                 {
                     Destroy(gameObject);
                 }
@@ -242,6 +273,7 @@ public class Shroom : MonoBehaviour
             dayPassed = false;
         }
     }
+    
 
     //switches states and plays sound
     void BreatheIn()
@@ -369,6 +401,15 @@ public class Shroom : MonoBehaviour
     //called to move shroom to unplanted state so player can harvest
     public void UprootShroom()
     {
+        //remove plant from grid
+        if (plantedOnGrid)
+        {
+            //nothing planted tag
+            tgs.CellSetTag(cellIndex, 0);
+            //ground texture
+            tgs.CellToggleRegionSurface(cellIndex, true, groundTexture);
+        }
+
         plantingState = PlantingState.UNPLANTED;
 
         shroomMR.material = uprootMat;

@@ -19,6 +19,8 @@ public class Rhythm : MonoBehaviour {
             //shroom should release spores
             if (other.gameObject.GetComponent<Shroom>())
             {
+                //might want switch rhythm to only have a chance to happen if this is annoying 
+                other.gameObject.GetComponent<Shroom>().SwitchRhythm();
                 other.gameObject.GetComponent<Shroom>().ReleaseSpores();
             }
         }
