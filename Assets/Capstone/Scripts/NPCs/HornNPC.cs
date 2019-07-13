@@ -156,7 +156,7 @@ public class HornNPC : NPC {
 
             if(randomRotate > 60)
             {
-                circleMill.Selection_One();
+                //circleMill.Selection_One();
             }
 
 
@@ -171,13 +171,13 @@ public class HornNPC : NPC {
                 //increase chance low
                 if (randomTempo < 25)
                 {
-                    circleMill.Selection_Two();
+                    //circleMill.Selection_Two();
                     movementPointsContainer.transform.localScale *= 1.3f;
                 }
                 //decrease chance high
                 else
                 {
-                    circleMill.Selection_Three();
+                    //circleMill.Selection_Three();
                     movementPointsContainer.transform.localScale *= 0.7f;
                 }
             }
@@ -186,13 +186,13 @@ public class HornNPC : NPC {
                 //increase 
                 if (randomTempo < 50)
                 {
-                    circleMill.Selection_Two();
+                    //circleMill.Selection_Two();
                     movementPointsContainer.transform.localScale *= 1.2f;
                 }
                 //decrease 
                 else
                 {
-                    circleMill.Selection_Three();
+                    //circleMill.Selection_Three();
                     movementPointsContainer.transform.localScale *= 0.8f;
                 }
             }
@@ -201,13 +201,13 @@ public class HornNPC : NPC {
                 //increase chance high
                 if (randomTempo < 75)
                 {
-                    circleMill.Selection_Two();
+                    //circleMill.Selection_Two();
                     movementPointsContainer.transform.localScale *= 1.1f;
                 }
                 //decrease chance low
                 else
                 {
-                    circleMill.Selection_Three();
+                    //circleMill.Selection_Three();
                     movementPointsContainer.transform.localScale *= 0.9f;
                 }
             }

@@ -1,100 +1,152 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class CircleMillControls : Interactable {
+public class CircleMillControls : MonoBehaviour {
+    //player ref
+    GameObject player;
+    ThirdPersonController tpc;
+
+    //camera refs
+    PlayerCameraController camControl;
+    public float origHeight;
+    public float zoomedOutHeight;
+
+    //is the player currently operating the mill controls?
+    public bool playerOperating, playerWasNear;
+    private float timeUntilLeaving;
+    //is the mill currently activated -- moving circle winds?
+    public Vector3 operatingPos, exitPos;
+    public GameObject operatingMenu;
+    public GameObject cursor;
 
     //windTurbine and its rotation speed, lever objects 
-    public GameObject windTurbine, rhythmLever, dirLever;
+    public GameObject windTurbine;
     public float rotationSpeed;
 
     //the transform parent of this object
     Transform circleMill;
 
-    //array of circleNPCs which fills up at start
-    public HornNPC hornPlanter;
+    //actual wind which rotates around mill
+    public Transform circleWindParent;
+    public Slider windCountSlider;
+    public Image windHandle;
+    public Sprite[] windHandleSprites;
+    public int windCount = 0;
+    public CircleWind[] allCircleWinds, currentCircleWinds, zeroCircleWinds, singleCircleWind, doubleCircleWind, tripleCircleWind, quadCircleWind;
+    public float windSpeedMin;
 
     //rhythm vars
-    public int rhythmState, rhythmStateMax;
-    public float rhythmInterval, turbineInterval, NPCspeedInterval, animatorSpeedInterval, NPCLookInterval, windRadius;
-
-    //actual wind which rotates around mill
-    CircleWind windCircles;
-
+    public Slider rhythmSlider;
+    public Image rhythmHandle;
+    public Sprite[] rhythmHandleSprites;
+    public int rhythmState;
+    public float rhythmInterval, windRadius;
+    
     //lowering sound
     AudioSource controlsAudio;
-    public AudioClip selectLower, gearTurn1, gearTurn2;
-
-    CameraController camControl;
-    Vector3 zoomedOutPosO, zoomedOutRotO;
+    public AudioClip beginOperating, gearTurn1, gearTurn2;
+    public AudioClip[] selectionSounds;
 
     //direction lever boolean (starts as 'positive')
-    public bool dirPositive = true;
+    public Button changeDirection;
+    public bool dirClockwise = true;
 
-    public Animator rhythmIndicator;
-    SpriteRenderer rhythmSR;
-    float disappearTimer, disappearTimerTotal = 1f;
+    //rhythm indicator stuff
+    public SpriteRenderer rhythmSR;
+    Animator rhythmIndicator;
+    FadeSprite rhythmFader;
+    //timers for how long indicator appears
+    public bool changedRhythm;
+    public float disappearTimer, disappearTimerTotal = 1.5f;
 
-    public override void Start()
+    //ui refs for pickup prompt
+    public Text interactText;
+    public string useMessage, leaveMessage;
+    public FadeUI[] interactPrompts;
+
+    void Start()
     {
-        base.Start();
-        interactable = true;
-        rhythmSR = rhythmIndicator.GetComponent<SpriteRenderer>();
+        //player refs
+        player = GameObject.FindGameObjectWithTag("Player");
+        tpc = player.GetComponent<ThirdPersonController>();
+        camControl = Camera.main.GetComponent<PlayerCameraController>();
+
+        //rhythm indicator
+        rhythmIndicator = rhythmSR.GetComponent<Animator>();
+        rhythmFader = rhythmSR.GetComponent<FadeSprite>();
         rhythmSR.enabled = false;
         disappearTimer = disappearTimerTotal;
-
-        controlsAudio = GetComponent<AudioSource>();
-        camControl = cammy.GetComponent<CameraController>();
-        if(camControl != null)
-        {
-            zoomedOutPosO = camControl.zoomedOutPos;
-            zoomedOutRotO = camControl.zoomedOutRot;
-        }
         
-
-        //interact sprites
-        for (int i = 1; i < 4; i++)
-        {
-            interactSprites.Add(Resources.Load<Sprite>("CursorSprites/machine " + i));
-        }
-
         //mill refs
         circleMill = transform.parent;
-        windCircles = circleMill.GetChild(0).GetComponent<CircleWind>();
-        
+        controlsAudio = GetComponent<AudioSource>();
+        operatingPos = transform.position + new Vector3(-1f, 1f, 0);
+        exitPos = transform.position + new Vector3(-2f, 1f, 0);
+
+        //add circle winds to the list
+        currentCircleWinds = zeroCircleWinds;
+        for(int i = 0; i < allCircleWinds.Length; i++)
+        {
+            allCircleWinds[i].DeactivateWind();
+        }
+
+        operatingMenu.SetActive(false);
 
         //set rhythm states
-        rhythmState = 2;
-        rhythmIndicator.SetInteger("Level", rhythmState);
-        rotationSpeed = 100f;
-        rhythmLever.transform.localEulerAngles = new Vector3(0, 0, 0);
+        SwitchRhythm();
     }
 
-    public override void Update()
-    {
-        base.Update();
-
-
-        if((/*tpc.talking ||*/ selectionMenu.enabled) && playerClicked)
+    void Update()
+    { 
+        //just for interact logic 
+        if (!playerOperating)
         {
-            if (camControl != null)
+            //dist from player
+            float dist = Vector3.Distance(transform.position, player.transform.position);
+            //if player is close
+            if (dist < 7.5f)
             {
-                camControl.zoomedOutPos = new Vector3(-10, 30, -10);
-                camControl.zoomedOutRot = new Vector3(65, 45, 0);
-            }
+                playerWasNear = true;
 
-            rhythmSR.enabled = true;
-            disappearTimer = disappearTimerTotal;
+                //fade in those prompts
+                if (interactText.color.a < 0.5f)
+                    ShowInteractPrompt(useMessage);
+
+                //pick up when player presses E
+                if (Input.GetKeyDown(KeyCode.E) && !tpc.menuOpen)
+                {
+                    OperateControls();
+                }
+            }
+            //player has left
+            else if (dist > 15f)
+            {
+                //fade out prompts
+                if (playerWasNear)
+                {
+                    DeactivatePrompt();
+                    playerWasNear = false;
+                }
+            }
         }
+        //player operating
         else
         {
-            if (camControl != null)
+            timeUntilLeaving += Time.deltaTime;
+
+            if(timeUntilLeaving > 0.5f)
             {
-                camControl.zoomedOutPos = zoomedOutPosO;
-                camControl.zoomedOutRot = zoomedOutRotO;
+                //pick up when player presses E
+                if (Input.GetKeyDown(KeyCode.E) && !tpc.menuOpen)
+                {
+                    LeaveControls();
+                }
             }
         }
 
+        //deactivates rhythm indicator after disappearTimer
         if (rhythmSR.enabled)
         {
             disappearTimer -= Time.deltaTime;
@@ -108,186 +160,195 @@ public class CircleMillControls : Interactable {
         //rotates the wind turbine
         windTurbine.transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
     }
-    public override void OnMouseEnter()
+
+    //called when player begins operating
+    void OperateControls()
     {
-        base.OnMouseEnter();
-        rhythmSR.enabled = true;
+        playerOperating = true;
+        origHeight = camControl.heightFromPlayer;
+        camControl.heightMax = zoomedOutHeight;
+        camControl.heightFromPlayer = zoomedOutHeight;
+        camControl.zoomSpeed = 0;
+        tpc.playerCanMove = false;
+        tpc.transform.position = operatingPos;
+        tpc.myInventory.gameObject.SetActive(false);
+        tpc.playerSource.PlayOneShot(beginOperating);
+        timeUntilLeaving = 0;
+
+        //menu on
+        operatingMenu.SetActive(true);
+        //cursor on
+        Cursor.lockState = CursorLockMode.None;
+        cursor.SetActive(true);
+
+
+        ShowInteractPrompt(leaveMessage);
     }
 
-    public override void OnMouseOver()
+    //called when player stops operating
+    void LeaveControls()
     {
-        base.OnMouseOver();
-        disappearTimer = disappearTimerTotal;
-        rhythmSR.enabled = true;
-    }
+        playerOperating = false;
+        camControl.heightMax = 20f;
+        camControl.heightFromPlayer = origHeight;
+        camControl.zoomSpeed = 500f;
+        tpc.playerCanMove = true;
+        tpc.transform.position = exitPos;
+        tpc.myInventory.gameObject.SetActive(true);
 
-    public override void OnMouseExit()
-    {
-        base.OnMouseExit();
-        rhythmSR.enabled = false;
+        //menu off
+        operatingMenu.SetActive(false);
+        //cursor off
+        Cursor.lockState = CursorLockMode.Locked;
+        cursor.SetActive(false);
     }
-
+    
     //Switch Wind Direction
-    public override void Selection_One()
+    public void ChangeDirections()
     {
         if (!controlsAudio.isPlaying)
         {
-            base.Selection_One();
+            //loop thru circle winds to set neg wind speed
+            for(int i = 0; i < allCircleWinds.Length; i++)
+            {
+                allCircleWinds[i].windSpeed *= -1;
+            }
 
-            windCircles.windSpeed *= -1;
             rotationSpeed *= -1;
 
             //plays dif sound and moves lever correctly
-            if (dirPositive)
+            if (dirClockwise)
             {
-                if (!controlsAudio.isPlaying)
-                    controlsAudio.PlayOneShot(gearTurn1, 1f);
-                dirLever.transform.localEulerAngles = new Vector3(0, 0, -60);
-                dirPositive = false;
-                //change NPC direction
-                if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
-                {
-                    if (hornPlanter != null)
-                        hornPlanter.walkingDirection = true;
-                }
-
+                controlsAudio.PlayOneShot(gearTurn1, 1f);
+                dirClockwise = false;
             }
+            //counter clockwise
             else
             {
-                if (!controlsAudio.isPlaying)
-                    controlsAudio.PlayOneShot(gearTurn2, 1f);
-                dirLever.transform.localEulerAngles = new Vector3(0, 0, 60);
-                dirPositive = true;
-                //change NPC direction
-                if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
-                {
-                    if (hornPlanter != null)
-                        hornPlanter.walkingDirection = false;
-
-                }
+                controlsAudio.PlayOneShot(gearTurn2, 1f);
+                dirClockwise = true;
             }
         }
     }
 
-    //Increase rhythm
-    public override void Selection_Two()
+    //called when the player moves the rhythm switch UI
+    public void SwitchRhythm()
     {
-        base.Selection_Two();
-        if(rhythmState < rhythmStateMax)
-        {
-            rhythmState++;
-
-            if (dirPositive)
-            {
-                PositiveRhythmIncrease();
-            }
-            else
-            {
-                NegativeRhythmIncrease();
-            }
-
-
-            if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(InteractSound, 1f);
-        }
+        //set rhythm state & rhythm indicator
+        rhythmState = (int)rhythmSlider.value;
         rhythmIndicator.SetInteger("Level", rhythmState);
-    }
-
-    //Decrease Rhythm
-    public override void Selection_Three()
-    {
-        base.Selection_Three();
-        if(rhythmState > 0)
-        {
-            rhythmState--;
-            if (dirPositive)
-            {
-                PositiveRhythmDecrease();
-            }
-            else
-            {
-                NegativeRhythmDecrease();
-            }
-
-            if (!controlsAudio.isPlaying)
-                controlsAudio.PlayOneShot(selectLower, 1f);
-        }
-        rhythmIndicator.SetInteger("Level", rhythmState);
-    }
-
-    //These rhythm functions are stored separately because they can be called in dif. ways based on if dirPositive = true or not
-
-    void PositiveRhythmIncrease()
-    {
-        windCircles.windSpeed += rhythmInterval;
-        rotationSpeed *= 2;
-        rhythmLever.transform.localEulerAngles -= new Vector3(0, 0, 30);
-
-        //adjusts NPC circle men speeds
-       
-            if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
-            {
-                if (hornPlanter != null)
-                {
-                hornPlanter.navMeshAgent.speed += NPCspeedInterval;
-                hornPlanter.animator.speed += animatorSpeedInterval;
-                }
-                   
-            }
+        rhythmFader.FadeIn();
+        changedRhythm = true;
+        disappearTimer = disappearTimerTotal;
+        rhythmHandle.sprite = rhythmHandleSprites[rhythmState];
+        controlsAudio.PlayOneShot(selectionSounds[rhythmState], 1f);
         
-    }
-
-    void NegativeRhythmIncrease()
-    {
-        windCircles.windSpeed -= rhythmInterval;
-        rotationSpeed *= 2;
-        rhythmLever.transform.localEulerAngles -= new Vector3(0, 0, 30);
-
-        if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
+        //loop thru wind circles and set new speeds
+        for (int i = 0; i < allCircleWinds.Length; i++)
         {
-            if (hornPlanter != null)
+            //set to min
+            if(rhythmState == 0)
             {
-                hornPlanter.navMeshAgent.speed += NPCspeedInterval;
-                hornPlanter.animator.speed += animatorSpeedInterval;
+                allCircleWinds[i].windSpeed = windSpeedMin;
+            }
+            //multiply by interval
+            else
+            {
+                allCircleWinds[i].windSpeed = windSpeedMin + (rhythmState * rhythmInterval);
+            }
+        }
+
+        //set rotation speed
+        if(rhythmState == 0)
+        {
+            rotationSpeed = 25f;
+        }
+        else
+        {
+            rotationSpeed = 25f * (2 * rhythmState);
+        }
+
+        //keep them counter-clockwise if so -- negative!
+        if (!dirClockwise)
+        {
+            //loop thru circle winds to set neg wind speed
+            for (int i = 0; i < allCircleWinds.Length; i++)
+            {
+                allCircleWinds[i].windSpeed *= -1;
             }
 
+            rotationSpeed *= -1;
         }
     }
 
-    void PositiveRhythmDecrease()
+    public void SetCurrentCircleWinds()
     {
-        windCircles.windSpeed -= rhythmInterval;
-        rotationSpeed *= 0.5f;
-        rhythmLever.transform.localEulerAngles += new Vector3(0, 0, 30);
-
-        //adjusts NPC circle men speeds
-      
-            if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
-            {
-                if (hornPlanter != null)
-                {
-                hornPlanter.navMeshAgent.speed -= NPCspeedInterval;
-                hornPlanter.animator.speed -= animatorSpeedInterval;
-                }
-            }
-    }
-
-    void NegativeRhythmDecrease()
-    {
-        windCircles.windSpeed += rhythmInterval;
-        rotationSpeed *= 0.5f;
-        rhythmLever.transform.localEulerAngles += new Vector3(0, 0, 30);
-
-        //adjusts NPC circle men speeds
-
-        if (Vector3.Distance(hornPlanter.gameObject.transform.position, transform.position) < windRadius)
+        //deactivate current circle winds
+        if(currentCircleWinds.Length > 0)
         {
-            if (hornPlanter != null)
+            for (int i = 0; i < currentCircleWinds.Length; i++)
             {
-                hornPlanter.navMeshAgent.speed -= NPCspeedInterval;
-                hornPlanter.animator.speed -= animatorSpeedInterval;
+                currentCircleWinds[i].DeactivateWind();
+            }
+        }
+        //set windCount
+        windCount = (int)windCountSlider.value;
+
+        //set new circle winds
+        switch (windCount)
+        {
+            case 0:
+                currentCircleWinds = zeroCircleWinds;
+                break;
+            case 1:
+                currentCircleWinds = singleCircleWind;
+                break;
+            case 2:
+                currentCircleWinds = doubleCircleWind;
+                break;
+            case 3:
+                currentCircleWinds = tripleCircleWind;
+                break;
+            case 4:
+                currentCircleWinds = quadCircleWind;
+                break;
+        }
+
+        //play sound corresponding to number 
+        controlsAudio.PlayOneShot(selectionSounds[windCount], 1f);
+        windHandle.sprite = windHandleSprites[windCount];
+
+        //if we aren't at 0
+        if (currentCircleWinds.Length > 0)
+        {
+            //activate new winds
+            for(int i = 0; i < currentCircleWinds.Length; i++)
+            {
+                currentCircleWinds[i].ActivateWind();
             }
         }
     }
+    
 
+    public void ShowInteractPrompt(string message)
+    {
+        //set text prompt
+        interactText.text = message;
+
+        //fade em in
+        for (int i = 0; i < interactPrompts.Length; i++)
+        {
+            interactPrompts[i].FadeIn();
+        }
+    }
+
+    //turn off prompt
+    public void DeactivatePrompt()
+    {
+        //fade em out
+        for (int i = 0; i < interactPrompts.Length; i++)
+        {
+            interactPrompts[i].FadeOut();
+        }
+    }
 }
