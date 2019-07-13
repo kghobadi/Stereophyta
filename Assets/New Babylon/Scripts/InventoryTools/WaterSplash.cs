@@ -61,15 +61,28 @@ public class WaterSplash : Rhythm {
             //for plants
             if (other.gameObject.tag == "Plant")
             {
-                //play sound from plant
-                if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-                    other.gameObject.GetComponent<Plont>().PlaySound();
-
-                //if it hasn't been watered, grow and water
-                if (!other.gameObject.GetComponent<Plont>().hasBeenWatered)
+                //plont
+                if (other.GetComponent<Plont>())
                 {
-                    other.gameObject.GetComponent<Plont>().GrowPlant(true);
-                    other.gameObject.GetComponent<Plont>().hasBeenWatered = true;
+                    //play sound from plant
+                    if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+                        other.gameObject.GetComponent<Plont>().PlaySound();
+
+                    //if it hasn't been watered, grow and water
+                    if (!other.gameObject.GetComponent<Plont>().hasBeenWatered)
+                    {
+                        other.gameObject.GetComponent<Plont>().WaterPlant();
+                    }
+                }
+
+                //shroom
+                if (other.GetComponent<Shroom>())
+                {
+                    //change rhythm possible
+                    if (!other.GetComponent<Shroom>().changedRhythm)
+                        other.GetComponent<Shroom>().SwitchRhythm();
+
+                    other.GetComponent<Shroom>().ReleaseSpores();
                 }
             }
 

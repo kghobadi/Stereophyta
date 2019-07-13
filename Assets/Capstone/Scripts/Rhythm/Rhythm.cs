@@ -7,9 +7,22 @@ public class Rhythm : MonoBehaviour {
 
     public virtual void OnTriggerEnter(Collider other)
     {
+        //plant tag
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<Plont>().PlaySound();
+            //plont plays sound
+            if (other.gameObject.GetComponent<Plont>())
+            {
+                other.gameObject.GetComponent<Plont>().PlaySound();
+            }
+
+            //shroom should release spores
+            if (other.gameObject.GetComponent<Shroom>())
+            {
+                //might want switch rhythm to only have a chance to happen if this is annoying 
+                other.gameObject.GetComponent<Shroom>().SwitchRhythm();
+                other.gameObject.GetComponent<Shroom>().ReleaseSpores();
+            }
         }
         else if (other.gameObject.tag == "Tree")
         {

@@ -11,6 +11,7 @@ public class PuzzleWind : Rhythm
     ParticleSystem windParticles;
 
     public LayerMask ground;
+    Vector3 originalPos;
 
     void Start()
     {
@@ -18,13 +19,14 @@ public class PuzzleWind : Rhythm
         windParticles = GetComponent<ParticleSystem>();
         poolObj = GetComponent<PooledObject>();
         transform.SetParent(null);
+        originalPos = transform.position;
     }
 
     void Update()
     {
         transform.Translate(currentSpeed * Time.deltaTime, 0, 0);
 
-        if (Vector3.Distance(transform.position, _windGen.transform.position) > _windGen.distanceToDestroy)
+        if (Vector3.Distance(transform.position, originalPos) > _windGen.distanceToDestroy)
         {
             StartCoroutine(DissipateWind());
         }

@@ -51,6 +51,10 @@ public class Sun : MonoBehaviour
     //save ref
     public SleepSave saveScript;
 
+    //sun saver anim
+    public FadeUI sunSaver;
+    public FadeUItmp sunSavingText, sunSavingOutline;
+
     void Start()
     {
         //player refs
@@ -91,7 +95,7 @@ public class Sun : MonoBehaviour
 
         // randomize wind && rains
         RandomizeWinds();
-        RandomizeRains();
+        //RandomizeRains();
     }
 
     void Update()
@@ -100,7 +104,7 @@ public class Sun : MonoBehaviour
         transform.RotateAround(Vector3.zero, Vector3.forward, rotationSpeed * Time.deltaTime);
 
         //always look at center of the map
-        transform.LookAt(Vector3.zero);
+        transform.LookAt(tpc.transform);
 
         CheckSunsRotation();
     }
@@ -208,7 +212,7 @@ public class Sun : MonoBehaviour
 
         // randomize wind && rains
         RandomizeWinds();
-        RandomizeRains();
+        //RandomizeRains();
 
         //subtract from player's days to sleep
         if (tpc.sleeping)
@@ -231,6 +235,11 @@ public class Sun : MonoBehaviour
                 StartCoroutine(WaitForPlayerToPassOut());
             }
         }
+
+        //fade in and out sun saver
+        sunSaver.FadeIn();
+        sunSavingText.FadeIn();
+        sunSavingOutline.FadeIn();
 
         StartCoroutine(WaitToSave());
     }

@@ -10,6 +10,8 @@ public class PlayerCameraController : MonoBehaviour {
 
     //all the camera movement vars
     Quaternion targetLook;
+    Vector3 horizontalRotation;
+    Vector3 verticalRotation;
     //stores verticalRotation input and consistently sets it
     Vector3 yLook;
     Vector3 targetMove;
@@ -46,6 +48,12 @@ public class PlayerCameraController : MonoBehaviour {
     public bool canLook;
     public LayerMask obstructionMask;
 
+
+    //for lerping fov 
+    public bool lerpingFOV;
+    public float desiredFOV, lerpFOVspeed;
+    float lerpCounter;
+
     void Start () {
         //player refs set
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
@@ -66,26 +74,26 @@ public class PlayerCameraController : MonoBehaviour {
 	
 	void LateUpdate ()
     {
-        targetMove = playerTransform.position + (playerTransform.rotation * new Vector3(0, heightFromPlayer, -distanceFromPlayer));
-
-        //as the player turns their body more intensely, we want to simultaneously increase smoothMove
-
-        if (mouseControls)
-        {
-            transform.position = Vector3.Lerp(transform.position, targetMove, mSmoothMove * Time.deltaTime);
-        }
-        else
-        {
-            transform.position = Vector3.Lerp(transform.position, targetMove, smoothMove * Time.deltaTime);
-        }
-
         //lets set up right analogue stick to enable us to rotate the camera around player and redirect motion as we do so
-        Vector3 horizontalRotation = Vector3.zero;
-        Vector3 verticalRotation = Vector3.zero;
+        horizontalRotation = Vector3.zero;
+        verticalRotation = Vector3.zero;
 
         //not true until out of start view
         if (canLook)
         {
+            targetMove = playerTransform.position + (playerTransform.rotation * new Vector3(0, heightFromPlayer, -distanceFromPlayer));
+
+            //as the player turns their body more intensely, we want to simultaneously increase smoothMove
+
+            if (mouseControls)
+            {
+                transform.position = Vector3.Lerp(transform.position, targetMove, mSmoothMove * Time.deltaTime);
+            }
+            else
+            {
+                transform.position = Vector3.Lerp(transform.position, targetMove, smoothMove * Time.deltaTime);
+            }
+            
             //using mouse and WASD
             if (mouseControls)
             {
@@ -109,45 +117,111 @@ public class PlayerCameraController : MonoBehaviour {
             {
                 yLook += verticalRotation;
             }
+
+            
+
+            //add yLook to the player pos, then subtract cam pos to get the forward look
+            targetLook = Quaternion.LookRotation((playerTransform.position + yLook) - transform.position);
+
+
+            if (mouseControls)
+            {
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mSmoothLook * Time.deltaTime);
+            }
+            else
+            {
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, smoothLook * Time.deltaTime);
+
+            }
+
+            //ONLY GETS ZOOM INPUT IN CANLOOK
+            //grab input from scroll wheel axis
+            zoomInput = Input.GetAxis("Mouse ScrollWheel");
+
+            //zoom in
+            if (zoomInput < 0 && heightFromPlayer > heightMin)
+            {
+                //Debug.Log("zoom in");
+                ZoomIn(zoomInput);
+            }
+            //and out
+            if (zoomInput > 0 && heightFromPlayer < heightMax)
+            {
+                //Debug.Log("zoom out");
+                ZoomOut(zoomInput);
+            }
+
+            heightFromPlayer = Mathf.Clamp(heightFromPlayer, heightMin, heightMax);
+
+            CastToPlayer();
+
+            //rotate the player's body
+            playerTransform.Rotate(horizontalRotation);
+
+            AlterSmoothValues();
         }
 
-        //add yLook to the player pos, then subtract cam pos to get the forward look
-        targetLook = Quaternion.LookRotation((playerTransform.position + yLook) - transform.position) ;
+        //for lerping cam FOV 
+        if (lerpingFOV)
+        {
+            actualCam.fieldOfView = Mathf.Lerp(actualCam.fieldOfView, desiredFOV, Time.deltaTime * lerpFOVspeed);
+
+            lerpCounter += Time.deltaTime;
+
+            if(lerpCounter > 3f)
+            {
+                lerpingFOV = false;
+            }
+        }
+        
         
 
-        if (mouseControls)
+        //for y axis of right analogue, want to be able to set camera look up and down.
+        //pushing stick up moves camera down closer to and behind player, 
+        //while moving it down looks down at player and moves camera up? or the reverse...
+    }
+    
+    void ZoomIn(float zoom)
+    {
+        float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
+        heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
+        //see fuurther as it zooms in
+        if (actualCam.farClipPlane < 1000)
+            actualCam.farClipPlane += zoomSpeed * Time.deltaTime * 3;
+    }
+
+    void ZoomOut(float zoom)
+    {
+        float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
+        heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
+
+        //see less as it zooms out
+        if (actualCam.farClipPlane > 500)
+            actualCam.farClipPlane -= zoomSpeed * Time.deltaTime * 3;
+    }
+
+    //detects whether cam is seeing ground in front of player somehw
+    void CastToPlayer()
+    {
+        RaycastHit hit = new RaycastHit();
+        float radius = 1f;
+        Vector3 dir = playerTransform.position - transform.position;
+        float dist = Vector3.Distance(transform.position, playerTransform.position);
+        //send raycast
+        if (Physics.Raycast(transform.position, dir, out hit, dist , obstructionMask))
         {
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mSmoothLook * Time.deltaTime);
+            //anything on layer mask that is not player
+            if(hit.transform.gameObject.layer != 8 )
+            {
+                ZoomOut(0.025f);
+
+                //Debug.Log("cam hitting " + hit.transform.gameObject.name);
+            }
         }
-        else
-        {
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, smoothLook * Time.deltaTime);
-           
-        }
+    }
 
-        //grab input from scroll wheel axis
-        zoomInput = Input.GetAxis("Mouse ScrollWheel");
-
-        //zoom in
-        if (zoomInput < 0 && heightFromPlayer > heightMin )
-        {
-            //Debug.Log("zoom in");
-            ZoomIn(zoomInput);
-        }
-        //and out
-        if (zoomInput > 0 && heightFromPlayer < heightMax )
-        {
-            //Debug.Log("zoom out");
-            ZoomOut(zoomInput);
-        }
-        
-        heightFromPlayer = Mathf.Clamp(heightFromPlayer, heightMin, heightMax);
-
-        CastToPlayer();
-
-        //rotate the player's body
-        playerTransform.Rotate(horizontalRotation);
-
+    void AlterSmoothValues()
+    {
         //ps4 smooth move 
         if (!mouseControls)
         {
@@ -192,49 +266,13 @@ public class PlayerCameraController : MonoBehaviour {
                 mSmoothMove = mSmoothMoveOriginal;
             }
         }
-        
-
-        //for y axis of right analogue, want to be able to set camera look up and down.
-        //pushing stick up moves camera down closer to and behind player, 
-        //while moving it down looks down at player and moves camera up? or the reverse...
-    }
-    
-    void ZoomIn(float zoom)
-    {
-        float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
-        heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
-        //see fuurther as it zooms in
-        if (actualCam.farClipPlane < 1000)
-            actualCam.farClipPlane += zoomSpeed * Time.deltaTime * 3;
     }
 
-    void ZoomOut(float zoom)
+    //called here or elsewhere
+    public void LerpFOV(float newFOV)
     {
-        float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
-        heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
-
-        //see less as it zooms out
-        if (actualCam.farClipPlane > 500)
-            actualCam.farClipPlane -= zoomSpeed * Time.deltaTime * 3;
-    }
-
-    //detects whether cam is seeing ground in front of player somehw
-    void CastToPlayer()
-    {
-        RaycastHit hit = new RaycastHit();
-        float radius = 1f;
-        Vector3 dir = playerTransform.position - transform.position;
-        float dist = Vector3.Distance(transform.position, playerTransform.position);
-        //send raycast
-        if (Physics.Raycast(transform.position, dir, out hit, dist , obstructionMask))
-        {
-            //anything on layer mask that is not player
-            if(hit.transform.gameObject.layer != 8 )
-            {
-                ZoomOut(0.025f);
-
-                Debug.Log("cam hitting " + hit.transform.gameObject.name);
-            }
-        }
+        desiredFOV = newFOV;
+        lerpCounter = 0;
+        lerpingFOV = true;
     }
 }

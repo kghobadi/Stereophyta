@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TGS;
 
 [System.Serializable]
 public struct GrowthStages
@@ -17,6 +18,16 @@ public class Plont : MonoBehaviour {
     ThirdPersonController tpc;
     SleepSave saveScript;
     public bool startingPlant;
+
+    //tgs logic
+    public TerrainGridSystem tgs;
+    public bool plantedOnGrid;
+    public int cellIndex;
+
+    //All possible texture references. 
+    public Texture2D groundTexture;
+    public Texture2D plantedTexture;
+    public Texture2D wateredTexture;
 
     //physics 
     Rigidbody plantBody;
@@ -52,6 +63,7 @@ public class Plont : MonoBehaviour {
     public float growthSpeed;
     Vector3 newScale;
     public float seedSpawnChance = 10;
+    public ObjectPooler seedPooler;
 
     public PlantType myPlantType;
 
@@ -64,17 +76,18 @@ public class Plont : MonoBehaviour {
     
 	void Start () {
         //hail the sun
+        tgs = TerrainGridSystem.instance;
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+
         //add data to save script
         if (!startingPlant)
         {
             saveScript.mySaveStorage.plants.Add(gameObject);
             saveScript.mySaveStorage.plantScripts.Add(this);
             saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
-
             //Debug.Log("added this plant to save storage");
         }
         else
@@ -111,21 +124,67 @@ public class Plont : MonoBehaviour {
             }
         }
 
+        //get the obj pooler
+        FindObjPoolers();
+
         //call funcs
         PlayPlantingEffect();
         GrowPlant(true);
     }
 
+    //shitty method but fuck it it finds the object pooler scripts easy
+    void FindObjPoolers()
+    {
+        if(myPlantType == PlantType.BELL)
+        {
+            seedPooler = GameObject.Find("BellPepperSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.PIANO)
+        {
+            seedPooler = GameObject.Find("PianoSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.GUITAR)
+        {
+            seedPooler = GameObject.Find("GuitarSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.EGUITAR)
+        {
+            seedPooler = GameObject.Find("EguitarSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.SUCCULENTAR)
+        {
+            seedPooler = GameObject.Find("SucculentarSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.TRIANGULAR)
+        {
+            seedPooler = GameObject.Find("TriangulationSeedPool").GetComponent<ObjectPooler>();
+        }
+        if (myPlantType == PlantType.TRUMPET)
+        {
+            seedPooler = GameObject.Find("TrumpetSeedPool").GetComponent<ObjectPooler>();
+        }
+    }
+
     public void Update() {
+        
         //counting days is hard work
         if (sun.dayCounter > sun.yesterday)
         {
             if (!dayPassed)
             {
+                //increment age (within stage)
                 myAge++;
 
+                //reset watered vars
                 hasBeenWatered = false;
 
+                //ground texture
+                if (plantedOnGrid)
+                {
+                    tgs.CellToggleRegionSurface(cellIndex, true, plantedTexture);
+                }
+                
+                //reached next stage, grow
                 if (myAge == nextStage)
                 {
                     GrowPlant(true);
@@ -307,8 +366,25 @@ public class Plont : MonoBehaviour {
         SpawnSeed();
     }
 
+    //called by water or rains
+    public void WaterPlant()
+    {
+        GrowPlant(true);
+        tgs.CellToggleRegionSurface(cellIndex, true, wateredTexture);
+        hasBeenWatered = true;
+    }
+
     void Die()
     {
+        //remove plant from grid
+        if (plantedOnGrid)
+        {
+            //nothing planted tag
+            tgs.CellSetTag(cellIndex, 0);
+            //ground texture
+            tgs.CellToggleRegionSurface(cellIndex, true, groundTexture);
+        }
+
         //Debug.Log("Rip " + gameObject.name);
         if (!startingPlant)
         {
@@ -328,10 +404,12 @@ public class Plont : MonoBehaviour {
         Destroy(gameObject);
     }
 
+    //spawn seed from object pooler script 
     void SpawnSeed()
     {
         Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
-        GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
+        GameObject newSeed = seedPooler.GrabObject();
+        newSeed.transform.position = spawnPos;
     }
 
     //plays the dirt planting effect at start

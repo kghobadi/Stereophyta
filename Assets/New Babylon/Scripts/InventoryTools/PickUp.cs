@@ -23,6 +23,7 @@ public abstract class PickUp : MonoBehaviour {
     public FadeUI[] interactPrompts;
 
     void Awake () {
+
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
@@ -93,7 +94,7 @@ public abstract class PickUp : MonoBehaviour {
 
     public virtual void ShowPickupPrompt()
     {
-        Debug.Log("show pickup prompt");
+        //Debug.Log("show pickup prompt");
         //set text prompt
         pickUpText.text = pickUpMessage;
 
@@ -107,7 +108,7 @@ public abstract class PickUp : MonoBehaviour {
     //turn off prompt
     public virtual void DeactivatePrompt()
     {
-        Debug.Log("deactivating prompt");
+        //Debug.Log("deactivating prompt");
         //fade em out
         for (int i = 0; i < interactPrompts.Length; i++)
         {

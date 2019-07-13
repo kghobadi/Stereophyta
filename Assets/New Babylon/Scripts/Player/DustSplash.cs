@@ -9,6 +9,7 @@ public class DustSplash : Rhythm {
 
     Vector3 originalPosition;
     ParticleSystem splashEffect;
+    ParticleSystem.MainModule splashMain;
     ThirdPersonController tpc;
 
     SphereCollider sphereCol;
@@ -16,11 +17,12 @@ public class DustSplash : Rhythm {
 
     Vector3 origScale;
 
-	void Awake () {
+    void Awake () {
         splashAudio = GetComponent<AudioSource>();
         originalPosition = transform.localPosition;
         splashEffect = GetComponent<ParticleSystem>();
         sphereCol = GetComponent<SphereCollider>();
+        splashMain = splashEffect.main;
         splashEffect.Stop();
         tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
         origScale = transform.localScale;
@@ -28,6 +30,19 @@ public class DustSplash : Rhythm {
     
     public IEnumerator Splash(int jumpType)
     {
+        //set the dif colors
+        switch (jumpType)
+        {
+            case 0:
+                splashMain.startColor = tpc.smallJMat.color;
+                break;
+            case 1:
+                splashMain.startColor = tpc.midJMat.color;
+                break;
+            case 2:
+                splashMain.startColor = tpc.bigJMat.color;
+                break;
+        }
         transform.localScale = origScale * (jumpType + 1);
         splashEffect.Play();
         sphereCol.enabled = true;
@@ -45,8 +60,22 @@ public class DustSplash : Rhythm {
         base.OnTriggerEnter(other);
         if (other.gameObject.tag == "Plant")
         {
-            if(!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-                other.gameObject.GetComponent<Plont>().PlaySound();
+            //plant
+            if (other.GetComponent<Plont>())
+            {
+                //not already playing sound 
+                if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
+                    other.gameObject.GetComponent<Plont>().PlaySound();
+            }
+            //shroom
+            if (other.GetComponent<Shroom>())
+            {
+                //change rhythm possible
+                if(!other.GetComponent<Shroom>().changedRhythm)
+                    other.GetComponent<Shroom>().SwitchRhythm();
+
+                other.GetComponent<Shroom>().ReleaseSpores();
+            }
         }
         //when u jump on wind fan increase the rhythm
         if (other.gameObject.tag == "WindMachines")

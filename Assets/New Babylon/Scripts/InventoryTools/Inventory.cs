@@ -29,6 +29,7 @@ public class Inventory : MonoBehaviour {
     IEnumerator fadeTools;
 
     //seed inv
+    public Vector3 localSeedSpot;
     public int currentSeed = 0;
     public GameObject currenSeedObj;
     public List<SeedStorage> seedStorage = new List<SeedStorage>();
@@ -37,18 +38,21 @@ public class Inventory : MonoBehaviour {
     public GameObject seedInvVisual;
     public Image currentSeedImg, lastSeedImg, nextSeedImg;
     public Text seedCounter;
-    public Sprite[] seedSprites;
+    public List<Sprite> seedSprites = new List<Sprite>();
     public FadeUI[] seedsUI;
     IEnumerator fadeSeeds;
     
     //for controlling switching
-    public float inputTimer;
-    public bool canSwitchInv;
+    public float inputTimerT, inputTimerS;
+    public bool canSwitchTools, canSwitchSeeds;
 
     //audio
     public AudioSource inventoryAudio;
     public AudioClip switchSeeds, switchTools;
-    
+    //for altering seed count text
+    public float seedTxtScale1 = 1f, seedTxtScale2 = 0.8f, seedTxtScale3 = 0.6f;
+    public float seedTxtPos1 = 69f, seedTxtPos2 = 50f, seedTxtPos3 = 45f;
+
     void Start () {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
@@ -87,22 +91,29 @@ public class Inventory : MonoBehaviour {
     }
 	
 	void Update () {
-        inputTimer -= Time.deltaTime;
-        if(inputTimer < 0)
+        inputTimerT -= Time.deltaTime;
+        if(inputTimerT < 0)
         {
-            canSwitchInv = true;
+            canSwitchTools = true;
+        }
+
+        inputTimerS -= Time.deltaTime;
+        if (inputTimerS < 0)
+        {
+            canSwitchSeeds = true;
         }
 
         if (!tpc.menuOpen)
         {
 
             //switch current item +
-            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchInv && myItems.Count > 1)
+            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchTools && myItems.Count > 1)
             {
                 SwitchItem(true);
             }
             //switch current item -
-            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchInv && !currenSeedObj.GetComponent<Seed>().planting && CheckPlayerHasSeed() >= 2)
+            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchSeeds 
+                && currenSeedObj.GetComponent<Item>().CheckSeedPlanting() && CheckPlayerHasSeed() >= 2)
             {
                 SwitchSeed(true);
             }
@@ -132,10 +143,37 @@ public class Inventory : MonoBehaviour {
             }
         }
 
-        //set seed counter in inv UI
-        seedCounter.text = seedStorage[currentSeed].seedCount.ToString();
+        SetSeedText();
     }
 
+    //alter count of current seed
+    void SetSeedText()
+    {
+        //set seed counter in inv UI
+        seedCounter.text = seedStorage[currentSeed].seedCount.ToString();
+
+        switch (seedCounter.text.Length)
+        {
+            case 0:
+                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale1, seedTxtScale1, seedTxtScale1);
+                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos1, -60.5f, 0);
+                break;
+            case 1:
+                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale1, seedTxtScale1, seedTxtScale1);
+                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos1, -60.5f, 0);
+                break;
+            case 2:
+                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale2, seedTxtScale2, seedTxtScale2);
+                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos2, -60.5f, 0);
+                break;
+            case 3:
+                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale3, seedTxtScale3, seedTxtScale3);
+                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos3, -60.5f, 0);
+                break;
+        }
+    }
+
+    //switches thru tools
     public void SwitchItem(bool posOrNeg)
     {
         currenItemObj.SetActive(false);
@@ -175,8 +213,8 @@ public class Inventory : MonoBehaviour {
         SetToolSprite();
 
         //reset timer so not infinite switch
-        inputTimer = 0.1f;
-        canSwitchInv = false;
+        inputTimerT = 0.1f;
+        canSwitchTools = false;
 
         inventoryAudio.PlayOneShot(switchTools);
     }
@@ -224,11 +262,12 @@ public class Inventory : MonoBehaviour {
             StartCoroutine(fadeTools);
     }
 
+    //switch thru seeds
    public void SwitchSeed(bool posOrNeg)
     {
         if(currenSeedObj.activeSelf)
         {
-            currenSeedObj.GetComponent<Seed>().seedSelected = false;
+            currenSeedObj.GetComponent<Item>().DeselectSeed();
             currenSeedObj.SetActive(false);
         }
 
@@ -249,7 +288,7 @@ public class Inventory : MonoBehaviour {
         if(seedStorage[currentSeed].seedCount > 0)
         {
             currenSeedObj.SetActive(true);
-            currenSeedObj.GetComponent<Seed>().seedSelected = true;
+            currenSeedObj.GetComponent<Item>().SelectSeed();
         }
         //switch seed again -- this causes a StackOverflow if there's no seeds in your inv
         else
@@ -260,8 +299,8 @@ public class Inventory : MonoBehaviour {
         SetSeedSprite();
       
         //reset timer so not infinite switch
-        inputTimer = 0.1f;
-        canSwitchInv = false;
+        inputTimerS = 0.1f;
+        canSwitchSeeds = false;
 
         inventoryAudio.PlayOneShot(switchSeeds);
     }
@@ -338,6 +377,36 @@ public class Inventory : MonoBehaviour {
         }
 
         return seedCounter;
+    }
+
+    //adds seed type to inv
+    public void AddSeedToInventory(GameObject seed, Sprite seedInvSprite)
+    {
+        //new seed seedstorage struct
+        SeedStorage newSeed;
+        newSeed.seedObj = seed;
+        newSeed.seedCount = 1;
+
+        //add to lists
+        seedStorage.Add(newSeed);
+        seedSprites.Add(seedInvSprite);
+
+        //set parent and pos
+        seed.transform.SetParent(transform);
+        seed.transform.localPosition = localSeedSpot;
+
+        //set new seed index in seed & plant
+        seed.GetComponent<Item>().SetSeedIndex(seedStorage.Count - 1);
+    }
+
+    //remove seed type from inv
+    public void RemoveSeedFromInventory(int index)
+    {
+        //turn off
+        seedStorage[index].seedObj.SetActive(false);
+        //remove from lists
+        seedStorage.RemoveAt(index);
+        seedSprites.RemoveAt(index);
     }
 
     //fade in and out Tools inv

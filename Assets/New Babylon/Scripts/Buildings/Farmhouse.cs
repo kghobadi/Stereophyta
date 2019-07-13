@@ -43,10 +43,27 @@ public class Farmhouse : MonoBehaviour {
                 walkingEffect.SetActive(false);
                 lastFootsteps = tpc.currentFootsteps;
                 tpc.currentFootsteps = tpc.woodSteps;
+               
                 houseCamera.SetActive(true);
                 occupied = true;
+
+                //wait to change controls rotation
+                if(PlayerPrefs.GetString("hasBook") == "yes")
+                {
+                    StartCoroutine(WaitToSetIndoors());
+                }
+                else
+                {
+                    tpc.indoors = true;
+                }
             }
         }
+    }
+
+    IEnumerator WaitToSetIndoors()
+    {
+        yield return new WaitForSeconds(0.5f);
+        tpc.indoors = true;
     }
 
     //so when you sleep it stays off
@@ -97,6 +114,8 @@ public class Farmhouse : MonoBehaviour {
                 playerInventory.SetActive(true);
                 walkingEffect.SetActive(true);
                 tpc.currentFootsteps = lastFootsteps;
+                tpc.indoors = false;
+                tpc.transform.localEulerAngles = new Vector3(0, 105f, 0);
                 houseCamera.SetActive(false);
                 occupied = false;
 
