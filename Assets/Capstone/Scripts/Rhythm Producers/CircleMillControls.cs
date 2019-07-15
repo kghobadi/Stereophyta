@@ -173,6 +173,12 @@ public class CircleMillControls : MonoBehaviour {
         tpc.playerSource.PlayOneShot(beginOperating);
         timeUntilLeaving = 0;
 
+        //play sound if not already playing anything
+        if (!controlsAudio.isPlaying)
+        {
+            controlsAudio.PlayOneShot(beginOperating);
+        }
+      
         //menu on
         operatingMenu.SetActive(true);
         //cursor on
@@ -204,28 +210,25 @@ public class CircleMillControls : MonoBehaviour {
     //Switch Wind Direction
     public void ChangeDirections()
     {
-        if (!controlsAudio.isPlaying)
+        //loop thru circle winds to set neg wind speed
+        for (int i = 0; i < allCircleWinds.Length; i++)
         {
-            //loop thru circle winds to set neg wind speed
-            for(int i = 0; i < allCircleWinds.Length; i++)
-            {
-                allCircleWinds[i].windSpeed *= -1;
-            }
+            allCircleWinds[i].windSpeed *= -1;
+        }
 
-            rotationSpeed *= -1;
+        rotationSpeed *= -1;
 
-            //plays dif sound and moves lever correctly
-            if (dirClockwise)
-            {
-                controlsAudio.PlayOneShot(gearTurn1, 1f);
-                dirClockwise = false;
-            }
-            //counter clockwise
-            else
-            {
-                controlsAudio.PlayOneShot(gearTurn2, 1f);
-                dirClockwise = true;
-            }
+        //plays dif sound and moves lever correctly
+        if (dirClockwise)
+        {
+            controlsAudio.PlayOneShot(gearTurn1, 1f);
+            dirClockwise = false;
+        }
+        //counter clockwise
+        else
+        {
+            controlsAudio.PlayOneShot(gearTurn2, 1f);
+            dirClockwise = true;
         }
     }
 

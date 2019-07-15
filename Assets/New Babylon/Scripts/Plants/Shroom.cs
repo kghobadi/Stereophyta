@@ -370,11 +370,6 @@ public class Shroom : MonoBehaviour
     //called whenever rhythm is changed;
     public void SetVisualRhythm()
     {
-        if (plantingState == PlantingState.PLANTED)
-        {
-            rhythmFader.FadeIn();
-        }
-
         rhythmIndicator.SetInteger("Level", rhythm);
 
         changedRhythm = true;
@@ -382,6 +377,15 @@ public class Shroom : MonoBehaviour
 
         //sound to indicate dif rhythm
         shroomSource.PlayOneShot(changeRhythms[rhythm], 1f);
+
+        //only if player is close by, show the indicator
+        if (Vector3.Distance(transform.position, tpc.transform.position) < 10f)
+        {
+            if (plantingState == PlantingState.PLANTED)
+            {
+                rhythmFader.FadeIn();
+            }
+        }
     }
 
     //called to move shroom to unplanted state so player can harvest
