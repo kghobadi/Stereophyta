@@ -48,7 +48,7 @@ public class Shroom : MonoBehaviour
     public ShroomType shroomType;
     public enum ShroomType
     {
-        OCTA, CUBIE, 
+        OCTA, SPHEROCYBIN, 
     }
 
     //active planted bools
@@ -56,28 +56,28 @@ public class Shroom : MonoBehaviour
     public float breatheSpeedFlat, currentBreatheSpeed, breatheDistance;
     public int rhythm;
     //rhythm indicator
-    public SpriteRenderer rhythmSR;
+    SpriteRenderer rhythmSR;
     Animator rhythmIndicator;
     FadeSprite rhythmFader;
     //timers for how long indicator appears
     public bool changedRhythm;
-    public float disappearTimer, disappearTimerTotal = 1.5f;
+    private float disappearTimer, disappearTimerTotal = 1.5f;
 
     //for shroom growth 
     public int myAge, deathDay;
     public bool dayPassed;
 
     //audio for shroom
-    public AudioSource shroomSource;
+    AudioSource shroomSource;
     public AudioClip[] breathingSounds;
     public int mushroomSize;
     public AudioClip mushroomSound;
-    public AudioClip dropShroom, noNo, uprootSound;
+    public AudioClip noNo, uprootSound;
     public AudioClip[] changeRhythms;
 
     //for player to take!!
-    public Animator shroomAnimator;
-    public MeshRenderer shroomMR;
+    Animator shroomAnimator;
+    MeshRenderer shroomMR;
     public Material myShroomShader, uprootMat;
 
     //for obj pooling 
@@ -110,6 +110,7 @@ public class Shroom : MonoBehaviour
         shroomSource = GetComponent<AudioSource>();
 
         //rhythm indicator
+        rhythmSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
         rhythmIndicator = rhythmSR.GetComponent<Animator>();
         rhythmFader = rhythmSR.GetComponent<FadeSprite>();
 

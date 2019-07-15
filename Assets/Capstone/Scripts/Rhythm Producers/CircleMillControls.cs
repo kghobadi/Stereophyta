@@ -32,7 +32,6 @@ public class CircleMillControls : MonoBehaviour {
     public Transform circleWindParent;
     public Slider windCountSlider;
     public Image windHandle;
-    public Sprite[] windHandleSprites;
     public int windCount = 0;
     public CircleWind[] allCircleWinds, currentCircleWinds, zeroCircleWinds, singleCircleWind, doubleCircleWind, tripleCircleWind, quadCircleWind;
     public float windSpeedMin;
@@ -40,7 +39,6 @@ public class CircleMillControls : MonoBehaviour {
     //rhythm vars
     public Slider rhythmSlider;
     public Image rhythmHandle;
-    public Sprite[] rhythmHandleSprites;
     public int rhythmState;
     public float rhythmInterval, windRadius;
     
@@ -106,7 +104,7 @@ public class CircleMillControls : MonoBehaviour {
             //dist from player
             float dist = Vector3.Distance(transform.position, player.transform.position);
             //if player is close
-            if (dist < 7.5f)
+            if (dist < 10f)
             {
                 playerWasNear = true;
 
@@ -121,7 +119,7 @@ public class CircleMillControls : MonoBehaviour {
                 }
             }
             //player has left
-            else if (dist > 15f)
+            else if (dist > 11f)
             {
                 //fade out prompts
                 if (playerWasNear)
@@ -240,7 +238,6 @@ public class CircleMillControls : MonoBehaviour {
         rhythmFader.FadeIn();
         changedRhythm = true;
         disappearTimer = disappearTimerTotal;
-        rhythmHandle.sprite = rhythmHandleSprites[rhythmState];
         controlsAudio.PlayOneShot(selectionSounds[rhythmState], 1f);
         
         //loop thru wind circles and set new speeds
@@ -316,7 +313,6 @@ public class CircleMillControls : MonoBehaviour {
 
         //play sound corresponding to number 
         controlsAudio.PlayOneShot(selectionSounds[windCount], 1f);
-        windHandle.sprite = windHandleSprites[windCount];
 
         //if we aren't at 0
         if (currentCircleWinds.Length > 0)

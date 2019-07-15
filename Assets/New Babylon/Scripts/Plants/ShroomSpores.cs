@@ -155,8 +155,6 @@ public class ShroomSpores : MonoBehaviour {
                 //check if theres a cell here
                 Cell cell = tgs.CellGetAtPosition(spawnPos, true);
 
-                Debug.Log(cell);
-
                 //got a cell on the grid
                 if(cell != null)
                 {
@@ -206,9 +204,6 @@ public class ShroomSpores : MonoBehaviour {
                 shroomScript.cellIndex = cellIndex;
             }
         }
-        
-
-        Debug.Log("spawning shroom from spore");
 
     }
 
