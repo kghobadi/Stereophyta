@@ -28,14 +28,14 @@ public class ThirdPersonController : MonoBehaviour
 
     //PS4 move variables
     public bool playerCanMove, menuOpen;
-    public bool indoors;
+    public bool indoors, swimming;
     public Transform houseCam;
     public bool running;
     public GameObject runParticles;
     Vector3 currentMovement;
     public Vector3 horizontalInput;
     public Vector3 forwardInput;
-    public float movespeed = 5, runSpeed;
+    public float movespeed = 5, runSpeed, swimSpeed;
     public float movespeedSmooth = 0.3f;
     public float rotateSpeed = 10;
     public float rotateSpeedSmooth = 0.3f;
@@ -75,7 +75,7 @@ public class ThirdPersonController : MonoBehaviour
     AudioSource cameraAudSource;
     public AudioSource playerSource;
     public AudioClip[] jumpSounds;
-    public AudioClip[] currentFootsteps, grassSteps, woodSteps, noNo;
+    public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps, noNo;
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
     public ParticleSystem walkingEffect;
     float footStepTimer = 0;
@@ -143,6 +143,8 @@ public class ThirdPersonController : MonoBehaviour
         splashScript = dustSplash.GetComponent<DustSplash>();
         sleepParticles.SetActive(false);
         runParticles.SetActive(false);
+        swimSpeed = movespeed / 2;
+
         //for dirt particles
         if (walkingEffect != null)
         {
@@ -193,7 +195,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //call sleep -- only works if you haven't slept for a day and you are on the ground
-        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen && playerCanMove)
+        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen && playerCanMove && !swimming)
         {
             Sleep(true);
         }
@@ -208,6 +210,7 @@ public class ThirdPersonController : MonoBehaviour
                 sleepSource.PlayOneShot(snores[randomSnore], 1f);
             }
         }
+        
 
         //in case of weird sleep/ wake up bug
         if(!sleeping)
@@ -275,52 +278,71 @@ public class ThirdPersonController : MonoBehaviour
         {
             //dont rotate mc
         }
-
-       
+        
 
         //set animation based on target movement
         SetPlayerAnimsFootsteps(targetMovementTotal);
 
-
-        //run
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        //on land
+        if (!swimming)
         {
-            currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
-            playerRunCollider.enabled = true;
-            running = true;
-            if(targetMovementTotal.magnitude > 0)
+            //run
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
-                runParticles.SetActive(true);
-                poopShoes.speed = 2f;
+                currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
+                playerRunCollider.enabled = true;
+                running = true;
+                if (targetMovementTotal.magnitude > 0)
+                {
+                    runParticles.SetActive(true);
+                    poopShoes.speed = 2f;
+                }
+                else
+                {
+                    runParticles.SetActive(false);
+                }
             }
+            //walk
             else
             {
+                currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
+                playerRunCollider.enabled = false;
+                running = false;
                 runParticles.SetActive(false);
+                poopShoes.speed = 1f;
             }
         }
-        //walk
+        //swimming
         else
         {
-            currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
-            playerRunCollider.enabled = false;
-            running = false;
-            runParticles.SetActive(false);
+            currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
             poopShoes.speed = 1f;
+            runParticles.SetActive(false);
+
+            //always swimmin
+            if (poopShoes.GetBool("swimming") != true)
+            {
+                SetAnimator("swimming");
+            }
+            
         }
 
-        //OLD rotate the player's body OLD
-        //transform.Rotate(horizontalInput * rotateSpeedMouse * Time.deltaTime);
+        //no jump grav when swimming
+        if (!swimming)
+        {
+            JumpCheck();
 
-        JumpCheck();
-
-        currentMovement.y = verticalSpeed;
-
-        //Debug.Log(" currentMovement = " + currentMovement);
-        controller.Move(currentMovement * Time.deltaTime);
-
-       
-        ResetNearbyAudioSources();
+            currentMovement.y = verticalSpeed;
+        }
+        //set y to 0 while swimming
+        else
+        {
+            currentMovement.y = 0;
+        }
         
+        controller.Move(currentMovement * Time.deltaTime);
+        
+        ResetNearbyAudioSources();
     }
 
     //PS4 Controls
@@ -472,15 +494,21 @@ public class ThirdPersonController : MonoBehaviour
         //need input to set movement anim
         if (inputToCheck.magnitude > 0)
         {
-            SetAnimator("running");
+            if(!swimming)
+                SetAnimator("running");
 
 
             if (!jumping)
             {
                 //dirt particles start
-                if (!walkingEffect.isPlaying)
+                if (!walkingEffect.isPlaying && !swimming)
                 {
                     walkingEffect.Play();
+                }
+                //turn off walking effect
+                if (swimming)
+                {
+                    walkingEffect.Stop();
                 }
 
                 footStepTimer += Time.deltaTime;
@@ -510,7 +538,8 @@ public class ThirdPersonController : MonoBehaviour
         }
         else
         {
-            SetAnimator("idle");
+            if (!swimming)
+                SetAnimator("idle");
 
             //dirt particles stop
             if (walkingEffect.isPlaying)
@@ -529,7 +558,7 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool("running", false);
         poopShoes.SetBool("sleeping", false);
         poopShoes.SetBool("idle", false);
-        poopShoes.SetBool("sidestepping", false);
+        poopShoes.SetBool("swimming", false);
 
         //set new state
         poopShoes.SetBool(newState, true);
@@ -589,28 +618,29 @@ public class ThirdPersonController : MonoBehaviour
             verticalSpeed -= grav * Time.deltaTime;
         }
 
+
         //hold jump button to charge jump on rhythm
         if (Input.GetButton("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
         {
             jumpCharger += Time.deltaTime;
 
             //reached capacity -- big jump
-            if(jumpCharger > jumpChargerMax)
+            if (jumpCharger > jumpChargerMax)
             {
                 SetJump(2);
             }
         }
 
         //release to set jump
-        if(Input.GetButtonUp("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
+        if (Input.GetButtonUp("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
         {
             //small jump
-            if(jumpCharger < midJCharge)
+            if (jumpCharger < midJCharge)
             {
                 SetJump(0);
             }
             //mid jump
-            if(jumpCharger > midJCharge && jumpCharger < bigJCharge)
+            if (jumpCharger > midJCharge && jumpCharger < bigJCharge)
             {
                 SetJump(1);
             }
@@ -620,7 +650,6 @@ public class ThirdPersonController : MonoBehaviour
                 SetJump(2);
             }
         }
-
     }
 
     //called to actually jump
@@ -653,10 +682,6 @@ public class ThirdPersonController : MonoBehaviour
         jumpWaitTimer = jumpWaitTime;
         jumpCharger = 0;
         lastJumpType = jumpType;
-
-        
-        
-        
     }
 
     //for ps4 move

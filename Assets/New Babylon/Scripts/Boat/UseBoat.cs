@@ -48,8 +48,7 @@ public class UseBoat : PickUp {
         camController.transform.localPosition = new Vector3(0f, -10f, -8f);
         camController.transform.localEulerAngles = new Vector3(-75f, 0f, 0f);
         camController.LerpFOV(75f);
-
-       
+        
         //set boat as parent & position
         tpc.transform.SetParent(transform);
         tpc.transform.localPosition = playerLocalPos;
@@ -90,7 +89,10 @@ public class UseBoat : PickUp {
         //set boat vars
         boatScript.inBoat = false;
         boatScript.boatBody.isKinematic = true;
-        boatScript.boatCol.enabled = false;
+
+        //reset boat & player rot
+        transform.rotation = Quaternion.Euler(90f, -180f, transform.localEulerAngles.z);
+        tpc.transform.rotation = Quaternion.Euler(0f, tpc.transform.localEulerAngles.y, 0f);
 
         //set oar anim
         boatScript.oarAnimator.SetTrigger("deactivateBoat");

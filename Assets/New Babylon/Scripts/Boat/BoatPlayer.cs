@@ -35,7 +35,7 @@ public class BoatPlayer : MonoBehaviour
     public float angleInDegrees;
 
     //physics vars 
-    public CapsuleCollider boatCol;
+    public BoxCollider boatCol;
     public Rigidbody boatBody;
     public float boatSpeedX, boatSpeedZ;
     public float paddleForceX, paddleForceZ;
@@ -78,7 +78,7 @@ public class BoatPlayer : MonoBehaviour
         useBoatScript = GetComponent<UseBoat>();
         boatBody = GetComponent<Rigidbody>();
         boatBody.isKinematic = false;
-        boatCol = GetComponent<CapsuleCollider>();
+        boatCol = GetComponent<BoxCollider>();
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
     }
@@ -94,8 +94,6 @@ public class BoatPlayer : MonoBehaviour
                 tpc.SetAnimator("idle");
             }
 
-            //transform.localEulerAngles = new Vector3(origRotation.x, origRotation.y, transform.localEulerAngles.z);
-
             //for checking angle
             Vector3 forward = transform.forward;
             angleInDegrees = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg;
@@ -106,14 +104,7 @@ public class BoatPlayer : MonoBehaviour
 
             //so we can't immediately exit boat
             paddleIdleTimer += Time.deltaTime;
-
-            if (paddleIdleTimer > holdPaddle)
-            {
-                //ChangeAnimState(boatIdle);
-            }
-
-            //Debug.Log(boatBody.velocity);
-
+            
             //click to move to point
             if (Input.GetMouseButtonDown(0))
             {
@@ -150,10 +141,26 @@ public class BoatPlayer : MonoBehaviour
                 ApplyPaddleForce();
             }
             
-            //For exiting boat
             //if raycaster hits the ground nearby, can press E to exit boat
             if (GroundCheck())
             {
+                //force == boat pos - exitspot 
+                Vector3 heading = transform.position - exitSpot;
+                
+                float distance = heading.magnitude;
+
+                Vector3 direction = heading / distance;
+               
+
+                //push boat away from land
+                if (distance < 7.5f)
+                {
+                    boatBody.AddForce(-direction * boatSpeedZ);
+                    //Debug.Log("heading = " + heading);
+                    //Debug.Log("direction = " + direction);
+                }
+                
+                //exit boat 
                 if (Input.GetKeyDown(KeyCode.E) && paddleIdleTimer > 0.5f)
                 {
                     useBoatScript.ExitBoat(exitSpot);
@@ -303,12 +310,13 @@ public class BoatPlayer : MonoBehaviour
     //allows us to apply force over time
     IEnumerator AddTorqueOverTime(float totalForce, int division)
     {
+        //split up force and find time val
         float indForce = totalForce / division;
         float time = 1f / division;
 
         for(int i = 0; i < division; i++)
         {
-            boatBody.AddTorque(0, indForce, 0);
+            boatBody.AddTorque(transform.forward * -indForce);
             yield return new WaitForSeconds(time);
         }
     }
@@ -351,6 +359,9 @@ public class BoatPlayer : MonoBehaviour
 
     //we want to see if we are on terrain that should make us slide downward
     //only gets called while Player is considered to be grounded
+    //turn off boat's collision with ground
+    //if boat is close to ground, should send equal and opposite force to push boat a little bit away from ground
+    //direction decided by where we hit ground from with raycast
     bool GroundCheck()
     {
         //store hit and point
