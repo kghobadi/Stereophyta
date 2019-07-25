@@ -135,7 +135,11 @@ public class ThirdPersonController : MonoBehaviour
         playerCameraController.enabled = true;
 
         //set animator state to idle
-        SetAnimator("idle");
+        if(poopShoes.GetBool("idle") != true)
+        {
+            SetAnimator("idle");
+        }
+        poopShoes.speed = 1f;
         characterBody = poopShoes.transform;
         currentFootsteps = grassSteps;
 
@@ -286,16 +290,25 @@ public class ThirdPersonController : MonoBehaviour
         //on land
         if (!swimming)
         {
+            //need to figure out how to reset the cloth to what it's like at start / before swimming 
+            characterBody.transform.localPosition = new Vector3(0, -0.956f, 0);
+            poopShoes.speed = 1f;
+
             //run
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
-                playerRunCollider.enabled = true;
-                running = true;
+               
                 if (targetMovementTotal.magnitude > 0)
                 {
-                    runParticles.SetActive(true);
-                    poopShoes.speed = 2f;
+                    //set run
+                    if (poopShoes.GetBool("running") != true)
+                    {
+                        SetAnimator("running");
+                        playerRunCollider.enabled = true;
+                        running = true;
+                        runParticles.SetActive(true);
+                    }
                 }
                 else
                 {
@@ -306,25 +319,69 @@ public class ThirdPersonController : MonoBehaviour
             else
             {
                 currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
-                playerRunCollider.enabled = false;
-                running = false;
-                runParticles.SetActive(false);
-                poopShoes.speed = 1f;
+
+                //movin
+                if (targetMovementTotal.magnitude > 0)
+                {
+                    //set walk
+                    if (poopShoes.GetBool("walking") != true)
+                    {
+                        SetAnimator("walking");
+                        playerRunCollider.enabled = false;
+                        running = false;
+                        runParticles.SetActive(false);
+                    }
+                }
+                //not moving
+                else
+                {
+                    //idling
+                    if (poopShoes.GetBool("idle") != true)
+                    {
+                        SetAnimator("idle");
+                    }
+                }
             }
         }
         //swimming
         else
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
-            poopShoes.speed = 1f;
             runParticles.SetActive(false);
+            characterBody.transform.localPosition = new Vector3(0, -2f, 0);
+            //playerCloak.enabled = false;
+            //need to figure out what to do with the cloth while swimming...
 
-            //always swimmin
-            if (poopShoes.GetBool("swimming") != true)
+            //swim faster!
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
-                SetAnimator("swimming");
+                swimSpeed = movespeed;
+                poopShoes.speed = 2f;
             }
-            
+            //normal swim speed
+            else
+            {
+                swimSpeed = movespeed / 2f;
+                poopShoes.speed = 1f;
+            }
+            //swimming
+            if (targetMovementTotal.magnitude > 0)
+            {
+                //always swimmin
+                if (poopShoes.GetBool("swimming") != true)
+                {
+                    SetAnimator("swimming");
+                }
+            }
+            //treading water idle
+            else
+            {
+                //always swimmin
+                if (poopShoes.GetBool("swimIdle") != true)
+                {
+                    SetAnimator("swimIdle");
+                }
+            }
         }
 
         //no jump grav when swimming
@@ -494,10 +551,6 @@ public class ThirdPersonController : MonoBehaviour
         //need input to set movement anim
         if (inputToCheck.magnitude > 0)
         {
-            if(!swimming)
-                SetAnimator("running");
-
-
             if (!jumping)
             {
                 //dirt particles start
@@ -538,9 +591,6 @@ public class ThirdPersonController : MonoBehaviour
         }
         else
         {
-            if (!swimming)
-                SetAnimator("idle");
-
             //dirt particles stop
             if (walkingEffect.isPlaying)
             {
@@ -554,11 +604,13 @@ public class ThirdPersonController : MonoBehaviour
     public void SetAnimator(string newState)
     {
         //turn off all states
-        poopShoes.SetBool("jumping", false);
-        poopShoes.SetBool("running", false);
-        poopShoes.SetBool("sleeping", false);
         poopShoes.SetBool("idle", false);
+        poopShoes.SetBool("walking", false);
+        poopShoes.SetBool("running", false);
+        poopShoes.SetBool("jumping", false);
+        poopShoes.SetBool("sleeping", false);
         poopShoes.SetBool("swimming", false);
+        poopShoes.SetBool("swimIdle", false);
 
         //set new state
         poopShoes.SetBool(newState, true);
