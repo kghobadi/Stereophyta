@@ -95,7 +95,7 @@ public class Sun : MonoBehaviour
 
         // randomize wind && rains
         RandomizeWinds();
-        //RandomizeRains();
+        RandomizeRains();
     }
 
     void Update()
@@ -212,7 +212,7 @@ public class Sun : MonoBehaviour
 
         // randomize wind && rains
         RandomizeWinds();
-        //RandomizeRains();
+        RandomizeRains();
 
         //subtract from player's days to sleep
         if (tpc.sleeping)
@@ -284,21 +284,21 @@ public class Sun : MonoBehaviour
         }
 
         //activate rain with 1 / 4 chance
-        if (chanceToRain < 25f)
-        {
-            Debug.Log("its raining!");
-            rainCounter = Random.Range(0, 4);
+        //if (chanceToRain < 25f)
+        //{
+        //    Debug.Log("its raining!");
+        //    rainCounter = Random.Range(0, 4);
 
-            rainDirections[rainCounter].SetActive(true);
+        //    rainDirections[rainCounter].SetActive(true);
 
-            //randomize time scales of winds
-            for (int i = 0; i < rainDirections[rainCounter].transform.childCount; i++)
-            {
-                int randomScale = Random.Range(0, 4);
-                rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().timeScale = randomScale;
-                rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().SwitchTimeScale();
-            }
-        }
+        //    //randomize time scales of winds
+        //    for (int i = 0; i < rainDirections[rainCounter].transform.childCount; i++)
+        //    {
+        //        int randomScale = Random.Range(0, 4);
+        //        rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().timeScale = randomScale;
+        //        rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().SwitchTimeScale();
+        //    }
+        //}
 
         //not raining, just normal clouds!
         //Debug.Log("normal clouds...");

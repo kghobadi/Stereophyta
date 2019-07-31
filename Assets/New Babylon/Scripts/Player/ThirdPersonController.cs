@@ -27,12 +27,16 @@ public class ThirdPersonController : MonoBehaviour
     public LayerMask groundedCheck;
 
     //PS4 move variables
+    //move states
+    public bool running, jumping, swimming;
+
     public bool playerCanMove, menuOpen;
-    public bool indoors, swimming;
+    public bool indoors;
     public Transform houseCam;
-    public bool running;
     public GameObject runParticles;
     Vector3 currentMovement;
+    Vector3 targetMovementTotal;
+    Quaternion targetLook;
     public Vector3 horizontalInput;
     public Vector3 forwardInput;
     public float movespeed = 5, runSpeed, swimSpeed;
@@ -50,11 +54,11 @@ public class ThirdPersonController : MonoBehaviour
     public float jumpWaitTime, jumpWaitTimer;
     public float airControlSmooth = 0.8f;
     public float grav = 9.8f;
-    public bool jumping;
     float moveSmoothUse;
     float rotationV;
     float verticalSpeed;
     Vector3 currentMovementV;
+
     //for jump trails
     public ObjectPooler jumpTrailPool;
     GameObject jumpTrail;
@@ -77,9 +81,11 @@ public class ThirdPersonController : MonoBehaviour
     public AudioClip[] jumpSounds;
     public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps, noNo;
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
-    public ParticleSystem walkingEffect;
     float footStepTimer = 0;
     public int currentStep = 0;
+    //footstep objects & efx
+    public ObjectPooler footstepPooler;
+    public bool leftOrRightFoot;
 
     //world manager reference
     WorldManager wm;
@@ -149,12 +155,6 @@ public class ThirdPersonController : MonoBehaviour
         runParticles.SetActive(false);
         swimSpeed = movespeed / 2;
 
-        //for dirt particles
-        if (walkingEffect != null)
-        {
-            walkingEffect.Stop();
-        }
-
         //returning start pos
         if(PlayerPrefs.GetString("hasBook") == "yes")
         {
@@ -188,10 +188,6 @@ public class ThirdPersonController : MonoBehaviour
 
     void Update()
     {
-        //ps4 move
-        if (playerCanMove && !menuOpen && !playerCameraController.mouseControls)
-            PS4Movement();
-
         //calls mouse move
         if (playerCanMove && !menuOpen && playerCameraController.mouseControls)
         {
@@ -199,7 +195,13 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //call sleep -- only works if you haven't slept for a day and you are on the ground
-        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen && playerCanMove && !swimming)
+        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen && playerCanMove && !swimming) 
+        {
+            Sleep(true);
+        }
+
+        //set auto sleep when reach no sleep max
+        if(daysWithoutSleep > noSleepMax && !sleeping)
         {
             Sleep(true);
         }
@@ -231,6 +233,37 @@ public class ThirdPersonController : MonoBehaviour
 
     //same sort of logic for jump and other stuff, different core movement from ps4 controllers
     void MouseMovement()
+    {
+        CalculateMovementInputs();
+
+        //set animation based on target movement
+        SetPlayerAnimsFootsteps(targetMovementTotal);
+
+        //on land
+        if (!swimming)
+        {
+            RunWalk();
+            JumpCheck();
+            JumpInputs();
+
+            currentMovement.y = verticalSpeed;
+        }
+        //swimming
+        else
+        {
+            Swim();
+            currentMovement.y = 0;
+        }
+        
+        controller.Move(currentMovement * Time.deltaTime);
+        
+        ResetNearbyAudioSources();
+    }
+
+    //finds the targetMovementTotal (where the player is moving) 
+    // and the target Look (where the player is looking)
+    // based on player inputs 
+    void CalculateMovementInputs()
     {
         //grab inputs from our axes
         //z
@@ -267,184 +300,121 @@ public class ThirdPersonController : MonoBehaviour
         targetHorizontalMovement *= horizontalInput.magnitude;
 
         //add the 2 axes together
-        Vector3 targetMovementTotal = targetForwardMovement + targetHorizontalMovement;
-
+        targetMovementTotal = targetForwardMovement + targetHorizontalMovement;
+        
         //add yLook to the player pos, then subtract cam pos to get the forward look
-        Quaternion targetLook;
-
         //movement input
         if (targetMovementTotal.magnitude > 0)
         {
             targetLook = Quaternion.LookRotation(targetMovementTotal);
             characterBody.rotation = Quaternion.Lerp(characterBody.rotation, targetLook, 10f * Time.deltaTime);
         }
+    }
+
+    void RunWalk()
+    {
+        //need to figure out how to reset the cloth to what it's like at start / before swimming 
+        characterBody.transform.localPosition = new Vector3(0, -0.956f, 0);
+        poopShoes.speed = 1f;
+
+        //run
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
+
+            if (targetMovementTotal.magnitude > 0)
+            {
+                //set run
+                if (poopShoes.GetBool("running") != true)
+                {
+                    SetAnimator("running");
+                    playerRunCollider.enabled = true;
+                    running = true;
+                    runParticles.SetActive(true);
+                }
+            }
+            //not moving 
+            else
+            {
+                runParticles.SetActive(false);
+                //idling
+                if (poopShoes.GetBool("idle") != true)
+                {
+                    SetAnimator("idle");
+                }
+            }
+        }
+        //walk
         else
         {
-            //dont rotate mc
-        }
-        
+            currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
 
-        //set animation based on target movement
-        SetPlayerAnimsFootsteps(targetMovementTotal);
-
-        //on land
-        if (!swimming)
-        {
-            //need to figure out how to reset the cloth to what it's like at start / before swimming 
-            characterBody.transform.localPosition = new Vector3(0, -0.956f, 0);
-            poopShoes.speed = 1f;
-
-            //run
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            //movin
+            if (targetMovementTotal.magnitude > 0)
             {
-                currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
-               
-                if (targetMovementTotal.magnitude > 0)
+                //set walk
+                if (poopShoes.GetBool("walking") != true)
                 {
-                    //set run
-                    if (poopShoes.GetBool("running") != true)
-                    {
-                        SetAnimator("running");
-                        playerRunCollider.enabled = true;
-                        running = true;
-                        runParticles.SetActive(true);
-                    }
-                }
-                else
-                {
+                    SetAnimator("walking");
+                    playerRunCollider.enabled = false;
+                    running = false;
                     runParticles.SetActive(false);
                 }
             }
-            //walk
+            //not moving
             else
             {
-                currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
-
-                //movin
-                if (targetMovementTotal.magnitude > 0)
+                //idling
+                if (poopShoes.GetBool("idle") != true)
                 {
-                    //set walk
-                    if (poopShoes.GetBool("walking") != true)
-                    {
-                        SetAnimator("walking");
-                        playerRunCollider.enabled = false;
-                        running = false;
-                        runParticles.SetActive(false);
-                    }
-                }
-                //not moving
-                else
-                {
-                    //idling
-                    if (poopShoes.GetBool("idle") != true)
-                    {
-                        SetAnimator("idle");
-                    }
+                    SetAnimator("idle");
                 }
             }
+        }
+    }
+
+    void Swim()
+    {
+        currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
+        runParticles.SetActive(false);
+        characterBody.transform.localPosition = new Vector3(0, -2f, 0);
+        //should dynamically alter y based on raycast at water surface
+        //playerCloak.enabled = false;
+        //need to figure out what to do with the cloth while swimming...
+
+        //swim faster!
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            swimSpeed = movespeed;
+            poopShoes.speed = 2f;
+        }
+        //normal swim speed
+        else
+        {
+            swimSpeed = movespeed / 2f;
+            poopShoes.speed = 1f;
         }
         //swimming
+        if (targetMovementTotal.magnitude > 0)
+        {
+            //always swimmin
+            if (poopShoes.GetBool("swimming") != true)
+            {
+                SetAnimator("swimming");
+            }
+        }
+        //treading water idle
         else
         {
-            currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
-            runParticles.SetActive(false);
-            characterBody.transform.localPosition = new Vector3(0, -2f, 0);
-            //playerCloak.enabled = false;
-            //need to figure out what to do with the cloth while swimming...
-
-            //swim faster!
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            //always swimmin
+            if (poopShoes.GetBool("swimIdle") != true)
             {
-                swimSpeed = movespeed;
-                poopShoes.speed = 2f;
-            }
-            //normal swim speed
-            else
-            {
-                swimSpeed = movespeed / 2f;
-                poopShoes.speed = 1f;
-            }
-            //swimming
-            if (targetMovementTotal.magnitude > 0)
-            {
-                //always swimmin
-                if (poopShoes.GetBool("swimming") != true)
-                {
-                    SetAnimator("swimming");
-                }
-            }
-            //treading water idle
-            else
-            {
-                //always swimmin
-                if (poopShoes.GetBool("swimIdle") != true)
-                {
-                    SetAnimator("swimIdle");
-                }
+                SetAnimator("swimIdle");
             }
         }
-
-        //no jump grav when swimming
-        if (!swimming)
-        {
-            JumpCheck();
-
-            currentMovement.y = verticalSpeed;
-        }
-        //set y to 0 while swimming
-        else
-        {
-            currentMovement.y = 0;
-        }
-        
-        controller.Move(currentMovement * Time.deltaTime);
-        
-        ResetNearbyAudioSources();
     }
 
-    //PS4 Controls
-    void PS4Movement()
-    {
-        //gets both of these Axes from the L analogue stick
-        horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-
-        //should put measure in place to adjust animations and footsteps to walking speed based on slight input of joystick
-
-        if (horizontalInput.magnitude > 1)
-        {
-            horizontalInput.Normalize();
-        }
-
-        //checking if and how we are moving to set vis effects and anims
-        SetPlayerAnimsFootsteps(horizontalInput);
-
-
-        //Actual movement calcs
-        Vector3 targetHorizontalMovement = horizontalInput;
-        targetHorizontalMovement = cameraTransform.rotation * targetHorizontalMovement;
-        targetHorizontalMovement.y = 0;
-        targetHorizontalMovement.Normalize();
-        targetHorizontalMovement *= horizontalInput.magnitude;
-
-        currentMovement = Vector3.SmoothDamp(currentMovement, targetHorizontalMovement * movespeed, ref currentMovementV, moveSmoothUse);
-
-        Quaternion targetRotationQ = Quaternion.LookRotation(Vector3.forward);
-        if (new Vector3(currentMovement.x, 0, currentMovement.z).magnitude > 1)
-        {
-            targetRotationQ = Quaternion.LookRotation(new Vector3(currentMovement.x, 0, currentMovement.z));
-            transform.rotation = Quaternion.Euler(0, Mathf.SmoothDampAngle(transform.rotation.eulerAngles.y, targetRotationQ.eulerAngles.y, ref rotationV, rotateSpeedSmooth), 0);
-        }
-
-        //jump logics
-        JumpCheck();
-
-        currentMovement.y = verticalSpeed;
-
-        //Debug.Log(" currentMovement = " + currentMovement);
-        controller.Move(currentMovement * Time.deltaTime);
-
-        ResetNearbyAudioSources();
-    }
+   
 
     //called either when player presses B or has passed out from exhaustion
     public void Sleep(bool pressedOrPassed)
@@ -553,17 +523,6 @@ public class ThirdPersonController : MonoBehaviour
         {
             if (!jumping)
             {
-                //dirt particles start
-                if (!walkingEffect.isPlaying && !swimming)
-                {
-                    walkingEffect.Play();
-                }
-                //turn off walking effect
-                if (swimming)
-                {
-                    walkingEffect.Stop();
-                }
-
                 footStepTimer += Time.deltaTime;
 
                 //play footstep sound
@@ -571,9 +530,9 @@ public class ThirdPersonController : MonoBehaviour
                 {
                     if (footStepTimer > runStepTotal)
                     {
-                        if (currentStep < currentFootsteps.Length)
-                            playerSource.PlayOneShot(currentFootsteps[currentStep]);
                         IncrementFootsteps();
+                        playerSource.PlayOneShot(currentFootsteps[currentStep]);
+                        
                     }
                 }
                 //walking
@@ -581,26 +540,87 @@ public class ThirdPersonController : MonoBehaviour
                 {
                     if (footStepTimer > walkStepTotal)
                     {
-                        if (currentStep < currentFootsteps.Length)
-                            playerSource.PlayOneShot(currentFootsteps[currentStep]);
                         IncrementFootsteps();
+                        playerSource.PlayOneShot(currentFootsteps[currentStep]);
+                      
                     }
                 }
-               
             }
         }
         else
         {
-            //dirt particles stop
-            if (walkingEffect.isPlaying)
-            {
-                walkingEffect.Stop();
-            }
-
             footStepTimer = 0;
         }
     }
 
+    //count thru footstep sounds 
+    void IncrementFootsteps()
+    {
+        if (currentStep < (currentFootsteps.Length - 1))
+        {
+            currentStep += Random.Range(0, (currentFootsteps.Length - currentStep));
+        }
+        else
+        {
+            currentStep = 0;
+        }
+
+        footStepTimer = 0;
+
+        //spawn footprints on land
+        if(!swimming)
+            SpawnFootprint();
+    }
+
+    //leave footprints behind as you walk around
+    void SpawnFootprint()
+    {
+        //set footprint obj
+        GameObject footprint = null;
+        footprint = footstepPooler.GrabObject();
+        footprint.GetComponent<FadeSprite>().FadeIn();
+
+        //set spawn point
+        Vector3 spawnPos = new Vector3(transform.position.x, transform.position.y - controller.height / 2 + 0.1f, transform.position.z);
+
+        //set pos 
+        footprint.transform.position = spawnPos;
+        
+        //mess with rotation 
+        footprint.transform.SetParent(characterBody.transform);
+        if (leftOrRightFoot)
+        {
+            //edit spawn point and tell sprite to flip
+            spawnPos += new Vector3(0.3f, 0, 0);
+        }
+        else
+        {
+            //edit spawn point and tell sprite to flip
+            spawnPos += new Vector3(-0.3f, 0, 0);
+
+        }
+        footprint.transform.localEulerAngles = new Vector3(90, 0, 0);
+        footprint.transform.SetParent(null);
+
+        //wait 1 sec to fade out footprint
+        footprint.GetComponent<FadeSprite>().StartCoroutine(footprint.GetComponent<FadeSprite>().WaitToFadeOut());
+
+        //play little dirt particle effect 
+        //running fx
+        if (running)
+        {
+            footprint.transform.GetChild(1).GetComponent<ParticleSystem>().Play();
+        }
+        //walking fx
+        else
+        {
+            footprint.transform.GetChild(0).GetComponent<ParticleSystem>().Play();
+        }
+      
+
+        leftOrRightFoot = !leftOrRightFoot;
+    }
+    
     public void SetAnimator(string newState)
     {
         //turn off all states
@@ -616,22 +636,11 @@ public class ThirdPersonController : MonoBehaviour
         poopShoes.SetBool(newState, true);
     }
 
-    void IncrementFootsteps()
-    {
-        if (currentStep < (currentFootsteps.Length - 1))
-        {
-            currentStep += Random.Range(0, (currentFootsteps.Length - currentStep));
-        }
-        else
-        {
-            currentStep = 0;
-        }
-        footStepTimer = 0;
-    }
 
     //jump logics
     void JumpCheck()
     {
+        //on the ground
         if (controller.isGrounded)
         {
             if (jumping)
@@ -649,10 +658,11 @@ public class ThirdPersonController : MonoBehaviour
                 if (Physics.Raycast(transform.position, -transform.up, out hitD, 10, groundedCheck))
                 {
                     //dust splash
-                    dustSplash.transform.position = hitD.point + new Vector3(0, 2f, 0);
+                    dustSplash.transform.position = hitD.point + new Vector3(0, 1f, 0);
                     splashScript.StartCoroutine(splashScript.Splash(lastJumpType));
                 }
             }
+
             jumpWaitTimer -= Time.deltaTime;
             moveSmoothUse = movespeedSmooth;
 
@@ -661,16 +671,19 @@ public class ThirdPersonController : MonoBehaviour
             {
                 SetAnimator("idle");
             }
-            //SlideCheck();
         }
 
-        if (!controller.isGrounded)
+        //not grounded
+        if(!controller.isGrounded)
         {
             moveSmoothUse = airControlSmooth;
             verticalSpeed -= grav * Time.deltaTime;
         }
+        
+    }
 
-
+    void JumpInputs()
+    {
         //hold jump button to charge jump on rhythm
         if (Input.GetButton("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
         {

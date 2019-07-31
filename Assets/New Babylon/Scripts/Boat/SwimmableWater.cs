@@ -20,7 +20,8 @@ public class SwimmableWater : MonoBehaviour {
     {
         if(other.gameObject == player)
         {
-            if (!tpc.swimming)
+            //if not swimming
+            if (!tpc.swimming )
             {
                 tpc.swimming = true;
                 tpc.currentFootsteps = tpc.swimSteps;
@@ -35,6 +36,7 @@ public class SwimmableWater : MonoBehaviour {
     {
         if (other.gameObject == player)
         {
+            //if swimming 
             if (tpc.swimming)
             {
                 tpc.swimming = false;

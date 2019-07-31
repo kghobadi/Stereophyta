@@ -26,7 +26,7 @@ public class Seed : MonoBehaviour {
     //physics and collision
     public Rigidbody seedBody;
     SphereCollider seedCollider;
-    public bool seedSelected, planting, falling, vortexing;
+    public bool seedSelected, planting, blowing, falling, vortexing;
     float vortexSpeed = 7.5f;
 
     //for spawning plant
@@ -370,4 +370,19 @@ public class Seed : MonoBehaviour {
         
     }
 
+
+    void AdjustHeight()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, down, out hit, 150f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                transform.position = hit.point + new Vector3(0, 1f, 0);
+            }
+        }
+    }
 }

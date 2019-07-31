@@ -39,7 +39,6 @@ public class UseBoat : PickUp {
         tpc.playerCanMove = false;
         tpc.SetAnimator("idle");
         tpc.runParticles.SetActive(false);
-        tpc.walkingEffect.Stop();
         tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
         camController.canLook = false;
         //child cam to boat
