@@ -33,7 +33,7 @@ public class ShroomSeed : MonoBehaviour {
     SphereCollider shroomCol;
 
     //state bools
-    public bool planting, blowing;
+    public bool planting;
     public bool shroomSelected, plantingOnGrid;
     Vector3 originalPos;
     public float shroomGroupDist;
@@ -95,6 +95,8 @@ public class ShroomSeed : MonoBehaviour {
                 }
             }
         }
+
+     
     }
 
     //planting on terrain grid

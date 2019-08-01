@@ -26,7 +26,7 @@ public class SwimmableWater : MonoBehaviour {
                 tpc.swimming = true;
                 tpc.currentFootsteps = tpc.swimSteps;
                 tpc.myInventory.gameObject.SetActive(false);
-                //tpc.playerCloak.enabled = false;
+                tpc.playerCloak.enabled = false;
             }
         }
     }
@@ -42,8 +42,19 @@ public class SwimmableWater : MonoBehaviour {
                 tpc.swimming = false;
                 tpc.currentFootsteps = tpc.grassSteps;
                 tpc.myInventory.gameObject.SetActive(true);
-                //tpc.playerCloak.enabled = true;
+                StartCoroutine(WaitToEnableCloak());
             }
         }
+    }
+
+    IEnumerator WaitToEnableCloak()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        if (!tpc.swimming)
+        {
+            tpc.playerCloak.enabled = true;
+        }
+        
     }
 }

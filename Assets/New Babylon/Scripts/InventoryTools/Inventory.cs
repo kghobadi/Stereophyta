@@ -265,10 +265,13 @@ public class Inventory : MonoBehaviour {
     //switch thru seeds
    public void SwitchSeed(bool posOrNeg)
     {
-        if(currenSeedObj.activeSelf)
+        if(currenSeedObj != null)
         {
-            currenSeedObj.GetComponent<Item>().DeselectSeed();
-            currenSeedObj.SetActive(false);
+            if (currenSeedObj.activeSelf)
+            {
+                currenSeedObj.GetComponent<Item>().DeselectSeed();
+                currenSeedObj.SetActive(false);
+            }
         }
 
         //switch pos

@@ -29,7 +29,8 @@ public class Shroom : MonoBehaviour
     public Texture2D plantedTexture;
 
     //size and transform storage
-    Vector3 originalSize, largeSize, originalPosition;
+    public Vector3 originalSize;
+    Vector3 largeSize, originalPosition;
     
     //physics
     Rigidbody shroomBody;
@@ -52,6 +53,7 @@ public class Shroom : MonoBehaviour
     }
 
     //active planted bools
+    public bool blowing;
     bool breathingIn, breathingOut;
     public float breatheSpeedFlat, currentBreatheSpeed, breatheDistance;
     public int rhythm;
@@ -177,11 +179,20 @@ public class Shroom : MonoBehaviour
             CheckGrowth();
 
             //hard coded spin animation
-            transform.localEulerAngles = new Vector3(70f, transform.localEulerAngles.y + (Time.deltaTime * currentBreatheSpeed * 15), 0);
+            if (!blowing)
+            {
+                transform.localEulerAngles = new Vector3(70f, transform.localEulerAngles.y + (Time.deltaTime * currentBreatheSpeed * 15), 0);
+            }
 
             if (Vector3.Distance(transform.position, player.transform.position) < 5)
             {
                 plantingState = PlantingState.VORTEXING;
+            }
+
+            //when wind is blowing, adjust my height to the ground
+            if (blowing)
+            {
+                AdjustHeight();
             }
         }
 
@@ -452,4 +463,19 @@ public class Shroom : MonoBehaviour
         Destroy(gameObject);
     }
 
+
+    void AdjustHeight()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, down, out hit, 150f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                transform.position = hit.point + new Vector3(0, 1f, 0);
+            }
+        }
+    }
 }

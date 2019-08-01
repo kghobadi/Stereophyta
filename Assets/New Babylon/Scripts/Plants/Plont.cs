@@ -66,7 +66,7 @@ public class Plont : MonoBehaviour {
     public ObjectPooler seedPooler;
 
     public PlantType myPlantType;
-
+    
    
     //mostly used for saving / loading 
     public enum PlantType
@@ -107,7 +107,7 @@ public class Plont : MonoBehaviour {
         //grab audio sources
         plantSource = GetComponent<AudioSource>();
         extraVoice = transform.GetChild(1).GetComponent<AudioSource>();
-
+        
         //scale and set stages
         originalScale = transform.localScale;
         myAge = 0;

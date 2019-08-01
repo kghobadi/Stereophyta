@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AxWind : Rhythm {
-    float currentSpeed;
     public Ax myAxDaddy;
 
     Vector3 originalPos;
@@ -27,6 +26,16 @@ public class AxWind : Rhythm {
 
         if (Vector3.Distance(transform.position, originalPos) > myAxDaddy.distanceToDestroyWinds)
         {
+            //unchild all dem seeds
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                GameObject child = transform.GetChild(i).gameObject;
+
+                child.transform.SetParent(null);
+
+                child.transform.localScale = child.GetComponent<Seed>().origScale;
+            }
+
             Destroy(gameObject);
         }
 

@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class SickleWind : Rhythm
 {
-    float currentSpeed;
     public Sickle mySickleDaddy;
 
     Vector3 originalPos;
@@ -27,7 +26,12 @@ public class SickleWind : Rhythm
         transform.localScale -= (Vector3.one * scaleIncrease * Time.deltaTime);
 
         if (Vector3.Distance(transform.position, originalPos) > mySickleDaddy.distanceToDestroyWinds)
-        {
+        { 
+            //unchild all dem seeds
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                transform.GetChild(i).SetParent(null);
+            }
             Destroy(gameObject);
         }
 

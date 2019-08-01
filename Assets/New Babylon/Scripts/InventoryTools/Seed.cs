@@ -52,6 +52,9 @@ public class Seed : MonoBehaviour {
     public ObjectPooler seedPooler;
     PooledObject _pooledObj;
 
+    //wind blow reset
+    public Vector3 origScale;
+
 	void Start () {
         //grab refs
         tgs = TerrainGridSystem.instance;
@@ -65,6 +68,8 @@ public class Seed : MonoBehaviour {
         seedBody.isKinematic = true;
         seedCollider = GetComponent<SphereCollider>();
         seedSource = GetComponent<AudioSource>();
+
+        origScale = transform.localScale;
 
         _pooledObj = GetComponent<PooledObject>();
 
@@ -168,6 +173,12 @@ public class Seed : MonoBehaviour {
             {
                 CollectSeed();
             }
+        }
+
+        //when wind is blowing, adjust my height to the ground
+        if (blowing)
+        {
+            AdjustHeight();
         }
     }
 

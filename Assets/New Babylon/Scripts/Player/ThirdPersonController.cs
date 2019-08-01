@@ -17,7 +17,7 @@ public class ThirdPersonController : MonoBehaviour
     public CharacterController controller;
     PlayerCameraController playerCameraController;
     Transform cameraTransform;
-    public Transform characterBody;
+    public Transform characterBody, waterCaster;
     public Animator poopShoes;
     BoxCollider playerRunCollider;
     public Cloth playerCloak;
@@ -29,7 +29,6 @@ public class ThirdPersonController : MonoBehaviour
     //PS4 move variables
     //move states
     public bool running, jumping, swimming;
-
     public bool playerCanMove, menuOpen;
     public bool indoors;
     public Transform houseCam;
@@ -67,6 +66,11 @@ public class ThirdPersonController : MonoBehaviour
     //dust splash
     public GameObject dustSplash;
     DustSplash splashScript;
+
+    //swim fx
+    public GameObject swimRipples;
+    public ParticleSystem swimSplashL, swimSplashR;
+    ParticleSystem.MainModule splashMainL, splashMainR;
 
     //inventory ref
     public Inventory myInventory;
@@ -154,9 +158,12 @@ public class ThirdPersonController : MonoBehaviour
         sleepParticles.SetActive(false);
         runParticles.SetActive(false);
         swimSpeed = movespeed / 2;
+        swimRipples.SetActive(false);
+        splashMainL = swimSplashL.main;
+        splashMainR = swimSplashR.main;
 
         //returning start pos
-        if(PlayerPrefs.GetString("hasBook") == "yes")
+        if (PlayerPrefs.GetString("hasBook") == "yes")
         {
             transform.position = returningStartPos;
             transform.localEulerAngles = new Vector3(0, -90f, 0);
@@ -245,13 +252,14 @@ public class ThirdPersonController : MonoBehaviour
             RunWalk();
             JumpCheck();
             JumpInputs();
-
+            swimRipples.SetActive(false);
             currentMovement.y = verticalSpeed;
         }
         //swimming
         else
         {
             Swim();
+            swimRipples.SetActive(true);
             currentMovement.y = 0;
         }
         
@@ -373,12 +381,24 @@ public class ThirdPersonController : MonoBehaviour
         }
     }
 
+    void AdjustSwimHeight()
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(waterCaster.position, Vector3.down, out hit, 35f))
+        {
+            if (hit.transform.gameObject.tag == "Water")
+            {
+                transform.position = hit.point - new Vector3(0, 2f, 0);
+            }
+        }
+    }
+
     void Swim()
     {
         currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
         runParticles.SetActive(false);
-        characterBody.transform.localPosition = new Vector3(0, -2f, 0);
-        //should dynamically alter y based on raycast at water surface
+        AdjustSwimHeight();
         //playerCloak.enabled = false;
         //need to figure out what to do with the cloth while swimming...
 
@@ -387,16 +407,27 @@ public class ThirdPersonController : MonoBehaviour
         {
             swimSpeed = movespeed;
             poopShoes.speed = 2f;
+
+            //alter splash fx
+            splashMainL.startLifetime = 0.5f;
+            splashMainR.startLifetime = 0.5f;
+         
         }
         //normal swim speed
         else
         {
             swimSpeed = movespeed / 2f;
             poopShoes.speed = 1f;
+
+            //alter splash fx
+            splashMainL.startLifetime = 1f;
+            splashMainR.startLifetime = 1f;
         }
         //swimming
         if (targetMovementTotal.magnitude > 0)
         {
+            swimSplashL.gameObject.SetActive(true);
+            swimSplashR.gameObject.SetActive(true);
             //always swimmin
             if (poopShoes.GetBool("swimming") != true)
             {
@@ -406,6 +437,8 @@ public class ThirdPersonController : MonoBehaviour
         //treading water idle
         else
         {
+            swimSplashL.gameObject.SetActive(false);
+            swimSplashR.gameObject.SetActive(false);
             //always swimmin
             if (poopShoes.GetBool("swimIdle") != true)
             {
@@ -462,6 +495,11 @@ public class ThirdPersonController : MonoBehaviour
     //only called when player is on home island
     IEnumerator FadeToBed()
     {
+        yield return new WaitForSeconds(0.5f);
+
+        //set animator
+        SetAnimator("sleeping");
+
         sleepCover.FadeIn();
 
         yield return new WaitForSeconds(1f);
@@ -469,17 +507,16 @@ public class ThirdPersonController : MonoBehaviour
         //move player to bed & turn on z particles
         transform.position = bedPos.position;
         playerCloak.gameObject.SetActive(false);
-        transform.localEulerAngles = new Vector3(0, 80, 0);
+        transform.localEulerAngles = new Vector3(0, 180, 0);
         characterBody.localEulerAngles = new Vector3(0, 0, 0);
+        characterBody.transform.localPosition = new Vector3(0, 0.3f, 0);
         sleepParticles.SetActive(true);
 
-        //set animator
-        SetAnimator("sleeping");
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
 
         sleepCover.FadeOut();
-        playerCloak.gameObject.SetActive(true);
+      
     }
 
     //called by Sun when player's daysToSleep reaches 0 while sleeping is true
@@ -487,6 +524,7 @@ public class ThirdPersonController : MonoBehaviour
     {
         //Debug.Log("wake up time");
         //set bools
+        characterBody.transform.localPosition = new Vector3(0, 0, 0);
         sleeping = false;
         playerCanMove = true;
         playerCameraController.enabled = true;
@@ -511,8 +549,16 @@ public class ThirdPersonController : MonoBehaviour
 
         //set animator
         SetAnimator("idle");
+
+        StartCoroutine(WaitToActivateCloak());
     }
 
+    IEnumerator WaitToActivateCloak()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        playerCloak.gameObject.SetActive(true);
+    }
   
 
     //checking if and how we are moving to set vis effects and anims
