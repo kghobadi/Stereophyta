@@ -21,12 +21,14 @@ public class ShroomSeed : MonoBehaviour {
 
     //tgs logic
     TerrainGridSystem tgs;
+    GridManager gridMan;
     Cell currentCell;
     int currentCellIndex, previousCellIndex;
     //All possible texture references. 
-    public Texture2D groundTexture;
+    Texture2D groundTexture;
+    Texture2D canClickTexture;
     public Texture2D plantedTexture;
-    public Texture2D canClickTexture;
+   
 
     //physics
     Rigidbody shroomBody;
@@ -50,9 +52,13 @@ public class ShroomSeed : MonoBehaviour {
     public Shroom.ShroomType shroomSeedType;
 
     void Start () {
-
-        //player refs
+        //tgs refs 
         tgs = TerrainGridSystem.instance;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        canClickTexture = plantedTexture;
+
+        //player & environment refs
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();

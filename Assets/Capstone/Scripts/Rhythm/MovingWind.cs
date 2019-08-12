@@ -81,6 +81,8 @@ public class MovingWind : Rhythm {
                     other.GetComponent<Shroom>().blowing = true;
 
                     other.transform.SetParent(transform);
+
+                    other.transform.localEulerAngles = new Vector3(0, 0, 0);
                 }
 
                 Debug.Log("hit shroom");

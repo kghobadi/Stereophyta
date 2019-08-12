@@ -36,7 +36,7 @@ public class Sun : MonoBehaviour
 
     //wind stuff
     public int windCounter = 0;
-    public GameObject[] windDirections;
+    public GameObject[] windDirections, northWinds, southWinds, eastWinds, westWinds;
 
     //raincloud stuff
     public int rainCounter = 0;
@@ -73,10 +73,10 @@ public class Sun : MonoBehaviour
         //stars.SetActive(true);
         //starParticles.Stop();
 
-        SwitchTimeState(0);
+        timeState = TimeState.MORNING;
 
         //set dayCounter to saved player pref
-        if(PlayerPrefs.GetInt("dayCounter") > 0)
+        if (PlayerPrefs.GetInt("dayCounter") > 0)
         {
             dayCounter = PlayerPrefs.GetInt("dayCounter");
         }
@@ -142,7 +142,7 @@ public class Sun : MonoBehaviour
             //lighting
             LerpLighting(mid, ambientMid, skyMid);
             //time bool
-            SwitchTimeState(1);
+            timeState = TimeState.MIDDAY;
         }
         //is Dusk
         else if (angleInDegrees > duskInterval && angleInDegrees < nightInterval)
@@ -150,7 +150,7 @@ public class Sun : MonoBehaviour
             //lighting
             LerpLighting(dusk, ambientDusk, skyDusk);
             //time bool
-            SwitchTimeState(2);
+            timeState = TimeState.DUSK;
         }
         //is Night
         else if (angleInDegrees > nightInterval && angleInDegrees < morningInterval)
@@ -158,7 +158,7 @@ public class Sun : MonoBehaviour
             //lighting
             LerpLighting(night, ambientNight, skyNight);
             //time bool
-            SwitchTimeState(3);
+            timeState = TimeState.NIGHT;
 
             //when its night, yesterday catches up to dayCounter
             yesterday = dayCounter;
@@ -168,30 +168,6 @@ public class Sun : MonoBehaviour
             {
                 stars.SetActive(true);
             }
-        }
-    }
-
-    //pass the state you want to set true
-    void SwitchTimeState(int state)
-    {
-        switch (state)
-        {
-            //morning
-            case 0:
-                timeState = TimeState.MORNING;
-                break;
-            //midday
-            case 1:
-                timeState = TimeState.MIDDAY;
-                break;
-            //dusk
-            case 2:
-                timeState = TimeState.DUSK;
-                break;
-            //night
-            case 3:
-                timeState = TimeState.NIGHT;
-                break;
         }
     }
 
@@ -248,20 +224,62 @@ public class Sun : MonoBehaviour
     void RandomizeWinds()
     {
         windCounter = Random.Range(0, 4);
+        
+        SwitchWinds(windCounter);
 
-        for(int i = 0; i < windDirections.Length; i++)
-        {
-            windDirections[i].SetActive(false);
-        }
-
-        windDirections[windCounter].SetActive(true);
-
-        //randomize time scales of winds
+        //randomize time scales of all winds
         for(int i = 0; i < windDirections[windCounter].transform.childCount; i++)
         {
             int randomScale = Random.Range(0, 4);
             windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().timeScale = randomScale;
             windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
+        }
+    }
+
+    //sets wind direction active globally 
+    public void SwitchWinds(int windDir)
+    {
+        //turn off all winds
+        for (int i = 0; i < windDirections.Length; i++)
+        {
+            windDirections[i].SetActive(false);
+        }
+
+        //decide directions to activate
+        switch (windDir)
+        {
+            //NORTH
+            case 0:
+                //turn on north winds
+                for (int i = 0; i < northWinds.Length; i++)
+                {
+                    northWinds[i].SetActive(true);
+                }
+                break;
+            //EAST
+            case 1:
+                //turn on east winds
+                for (int i = 0; i < eastWinds.Length; i++)
+                {
+                    eastWinds[i].SetActive(true);
+                }
+                break;
+            //SOUTH
+            case 2:
+                //turn on south winds
+                for (int i = 0; i < southWinds.Length; i++)
+                {
+                    southWinds[i].SetActive(true);
+                }
+                break;
+            //WEST
+            case 3:
+                //turn on west winds
+                for (int i = 0; i < westWinds.Length; i++)
+                {
+                    westWinds[i].SetActive(true);
+                }
+                break;
         }
     }
 

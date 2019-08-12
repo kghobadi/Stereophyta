@@ -6,12 +6,13 @@ using TGS;
 public class Seed : MonoBehaviour {
     //tgs logic
     TerrainGridSystem tgs;
+    GridManager gridMan;
     Cell currentCell;
     int currentCellIndex, previousCellIndex;
     //All possible texture references. 
-    public Texture2D groundTexture;
+    Texture2D groundTexture;
+    Texture2D canClickTexture;
     public Texture2D plantedTexture;
-    public Texture2D canClickTexture;
     public bool plantingOnGrid;
 
     //for inv
@@ -56,23 +57,28 @@ public class Seed : MonoBehaviour {
     public Vector3 origScale;
 
 	void Start () {
-        //grab refs
+        //set tgs stuff
         tgs = TerrainGridSystem.instance;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        canClickTexture = plantedTexture;
+
+        //sun and player refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
+        _pooledObj = GetComponent<PooledObject>();
 
+        //seed start vars
         seedBody = GetComponent<Rigidbody>();
         seedBody.isKinematic = true;
         seedCollider = GetComponent<SphereCollider>();
         seedSource = GetComponent<AudioSource>();
-
         origScale = transform.localScale;
 
-        _pooledObj = GetComponent<PooledObject>();
-
+        //dif settings for UI seeds
         if (!UIseed)
         {
             daysBeforePlanting = Random.Range(2, 4);

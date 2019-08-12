@@ -132,7 +132,7 @@ public class ThirdPersonController : MonoBehaviour
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
-        wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        //wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
         myInventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
         playerRunCollider = GetComponent<BoxCollider>();
         playerRunCollider.enabled = false;

@@ -21,13 +21,14 @@ public class Plont : MonoBehaviour {
 
     //tgs logic
     public TerrainGridSystem tgs;
+    GridManager gridMan;
     public bool plantedOnGrid;
     public int cellIndex;
 
     //All possible texture references. 
-    public Texture2D groundTexture;
+    Texture2D groundTexture;
+    Texture2D wateredTexture;
     public Texture2D plantedTexture;
-    public Texture2D wateredTexture;
 
     //physics 
     Rigidbody plantBody;
@@ -75,8 +76,13 @@ public class Plont : MonoBehaviour {
     }
     
 	void Start () {
-        //hail the sun
+        //tgs refs
         tgs = TerrainGridSystem.instance;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        wateredTexture = gridMan.wateredTexture;
+
+        //hail the sun
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();

@@ -21,6 +21,7 @@ public class Shroom : MonoBehaviour
 
     //tgs logic
     TerrainGridSystem tgs;
+    GridManager gridMan;
     public bool plantedOnGrid;
     public int cellIndex;
 
@@ -96,8 +97,12 @@ public class Shroom : MonoBehaviour
 
     void Start()
     {
-        //player refs
+        //tgs refs
         tgs = TerrainGridSystem.instance;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+
+        //player and environment 
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
