@@ -4,8 +4,33 @@ timeCreated: 1549499994
 licenseType: Free
 ModelImporter:
   serializedVersion: 22
-  fileIDToRecycleName: {}
-  externalObjects: {}
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: pCube3
+    100004: pCube4
+    400000: //RootNode
+    400002: pCube3
+    400004: pCube4
+    2300000: pCube4
+    3300000: pCube4
+    4300000: pCube4
+    9500000: //RootNode
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bedFrame
+    second: {fileID: 2100000, guid: e7b18ec5a59985944a01e18cff575386, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mattress1
+    second: {fileID: 2100000, guid: 52d3ea0685f868448ab8e4c941215bd2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pillow
+    second: {fileID: 2100000, guid: 6500ddae76c2e674aa1983d44b392bdd, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
