@@ -6,8 +6,12 @@ using TGS;
 
 public class Shroom : MonoBehaviour
 { 
+    [Header("Prefab & Pooler")]
     //for spawning shrooms
     public GameObject shroomPrefab;
+    //for obj pooling 
+    public ObjectPooler shroomPooler;
+    PooledObject _pooledObj;
 
     //player and sun ref
     Sun sun;
@@ -22,6 +26,7 @@ public class Shroom : MonoBehaviour
     //tgs logic
     TerrainGridSystem tgs;
     GridManager gridMan;
+    [Header("TGS")]
     public bool plantedOnGrid;
     public int cellIndex;
 
@@ -37,15 +42,15 @@ public class Shroom : MonoBehaviour
     Rigidbody shroomBody;
     BoxCollider shroomCol;
     float vortexSpeed = 7.5f;
-
+    
     //lerp bools
     public enum PlantingState
     {
         PLANTED, UNPLANTED, VORTEXING,
     }
+    [Header("Shroom States")]
     public PlantingState plantingState;
-
-
+    
     //for checking shroom type
     public ShroomType shroomType;
     public enum ShroomType
@@ -72,6 +77,7 @@ public class Shroom : MonoBehaviour
 
     //audio for shroom
     AudioSource shroomSource;
+    [Header("Audio")]
     public AudioClip[] breathingSounds;
     public int mushroomSize;
     public AudioClip mushroomSound;
@@ -82,10 +88,6 @@ public class Shroom : MonoBehaviour
     Animator shroomAnimator;
     MeshRenderer shroomMR;
     public Material myShroomShader, uprootMat;
-
-    //for obj pooling 
-    public ObjectPooler shroomPooler;
-    PooledObject _pooledObj;
 
     //layermasks
     public LayerMask ground;
