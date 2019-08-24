@@ -12,13 +12,10 @@ public class ShroomSeed : MonoBehaviour {
     //for inv
     Inventory inventoryScript;
     Transform inventoryParent;
+    [Header("Inventory")]
     public Sprite inventorySprite;
     public int mySeedIndex;
-
-    //for spawning shrooms
-    public GameObject shroomPrefab;
-    GameObject shroomClone;
-
+    
     //tgs logic
     TerrainGridSystem tgs;
     GridManager gridMan;
@@ -35,6 +32,7 @@ public class ShroomSeed : MonoBehaviour {
     SphereCollider shroomCol;
 
     //state bools
+    [Header ("State bools")]
     public bool planting;
     public bool shroomSelected, plantingOnGrid;
     Vector3 originalPos;
@@ -42,22 +40,21 @@ public class ShroomSeed : MonoBehaviour {
     public int shroomGroupMax;
 
     //audio
+    [Header("Audio")]
     public AudioSource shroomSource;
     public AudioClip dropShroom, noNO, spawnShroom;
 
     //for obj pooling 
+    [Header("Pooler & Seed Type")]
     public ObjectPooler shroomPooler;
+    //for spawning shrooms
+    public GameObject shroomPrefab;
+    GameObject shroomClone;
 
     //for identifying shroom type
     public Shroom.ShroomType shroomSeedType;
 
     void Start () {
-        //tgs refs 
-        tgs = TerrainGridSystem.instance;
-        gridMan = tgs.transform.parent.GetComponent<GridManager>();
-        groundTexture = gridMan.groundTexture;
-        canClickTexture = plantedTexture;
-
         //player & environment refs
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
@@ -65,6 +62,12 @@ public class ShroomSeed : MonoBehaviour {
         inventoryScript = tpc.myInventory;
         inventoryParent = inventoryScript.transform;
         originalPos = transform.localPosition;
+
+        //tgs refs 
+        tgs = tpc.currentTGS;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        canClickTexture = plantedTexture;
 
         //aduio
         shroomBody = GetComponent<Rigidbody>();
@@ -84,6 +87,7 @@ public class ShroomSeed : MonoBehaviour {
                 {
                     //check if this spot is on the TGS
                     //grabs Cell tile and index
+                    tgs = tpc.currentTGS;
                     currentCell = tgs.CellGetAtPosition(hit.point, true);
 
                     //we have a grid cell

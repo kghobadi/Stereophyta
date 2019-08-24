@@ -21,6 +21,7 @@ public class Plont : MonoBehaviour {
     //tgs logic
     [Header("TGS")]
     public TerrainGridSystem tgs;
+    Zone myZone;
     GridManager gridMan;
     public bool plantedOnGrid;
     public int cellIndex;
@@ -77,17 +78,18 @@ public class Plont : MonoBehaviour {
     }
     
 	void Start () {
-        //tgs refs
-        tgs = TerrainGridSystem.instance;
-        gridMan = tgs.transform.parent.GetComponent<GridManager>();
-        groundTexture = gridMan.groundTexture;
-        wateredTexture = gridMan.wateredTexture;
-
         //hail the sun
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+
+        //tgs refs
+        tgs = tpc.currentTGS;
+        myZone = tpc.currentZone;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        wateredTexture = gridMan.wateredTexture;
 
         //add data to save script
         if (!startingPlant)

@@ -76,6 +76,12 @@ public class DustSplash : Rhythm {
 
                 other.GetComponent<Shroom>().ReleaseSpores();
             }
+
+            //recursive tree 
+            if (other.GetComponent<RecursiveBrancher>())
+            {
+                other.GetComponent<RecursiveBrancher>().PlaySounds();
+            }
         }
         //when u jump on wind fan increase the rhythm
         if (other.gameObject.tag == "WindMachines")

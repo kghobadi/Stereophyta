@@ -5,15 +5,18 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TGS;
 
 public class ThirdPersonController : MonoBehaviour
 {
     //start viewer ref
+    [Header("Starting View")]
     public StartView startViewer;
     //alternate start Pos based on if you have played before
     public Vector3 firstTimeStartPos, returningStartPos;
 
     //player controller and cam controller ref
+    [Header("Component Refs")]
     public CharacterController controller;
     PlayerCameraController playerCameraController;
     Transform cameraTransform;
@@ -21,14 +24,21 @@ public class ThirdPersonController : MonoBehaviour
     public Animator poopShoes;
     BoxCollider playerRunCollider;
     public Cloth playerCloak;
+   
 
     //set publicly to tell this script what raycasts can and can't go thru
+    [Header("Layer Masks & Zoning")]
     public LayerMask mask;
     public LayerMask groundedCheck;
+    public Zone currentZone;
+    public string currentZoneName;
+    public TerrainGridSystem currentTGS;
 
     //PS4 move variables
     //move states
-    public bool running, jumping, swimming;
+    [Header ("Movement Vars")]
+    public bool running;
+    public bool jumping, swimming;
     public bool playerCanMove, menuOpen;
     public bool indoors;
     public Transform houseCam;
@@ -47,7 +57,9 @@ public class ThirdPersonController : MonoBehaviour
     public float rotateSpeedMouse;
 
     //jump variables
-    public float jumpSpeed = 20, smallJump, midJump, bigJump;
+    [Header("Jump Vars")]
+    public float jumpSpeed = 20;
+    public float smallJump, midJump, bigJump;
     public float jumpCharger, midJCharge, bigJCharge, jumpChargerMax;
     public int lastJumpType;
     public float jumpWaitTime, jumpWaitTimer;
@@ -59,6 +71,7 @@ public class ThirdPersonController : MonoBehaviour
     Vector3 currentMovementV;
 
     //for jump trails
+    [Header ("Jump Trails & Dust Splash")]
     public ObjectPooler jumpTrailPool;
     GameObject jumpTrail;
     public Material smallJMat, midJMat, bigJMat;
@@ -68,6 +81,7 @@ public class ThirdPersonController : MonoBehaviour
     DustSplash splashScript;
 
     //swim fx
+    [Header("Swim FX")]
     public GameObject swimRipples;
     public ParticleSystem swimSplashL, swimSplashR;
     ParticleSystem.MainModule splashMainL, splashMainR;
@@ -79,6 +93,7 @@ public class ThirdPersonController : MonoBehaviour
     public Transform physicsRaycaster;
 
     //all my audio stuff
+    [Header("Audio")]
     AudioSource audioSource;
     AudioSource cameraAudSource;
     public AudioSource playerSource;
@@ -97,12 +112,14 @@ public class ThirdPersonController : MonoBehaviour
     Sun sunScript;
 
     //for planting effect 
+    [Header("Planting FX")]
     public List<ParticleSystem> plantingEffects = new List<ParticleSystem>();
     public int plantingEffectCounter = 0;
     public AudioSource seedAudio;
     public AudioClip[] seedCollects;
 
     //for sleeping
+    [Header("Sleeping Stuff")]
     public bool sleeping;
     public Transform bedPos;
     public FadeUI sleepCover;
@@ -117,6 +134,7 @@ public class ThirdPersonController : MonoBehaviour
     [SerializeField]
     public Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
     //to shorten if statement
+    [Header("Audio Listening Range")]
     public List<GameObject> audioObjects = new List<GameObject>();
     //listener range
     public float listeningRadius;

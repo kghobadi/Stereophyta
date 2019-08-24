@@ -57,12 +57,6 @@ public class Seed : MonoBehaviour {
     public Vector3 origScale;
 
 	void Start () {
-        //set tgs stuff
-        tgs = TerrainGridSystem.instance;
-        gridMan = tgs.transform.parent.GetComponent<GridManager>();
-        groundTexture = gridMan.groundTexture;
-        canClickTexture = plantedTexture;
-
         //sun and player refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
@@ -70,6 +64,12 @@ public class Seed : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
         _pooledObj = GetComponent<PooledObject>();
+
+        //set tgs stuff
+        tgs = tpc.currentTGS;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        canClickTexture = plantedTexture;
 
         //seed start vars
         seedBody = GetComponent<Rigidbody>();
@@ -133,6 +133,7 @@ public class Seed : MonoBehaviour {
                 {
                     //check if this spot is on the TGS
                     //grabs Cell tile and index
+                    tgs = tpc.currentTGS;
                     currentCell = tgs.CellGetAtPosition(hit.point, true);
 
                     //we have a grid cell
