@@ -32,6 +32,7 @@ public class StartView : MonoBehaviour {
     //UI stuff 
     public GameObject startMenuUI;
     public FadeUI[] menuFades;
+    public GameObject clickToStart;
 
 	void Start () {
         sunScript = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
@@ -48,6 +49,7 @@ public class StartView : MonoBehaviour {
             playerCamera.GetComponent<Camera>().enabled = false;
             playerInventory.SetActive(false);
             startCam.fieldOfView = 75f;
+            clickToStart.SetActive(true);
 
             if (PlayerPrefs.GetString("hasBook") == "yes")
             {

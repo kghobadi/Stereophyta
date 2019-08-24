@@ -9,7 +9,7 @@ public class CircleMillControls : MonoBehaviour {
     ThirdPersonController tpc;
 
     //camera refs
-    PlayerCameraController camControl;
+    public PlayerCameraController camControl;
     public float origHeight;
     public float zoomedOutHeight;
 
@@ -69,7 +69,6 @@ public class CircleMillControls : MonoBehaviour {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        camControl = Camera.main.GetComponent<PlayerCameraController>();
 
         //rhythm indicator
         rhythmIndicator = rhythmSR.GetComponent<Animator>();

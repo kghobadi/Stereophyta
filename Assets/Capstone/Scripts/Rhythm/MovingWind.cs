@@ -109,7 +109,7 @@ public class MovingWind : Rhythm {
             {
                 if (other.GetComponent<Shroom>().blowing)
                 {
-                    other.transform.Translate((-currentSpeed / 2) * Time.deltaTime, 0, 0);
+                    other.transform.Translate((-currentSpeed / 1.5f) * Time.deltaTime, 0, 0);
                 }
             }
         }
@@ -123,7 +123,7 @@ public class MovingWind : Rhythm {
                 if (other.GetComponent<Seed>().blowing && !other.GetComponent<Seed>().UIseed)
                 {
                     //blow slightly in the opposite direction
-                    other.transform.Translate((-currentSpeed / 2) * Time.deltaTime, 0, 0);
+                    other.transform.Translate((-currentSpeed / 1.5f) * Time.deltaTime, 0, 0);
 
                     //Debug.Log("wind moving seed");
                 }

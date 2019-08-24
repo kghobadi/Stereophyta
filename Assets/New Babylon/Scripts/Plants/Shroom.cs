@@ -130,6 +130,7 @@ public class Shroom : MonoBehaviour
         sporeMain = shroomSpores.main;
         sporeScript = shroomSpores.GetComponent<ShroomSpores>();
 
+        AdjustHeight();
         SetShroom();
     }
 

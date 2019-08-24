@@ -35,6 +35,14 @@ public class UseBoat : PickUp {
             transform.localPosition += new Vector3(0, 0, 5f);
         }
 
+        //in case you are jumping 
+        if (tpc.jumping)
+        {
+            tpc.jumping = false;
+            tpc.jumpTrail.transform.SetParent(null);
+            tpc.jumpTrail.GetComponent<JumpTrail>().StartCoroutine(tpc.jumpTrail.GetComponent<JumpTrail>().Deactivate());
+        }
+
         //turn off player movment
         tpc.playerCanMove = false;
         tpc.SetAnimator("idle");

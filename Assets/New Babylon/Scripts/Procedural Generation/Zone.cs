@@ -20,7 +20,7 @@ public class Zone : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
     }
 
-    void OnTriggerStay(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         if(other.gameObject == player)
         {
@@ -30,6 +30,8 @@ public class Zone : MonoBehaviour {
                 tpc.currentZone = this;
                 tpc.currentTGS = zoneTGS;
                 tpc.currentZoneName = zoneName;
+
+                Debug.Log("Player entered zone: " + zoneName);
             }
         }
         

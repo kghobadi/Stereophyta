@@ -43,7 +43,8 @@ public class ThirdPersonController : MonoBehaviour
     public bool indoors;
     public Transform houseCam;
     public GameObject runParticles;
-    Vector3 currentMovement;
+    [HideInInspector]
+    public Vector3 currentMovement;
     Vector3 targetMovementTotal;
     Quaternion targetLook;
     public Vector3 horizontalInput;
@@ -68,13 +69,15 @@ public class ThirdPersonController : MonoBehaviour
     float moveSmoothUse;
     float rotationV;
     float verticalSpeed;
-    Vector3 currentMovementV;
+    [HideInInspector]
+    public Vector3 currentMovementV;
 
     //for jump trails
     [Header ("Jump Trails & Dust Splash")]
     public ObjectPooler jumpTrailPool;
-    GameObject jumpTrail;
     public Material smallJMat, midJMat, bigJMat;
+    [HideInInspector]
+    public GameObject jumpTrail;
 
     //dust splash
     public GameObject dustSplash;

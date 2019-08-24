@@ -27,6 +27,17 @@ public class SwimmableWater : MonoBehaviour {
                 tpc.currentFootsteps = tpc.swimSteps;
                 tpc.myInventory.gameObject.SetActive(false);
                 tpc.playerCloak.enabled = false;
+
+                if (tpc.jumping)
+                {
+                    tpc.jumping = false;
+                    tpc.jumpTrail.transform.SetParent(null);
+                    tpc.jumpTrail.GetComponent<JumpTrail>().StartCoroutine(tpc.jumpTrail.GetComponent<JumpTrail>().Deactivate());
+
+                    //bring down move speed 
+                    tpc.currentMovement /= 3;
+                    tpc.currentMovementV /= 2;
+                }
             }
         }
     }
