@@ -27,10 +27,13 @@ public class SaveStorage
 public class SleepSave : MonoBehaviour {
 
     public SaveStorage mySaveStorage;
+    GameObject player;
+    ThirdPersonController tpc;
 
     //for saving and file writing
     private string gameDataFileName = "islandStorage";
     public bool canLoad;
+    public bool savingAndLoadingEnabled;
 
     //script ref to inventory
     Inventory inventoryScript;
@@ -42,11 +45,13 @@ public class SleepSave : MonoBehaviour {
     TerrainGridSystem tgs;
 
     void Start () {
-        tgs = TerrainGridSystem.instance;
+        player = GameObject.FindGameObjectWithTag("Player");
+        tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
+        tgs = tpc.currentTGS;
 
         //this means we have set it before, so we have saved before
-        if (PlayerPrefs.GetInt("sessionNumber") > 0)
+        if (PlayerPrefs.GetInt("sessionNumber") > 0 && savingAndLoadingEnabled)
         {
             LoadGameData();
         }

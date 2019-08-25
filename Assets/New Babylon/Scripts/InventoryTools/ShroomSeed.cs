@@ -12,27 +12,27 @@ public class ShroomSeed : MonoBehaviour {
     //for inv
     Inventory inventoryScript;
     Transform inventoryParent;
+    [Header("Inventory")]
     public Sprite inventorySprite;
     public int mySeedIndex;
-
-    //for spawning shrooms
-    public GameObject shroomPrefab;
-    GameObject shroomClone;
-
+    
     //tgs logic
     TerrainGridSystem tgs;
+    GridManager gridMan;
     Cell currentCell;
     int currentCellIndex, previousCellIndex;
     //All possible texture references. 
-    public Texture2D groundTexture;
+    Texture2D groundTexture;
+    Texture2D canClickTexture;
     public Texture2D plantedTexture;
-    public Texture2D canClickTexture;
+   
 
     //physics
     Rigidbody shroomBody;
     SphereCollider shroomCol;
 
     //state bools
+    [Header ("State bools")]
     public bool planting;
     public bool shroomSelected, plantingOnGrid;
     Vector3 originalPos;
@@ -40,25 +40,34 @@ public class ShroomSeed : MonoBehaviour {
     public int shroomGroupMax;
 
     //audio
+    [Header("Audio")]
     public AudioSource shroomSource;
     public AudioClip dropShroom, noNO, spawnShroom;
 
     //for obj pooling 
+    [Header("Pooler & Seed Type")]
     public ObjectPooler shroomPooler;
+    //for spawning shrooms
+    public GameObject shroomPrefab;
+    GameObject shroomClone;
 
     //for identifying shroom type
     public Shroom.ShroomType shroomSeedType;
 
     void Start () {
-
-        //player refs
-        tgs = TerrainGridSystem.instance;
+        //player & environment refs
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
         inventoryParent = inventoryScript.transform;
         originalPos = transform.localPosition;
+
+        //tgs refs 
+        tgs = tpc.currentTGS;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        canClickTexture = plantedTexture;
 
         //aduio
         shroomBody = GetComponent<Rigidbody>();
@@ -78,6 +87,7 @@ public class ShroomSeed : MonoBehaviour {
                 {
                     //check if this spot is on the TGS
                     //grabs Cell tile and index
+                    tgs = tpc.currentTGS;
                     currentCell = tgs.CellGetAtPosition(hit.point, true);
 
                     //we have a grid cell
@@ -95,6 +105,8 @@ public class ShroomSeed : MonoBehaviour {
                 }
             }
         }
+
+     
     }
 
     //planting on terrain grid

@@ -4,19 +4,22 @@ using UnityEngine;
 using TGS;
 
 public class GridManager : MonoBehaviour {
-    TerrainGridSystem tgs;
+    public TerrainGridSystem tgs;
     public Vector3 cellCenter;
 
-    public Texture2D groundTexture, fertileTexture, plantedTexture;
+    public Texture2D groundTexture, wateredTexture;
 
     void Start()
     {
-        tgs = TerrainGridSystem.instance;
+        PaintGridCells(groundTexture);
+    }
 
-        for (int i = 0; i < tgs.cells.Count; i++)
+    public void PaintGridCells(Texture2D texture)
+    {
+        for (int i = 0; i<tgs.cells.Count; i++)
         {
             if (tgs.CellGetTag(i) == 0)
-                tgs.CellToggleRegionSurface(i, true, groundTexture);
+                tgs.CellToggleRegionSurface(i, true, texture);
         }
     }
 

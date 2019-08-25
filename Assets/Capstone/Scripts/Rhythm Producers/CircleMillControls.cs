@@ -9,17 +9,23 @@ public class CircleMillControls : MonoBehaviour {
     ThirdPersonController tpc;
 
     //camera refs
-    PlayerCameraController camControl;
+    [Header("Camera Refs")]
+    public PlayerCameraController camControl;
     public float origHeight;
     public float zoomedOutHeight;
 
     //is the player currently operating the mill controls?
-    public bool playerOperating, playerWasNear;
+    [Header("Operating Vars")]
+    public bool playerOperating;
+    public bool playerWasNear;
     private float timeUntilLeaving;
     //is the mill currently activated -- moving circle winds?
     public Vector3 operatingPos, exitPos;
     public GameObject operatingMenu;
     public GameObject cursor;
+    //direction lever boolean (starts as 'positive')
+    public Button changeDirection;
+    public bool dirClockwise = true;
 
     //windTurbine and its rotation speed, lever objects 
     public GameObject windTurbine;
@@ -29,30 +35,20 @@ public class CircleMillControls : MonoBehaviour {
     Transform circleMill;
 
     //actual wind which rotates around mill
+    [Header("Wind Refs")]
     public Transform circleWindParent;
     public Slider windCountSlider;
     public Image windHandle;
-    public Sprite[] windHandleSprites;
     public int windCount = 0;
     public CircleWind[] allCircleWinds, currentCircleWinds, zeroCircleWinds, singleCircleWind, doubleCircleWind, tripleCircleWind, quadCircleWind;
     public float windSpeedMin;
 
     //rhythm vars
+    [Header("Rhythm Vars")]
     public Slider rhythmSlider;
     public Image rhythmHandle;
-    public Sprite[] rhythmHandleSprites;
     public int rhythmState;
     public float rhythmInterval, windRadius;
-    
-    //lowering sound
-    AudioSource controlsAudio;
-    public AudioClip beginOperating, gearTurn1, gearTurn2;
-    public AudioClip[] selectionSounds;
-
-    //direction lever boolean (starts as 'positive')
-    public Button changeDirection;
-    public bool dirClockwise = true;
-
     //rhythm indicator stuff
     public SpriteRenderer rhythmSR;
     Animator rhythmIndicator;
@@ -61,7 +57,14 @@ public class CircleMillControls : MonoBehaviour {
     public bool changedRhythm;
     public float disappearTimer, disappearTimerTotal = 1.5f;
 
+    //lowering sound
+    AudioSource controlsAudio;
+    [Header("Audio")]
+    public AudioClip[] selectionSounds;
+    public AudioClip beginOperating, gearTurn1, gearTurn2;
+
     //ui refs for pickup prompt
+    [Header("Interact Prompts")]
     public Text interactText;
     public string useMessage, leaveMessage;
     public FadeUI[] interactPrompts;
@@ -71,7 +74,6 @@ public class CircleMillControls : MonoBehaviour {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        camControl = Camera.main.GetComponent<PlayerCameraController>();
 
         //rhythm indicator
         rhythmIndicator = rhythmSR.GetComponent<Animator>();
@@ -106,7 +108,7 @@ public class CircleMillControls : MonoBehaviour {
             //dist from player
             float dist = Vector3.Distance(transform.position, player.transform.position);
             //if player is close
-            if (dist < 7.5f)
+            if (dist < 10f)
             {
                 playerWasNear = true;
 
@@ -121,7 +123,7 @@ public class CircleMillControls : MonoBehaviour {
                 }
             }
             //player has left
-            else if (dist > 15f)
+            else if (dist > 11f)
             {
                 //fade out prompts
                 if (playerWasNear)
@@ -175,6 +177,12 @@ public class CircleMillControls : MonoBehaviour {
         tpc.playerSource.PlayOneShot(beginOperating);
         timeUntilLeaving = 0;
 
+        //play sound if not already playing anything
+        if (!controlsAudio.isPlaying)
+        {
+            controlsAudio.PlayOneShot(beginOperating);
+        }
+      
         //menu on
         operatingMenu.SetActive(true);
         //cursor on
@@ -206,28 +214,25 @@ public class CircleMillControls : MonoBehaviour {
     //Switch Wind Direction
     public void ChangeDirections()
     {
-        if (!controlsAudio.isPlaying)
+        //loop thru circle winds to set neg wind speed
+        for (int i = 0; i < allCircleWinds.Length; i++)
         {
-            //loop thru circle winds to set neg wind speed
-            for(int i = 0; i < allCircleWinds.Length; i++)
-            {
-                allCircleWinds[i].windSpeed *= -1;
-            }
+            allCircleWinds[i].windSpeed *= -1;
+        }
 
-            rotationSpeed *= -1;
+        rotationSpeed *= -1;
 
-            //plays dif sound and moves lever correctly
-            if (dirClockwise)
-            {
-                controlsAudio.PlayOneShot(gearTurn1, 1f);
-                dirClockwise = false;
-            }
-            //counter clockwise
-            else
-            {
-                controlsAudio.PlayOneShot(gearTurn2, 1f);
-                dirClockwise = true;
-            }
+        //plays dif sound and moves lever correctly
+        if (dirClockwise)
+        {
+            controlsAudio.PlayOneShot(gearTurn1, 1f);
+            dirClockwise = false;
+        }
+        //counter clockwise
+        else
+        {
+            controlsAudio.PlayOneShot(gearTurn2, 1f);
+            dirClockwise = true;
         }
     }
 
@@ -240,7 +245,6 @@ public class CircleMillControls : MonoBehaviour {
         rhythmFader.FadeIn();
         changedRhythm = true;
         disappearTimer = disappearTimerTotal;
-        rhythmHandle.sprite = rhythmHandleSprites[rhythmState];
         controlsAudio.PlayOneShot(selectionSounds[rhythmState], 1f);
         
         //loop thru wind circles and set new speeds
@@ -316,7 +320,6 @@ public class CircleMillControls : MonoBehaviour {
 
         //play sound corresponding to number 
         controlsAudio.PlayOneShot(selectionSounds[windCount], 1f);
-        windHandle.sprite = windHandleSprites[windCount];
 
         //if we aren't at 0
         if (currentCircleWinds.Length > 0)

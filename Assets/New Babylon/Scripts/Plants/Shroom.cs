@@ -6,8 +6,12 @@ using TGS;
 
 public class Shroom : MonoBehaviour
 { 
+    [Header("Prefab & Pooler")]
     //for spawning shrooms
     public GameObject shroomPrefab;
+    //for obj pooling 
+    public ObjectPooler shroomPooler;
+    PooledObject _pooledObj;
 
     //player and sun ref
     Sun sun;
@@ -21,6 +25,9 @@ public class Shroom : MonoBehaviour
 
     //tgs logic
     TerrainGridSystem tgs;
+    Zone myZone;
+    GridManager gridMan;
+    [Header("TGS")]
     public bool plantedOnGrid;
     public int cellIndex;
 
@@ -29,60 +36,59 @@ public class Shroom : MonoBehaviour
     public Texture2D plantedTexture;
 
     //size and transform storage
-    Vector3 originalSize, largeSize, originalPosition;
+    public Vector3 originalSize;
+    Vector3 largeSize, originalPosition;
     
     //physics
     Rigidbody shroomBody;
     BoxCollider shroomCol;
     float vortexSpeed = 7.5f;
-
+    
     //lerp bools
     public enum PlantingState
     {
         PLANTED, UNPLANTED, VORTEXING,
     }
+    [Header("Shroom States")]
     public PlantingState plantingState;
-
-
+    
     //for checking shroom type
     public ShroomType shroomType;
     public enum ShroomType
     {
-        OCTA, CUBIE, 
+        OCTA, SPHEROCYBIN, 
     }
 
     //active planted bools
+    public bool blowing;
     bool breathingIn, breathingOut;
     public float breatheSpeedFlat, currentBreatheSpeed, breatheDistance;
     public int rhythm;
     //rhythm indicator
-    public SpriteRenderer rhythmSR;
+    SpriteRenderer rhythmSR;
     Animator rhythmIndicator;
     FadeSprite rhythmFader;
     //timers for how long indicator appears
     public bool changedRhythm;
-    public float disappearTimer, disappearTimerTotal = 1.5f;
+    private float disappearTimer, disappearTimerTotal = 1.5f;
 
     //for shroom growth 
     public int myAge, deathDay;
     public bool dayPassed;
 
     //audio for shroom
-    public AudioSource shroomSource;
+    AudioSource shroomSource;
+    [Header("Audio")]
     public AudioClip[] breathingSounds;
     public int mushroomSize;
     public AudioClip mushroomSound;
-    public AudioClip dropShroom, noNo, uprootSound;
+    public AudioClip noNo, uprootSound;
     public AudioClip[] changeRhythms;
 
     //for player to take!!
-    public Animator shroomAnimator;
-    public MeshRenderer shroomMR;
+    Animator shroomAnimator;
+    MeshRenderer shroomMR;
     public Material myShroomShader, uprootMat;
-
-    //for obj pooling 
-    public ObjectPooler shroomPooler;
-    PooledObject _pooledObj;
 
     //layermasks
     public LayerMask ground;
@@ -94,12 +100,17 @@ public class Shroom : MonoBehaviour
 
     void Start()
     {
-        //player refs
-        tgs = TerrainGridSystem.instance;
+        //player and environment 
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
+
+        //tgs refs
+        tgs = tpc.currentTGS;
+        myZone = tpc.currentZone;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
 
         //obj refs
         shroomCol = GetComponent<BoxCollider>();
@@ -110,6 +121,7 @@ public class Shroom : MonoBehaviour
         shroomSource = GetComponent<AudioSource>();
 
         //rhythm indicator
+        rhythmSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
         rhythmIndicator = rhythmSR.GetComponent<Animator>();
         rhythmFader = rhythmSR.GetComponent<FadeSprite>();
 
@@ -118,6 +130,7 @@ public class Shroom : MonoBehaviour
         sporeMain = shroomSpores.main;
         sporeScript = shroomSpores.GetComponent<ShroomSpores>();
 
+        AdjustHeight();
         SetShroom();
     }
 
@@ -176,11 +189,20 @@ public class Shroom : MonoBehaviour
             CheckGrowth();
 
             //hard coded spin animation
-            transform.localEulerAngles = new Vector3(70f, transform.localEulerAngles.y + (Time.deltaTime * currentBreatheSpeed * 15), 0);
+            if (!blowing)
+            {
+                transform.localEulerAngles = new Vector3(70f, transform.localEulerAngles.y + (Time.deltaTime * currentBreatheSpeed * 15), 0);
+            }
 
             if (Vector3.Distance(transform.position, player.transform.position) < 5)
             {
                 plantingState = PlantingState.VORTEXING;
+            }
+
+            //when wind is blowing, adjust my height to the ground
+            if (blowing)
+            {
+                AdjustHeight();
             }
         }
 
@@ -369,11 +391,6 @@ public class Shroom : MonoBehaviour
     //called whenever rhythm is changed;
     public void SetVisualRhythm()
     {
-        if (plantingState == PlantingState.PLANTED)
-        {
-            rhythmFader.FadeIn();
-        }
-
         rhythmIndicator.SetInteger("Level", rhythm);
 
         changedRhythm = true;
@@ -381,6 +398,15 @@ public class Shroom : MonoBehaviour
 
         //sound to indicate dif rhythm
         shroomSource.PlayOneShot(changeRhythms[rhythm], 1f);
+
+        //only if player is close by, show the indicator
+        if (Vector3.Distance(transform.position, tpc.transform.position) < 10f)
+        {
+            if (plantingState == PlantingState.PLANTED)
+            {
+                rhythmFader.FadeIn();
+            }
+        }
     }
 
     //called to move shroom to unplanted state so player can harvest
@@ -447,4 +473,19 @@ public class Shroom : MonoBehaviour
         Destroy(gameObject);
     }
 
+
+    void AdjustHeight()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, down, out hit, 150f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                transform.position = hit.point + new Vector3(0, 1f, 0);
+            }
+        }
+    }
 }

@@ -7,7 +7,6 @@ using TGS;
 public struct GrowthStages
 {
     public int growthDays;
-    public GameObject stageModel;
     public AudioClip[] stageAudioClips;
 }
 
@@ -20,54 +19,58 @@ public class Plont : MonoBehaviour {
     public bool startingPlant;
 
     //tgs logic
+    [Header("TGS")]
     public TerrainGridSystem tgs;
+    Zone myZone;
+    GridManager gridMan;
     public bool plantedOnGrid;
     public int cellIndex;
 
     //All possible texture references. 
-    public Texture2D groundTexture;
+    Texture2D groundTexture;
+    Texture2D wateredTexture;
     public Texture2D plantedTexture;
-    public Texture2D wateredTexture;
 
     //physics 
     Rigidbody plantBody;
     BoxCollider plantCollider;
-    GameObject currentModel;
 
     //sound controls
+    [HideInInspector]
     public AudioSource plantSource, extraVoice;
+    [Header("Audio")]
     public AudioClip currentClip;
     ParticleSystem soundPlaying;
     ParticleSystem.MainModule soundsPlayer;
     public float emitFreq = 0.25f;
         public int emitCount;
-    float emitTimer;
 
-    Vector3 originalScale;
     //stages
-    public int myAge, currentStage, nextStage;
+    [Header("Growth Stages")]
+    public int myAge;
+    public int currentStage;
+    public int nextStage;
     public bool dayPassed, hasBeenWatered;
     public GrowthStages[] myGrowthStages;
     public AudioClip[] stageSounds;
     public AudioClip sicknessSound;
     public Animator plantAnimator, extraAnimator;
     public bool animatorInChildren, hasExtraAnimator;
+    public bool growing;
+    public float growthSpeed;
+    Vector3 originalScale;
+    Vector3 newScale;
 
-    public bool hasCropBundles;
+    [Header("Crop Bundles")]
     public GameObject[] cropBundles;
+    [Header("Prefab Refs")]
     //for spawning seeds when cut down
     public GameObject seedPrefab;
     public GameObject plantPrefab;
-
-    public bool growing;
-    public float growthSpeed;
-    Vector3 newScale;
     public float seedSpawnChance = 10;
     public ObjectPooler seedPooler;
 
     public PlantType myPlantType;
-
-   
     //mostly used for saving / loading 
     public enum PlantType
     {
@@ -76,11 +79,17 @@ public class Plont : MonoBehaviour {
     
 	void Start () {
         //hail the sun
-        tgs = TerrainGridSystem.instance;
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+
+        //tgs refs
+        tgs = tpc.currentTGS;
+        myZone = tpc.currentZone;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        wateredTexture = gridMan.wateredTexture;
 
         //add data to save script
         if (!startingPlant)
@@ -89,10 +98,6 @@ public class Plont : MonoBehaviour {
             saveScript.mySaveStorage.plantScripts.Add(this);
             saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
             //Debug.Log("added this plant to save storage");
-        }
-        else
-        {
-            AdjustHeight();
         }
 
         //colliders and rigibodys
@@ -107,7 +112,7 @@ public class Plont : MonoBehaviour {
         //grab audio sources
         plantSource = GetComponent<AudioSource>();
         extraVoice = transform.GetChild(1).GetComponent<AudioSource>();
-
+        
         //scale and set stages
         originalScale = transform.localScale;
         myAge = 0;
@@ -116,12 +121,9 @@ public class Plont : MonoBehaviour {
         soundPlaying.Stop();
 
         //turn off all the crop bundles at start
-        if (hasCropBundles)
+        for (int i = 0; i < cropBundles.Length; i++)
         {
-            for(int i = 0; i < cropBundles.Length; i++)
-            {
-                cropBundles[i].SetActive(false);
-            }
+            cropBundles[i].SetActive(false);
         }
 
         //get the obj pooler
@@ -234,7 +236,12 @@ public class Plont : MonoBehaviour {
                         SpawnSeed();
                     }
                 }
-               
+
+                //set growing 
+                newScale = (originalScale * currentStage) / 1.5f;
+                growing = true;
+                //set active next crop bundle
+                cropBundles[currentStage].SetActive(true);
             }
             //time to die!
             else
@@ -242,7 +249,7 @@ public class Plont : MonoBehaviour {
                 //a little less than total # of crop bundles on plant death
                 int randomDrop = Random.Range(cropBundles.Length - 3, cropBundles.Length);
                 //spawn a bunch of seeds and die
-                for(int i = 0; i < randomDrop; i++)
+                for (int i = 0; i < randomDrop; i++)
                 {
                     SpawnSeed();
                 }
@@ -250,28 +257,17 @@ public class Plont : MonoBehaviour {
                 //from old age
                 Die();
             }
-
-            //set active next crop bundle
-            if (hasCropBundles)
-            {
-                if (currentStage <= cropBundles.Length - 1)
-                    cropBundles[currentStage].SetActive(true);
-            }
         }
         //shrink
         else
         {
-            //has seeds to drop
-            if (hasCropBundles)
+            //high chance to spawn seed when cut // always drops when plant is on last life
+            float randomChance = Random.Range(0, 100);
+            if (randomChance > 50 || currentStage == 1)
             {
-                //high chance to spawn seed when cut // always drops when plant is on last life
-                float randomChance = Random.Range(0, 100);
-                if(randomChance > 50 || currentStage == 1)
-                {
-                    CutCrop();
-                }
+                CutCrop();
             }
-
+            
             //Debug.Log("shrinking!!");
             //increment current stage based on number of growth stages
             if (currentStage > 1)
@@ -284,35 +280,10 @@ public class Plont : MonoBehaviour {
                 //from cutting down
                 Die();
             }
-        }
 
-
-        //if there is a new model for this stage
-        if (myGrowthStages[currentStage].stageModel)
-        {
-            //set new model
-            if (currentModel)
-            {
-                currentModel.SetActive(false);
-            }
-            currentModel = myGrowthStages[currentStage].stageModel;
-            currentModel.SetActive(true);
+            //set scale to lower value 
+            transform.localScale = (originalScale * currentStage) / 1.5f;
         }
-        //just increase its height ok to original * current stage
-        else
-        {
-            if (growOrShrink)
-            {
-                newScale = (originalScale * currentStage) / 1.5f;
-                growing = true;
-            }
-            //shrink
-            else
-            {
-                transform.localScale = (originalScale * currentStage) / 1.5f;
-            }
-        }
-
 
         //set nextStage
         nextStage = myAge + myGrowthStages[currentStage].growthDays;

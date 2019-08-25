@@ -15,6 +15,7 @@ public class StartView : MonoBehaviour {
     Camera startCam;
 
     //these start disabled
+    [Header("Cameras")]
     public GameObject playerCamera;
     public GameObject houseCamera;
     public GameObject playerInventory;
@@ -23,6 +24,7 @@ public class StartView : MonoBehaviour {
     public bool startView, lerpToPlayer;
 
     //for now, this will be the windmill
+    [Header("Values for rotation & movement")]
     public Transform rotationPoint;
     //speed cam will rotate around island, lerp speed to player pos on click
     public float rotationSpeed, lerpSpeed;
@@ -30,8 +32,10 @@ public class StartView : MonoBehaviour {
     public float mSmoothLook = 5f;
 
     //UI stuff 
+    [Header("UI refs")]
     public GameObject startMenuUI;
     public FadeUI[] menuFades;
+    public GameObject clickToStart;
 
 	void Start () {
         sunScript = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
@@ -48,6 +52,7 @@ public class StartView : MonoBehaviour {
             playerCamera.GetComponent<Camera>().enabled = false;
             playerInventory.SetActive(false);
             startCam.fieldOfView = 75f;
+            clickToStart.SetActive(true);
 
             if (PlayerPrefs.GetString("hasBook") == "yes")
             {
@@ -63,6 +68,7 @@ public class StartView : MonoBehaviour {
         //not start view 
         else
         {
+            //enable player cam & disable start cam 
             GetComponent<AudioListener>().enabled = false;
             startCam.enabled = false;
             playerCamera.GetComponent<PlayerCameraController>().canLook = true;
@@ -108,53 +114,63 @@ public class StartView : MonoBehaviour {
                 //lerping to player cam 
                 if (PlayerPrefs.GetString("hasBook") == "yes")
                 {
-                    //pos
-                    transform.position = Vector3.Lerp(transform.position, playerCamera.transform.position, lerpSpeed * Time.deltaTime);
-                    //field of view
-                    startCam.fieldOfView = Mathf.Lerp(startCam.fieldOfView, 50f, lerpSpeed * Time.deltaTime);
-
-                    //distance check, once within reactivate everything and turn off start viewer
-                    if (Vector3.Distance(transform.position, playerCamera.transform.position) < 0.5f)
-                    {
-                        //enable player & player cam
-                        tpc.playerCanMove = true;
-                        playerInventory.SetActive(true);
-                        playerCamera.GetComponent<PlayerCameraController>().canLook = true;
-                        playerCamera.GetComponent<Camera>().enabled = true;
-                        playerCamera.GetComponent<AudioListener>().enabled = true;
-
-                        //disable start view stuff
-                        sunScript.rotationSpeed = sunScript.normalRotation;
-                        GetComponent<AudioListener>().enabled = false;
-                        startCam.enabled = false;
-                        startView = false;
-                    }
+                    LerpToPlayer();
                 }
                 //first time starting, lerp to house Cam
                 else
                 {
-                    //pos
-                    transform.position = Vector3.Lerp(transform.position, houseCamera.transform.position, lerpSpeed * Time.deltaTime);
-                    //field of view
-                    startCam.fieldOfView = Mathf.Lerp(startCam.fieldOfView, 60f, lerpSpeed * Time.deltaTime);
-
-                    //distance check, once within reactivate everything and turn off start viewer
-                    if (Vector3.Distance(transform.position, houseCamera.transform.position) < 0.5f)
-                    {
-                        //enable player movement and houseCam
-                        tpc.playerCanMove = true;
-                        houseCamera.SetActive(true);
-                        playerCamera.GetComponent<PlayerCameraController>().canLook = true;
-                        
-                        //disable start view stuff
-                        sunScript.rotationSpeed = sunScript.normalRotation;
-                        GetComponent<AudioListener>().enabled = false;
-                        startCam.enabled = false;
-                        startView = false;
-                    }
+                    LerpToHouse();
                 }
                
             }
         }
 	}
+
+    void LerpToPlayer()
+    {
+        //pos
+        transform.position = Vector3.Lerp(transform.position, playerCamera.transform.position, lerpSpeed * Time.deltaTime);
+        //field of view
+        startCam.fieldOfView = Mathf.Lerp(startCam.fieldOfView, 50f, lerpSpeed * Time.deltaTime);
+
+        //distance check, once within reactivate everything and turn off start viewer
+        if (Vector3.Distance(transform.position, playerCamera.transform.position) < 0.5f)
+        {
+            //enable player & player cam
+            tpc.playerCanMove = true;
+            playerInventory.SetActive(true);
+            playerCamera.GetComponent<PlayerCameraController>().canLook = true;
+            playerCamera.GetComponent<Camera>().enabled = true;
+            playerCamera.GetComponent<AudioListener>().enabled = true;
+
+            //disable start view stuff
+            sunScript.rotationSpeed = sunScript.normalRotation;
+            GetComponent<AudioListener>().enabled = false;
+            startCam.enabled = false;
+            startView = false;
+        }
+    }
+
+    void LerpToHouse()
+    {
+        //pos
+        transform.position = Vector3.Lerp(transform.position, houseCamera.transform.position, lerpSpeed * Time.deltaTime);
+        //field of view
+        startCam.fieldOfView = Mathf.Lerp(startCam.fieldOfView, 60f, lerpSpeed * Time.deltaTime);
+
+        //distance check, once within reactivate everything and turn off start viewer
+        if (Vector3.Distance(transform.position, houseCamera.transform.position) < 0.5f)
+        {
+            //enable player movement and houseCam
+            tpc.playerCanMove = true;
+            houseCamera.SetActive(true);
+            playerCamera.GetComponent<PlayerCameraController>().canLook = true;
+
+            //disable start view stuff
+            sunScript.rotationSpeed = sunScript.normalRotation;
+            GetComponent<AudioListener>().enabled = false;
+            startCam.enabled = false;
+            startView = false;
+        }
+    }
 }

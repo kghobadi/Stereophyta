@@ -15,14 +15,16 @@ public class BoatPlayer : MonoBehaviour
     //Camera ref variables
     AudioSource cameraAudSource;
     PlayerCameraController camControl;
-
-    //set when player is inBoat
-    public bool inBoat; 
-
+    
     //vars for footstep audio
+    [HideInInspector]
     public AudioSource boatSource;
-    public AudioClip[] paddles, bigPaddles;
+    [Header("Audio")]
+    public AudioClip[] paddles;
+    public AudioClip[] bigPaddles;
     int currentPaddle = 0, currentBigPaddle = 0;
+    //min z force for big paddle sound
+    public float bigPaddleMin;
 
     //set publicly to tell this script what raycasts can and can't go thru
     public LayerMask boatMask;
@@ -35,31 +37,37 @@ public class BoatPlayer : MonoBehaviour
     public float angleInDegrees;
 
     //physics vars 
-    public CapsuleCollider boatCol;
+    [HideInInspector]
+    public BoxCollider boatCol;
+    [HideInInspector]
     public Rigidbody boatBody;
-    public float boatSpeedX, boatSpeedZ;
+    [Header("Physics Vars")]
+    public float boatSpeedX;
+    public float boatSpeedZ;
     public float paddleForceX, paddleForceZ;
     public float waterResistanceFwd, waterResistanceAng;
-    //min z force for big paddle sound
-    public float bigPaddleMin;
-
-    float paddleIdleTimer, holdPaddle = 1f;
-
+    //turning & torque force
+    [Header("Turning Physics")]
+    public bool turningBoat;
+    public float division, indForce, indTorque;
+    public int torqueApplier = 0;
+   
+    [Header("Animation & FX")]
     public Animator oarAnimator;
     //extra fx
     public Transform oarHead;
     public OarTrail[] oarTrails;
     public ParticleSystem[] splashParticles;
     int fxCounter = 0;
+    float paddleIdleTimer, holdPaddle = 1f;
 
     UseBoat useBoatScript;
-
-    public Vector3 exitSpot;
-
     Vector3 origRotation;
-
-    //dock boat prompt
-    public FadeUI[] dockprompts;
+    [Header ("Entering & Exiting")]
+    public bool inBoat;  //set when player is inBoat
+    public float exitSphereRadius = 3f;
+    public Vector3 exitSpot;
+    public FadeUI[] dockprompts;  //dock boat prompt
 
     void Start()
     {
@@ -78,7 +86,7 @@ public class BoatPlayer : MonoBehaviour
         useBoatScript = GetComponent<UseBoat>();
         boatBody = GetComponent<Rigidbody>();
         boatBody.isKinematic = false;
-        boatCol = GetComponent<CapsuleCollider>();
+        boatCol = GetComponent<BoxCollider>();
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
     }
@@ -94,8 +102,6 @@ public class BoatPlayer : MonoBehaviour
                 tpc.SetAnimator("idle");
             }
 
-            //transform.localEulerAngles = new Vector3(origRotation.x, origRotation.y, transform.localEulerAngles.z);
-
             //for checking angle
             Vector3 forward = transform.forward;
             angleInDegrees = Mathf.Atan2(forward.y, forward.x) * Mathf.Rad2Deg;
@@ -106,14 +112,7 @@ public class BoatPlayer : MonoBehaviour
 
             //so we can't immediately exit boat
             paddleIdleTimer += Time.deltaTime;
-
-            if (paddleIdleTimer > holdPaddle)
-            {
-                //ChangeAnimState(boatIdle);
-            }
-
-            //Debug.Log(boatBody.velocity);
-
+            
             //click to move to point
             if (Input.GetMouseButtonDown(0))
             {
@@ -135,7 +134,7 @@ public class BoatPlayer : MonoBehaviour
             //called to adjust the oar in space while row is happening
             if (checkingPaddle)
             {
-                AdjustOarAnim();
+                //right now nothing, could use this space to run procedural animations for oars and stuff 
             }
             //apply slow down to boat
             else
@@ -147,13 +146,29 @@ public class BoatPlayer : MonoBehaviour
             //mouse button is being released
             if (Input.GetMouseButtonUp(0))
             {
-                ApplyPaddleForce();
+                CalcPaddleForce();
             }
             
-            //For exiting boat
             //if raycaster hits the ground nearby, can press E to exit boat
             if (GroundCheck())
             {
+                //force == boat pos - exitspot 
+                Vector3 heading = transform.position - exitSpot;
+                
+                float distance = heading.magnitude;
+
+                Vector3 direction = heading / distance;
+               
+
+                //push boat away from land
+                if (distance < 7.5f)
+                {
+                    boatBody.AddForce(-direction * boatSpeedZ);
+                    //Debug.Log("heading = " + heading);
+                    //Debug.Log("direction = " + direction);
+                }
+                
+                //exit boat 
                 if (Input.GetKeyDown(KeyCode.E) && paddleIdleTimer > 0.5f)
                 {
                     useBoatScript.ExitBoat(exitSpot);
@@ -166,15 +181,9 @@ public class BoatPlayer : MonoBehaviour
         }
     }
 
-    //Calculate and monitor input while In Boat and only once player has clicked on water
-    void AdjustOarAnim()
-    {
-
-    }
-
     // now that we have our inputs, we need to 
     //Apply Physical Forces
-    void ApplyPaddleForce()
+    void CalcPaddleForce()
     {
         //stop checking paddle and set final mouse pos
         checkingPaddle = false;
@@ -242,6 +251,52 @@ public class BoatPlayer : MonoBehaviour
         StartCoroutine(WaitToApplyForce());
     }
 
+    //wait for anim to play then apply forces
+    IEnumerator WaitToApplyForce()
+    {
+        yield return new WaitForSeconds(0.8f);
+
+        //z forward force applied with AddForce (0, 0, zForce);
+        indForce = paddleForceZ / division;
+        //x force applied with AddTorqur(0, xTorque, 0) 
+        indTorque = paddleForceX / division;
+        //reset torqueApplier & set turning boat 
+        torqueApplier = 0;
+        turningBoat = true;
+
+        //decide which paddle sound
+        if (Mathf.Abs(paddleForceZ) > bigPaddleMin)
+        {
+            PlayBigPaddleSound();
+        }
+        //normal paddle
+        else
+        {
+            PlayPaddleSound();
+        }
+    }
+
+    //this is where we actually apply the Forces
+    void FixedUpdate()
+    {
+        //boat turns over time in the fixed update so it is not frame dependent
+        if (turningBoat)
+        {
+            //add the force
+            boatBody.AddRelativeForce(0, indForce, 0);
+            //add the torque 
+            boatBody.AddTorque(0, indTorque, 0);
+            //count up 
+            torqueApplier++;
+
+            //split up force and find time val
+            if (torqueApplier == division)
+            {
+                turningBoat = false;
+            }
+        }
+    }
+
     //grab trail & splash particles
     void StartPaddleFX()
     {
@@ -276,44 +331,7 @@ public class BoatPlayer : MonoBehaviour
         //move alongside oarhead
         splashParticles[fxCounter].GetComponent<PaddleSplashes>().StartCoroutine(splashParticles[fxCounter].GetComponent<PaddleSplashes>().Paddle());
     }
-
-    //wait for anim to play then apply forces
-    IEnumerator WaitToApplyForce()
-    {
-        yield return new WaitForSeconds(0.8f);
-
-        //z forward force applied with AddForce (0, 0, zForce);
-        boatBody.AddRelativeForce(0, paddleForceZ, 0);
-        //x force applied with AddTorqur(0, xTorque, 0) 
-        StartCoroutine(AddTorqueOverTime(paddleForceX, 12));
-
-        //decide which paddle sound
-        if(Mathf.Abs(paddleForceZ) > bigPaddleMin)
-        {
-            PlayBigPaddleSound();
-        }
-        //normal paddle
-        else
-        {
-            PlayPaddleSound();
-        }
-        
-    }
-
-    //allows us to apply force over time
-    IEnumerator AddTorqueOverTime(float totalForce, int division)
-    {
-        float indForce = totalForce / division;
-        float time = 1f / division;
-
-        for(int i = 0; i < division; i++)
-        {
-            boatBody.AddTorque(0, indForce, 0);
-            yield return new WaitForSeconds(time);
-        }
-    }
-   
- 
+    
     //called every time we paddle
     void PlayPaddleSound()
     {
@@ -351,6 +369,9 @@ public class BoatPlayer : MonoBehaviour
 
     //we want to see if we are on terrain that should make us slide downward
     //only gets called while Player is considered to be grounded
+    //turn off boat's collision with ground
+    //if boat is close to ground, should send equal and opposite force to push boat a little bit away from ground
+    //direction decided by where we hit ground from with raycast
     bool GroundCheck()
     {
         //store hit and point
@@ -361,7 +382,7 @@ public class BoatPlayer : MonoBehaviour
         for (int i = 0; i < 30; i++)
         {
             //raycast forward to see if we hit terrain 
-            if (Physics.SphereCast(tpc.physicsRaycaster.transform.position, 5f, tpc.physicsRaycaster.transform.forward, out hit, 15f, tpc.groundedCheck))
+            if (Physics.SphereCast(tpc.physicsRaycaster.transform.position, exitSphereRadius, tpc.physicsRaycaster.transform.forward, out hit, 15f, tpc.groundedCheck))
             {
                 exitSpot = hit.point;
 

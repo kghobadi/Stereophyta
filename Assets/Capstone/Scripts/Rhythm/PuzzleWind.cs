@@ -5,8 +5,6 @@ using UnityEngine;
 public class PuzzleWind : Rhythm
 {
     PooledObject poolObj;
-
-    float currentSpeed;
     public WindMachine _windGen;
     ParticleSystem windParticles;
 
@@ -28,6 +26,11 @@ public class PuzzleWind : Rhythm
 
         if (Vector3.Distance(transform.position, originalPos) > _windGen.distanceToDestroy)
         {
+            //unchild all dem seeds
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                transform.GetChild(i).SetParent(null);
+            }
             StartCoroutine(DissipateWind());
         }
 

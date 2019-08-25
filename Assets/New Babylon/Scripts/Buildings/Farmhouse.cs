@@ -10,7 +10,6 @@ public class Farmhouse : MonoBehaviour {
     //these get turned on & off when player walks inside
     public GameObject playerCamera;
     public GameObject playerInventory;
-    public GameObject walkingEffect;
     public GameObject houseCamera;
 
     //only true when player is inside house
@@ -40,7 +39,6 @@ public class Farmhouse : MonoBehaviour {
             {
                 playerCamera.SetActive(false);
                 playerInventory.SetActive(false);
-                walkingEffect.SetActive(false);
                 lastFootsteps = tpc.currentFootsteps;
                 tpc.currentFootsteps = tpc.woodSteps;
                
@@ -112,7 +110,6 @@ public class Farmhouse : MonoBehaviour {
                     playerCamera.GetComponent<Camera>().enabled = true;
                 }
                 playerInventory.SetActive(true);
-                walkingEffect.SetActive(true);
                 tpc.currentFootsteps = lastFootsteps;
                 tpc.indoors = false;
                 tpc.transform.localEulerAngles = new Vector3(0, 105f, 0);

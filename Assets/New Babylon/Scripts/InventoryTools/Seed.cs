@@ -6,13 +6,19 @@ using TGS;
 public class Seed : MonoBehaviour {
     //tgs logic
     TerrainGridSystem tgs;
+    GridManager gridMan;
     Cell currentCell;
     int currentCellIndex, previousCellIndex;
     //All possible texture references. 
-    public Texture2D groundTexture;
+    Texture2D groundTexture;
+    Texture2D canClickTexture;
+    [Header("TGS")]
     public Texture2D plantedTexture;
-    public Texture2D canClickTexture;
     public bool plantingOnGrid;
+    [Header("Important Bools")]
+    public bool plantOnStart;
+    public bool UIseed, startingSeed;
+    public bool dayPassed;
 
     //for inv
     public int mySeedIndex;
@@ -20,66 +26,107 @@ public class Seed : MonoBehaviour {
     GameObject player;
     ThirdPersonController tpc;
     Inventory inventoryScript;
+    Transform inventoryParent;
     GameObject sun;
     Sun sunScript;
 
     //physics and collision
+    [HideInInspector]
     public Rigidbody seedBody;
+    Animator seedAnimator;
     SphereCollider seedCollider;
-    public bool seedSelected, planting, falling, vortexing;
-    float vortexSpeed = 7.5f;
-
+    [Header("Seed States")]
+    public SeedStates seedState;
+    public enum SeedStates
+    {
+        IDLE, SEEDSELECTED, PLANTING, BLOWING, FALLING, VORTEXING
+    }
+    
     //for spawning plant
-    Vector3 originalPos;
+    [Header("Plant Prefab & Obj Pooling")]
     public GameObject plantPrefab;
+    public ObjectPooler seedPooler;
+    PooledObject _pooledObj;
+    Vector3 originalPos;
     GameObject plantClone;
 
     //audio
+    [HideInInspector]
     public AudioSource seedSource;
-    public AudioClip dropSeed, spawnPlant, noNO;
-
-    Transform inventoryParent;
-
-    public bool UIseed, startingSeed;
-
+    [Header("Audio")]
+    public AudioClip dropSeed;
+    public AudioClip spawnPlant, noNO;
+    
     //needs to be this far away from other plants
+    [Header ("Misc. Settings")]
     public float distFromOtherPlants;
-
+    public float vortexSpeed = 7.5f;
     //for planting itself after a few days
     public int daysBeforePlanting;
-    public bool dayPassed;
-
-    public ObjectPooler seedPooler;
-    PooledObject _pooledObj;
-
-	void Start () {
-        //grab refs
-        tgs = TerrainGridSystem.instance;
+    
+    //wind blow reset
+    [HideInInspector]
+    public Vector3 origScale;
+  
+    void Start () {
+        //sun and player refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
+        _pooledObj = GetComponent<PooledObject>();
 
+        //set tgs stuff
+        tgs = tpc.currentTGS;
+        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        groundTexture = gridMan.groundTexture;
+        canClickTexture = plantedTexture;
+
+        //seed start vars
+        seedAnimator = GetComponent<Animator>();
+        if(seedAnimator == null)
+        {
+            seedAnimator = GetComponentInChildren<Animator>();
+        }
         seedBody = GetComponent<Rigidbody>();
         seedBody.isKinematic = true;
         seedCollider = GetComponent<SphereCollider>();
         seedSource = GetComponent<AudioSource>();
+        origScale = transform.localScale;
 
-        _pooledObj = GetComponent<PooledObject>();
-
+        //dif settings for UI seeds
         if (!UIseed)
         {
-            daysBeforePlanting = Random.Range(2, 4);
-            SeedFall();
+            //plant immediately 
+            if (plantOnStart)
+            {
+                RaycastToGround();
+            }
+            //fall to ground --> IDLE state
+            else
+            {
+                daysBeforePlanting = Random.Range(2, 4);
+                SeedFall();
+            }
         }
         else
         {
             inventoryParent = transform.parent;
         }
 	}
-	
-	void Update () {
+
+    //called when it falls off a plant from chop / plant death at start 
+    public void SeedFall()
+    {
+        seedBody.isKinematic = false;
+        seedBody.useGravity = true;
+        seedBody.AddRelativeForce(0, 15, 5);
+
+        seedState = SeedStates.FALLING;
+    }
+
+    void Update () {
         //counting days is hard work (for spawned seeds only)
         if (!UIseed)
         {
@@ -92,10 +139,7 @@ public class Seed : MonoBehaviour {
                     //plant spawned seed 
                     if (daysBeforePlanting == 0)
                     {
-                        planting = true;
-                        seedBody.isKinematic = false;
-                        seedBody.useGravity = true;
-                        seedCollider.isTrigger = false;
+                        DropSeed();
                     }
 
                     dayPassed = true;
@@ -110,53 +154,36 @@ public class Seed : MonoBehaviour {
             }
         }
      
+        //idle seed
+        if(seedState == SeedStates.IDLE)
+        {
+            seedAnimator.enabled = true;
+        }
 
         //plant seed
-        if (seedSelected && !planting && !tpc.menuOpen)
+        if (seedState == SeedStates.SEEDSELECTED && !tpc.menuOpen)
         {
-            RaycastHit hit;
-            // Does the ray intersect any objects excluding the player layer
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
-            {
-                if(hit.transform.gameObject.tag == "Ground")
-                {
-                    //check if this spot is on the TGS
-                    //grabs Cell tile and index
-                    currentCell = tgs.CellGetAtPosition(hit.point, true);
-
-                    //we have a grid cell
-                    if(currentCell != null)
-                    {
-                        //Debug.Log("tgs planting");
-                        CheckCanPlantGrid();
-                    }
-
-                    //no grid -- just terrain 
-                    else
-                    {
-                        CheckCanPlant(hit);
-                    }
-                }
-            }
+            //this is the seed the player is holding 
+            RaycastToGround();
         }
 
         //right after spawning
-        if (falling)
+        if (seedState == SeedStates.FALLING)
         {
             seedBody.AddForce(1, -3, 1);
         }
 
-        //when player is near and nothing happening 
-        if (!falling && !planting && !UIseed && !vortexing)
+        //when player is near and IDLE / BLOWING
+        if ((seedState == SeedStates.IDLE || seedState == SeedStates.BLOWING) && !UIseed)
         {
             if(Vector3.Distance(transform.position, player.transform.position) < 5)
             {
-                vortexing = true;
+                seedState = SeedStates.VORTEXING;
             }
         }
 
         //succ to player
-        if (vortexing)
+        if (seedState == SeedStates.VORTEXING)
         {
             //lerp to the player mon
             transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * vortexSpeed);
@@ -167,6 +194,45 @@ public class Seed : MonoBehaviour {
             if (Vector3.Distance(transform.position, player.transform.position) < 1)
             {
                 CollectSeed();
+            }
+        }
+
+        //when wind is blowing, adjust my height to the ground
+        if (seedState == SeedStates.BLOWING)
+        {
+            seedAnimator.enabled = false;
+            transform.localEulerAngles = Vector3.zero;
+            
+            AdjustHeight();
+        }
+    }
+
+    //raycat logic 
+    void RaycastToGround()
+    {
+        RaycastHit hit;
+        // Does the ray intersect any objects excluding the player layer
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                //check if this spot is on the TGS
+                //grabs Cell tile and index
+                tgs = tpc.currentTGS;
+                currentCell = tgs.CellGetAtPosition(hit.point, true);
+
+                //we have a grid cell
+                if (currentCell != null)
+                {
+                    //Debug.Log("tgs planting");
+                    CheckCanPlantGrid();
+                }
+
+                //no grid -- just terrain 
+                else
+                {
+                    CheckCanPlant(hit);
+                }
             }
         }
     }
@@ -191,7 +257,7 @@ public class Seed : MonoBehaviour {
             tgs.CellToggleRegionSurface(cellIndex, true, canClickTexture);
 
             //If player clicks, we plant seed and clear up Equip slot
-            if (Input.GetButton("Plant"))
+            if (Input.GetButton("Plant") || plantOnStart)
             {
                 DropSeed();
                 plantingOnGrid = true;
@@ -216,7 +282,7 @@ public class Seed : MonoBehaviour {
     //planting on terrain without grid
     void CheckCanPlant(RaycastHit hit)
     {
-        if (Input.GetButton("Plant"))
+        if (Input.GetButton("Plant") || plantOnStart)
         {
             //check in radius of planting point if its too close to others
             bool nearOtherPlant = false;
@@ -256,7 +322,7 @@ public class Seed : MonoBehaviour {
     //called when click to plant really goes through
     void DropSeed()
     {
-        planting = true;
+        seedState = SeedStates.PLANTING;
         originalPos = transform.localPosition;
         transform.SetParent(null);
         seedBody.isKinematic = false;
@@ -267,15 +333,15 @@ public class Seed : MonoBehaviour {
     void OnCollisionEnter(Collision collision)
     {
         //ui seed hitting ground
-        if(collision.gameObject.tag == "Ground" && planting)
+        if(collision.gameObject.tag == "Ground" && seedState == SeedStates.PLANTING)
         {
             SpawnPlant();
         }
 
         //spawned seed falling from plant
-        if (collision.gameObject.tag == "Ground" && falling)
+        if (collision.gameObject.tag == "Ground" && seedState == SeedStates.FALLING)
         {
-            falling = false;
+            seedState = SeedStates.IDLE;
             transform.position = transform.position + new Vector3(0, 0.5f, 0);
             seedBody.useGravity = false;
             seedBody.isKinematic = true;
@@ -315,39 +381,38 @@ public class Seed : MonoBehaviour {
             plontScript.plantedOnGrid = true;
             plontScript.cellIndex = currentCellIndex;
         }
-     
-        //reset seed parent & pos, physics and planting bool
-        transform.SetParent(inventoryParent);
-        transform.localPosition = originalPos;
-        seedBody.isKinematic = true;
-        seedBody.useGravity = false;
-        planting = false;
 
-        //set seed count
-        SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
-        seedStorageTemp.seedCount--;
-        inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
-
-        //turn off if no more seeds
-        if(seedStorageTemp.seedCount == 0)
+        //if plant on start, set plant to startingPlant
+        if (plantOnStart)
         {
-            gameObject.SetActive(false);
+            plontScript.startingPlant = true;
+            Destroy(gameObject);
         }
+        //normal UI seed plant -- returns to inventory 
+        else
+        {
+            //reset seed parent & pos, physics and planting bool
+            transform.SetParent(inventoryParent);
+            transform.localPosition = originalPos;
+            seedBody.isKinematic = true;
+            seedBody.useGravity = false;
 
-        //set this back to false
-        plantingOnGrid = false;
+            //set seed count
+            SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
+            seedStorageTemp.seedCount--;
+            inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
+
+            //turn off if no more seeds
+            if (seedStorageTemp.seedCount == 0)
+            {
+                gameObject.SetActive(false);
+            }
+
+            //set this back to false
+            plantingOnGrid = false;
+        }
     }
-
-    //called when it falls off a plant from chop
-    public void SeedFall()
-    {
-        seedBody.isKinematic = false;
-        seedBody.useGravity = true;
-        seedBody.AddRelativeForce(0, 15, 5);
-
-        falling = true;
-    }
-
+    
     //called when vortexing reaches player
     void CollectSeed()
     {
@@ -369,5 +434,19 @@ public class Seed : MonoBehaviour {
         }
         
     }
+    
+    void AdjustHeight()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
 
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, down, out hit, 150f))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                transform.position = hit.point + new Vector3(0, 1f, 0);
+            }
+        }
+    }
 }

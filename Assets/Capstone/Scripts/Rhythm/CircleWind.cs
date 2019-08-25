@@ -10,7 +10,7 @@ public class CircleWind : Rhythm {
 
     BoxCollider windTrigger;
 
-	void Start () {
+	void Awake () {
         windMill = transform.parent.parent.gameObject;
         windParticles = GetComponent<ParticleSystem>();
         windTrigger = GetComponent<BoxCollider>();

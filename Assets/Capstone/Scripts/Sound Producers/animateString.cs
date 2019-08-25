@@ -39,9 +39,6 @@ public class animateString : MonoBehaviour
         animateLine.SetPosition(0, point1.transform.position);
         animateLine.SetPosition(animateLine.positionCount / 2, target.transform.position);
         animateLine.SetPosition(animateLine.positionCount - 1, point2.transform.position);
-
-
-
     }
 
 }

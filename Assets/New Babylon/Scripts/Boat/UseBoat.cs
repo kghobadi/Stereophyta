@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class UseBoat : PickUp {
     PlayerCameraController camController;
@@ -11,61 +13,119 @@ public class UseBoat : PickUp {
     public GameObject cursor;
     public bool firstTime;
 
+    //boat instructions
+    [Header("Instruction refs")]
+    public TMP_Text clickNDragTxt;
+    public TMP_Text textBack;
+    FadeUItmp txtFader, textBackFader;
+    public Image clickNDragAnim, clickNDragAnimRight;
+    FadeUI animFader, animFaderRight;
+    AnimateDialogue animator, animatorRight;
+
+    public bool canEnter = true;
+    public float justExitedTimer, exitTimerTotal = 0.5f;
+
     void Start()
     {
         firstTime = true;
         boatScript = GetComponent<BoatPlayer>();
         camController = Camera.main.GetComponent<PlayerCameraController>();
+
+        //ui refs
+        txtFader = clickNDragTxt.GetComponent<FadeUItmp>();
+        textBackFader = textBack.GetComponent<FadeUItmp>();
+        animFader = clickNDragAnim.GetComponent<FadeUI>();
+        animator = clickNDragAnim.GetComponent<AnimateDialogue>();
+        animFaderRight = clickNDragAnimRight.GetComponent<FadeUI>();
+        animatorRight = clickNDragAnimRight.GetComponent<AnimateDialogue>();
+
+    }
+
+    public override void Update()
+    {
+        //pickup / enterexit boat check logic 
+        base.Update();
+
+        //little reset for entrance 
+        if (canEnter == false)
+        {
+            justExitedTimer -= Time.deltaTime;
+            if(justExitedTimer < 0)
+            {
+                canEnter = true;
+            }
+        }
     }
 
     public override void PickUpTool(bool playSound)
     {
-        //so we can deactivate stuff
-        hasBeenAcquired = true;
-
-        //play this tools pickup sound
-        inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
-        cursor.SetActive(true);
-        Cursor.lockState = CursorLockMode.None;
-
-        //set boats rotation to player's current forward
-        if (!firstTime)
+        //a lil time sets this after an exit 
+        if (canEnter)
         {
-            transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, tpc.characterBody.rotation.y);
-            transform.localPosition += new Vector3(0, 0, 5f);
+            //so we can deactivate stuff
+            hasBeenAcquired = true;
+
+            //play this tools pickup sound
+            inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
+            cursor.SetActive(true);
+            Cursor.lockState = CursorLockMode.None;
+
+            //set boats rotation to player's current forward
+            if (!firstTime)
+            {
+                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, tpc.characterBody.rotation.y);
+                transform.localPosition += new Vector3(0, 0, 5f);
+            }
+            //first time, so fade in boat usage instructions 
+            else
+            {
+                txtFader.FadeIn();
+                textBackFader.FadeIn();
+                animFader.FadeIn();
+                animator.active = true;
+                animFaderRight.FadeIn();
+                animatorRight.active = true;
+            }
+
+            //in case you are jumping 
+            if (tpc.jumping)
+            {
+                tpc.jumping = false;
+                tpc.jumpTrail.transform.SetParent(null);
+                tpc.jumpTrail.GetComponent<JumpTrail>().StartCoroutine(tpc.jumpTrail.GetComponent<JumpTrail>().Deactivate());
+            }
+
+            //turn off player movment
+            tpc.playerCanMove = false;
+            tpc.SetAnimator("idle");
+            tpc.runParticles.SetActive(false);
+            tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
+            camController.canLook = false;
+            //child cam to boat
+            camController.transform.SetParent(transform);
+            //adjust cam height & rotation
+            camController.transform.localPosition = new Vector3(0f, -10f, -8f);
+            camController.transform.localEulerAngles = new Vector3(-75f, 0f, 0f);
+            camController.LerpFOV(75f);
+
+            //set boat as parent & position
+            tpc.transform.SetParent(transform);
+            tpc.transform.localPosition = playerLocalPos;
+            tpc.myInventory.gameObject.SetActive(false);
+            tpc.transform.localEulerAngles = new Vector3(-90f, 0, 0);
+
+            //set boat vars
+            boatScript.inBoat = true;
+            boatScript.boatBody.isKinematic = false;
+            boatScript.boatCol.enabled = true;
+            //set oar anim
+            boatScript.oarAnimator.SetTrigger("activateBoat");
+            boatScript.oarAnimator.SetBool("rightOrLeft", true);
+            firstTime = false;
+
+            DeactivatePrompt();
         }
-
-        //turn off player movment
-        tpc.playerCanMove = false;
-        tpc.SetAnimator("idle");
-        tpc.runParticles.SetActive(false);
-        tpc.walkingEffect.Stop();
-        tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
-        camController.canLook = false;
-        //child cam to boat
-        camController.transform.SetParent(transform);
-        //adjust cam height & rotation
-        camController.transform.localPosition = new Vector3(0f, -10f, -8f);
-        camController.transform.localEulerAngles = new Vector3(-75f, 0f, 0f);
-        camController.LerpFOV(75f);
-
-       
-        //set boat as parent & position
-        tpc.transform.SetParent(transform);
-        tpc.transform.localPosition = playerLocalPos;
-        tpc.myInventory.gameObject.SetActive(false);
-        tpc.transform.localEulerAngles = new Vector3(-90f, 0, 0);
-
-        //set boat vars
-        boatScript.inBoat = true;
-        boatScript.boatBody.isKinematic = false;
-        boatScript.boatCol.enabled = true;
-        //set oar anim
-        boatScript.oarAnimator.SetTrigger("activateBoat");
-        boatScript.oarAnimator.SetBool("rightOrLeft", true);
-        firstTime = false;
-
-        DeactivatePrompt();
+        
     }
 
     public void ExitBoat(Vector3 exitPos)
@@ -90,7 +150,10 @@ public class UseBoat : PickUp {
         //set boat vars
         boatScript.inBoat = false;
         boatScript.boatBody.isKinematic = true;
-        boatScript.boatCol.enabled = false;
+
+        //reset boat & player rot
+        transform.rotation = Quaternion.Euler(90f, -180f, transform.localEulerAngles.z);
+        tpc.transform.rotation = Quaternion.Euler(0f, tpc.transform.localEulerAngles.y, 0f);
 
         //set oar anim
         boatScript.oarAnimator.SetTrigger("deactivateBoat");
@@ -102,5 +165,9 @@ public class UseBoat : PickUp {
         }
 
         ShowPickupPrompt();
+
+        //so that player doesn't immediately reenter
+        canEnter = false;
+        justExitedTimer = exitTimerTotal;
     }
 }

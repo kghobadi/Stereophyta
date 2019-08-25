@@ -121,6 +121,7 @@ ModelImporter:
     100226: transform8
     100228: transform9
     100230: //RootNode
+    100232: pCone4
     400000: group1
     400002: group2
     400004: pasted__pCylinder6
@@ -237,18 +238,22 @@ ModelImporter:
     400226: transform8
     400228: transform9
     400230: //RootNode
+    400232: pCone4
     2300000: pCone3
     2300002: pCylinder5
     2300004: side1
     2300006: transform7
+    2300008: pCone4
     3300000: pCone3
     3300002: pCylinder5
     3300004: side1
     3300006: transform7
+    3300008: pCone4
     4300000: pCylinder5
     4300002: transform7
     4300004: pCone3
     4300006: side1
+    4300008: pCone4
     7400000: Take 001
     9500000: //RootNode
   externalObjects:
@@ -261,7 +266,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: lambert3
-    second: {fileID: 2100000, guid: d0cca693921ffed4a84d0c29575a7162, type: 2}
+    second: {fileID: 2100000, guid: bea5faf7df8726c4b868328aa0341491, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -4,31 +4,51 @@ using UnityEngine;
 
 public class WindGen : RhythmProducer {
 
+    Vector3 origPos;
+
     public ObjectPooler windPooler;
     GameObject windClone;
     
     public float windSpeed;
     public float distanceToDestroy;
-	
-	public override void Update () {
+
+    public WindDirection windDir;
+    public enum WindDirection
+    {
+        NORTH, EAST, SOUTH, WEST,
+    }
+
+    void Awake()
+    {
+        origPos = transform.position;
+    }
+
+    public override void Update () {
 
         if (showRhythm)
         {
-            //instantiate wind, show particles, etc.
-            //grab obj from pool and set pos
-            windClone = windPooler.GrabObject();
-            windClone.transform.SetParent(transform);
-            windClone.transform.position = transform.position;
-            windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles);
-            windClone.GetComponent<MovingWind>()._windGen = this;
-            showRhythm = false;
+            SpawnWind();
         }
 
+    }
+
+    public void SpawnWind()
+    {
+        //instantiate wind, show particles, etc.
+        //grab obj from pool and set pos
+        windClone = windPooler.GrabObject();
+        windClone.transform.SetParent(transform);
+        windClone.transform.position = transform.position;
+        windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles);
+        windClone.GetComponent<MovingWind>()._windGen = this;
+        showRhythm = false;
     }
 
     public override void SwitchTimeScale()
     {
         base.SwitchTimeScale();
+
+        CheckDirRandomPos();
 
         switch (timeScale)
         {
@@ -47,6 +67,26 @@ public class WindGen : RhythmProducer {
             case 4:
                 windSpeed = 40f;
                 break;
+        }
+    }
+
+    void CheckDirRandomPos()
+    {
+        if(windDir == WindDirection.NORTH)
+        {
+            transform.position = new Vector3(Random.Range(-15, 15), 0, 0) + origPos;
+        }
+        if (windDir == WindDirection.EAST)
+        {
+            transform.position = new Vector3(0, 0, Random.Range(-15, 15)) + origPos;
+        }
+        if (windDir == WindDirection.SOUTH)
+        {
+            transform.position = new Vector3(Random.Range(-15, 15), 0, 0) + origPos;
+        }
+        if (windDir == WindDirection.WEST)
+        {
+            transform.position = new Vector3(0, 0, Random.Range(-15, 15)) + origPos;
         }
     }
 }
