@@ -33,6 +33,7 @@ public class SleepSave : MonoBehaviour {
     //for saving and file writing
     private string gameDataFileName = "islandStorage";
     public bool canLoad;
+    public bool savingAndLoadingEnabled;
 
     //script ref to inventory
     Inventory inventoryScript;
@@ -50,7 +51,7 @@ public class SleepSave : MonoBehaviour {
         tgs = tpc.currentTGS;
 
         //this means we have set it before, so we have saved before
-        if (PlayerPrefs.GetInt("sessionNumber") > 0)
+        if (PlayerPrefs.GetInt("sessionNumber") > 0 && savingAndLoadingEnabled)
         {
             LoadGameData();
         }

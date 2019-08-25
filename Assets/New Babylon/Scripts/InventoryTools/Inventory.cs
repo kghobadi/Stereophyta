@@ -17,10 +17,12 @@ public class Inventory : MonoBehaviour {
     ThirdPersonController tpc;
 
     //tools inv
+    [Header ("Tools Inv")]
     public int currentItem = 0;
     public GameObject currenItemObj;
     public List<GameObject> myItems = new List<GameObject>();
     //UI
+    [Header("Tools UI")]
     public GameObject toolInvVisual;
     public Image currentToolImg, lastToolImg, nextToolImg;
     public List<Sprite> toolSprites = new List<Sprite>();
@@ -29,29 +31,35 @@ public class Inventory : MonoBehaviour {
     IEnumerator fadeTools;
 
     //seed inv
+    [Header("Seed Inv")]
     public Vector3 localSeedSpot;
     public int currentSeed = 0;
     public GameObject currenSeedObj;
     public List<SeedStorage> seedStorage = new List<SeedStorage>();
 
     //UI
+    [Header("Seed UI")]
     public GameObject seedInvVisual;
     public Image currentSeedImg, lastSeedImg, nextSeedImg;
     public Text seedCounter;
     public List<Sprite> seedSprites = new List<Sprite>();
     public FadeUI[] seedsUI;
     IEnumerator fadeSeeds;
-    
-    //for controlling switching
-    public float inputTimerT, inputTimerS;
-    public bool canSwitchTools, canSwitchSeeds;
-
-    //audio
-    public AudioSource inventoryAudio;
-    public AudioClip switchSeeds, switchTools;
     //for altering seed count text
     public float seedTxtScale1 = 1f, seedTxtScale2 = 0.8f, seedTxtScale3 = 0.6f;
     public float seedTxtPos1 = 69f, seedTxtPos2 = 50f, seedTxtPos3 = 45f;
+
+    //for controlling switching
+    [Header("Input Resets for Switching")]
+    public float inputTimerT;
+    public float inputTimerS;
+    public bool canSwitchTools, canSwitchSeeds;
+
+    //audio
+    [Header("Audio")]
+    public AudioSource inventoryAudio;
+    public AudioClip switchSeeds, switchTools;
+ 
 
     void Start () {
         //player refs
@@ -76,7 +84,7 @@ public class Inventory : MonoBehaviour {
 
         //set current item
         currenSeedObj = seedStorage[currentSeed].seedObj;
-        currenSeedObj.GetComponent<Seed>().seedSelected = true;
+        currenSeedObj.GetComponent<Seed>().seedState = Seed.SeedStates.SEEDSELECTED;
 
         //turn off other seeds
         for (int i = 0; i < seedStorage.Count; i++)
@@ -267,7 +275,7 @@ public class Inventory : MonoBehaviour {
     {
         if(currenSeedObj != null)
         {
-            if (currenSeedObj.activeSelf)
+            if (currenSeedObj.activeSelf && CheckPlayerHasSeed() > 1)
             {
                 currenSeedObj.GetComponent<Item>().DeselectSeed();
                 currenSeedObj.SetActive(false);
@@ -306,6 +314,7 @@ public class Inventory : MonoBehaviour {
         canSwitchSeeds = false;
 
         inventoryAudio.PlayOneShot(switchSeeds);
+
     }
 
     public void SetSeedSprite()

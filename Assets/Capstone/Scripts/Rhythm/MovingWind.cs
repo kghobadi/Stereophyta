@@ -6,6 +6,7 @@ public class MovingWind : Rhythm {
 
     public WindGen _windGen;
     public LayerMask ground;
+    public float blowSeedSpeed = 2f;
 
     ParticleSystem windParticles;
     PooledObject poolObj;
@@ -61,7 +62,7 @@ public class MovingWind : Rhythm {
                 //make sure it is not ui seed
                 if (!seedScript.UIseed)
                 {
-                    seedScript.blowing = true;
+                    seedScript.seedState = Seed.SeedStates.BLOWING;
 
                     seedScript.transform.SetParent(transform);
 
@@ -85,7 +86,7 @@ public class MovingWind : Rhythm {
                     other.transform.localEulerAngles = new Vector3(0, 0, 0);
                 }
 
-                Debug.Log("hit shroom");
+                //Debug.Log("hit shroom");
             }
         }
     }
@@ -109,7 +110,7 @@ public class MovingWind : Rhythm {
             {
                 if (other.GetComponent<Shroom>().blowing)
                 {
-                    other.transform.Translate((-currentSpeed / 1.5f) * Time.deltaTime, 0, 0);
+                    other.transform.Translate((-currentSpeed * blowSeedSpeed) * Time.deltaTime, 0, 0);
                 }
             }
         }
@@ -120,10 +121,10 @@ public class MovingWind : Rhythm {
             //check that it is a seed
             if (other.GetComponent<Seed>())
             {
-                if (other.GetComponent<Seed>().blowing && !other.GetComponent<Seed>().UIseed)
+                if (other.GetComponent<Seed>().seedState == Seed.SeedStates.BLOWING && !other.GetComponent<Seed>().UIseed)
                 {
                     //blow slightly in the opposite direction
-                    other.transform.Translate((-currentSpeed / 1.5f) * Time.deltaTime, 0, 0);
+                    other.transform.Translate((-currentSpeed * blowSeedSpeed) * Time.deltaTime, 0, 0);
 
                     //Debug.Log("wind moving seed");
                 }
@@ -144,7 +145,7 @@ public class MovingWind : Rhythm {
                 //check its not UI seed 
                 if (!other.GetComponent<Seed>().UIseed)
                 {
-                    other.GetComponent<Seed>().blowing = false;
+                    other.GetComponent<Seed>().seedState = Seed.SeedStates.IDLE;
 
                     other.transform.SetParent(null);
 

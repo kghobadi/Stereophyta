@@ -212,12 +212,15 @@ public class Sun : MonoBehaviour
             }
         }
 
-        //fade in and out sun saver
-        sunSaver.FadeIn();
-        sunSavingText.FadeIn();
-        sunSavingOutline.FadeIn();
+        //fade in and out sun saver IF saving enabled 
+        if (saveScript.savingAndLoadingEnabled)
+        {
+            sunSaver.FadeIn();
+            sunSavingText.FadeIn();
+            sunSavingOutline.FadeIn();
 
-        StartCoroutine(WaitToSave());
+            StartCoroutine(WaitToSave());
+        }
     }
 
     //randomizes the wind generators active, their speeds & direction

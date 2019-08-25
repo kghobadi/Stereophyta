@@ -99,10 +99,6 @@ public class Plont : MonoBehaviour {
             saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
             //Debug.Log("added this plant to save storage");
         }
-        else
-        {
-            AdjustHeight();
-        }
 
         //colliders and rigibodys
         plantBody = GetComponent<Rigidbody>();

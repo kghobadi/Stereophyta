@@ -96,9 +96,9 @@ public class ThirdPersonController : MonoBehaviour
     public Transform physicsRaycaster;
 
     //all my audio stuff
-    [Header("Audio")]
     AudioSource audioSource;
     AudioSource cameraAudSource;
+    [Header("Audio")]
     public AudioSource playerSource;
     public AudioClip[] jumpSounds;
     public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps, noNo;

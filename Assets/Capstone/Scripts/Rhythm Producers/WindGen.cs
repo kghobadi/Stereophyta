@@ -18,7 +18,7 @@ public class WindGen : RhythmProducer {
         NORTH, EAST, SOUTH, WEST,
     }
 
-    void Start()
+    void Awake()
     {
         origPos = transform.position;
     }

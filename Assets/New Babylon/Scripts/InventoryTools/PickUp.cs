@@ -16,6 +16,7 @@ public abstract class PickUp : MonoBehaviour {
     public bool playerWasNear, hasBeenAcquired;
     public AudioClip pickupSound;
     //for setting local transform under inventory
+    public float pickUpDist = 10f;
     public Vector3 localPos, localRot, localScale;
     //ui refs for pickup prompt
     public Text pickUpText;
@@ -65,7 +66,7 @@ public abstract class PickUp : MonoBehaviour {
             //dist from player
             float dist = Vector3.Distance(transform.position, player.transform.position);
             //if player is close
-            if (dist < 10f)
+            if (dist < pickUpDist)
             {
                 playerWasNear = true;
 
@@ -80,7 +81,7 @@ public abstract class PickUp : MonoBehaviour {
                 }
             }
             //player has left
-            else if (dist > 15f)
+            else if (dist > (pickUpDist + 5f))
             {
                 //fade out prompts
                 if (playerWasNear)

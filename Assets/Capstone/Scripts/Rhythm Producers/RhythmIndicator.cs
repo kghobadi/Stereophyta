@@ -6,7 +6,7 @@ public class RhythmIndicator : MonoBehaviour {
 
     GameObject cammy;
 
-    private void Start()
+    private void Awake()
     {
         cammy = Camera.main.gameObject;
     }

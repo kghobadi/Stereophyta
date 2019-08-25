@@ -31,7 +31,7 @@ public class Item : MonoBehaviour {
         //crop type -- Seed script
         if(seedType == SeedType.CROP)
         {
-            if (GetComponent<Seed>().planting)
+            if (GetComponent<Seed>().seedState == Seed.SeedStates.PLANTING)
             {
                 return false;
             }
@@ -63,7 +63,7 @@ public class Item : MonoBehaviour {
         //crop type -- Seed script
         if (seedType == SeedType.CROP)
         {
-            GetComponent<Seed>().seedSelected = true;
+            GetComponent<Seed>().seedState = Seed.SeedStates.SEEDSELECTED;
         }
         //shroom type
         else if (seedType == SeedType.SHROOM)
@@ -77,7 +77,7 @@ public class Item : MonoBehaviour {
         //crop type -- Seed script
         if (seedType == SeedType.CROP)
         {
-            GetComponent<Seed>().seedSelected = false;
+            GetComponent<Seed>().seedState = Seed.SeedStates.SEEDSELECTED;
         }
         //shroom type
         else if (seedType == SeedType.SHROOM)
