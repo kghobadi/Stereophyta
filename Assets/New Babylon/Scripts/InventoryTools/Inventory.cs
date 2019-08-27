@@ -58,7 +58,7 @@ public class Inventory : MonoBehaviour {
     //audio
     [Header("Audio")]
     public AudioSource inventoryAudio;
-    public AudioClip switchSeeds, switchTools;
+    public AudioClip switchSeedsUp,switchSeedsDown, switchTools;
  
 
     void Start () {
@@ -309,11 +309,19 @@ public class Inventory : MonoBehaviour {
 
         SetSeedSprite();
       
+        //play switch sound 
+        if (posOrNeg && inputTimerS < 0)
+        {
+            inventoryAudio.PlayOneShot(switchSeedsUp);
+        }
+        else if (!posOrNeg &&  inputTimerS < 0)
+        {
+            inventoryAudio.PlayOneShot(switchSeedsDown);
+        }
+
         //reset timer so not infinite switch
         inputTimerS = 0.1f;
         canSwitchSeeds = false;
-
-        inventoryAudio.PlayOneShot(switchSeeds);
 
     }
 

@@ -88,7 +88,7 @@ public class CircleMillControls : MonoBehaviour {
         exitPos = transform.position + new Vector3(-2f, 1f, 0);
 
         //add circle winds to the list
-        currentCircleWinds = zeroCircleWinds;
+        currentCircleWinds = singleCircleWind;
         for(int i = 0; i < allCircleWinds.Length; i++)
         {
             allCircleWinds[i].DeactivateWind();
@@ -98,6 +98,8 @@ public class CircleMillControls : MonoBehaviour {
 
         //set rhythm states
         SwitchRhythm();
+        //set winds
+        SetCurrentCircleWinds();
     }
 
     void Update()
@@ -108,7 +110,7 @@ public class CircleMillControls : MonoBehaviour {
             //dist from player
             float dist = Vector3.Distance(transform.position, player.transform.position);
             //if player is close
-            if (dist < 10f)
+            if (dist < 12f)
             {
                 playerWasNear = true;
 
@@ -123,7 +125,7 @@ public class CircleMillControls : MonoBehaviour {
                 }
             }
             //player has left
-            else if (dist > 11f)
+            else if (dist > 15f)
             {
                 //fade out prompts
                 if (playerWasNear)
@@ -209,6 +211,8 @@ public class CircleMillControls : MonoBehaviour {
         //cursor off
         Cursor.lockState = CursorLockMode.Locked;
         cursor.SetActive(false);
+
+        DeactivatePrompt();
     }
     
     //Switch Wind Direction

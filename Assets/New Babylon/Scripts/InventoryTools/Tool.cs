@@ -29,7 +29,7 @@ public abstract class Tool : MonoBehaviour {
     public string pickUpMessage;
     public FadeUI[] interactPrompts;
 
-    public float interactDist = 10f, leaveDist = 15f;
+    public float interactDist = 10f;
 
     //set tool refs in awake so that inventory can disable them at start
     public virtual void Awake()
@@ -163,7 +163,7 @@ public abstract class Tool : MonoBehaviour {
                 }
             }
             //player has left
-            else if(dist > leaveDist)
+            else if(dist > (interactDist + 5f))
             {
                 //fade out prompts
                 if (playerWasNear)

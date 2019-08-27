@@ -327,7 +327,10 @@ public class Seed : MonoBehaviour {
         transform.SetParent(null);
         seedBody.isKinematic = false;
         seedBody.useGravity = true;
-        seedSource.PlayOneShot(dropSeed);
+        if (!plantOnStart)
+        {
+            seedSource.PlayOneShot(dropSeed);
+        }
     }
 
     void OnCollisionEnter(Collision collision)
@@ -354,7 +357,10 @@ public class Seed : MonoBehaviour {
     void SpawnPlant()
     {
         //play spawn plant sound
-        seedSource.PlayOneShot(spawnPlant);
+        if (!plantOnStart)
+        {
+            seedSource.PlayOneShot(spawnPlant);
+        }
         //set plant spawn pos to seed pos
         Vector3 plantSpawnPos = transform.position;
 
@@ -410,6 +416,7 @@ public class Seed : MonoBehaviour {
 
             //set this back to false
             plantingOnGrid = false;
+            seedState = SeedStates.SEEDSELECTED;
         }
     }
     

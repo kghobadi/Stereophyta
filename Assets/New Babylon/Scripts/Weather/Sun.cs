@@ -8,6 +8,7 @@ public class Sun : MonoBehaviour
     public StartView startViewer;
 
     //player refs
+    PlayerCameraController cammy;
     GameObject _player;
     ThirdPersonController tpc;
     //day counters

@@ -37,7 +37,11 @@ public class Farmhouse : MonoBehaviour {
         {
             if (!occupied)
             {
-                playerCamera.SetActive(false);
+                //disable playercam
+                playerCamera.GetComponent<Camera>().enabled = false;
+                playerCamera.GetComponent<PlayerCameraController>().enabled = false;
+                playerCamera.GetComponent<AudioListener>().enabled = false;
+
                 playerInventory.SetActive(false);
                 lastFootsteps = tpc.currentFootsteps;
                 tpc.currentFootsteps = tpc.woodSteps;
@@ -104,11 +108,11 @@ public class Farmhouse : MonoBehaviour {
         {
             if (occupied)
             {
-                playerCamera.SetActive(true);
-                if(playerCamera.GetComponent<Camera>().enabled == false)
-                {
-                    playerCamera.GetComponent<Camera>().enabled = true;
-                }
+                //reset playercam
+                playerCamera.GetComponent<Camera>().enabled = true;
+                playerCamera.GetComponent<PlayerCameraController>().enabled = true;
+                playerCamera.GetComponent<AudioListener>().enabled = true;
+
                 playerInventory.SetActive(true);
                 tpc.currentFootsteps = lastFootsteps;
                 tpc.indoors = false;

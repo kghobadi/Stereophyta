@@ -179,6 +179,11 @@ public class MovingWind : Rhythm {
     IEnumerator DissipateWind()
     {
         windParticles.Stop();
+        //unparent all my stupid seed children cuz i am fucking DEAD
+        for(int i = 0; i < transform.childCount; i++)
+        {
+            transform.GetChild(i).SetParent(null);
+        }
         yield return new WaitForSeconds(windParticles.main.duration);
         poolObj.ReturnToPool();
     }

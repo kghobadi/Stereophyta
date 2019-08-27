@@ -36,6 +36,7 @@ public class StartView : MonoBehaviour {
     public GameObject startMenuUI;
     public FadeUI[] menuFades;
     public GameObject clickToStart;
+    public FadeUI[] toolsNSeeds;
 
 	void Start () {
         sunScript = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
@@ -53,6 +54,12 @@ public class StartView : MonoBehaviour {
             playerInventory.SetActive(false);
             startCam.fieldOfView = 75f;
             clickToStart.SetActive(true);
+
+            //fade out any lingering tools n seeds menus 
+            for(int i = 0; i < toolsNSeeds.Length; i++)
+            {
+                toolsNSeeds[i].FadeOut();
+            }
 
             if (PlayerPrefs.GetString("hasBook") == "yes")
             {

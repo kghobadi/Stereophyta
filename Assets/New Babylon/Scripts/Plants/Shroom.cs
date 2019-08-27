@@ -194,6 +194,7 @@ public class Shroom : MonoBehaviour
                 transform.localEulerAngles = new Vector3(70f, transform.localEulerAngles.y + (Time.deltaTime * currentBreatheSpeed * 15), 0);
             }
 
+            //check for player to vortex
             if (Vector3.Distance(transform.position, player.transform.position) < 5)
             {
                 plantingState = PlantingState.VORTEXING;
@@ -238,34 +239,14 @@ public class Shroom : MonoBehaviour
                 SwitchRhythm();
 
                 //reached next stage, grow
-                if (myAge == deathDay)
+                if (myAge == deathDay && plantingState != PlantingState.UNPLANTED)
                 {
-                    float chanceToUproot = Random.Range(0f, 100f);
-
-                    //50% chance to uproot
-                    if(chanceToUproot > 50f)
-                    {
-                        //uproot shroom for 1 day
-                        UprootShroom();
-                    }
-                    //otherwise destroy right away
-                    else
-                    {
-                        //remove plant from grid
-                        if (plantedOnGrid)
-                        {
-                            //nothing planted tag
-                            tgs.CellSetTag(cellIndex, 0);
-                            //ground texture
-                            tgs.CellToggleRegionSurface(cellIndex, true, groundTexture);
-                        }
-
-                        Destroy(gameObject);
-                    }
+                    ReleaseSpores();
+                    StartCoroutine(WaitToUproot());
                 }
 
                 //destroy...
-                if(myAge > deathDay || plantingState == PlantingState.UNPLANTED)
+                if(myAge > deathDay && plantingState == PlantingState.UNPLANTED)
                 {
                     Destroy(gameObject);
                 }
@@ -407,6 +388,13 @@ public class Shroom : MonoBehaviour
                 rhythmFader.FadeIn();
             }
         }
+    }
+
+    IEnumerator WaitToUproot()
+    {
+        yield return new WaitForSeconds(1f);
+
+        UprootShroom();
     }
 
     //called to move shroom to unplanted state so player can harvest

@@ -71,13 +71,7 @@ public class UseBoat : PickUp {
             Cursor.lockState = CursorLockMode.None;
 
             //set boats rotation to player's current forward
-            if (!firstTime)
-            {
-                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, tpc.characterBody.rotation.y);
-                transform.localPosition += new Vector3(0, 0, 5f);
-            }
-            //first time, so fade in boat usage instructions 
-            else
+            if (firstTime)
             {
                 txtFader.FadeIn();
                 textBackFader.FadeIn();
