@@ -26,7 +26,7 @@ public class SwimmableWater : MonoBehaviour {
                 tpc.swimming = true;
                 tpc.currentFootsteps = tpc.swimSteps;
                 tpc.myInventory.gameObject.SetActive(false);
-                tpc.playerCloak.enabled = false;
+                tpc.playerCloak.gameObject.SetActive(false);
 
                 if (tpc.jumping)
                 {
@@ -53,6 +53,7 @@ public class SwimmableWater : MonoBehaviour {
                 tpc.swimming = false;
                 tpc.currentFootsteps = tpc.grassSteps;
                 tpc.myInventory.gameObject.SetActive(true);
+                
                 StartCoroutine(WaitToEnableCloak());
             }
         }
@@ -64,8 +65,7 @@ public class SwimmableWater : MonoBehaviour {
 
         if (!tpc.swimming)
         {
-            tpc.playerCloak.enabled = true;
+            tpc.ActivateCloak(0.1f);
         }
-        
     }
 }

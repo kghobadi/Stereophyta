@@ -90,6 +90,11 @@ public class ThirdPersonController : MonoBehaviour
     public TrailRenderer swimTrail, swimWhiteTrail;
     public ParticleSystem swimSplashL, swimSplashR;
     ParticleSystem.MainModule splashMainL, splashMainR;
+    public float swimJumpTotal = 10f;
+    float swimJumpTimer;
+    int swimJumpCounter;
+    public float swimJumpForce = 50f;
+    public bool swimJump;
 
     //inventory ref
     public Inventory myInventory;
@@ -102,8 +107,8 @@ public class ThirdPersonController : MonoBehaviour
     AudioSource cameraAudSource;
     [Header("Audio")]
     public AudioSource playerSource;
-    public AudioClip[] jumpSounds;
-    public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps, noNo;
+    public AudioClip[] jumpSounds, swimJumps;
+    public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps,  noNo;
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
     float footStepTimer = 0;
     public int currentStep = 0;
@@ -431,28 +436,57 @@ public class ThirdPersonController : MonoBehaviour
         AdjustSwimHeight();
         //playerCloak.enabled = false;
         //need to figure out what to do with the cloth while swimming...
+        //timer for swimjump
+        swimJumpTimer -= Time.deltaTime;
 
-        //swim faster!
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        //swim jump input 
+        if (Input.GetKey(KeyCode.Space) && !swimJump && swimJumpTimer < 0)
         {
-            swimSpeed = movespeed;
-            poopShoes.speed = 2f;
-
-            //alter splash fx
-            splashMainL.startLifetime = 0.5f;
-            splashMainR.startLifetime = 0.5f;
-         
+            swimJump = true;
+            int randomSwimJump = Random.Range(0, swimJumps.Length);
+            playerSource.PlayOneShot(swimJumps[randomSwimJump]);
         }
-        //normal swim speed
-        else
+
+        //actual force applied 
+        if (swimJump)
         {
-            swimSpeed = movespeed / 2f;
-            poopShoes.speed = 1f;
+            swimSpeed += swimJumpForce;
+            swimJumpCounter++;
 
-            //alter splash fx
-            splashMainL.startLifetime = 1f;
-            splashMainR.startLifetime = 1f;
+            if (swimJumpCounter > 10)
+            {
+                swimJumpCounter = 0;
+                swimJumpTimer = swimJumpTotal;
+                swimSpeed = movespeed;
+                swimJump = false;
+            }
         }
+
+        if (!swimJump)
+        {
+            //swim faster!
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            {
+                swimSpeed = movespeed;
+                poopShoes.speed = 2f;
+
+                //alter splash fx
+                splashMainL.startLifetime = 0.5f;
+                splashMainR.startLifetime = 0.5f;
+
+            }
+            //normal swim speed
+            else
+            {
+                swimSpeed = movespeed / 2f;
+                poopShoes.speed = 1f;
+
+                //alter splash fx
+                splashMainL.startLifetime = 1f;
+                splashMainR.startLifetime = 1f;
+            }
+        }
+       
         //swimming
         if (targetMovementTotal.magnitude > 0)
         {
@@ -582,12 +616,18 @@ public class ThirdPersonController : MonoBehaviour
         //set animator
         SetAnimator("idle");
 
-        StartCoroutine(WaitToActivateCloak());
+        StartCoroutine(WaitToActivateCloak(0.75f));
     }
 
-    IEnumerator WaitToActivateCloak()
+    //public call for waitToactivate    
+    public void ActivateCloak(float time)
     {
-        yield return new WaitForSeconds(0.5f);
+        StartCoroutine(WaitToActivateCloak(time));
+    }
+
+    IEnumerator WaitToActivateCloak(float time)
+    {
+        yield return new WaitForSeconds(time);
 
         playerCloak.gameObject.SetActive(true);
     }
