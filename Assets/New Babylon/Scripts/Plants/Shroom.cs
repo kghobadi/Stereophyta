@@ -113,6 +113,10 @@ public class Shroom : MonoBehaviour
         groundTexture = gridMan.groundTexture;
 
         //obj refs
+        if (shroomPrefab == null)
+        {
+            FindPoolers();
+        }
         shroomCol = GetComponent<BoxCollider>();
         shroomBody = GetComponent<Rigidbody>();
         shroomAnimator = GetComponent<Animator>();
@@ -132,6 +136,22 @@ public class Shroom : MonoBehaviour
 
         AdjustHeight();
         SetShroom();
+    }
+
+    //finds obj poolers for this type of shroom 
+    void FindPoolers()
+    {
+        switch (shroomType)
+        {
+            case ShroomType.OCTA:
+                shroomPooler = GameObject.Find("OctashroomPooler").GetComponent<ObjectPooler>();
+                break;
+            case ShroomType.SPHEROCYBIN:
+                shroomPooler = GameObject.Find("SpherocybinPooler").GetComponent<ObjectPooler>();
+                break;
+        }
+
+        shroomPrefab = shroomPooler.objectPrefab;
     }
 
     void Update()

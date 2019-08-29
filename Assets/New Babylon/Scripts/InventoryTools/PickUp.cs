@@ -13,12 +13,15 @@ public abstract class PickUp : MonoBehaviour {
     protected Inventory inventoryScript;
 
     //is true once player picks it up
-    public bool playerWasNear, hasBeenAcquired;
+    [Header("Pick Up Logic")]
+    public bool playerWasNear;
+    public bool hasBeenAcquired;
     public AudioClip pickupSound;
     //for setting local transform under inventory
     public float pickUpDist = 10f;
     public Vector3 localPos, localRot, localScale;
     //ui refs for pickup prompt
+    [Header("Pickup Prompt")]
     public Text pickUpText;
     public string pickUpMessage;
     public FadeUI[] interactPrompts;

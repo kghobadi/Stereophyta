@@ -80,6 +80,11 @@ public class UseBoat : PickUp {
                 animFaderRight.FadeIn();
                 animatorRight.active = true;
             }
+            //rotate boat so it's facing departure direction 
+            else
+            {
+                transform.localEulerAngles += new Vector3(0f, 180f, 0f);
+            }
 
             //in case you are jumping 
             if (tpc.jumping)
@@ -89,9 +94,21 @@ public class UseBoat : PickUp {
                 tpc.jumpTrail.GetComponent<JumpTrail>().StartCoroutine(tpc.jumpTrail.GetComponent<JumpTrail>().Deactivate());
             }
 
+            //check for swimming
+            if (tpc.swimming)
+            {
+                tpc.swimming = false;
+                tpc.currentMovement.y = 0;
+                tpc.swimTrail.enabled = false;
+                tpc.swimWhiteTrail.enabled = false;
+                tpc.swimRipples.Stop();
+                tpc.swimSplashL.Stop();
+                tpc.swimSplashR.Stop();
+            }
+
             //turn off player movment
-            tpc.playerCanMove = false;
             tpc.SetAnimator("idle");
+            tpc.playerCanMove = false;
             tpc.runParticles.SetActive(false);
             tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
             camController.canLook = false;

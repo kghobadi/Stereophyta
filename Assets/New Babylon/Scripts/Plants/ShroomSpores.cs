@@ -191,7 +191,7 @@ public class ShroomSpores : MonoBehaviour {
         //generate clone and set Plont script values
         if(shroomParent != null)
         {
-            shroomClone = Instantiate(shroomParent.shroomPrefab, plantingPos, Quaternion.Euler(tpc.transform.localEulerAngles));
+            shroomClone = shroomParent.shroomPooler.GrabObject();
             Shroom shroomScript = shroomClone.GetComponent<Shroom>();
             shroomScript.shroomPrefab = shroomParent.shroomPrefab;
             shroomScript.shroomPooler = shroomParent.shroomPooler;

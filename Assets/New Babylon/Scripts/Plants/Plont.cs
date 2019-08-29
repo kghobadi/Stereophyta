@@ -241,7 +241,8 @@ public class Plont : MonoBehaviour {
                 newScale = (originalScale * currentStage) / 1.5f;
                 growing = true;
                 //set active next crop bundle
-                cropBundles[currentStage].SetActive(true);
+                if(cropBundles[currentStage] != null)
+                    cropBundles[currentStage].SetActive(true);
             }
             //time to die!
             else

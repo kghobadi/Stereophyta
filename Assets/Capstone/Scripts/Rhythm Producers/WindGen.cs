@@ -18,8 +18,9 @@ public class WindGen : RhythmProducer {
         NORTH, EAST, SOUTH, WEST,
     }
 
-    void Awake()
+    public override void Awake()
     {
+        base.Awake();
         origPos = transform.position;
     }
 
