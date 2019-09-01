@@ -104,6 +104,7 @@ public class UseBoat : PickUp {
                 tpc.swimRipples.Stop();
                 tpc.swimSplashL.Stop();
                 tpc.swimSplashR.Stop();
+                tpc.ActivateCloak(0.5f);
             }
 
             //turn off player movment

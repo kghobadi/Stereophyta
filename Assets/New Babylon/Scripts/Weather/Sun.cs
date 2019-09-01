@@ -4,6 +4,12 @@ using UnityEngine.Audio;
 
 public class Sun : MonoBehaviour
 {
+    //clock stuff
+    SimpleClock clock;
+    [Header("Clock")]
+    public int clockBPM;
+    public int minBPM, maxBPM;
+
     //startView ref
     public StartView startViewer;
 
@@ -11,13 +17,13 @@ public class Sun : MonoBehaviour
     PlayerCameraController cammy;
     GameObject _player;
     ThirdPersonController tpc;
-    //day counters
-    public int yesterday, dayCounter = 0;
-
+    
     //rotation speed refs
+    [Header("Sun rotation & time states")]
     public Transform rotation;
     public float rotationSpeed = 10, sleepRotation, normalRotation;
-   
+    //day counters
+    public int yesterday, dayCounter = 0;
     //angle of sun's rotation
     public float angleInDegrees;
     //time state enum
@@ -30,38 +36,46 @@ public class Sun : MonoBehaviour
     public float rotationDiameter, morningInterval, middayInterval, duskInterval, nightInterval;
 
     //lighting color settings
+    [Header("Sun Lighting")]
     public Light sun;
     public Color morn, mid, dusk, night;
     public Color ambientMorn, ambientMid, ambientDusk, ambientNight;
     public Material skyMorn, skyMid, skyDusk, skyNight;
 
     //wind stuff
+    [Header("Wind")]
     public int windCounter = 0;
     public GameObject[] windDirections, northWinds, southWinds, eastWinds, westWinds;
 
     //raincloud stuff
+    [Header("Rain & Clouds")]
     public int rainCounter = 0;
     public GameObject[] rainDirections;
     public GameObject[] cloudDirections;
 
     //stars
+    [Header("Stars & Water")]
     public GameObject stars;
     ParticleSystem starParticles;
     //waters 
     public GameObject waterDay, waterNight;
-    //save ref
-    public SleepSave saveScript;
-
-    //sun saver anim
-    public FadeUI sunSaver;
-    public FadeUItmp sunSavingText, sunSavingOutline;
-
     //ocean audio
     public AudioSource oceanSource;
     public AudioClip[] oceanSounds;
 
+    //save ref 
+    [Header("Saving")]
+    public SleepSave saveScript;
+    //sun saver anim
+    public FadeUI sunSaver;
+    public FadeUItmp sunSavingText, sunSavingOutline;
+    
     void Start()
     {
+        //clock ref
+        clock = GameObject.FindGameObjectWithTag("Clock").GetComponent<SimpleClock>();
+        clockBPM = (int)clock.BPM;
+
         //player refs
         _player = GameObject.FindGameObjectWithTag("Player");
         tpc = _player.GetComponent<ThirdPersonController>();
@@ -98,6 +112,7 @@ public class Sun : MonoBehaviour
         }
 
         // randomize wind && rains
+        SetClockBPM();
         RandomizeWinds();
         RandomizeRains();
     }
@@ -191,6 +206,7 @@ public class Sun : MonoBehaviour
         PlayerPrefs.SetInt("dayCounter", dayCounter);
 
         // randomize wind && rains
+        SetClockBPM();
         RandomizeWinds();
         RandomizeRains();
 
@@ -227,6 +243,16 @@ public class Sun : MonoBehaviour
         }
     }
 
+    //called in newDay
+    void SetClockBPM()
+    {
+        int randomBPM = Random.Range(minBPM, maxBPM);
+
+        clock.SetBPM(randomBPM);
+
+        clockBPM = (int)clock.BPM;
+    }
+
     //randomizes the wind generators active, their speeds & direction
     void RandomizeWinds()
     {
@@ -255,6 +281,12 @@ public class Sun : MonoBehaviour
         //turn off all winds
         for (int i = 0; i < windDirections.Length; i++)
         {
+            //have the active wind gens release their winds for now 
+            for(int w = 0; w < windDirections[i].transform.childCount; w++)
+            {
+                windDirections[i].transform.GetChild(w).GetComponent<WindGen>().ReleaseWinds();
+            }
+
             windDirections[i].SetActive(false);
         }
 

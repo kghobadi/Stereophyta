@@ -26,7 +26,7 @@ public abstract class PickUp : MonoBehaviour {
     public string pickUpMessage;
     public FadeUI[] interactPrompts;
 
-    void Awake () {
+    public virtual void Awake () {
 
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
@@ -35,6 +35,8 @@ public abstract class PickUp : MonoBehaviour {
         //inventory ref
         inventory = GameObject.FindGameObjectWithTag("Inventory");
         inventoryScript = inventory.GetComponent<Inventory>();
+
+        //Debug.Log(inventoryScript.gameObject + " has been found!");
     }
 
     //called to pick up tool for the first time

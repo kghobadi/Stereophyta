@@ -5,13 +5,40 @@ using UnityEngine;
 public class ObjectPooler : MonoBehaviour {
 
     public GameObject objectPrefab;
-  
+    public int startingAmount;
     public int poolSize;
     List<GameObject> availableObjects = new List<GameObject>();
     List<GameObject> objectsInUse = new List<GameObject>();
 
+    public PoolerType poolType;
+    public enum PoolerType
+    {
+        SHROOM, CROP,
+    }
+
     protected virtual void Awake() {
-        //nothing -.-
+        for(int i = 0; i < startingAmount; i++)
+        {
+            InstantiateOnStart();
+        }
+    }
+
+    //instantiates a new object and resets poolsize
+    protected virtual GameObject InstantiateOnStart()
+    {
+        //instantiate
+        GameObject newObject = Instantiate(objectPrefab);
+        //add pooledObj script
+        newObject.AddComponent<PooledObject>();
+        newObject.GetComponent<PooledObject>().m_ObjectPooler = this;
+        //add to available objects
+        availableObjects.Add(newObject);
+        //set active false & parent to this
+        newObject.transform.SetParent(transform);
+        newObject.SetActive(false);
+        //set poolsize
+        poolSize = availableObjects.Count + objectsInUse.Count;
+        return newObject;
     }
 
     //instantiates a new object and resets poolsize

@@ -285,7 +285,8 @@ public class ShroomSeed : MonoBehaviour {
         }
 
         //generate clone and set Plont script values
-        shroomClone = Instantiate(shroomPrefab, plantSpawnPos, Quaternion.Euler(tpc.transform.localEulerAngles));
+        shroomClone = shroomPooler.GrabObject();
+        shroomClone.transform.position = plantSpawnPos;
         Shroom shroomScript = shroomClone.GetComponent<Shroom>();
         shroomScript.shroomPrefab = shroomPrefab;
         shroomScript.shroomPooler = shroomPooler;

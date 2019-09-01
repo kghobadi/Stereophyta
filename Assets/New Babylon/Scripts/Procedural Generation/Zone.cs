@@ -14,6 +14,7 @@ public class Zone : MonoBehaviour {
     public string zoneName;
     public bool playerInZone;
     public TerrainGridSystem zoneTGS;
+    public Spawner[] zoneSpawners;
     [Header("Audio snapshots")]
     public AudioMixerSnapshot Ocean;
     public AudioMixerSnapshot zoneSnapshot;
@@ -48,12 +49,11 @@ public class Zone : MonoBehaviour {
     {
         if (other.gameObject == player)
         {
-            if (!playerInZone)
+            if (playerInZone)
             {
                 playerInZone = false;
                 tpc.currentZone = null;
-                tpc.currentTGS = null;
-                tpc.currentZoneName = null;
+                tpc.currentZoneName = "Ocean";
                 Ocean.TransitionTo(3f);
                 Debug.Log("Player left zone: " + zoneName);
             }

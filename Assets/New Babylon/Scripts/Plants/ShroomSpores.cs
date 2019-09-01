@@ -9,8 +9,9 @@ public class ShroomSpores : MonoBehaviour {
     ThirdPersonController tpc;
 
     //shroom settings 
-    Shroom shroomParent;
-    GameObject shroomClone;
+    public ObjectPooler shroomPool;
+    public Shroom shroomParent;
+    public int seedIndex;
     public float shroomGroupDist;
     public int shroomGroupMax;
 
@@ -33,6 +34,8 @@ public class ShroomSpores : MonoBehaviour {
 
         //shroom stuff
         shroomParent = transform.parent.GetComponent<Shroom>();
+        shroomPool = shroomParent.shroomPooler;
+        seedIndex = shroomParent.mySeedIndex;
         sporeParticles = GetComponent<ParticleSystem>();
         collisionEvents = new List<ParticleCollisionEvent>();
 
@@ -189,20 +192,18 @@ public class ShroomSpores : MonoBehaviour {
         }
 
         //generate clone and set Plont script values
-        if(shroomParent != null)
-        {
-            shroomClone = shroomParent.shroomPooler.GrabObject();
-            Shroom shroomScript = shroomClone.GetComponent<Shroom>();
-            shroomScript.shroomPrefab = shroomParent.shroomPrefab;
-            shroomScript.shroomPooler = shroomParent.shroomPooler;
-            shroomScript.mySeedIndex = shroomParent.mySeedIndex;
+        GameObject shroomClone = shroomPool.GrabObject();
+        shroomClone.transform.position = plantingPos;
+        Shroom shroomScript = shroomClone.GetComponent<Shroom>();
+        shroomScript.shroomPrefab = shroomPool.objectPrefab;
+        shroomScript.shroomPooler = shroomPool;
+        shroomScript.mySeedIndex = seedIndex;
 
-            //add info to Plont if on Grid 
-            if (plantingOnGrid)
-            {
-                shroomScript.plantedOnGrid = true;
-                shroomScript.cellIndex = cellIndex;
-            }
+        //add info to Plont if on Grid 
+        if (plantingOnGrid)
+        {
+            shroomScript.plantedOnGrid = true;
+            shroomScript.cellIndex = cellIndex;
         }
 
     }

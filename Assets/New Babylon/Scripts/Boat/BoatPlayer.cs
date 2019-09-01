@@ -117,27 +117,12 @@ public class BoatPlayer : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 //use raycast from cam to screen point
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-
-                //raycast info
-                if (Physics.Raycast(ray, out hit, 100, boatMask))
-                {
-                    if (hit.transform.gameObject.tag == "Water")
-                    {
-                        origMousePos = currentMousePos;
-                        checkingPaddle = true;
-                    }
-                }
+                origMousePos = currentMousePos;
+                checkingPaddle = true;
             }
 
-            //called to adjust the oar in space while row is happening
-            if (checkingPaddle)
-            {
-                //right now nothing, could use this space to run procedural animations for oars and stuff 
-            }
             //apply slow down to boat
-            else
+            if(!checkingPaddle && !turningBoat)
             {
                 boatBody.velocity = Vector3.Lerp(boatBody.velocity, Vector3.zero, waterResistanceFwd * Time.deltaTime);
                 boatBody.angularVelocity = Vector3.Lerp(boatBody.angularVelocity, Vector3.zero, waterResistanceAng * Time.deltaTime);

@@ -59,7 +59,11 @@ public class Inventory : MonoBehaviour {
     [Header("Audio")]
     public AudioSource inventoryAudio;
     public AudioClip switchSeedsUp,switchSeedsDown, switchTools;
- 
+
+    void Awake()
+    {
+        //Debug.Log("hello I am here PLEASE FIND ME !");  
+    }
 
     void Start () {
         //player refs
