@@ -311,7 +311,7 @@ public class Shroom : RhythmProducer
     }
 
     //called when shroom is first planted
-    void SetShroom()
+    public void SetShroom()
     {
         //random mushroom sound
         int mushroomSize = Random.Range(0, breathingSounds.Length);
@@ -354,6 +354,7 @@ public class Shroom : RhythmProducer
         deathDay = Random.Range(3, 5);
 
         //end
+        shroomMR.material = myShroomShader;
         plantingState = PlantingState.PLANTED;
         shroomAnimator.SetBool("planted", true);
         BreatheIn();
@@ -482,7 +483,7 @@ public class Shroom : RhythmProducer
     }
 
 
-    void AdjustHeight()
+    public void AdjustHeight()
     {
         Vector3 down = transform.TransformDirection(Vector3.down) * 10;
 

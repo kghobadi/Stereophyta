@@ -169,7 +169,7 @@ public class MovingWind : Rhythm {
 
                     other.transform.localScale = other.GetComponent<Shroom>().originalSize;
 
-                    Debug.Log("wind left shroom");
+                    //Debug.Log("wind left shroom");
                 }
             }
         }

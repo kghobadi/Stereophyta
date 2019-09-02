@@ -56,25 +56,30 @@ public class WindGen : RhythmProducer {
     //adjusts wind interval based on what the clock bpm is 
     void EvaluateRhythmInterval()
     {
-        if(sunScript.clockBPM >= 10 && sunScript.clockBPM < 20)
+        if(sunScript.clockBPM >= 10 && sunScript.clockBPM < 15)
         {
             windInterval = 0;
         }
-        if (sunScript.clockBPM > 20 && sunScript.clockBPM < 30)
+        if (sunScript.clockBPM >= 15 && sunScript.clockBPM < 20)
         {
-            windInterval = Random.Range(0, 2);
+            windInterval = 1;
         }
-        if (sunScript.clockBPM > 30 && sunScript.clockBPM < 40)
+        if (sunScript.clockBPM >= 20 && sunScript.clockBPM < 30)
         {
             windInterval = Random.Range(1, 3);
         }
-        if (sunScript.clockBPM > 40 && sunScript.clockBPM <= 50)
+        if (sunScript.clockBPM >= 30 && sunScript.clockBPM < 40)
         {
-            windInterval = Random.Range(2, 4);
+            windInterval = Random.Range(2, 5);
+        }
+        if (sunScript.clockBPM >= 40 && sunScript.clockBPM <= 50)
+        {
+            windInterval = Random.Range(3, 6);
         }
 
         //keep updated bpm 
         lastBPM = sunScript.clockBPM;
+        Debug.Log(gameObject.name + "evaluated rhythm interval to: " + windInterval);
     }
 
     //unchild all the winds so they don't disappear totally when the day transitions 

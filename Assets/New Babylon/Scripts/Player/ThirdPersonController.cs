@@ -284,11 +284,16 @@ public class ThirdPersonController : MonoBehaviour
             JumpCheck();
             JumpInputs();
             currentMovement.y = verticalSpeed;
-            swimTrail.enabled = false;
-            swimWhiteTrail.enabled = false;
-            swimRipples.Stop();
-            swimSplashL.Stop();
-            swimSplashR.Stop();
+
+            //turn off all the swim fx 
+            if (swimTrail.enabled)
+            {
+                swimTrail.enabled = false;
+                swimWhiteTrail.enabled = false;
+                swimRipples.Stop();
+                swimSplashL.Stop();
+                swimSplashR.Stop();
+            }
         }
         //swimming
         else

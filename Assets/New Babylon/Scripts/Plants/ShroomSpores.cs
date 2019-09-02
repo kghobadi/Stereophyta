@@ -199,6 +199,12 @@ public class ShroomSpores : MonoBehaviour {
         shroomScript.shroomPooler = shroomPool;
         shroomScript.mySeedIndex = seedIndex;
 
+        //set that shroom
+        if (shroomScript.plantingState != Shroom.PlantingState.PLANTED)
+        {
+            shroomScript.SetShroom();
+        }
+
         //add info to Plont if on Grid 
         if (plantingOnGrid)
         {

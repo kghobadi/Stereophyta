@@ -223,6 +223,10 @@ public class Plont : MonoBehaviour {
             //increment current stage based on number of growth stages
             if (currentStage < myGrowthStages.Length - 1)
             {
+                //set active next crop bundle
+                if (cropBundles[currentStage] != null)
+                    cropBundles[currentStage].SetActive(true);
+
                 currentStage++;
 
                 //if older than 1
@@ -240,9 +244,6 @@ public class Plont : MonoBehaviour {
                 //set growing 
                 newScale = (originalScale * currentStage) / 1.5f;
                 growing = true;
-                //set active next crop bundle
-                if(cropBundles[currentStage] != null)
-                    cropBundles[currentStage].SetActive(true);
             }
             //time to die!
             else
@@ -288,8 +289,17 @@ public class Plont : MonoBehaviour {
 
         //set nextStage
         nextStage = myAge + myGrowthStages[currentStage].growthDays;
-        //set current clip
-        currentClip = stageSounds[currentStage];
+        //set current clip randomly out of available stage audio clips 
+        int clipCount = myGrowthStages[currentStage].stageAudioClips.Length;
+        if (clipCount > 0)
+        {
+            currentClip = myGrowthStages[currentStage].stageAudioClips[Random.Range(0, clipCount)];
+        }
+        //only one sound, just set it 
+        else
+        {
+            currentClip = stageSounds[currentStage];
+        }
 
         //set particles duration to our current audio clip's length
         StartCoroutine(WaitToSetParticles());
