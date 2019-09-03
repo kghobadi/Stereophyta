@@ -40,7 +40,11 @@ public class WindGen : RhythmProducer {
             {
                 windCounter = 0;
 
-                SpawnWind();
+                //only spawn wind if player is somewhat near 
+                if(Vector3.Distance(player.transform.position, transform.position) < (distanceToDestroy * 2))
+                {
+                    SpawnWind();
+                }
             }
         }
 
