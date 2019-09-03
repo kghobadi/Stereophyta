@@ -7,7 +7,6 @@ public class PlayerCameraController : MonoBehaviour {
     Transform playerTransform;
     ThirdPersonController tpc;
     Camera actualCam;
-
     //all the camera movement vars
     Quaternion targetLook;
     Vector3 horizontalRotation;
@@ -15,9 +14,11 @@ public class PlayerCameraController : MonoBehaviour {
     //stores verticalRotation input and consistently sets it
     Vector3 yLook;
     Vector3 targetMove;
-    public float rayHitMoveInFront = 0.1f;
     Vector3 targetMoveUse;
     Vector3 smoothMoveV;
+
+    [Header("Camera Characteristics")]
+    public float rayHitMoveInFront = 0.1f;
     public float distanceFromPlayer = 5;
     public float distanceFromPlayerMax;
     public float heightFromPlayer = 3;
@@ -27,6 +28,7 @@ public class PlayerCameraController : MonoBehaviour {
     float zoomInput;
 
     //all the ps4 feel variables
+    [Header("Controller Move feel")]
     public float cameraRotationSpeedX = 5;
     public float cameraRotationSpeedY = 5;
     public float smoothLookOriginal, smoothMoveOriginal;
@@ -35,6 +37,7 @@ public class PlayerCameraController : MonoBehaviour {
     public float turnSmoothMove = 0.1f, movingTurnSmoothMove;
 
     //all the alternative mouse variables
+    [Header("Mouse feel vars")]
     public bool mouseControls;
     public float cameraRotationSpeedXMouse = 5;
     public float cameraRotationSpeedYMouse = 5;
@@ -45,11 +48,12 @@ public class PlayerCameraController : MonoBehaviour {
     public float mTurnSmoothMove = 0.1f, mMovingTurnSmoothMove;
 
     // for boat stuff
+    [Header("Camera Limits")]
     public bool canLook;
     public LayerMask obstructionMask;
 
-
     //for lerping fov 
+    [Header("FOV")]
     public bool lerpingFOV;
     public float desiredFOV, lerpFOVspeed;
     float lerpCounter;

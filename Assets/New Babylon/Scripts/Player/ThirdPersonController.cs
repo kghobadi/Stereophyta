@@ -43,7 +43,7 @@ public class ThirdPersonController : MonoBehaviour
     public bool playerCanMove, menuOpen;
     public bool indoors;
     public Transform houseCam;
-    public GameObject runParticles;
+    public ParticleSystem runParticles;
     [HideInInspector]
     public Vector3 currentMovement;
     Vector3 targetMovementTotal;
@@ -185,7 +185,7 @@ public class ThirdPersonController : MonoBehaviour
         //set loose particles
         splashScript = dustSplash.GetComponent<DustSplash>();
         sleepParticles.SetActive(false);
-        runParticles.SetActive(false);
+        runParticles.Stop();
         swimSpeed = movespeed / 2;
         swimRipples.Stop();
         swimSplashL.Stop();
@@ -379,13 +379,13 @@ public class ThirdPersonController : MonoBehaviour
                     SetAnimator("running");
                     playerRunCollider.enabled = true;
                     running = true;
-                    runParticles.SetActive(true);
+                    runParticles.Play();
                 }
             }
             //not moving 
             else
             {
-                runParticles.SetActive(false);
+                runParticles.Stop();
                 //idling
                 if (poopShoes.GetBool("idle") != true)
                 {
@@ -407,7 +407,7 @@ public class ThirdPersonController : MonoBehaviour
                     SetAnimator("walking");
                     playerRunCollider.enabled = false;
                     running = false;
-                    runParticles.SetActive(false);
+                    runParticles.Stop();
                 }
             }
             //not moving
@@ -438,7 +438,7 @@ public class ThirdPersonController : MonoBehaviour
     void Swim()
     {
         currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
-        runParticles.SetActive(false);
+        runParticles.Stop();
         AdjustSwimHeight();
         //playerCloak.enabled = false;
         //need to figure out what to do with the cloth while swimming...

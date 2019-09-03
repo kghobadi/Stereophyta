@@ -109,24 +109,26 @@ public class WindGen : RhythmProducer {
 
         CheckDirRandomPos();
 
-        switch (timeScale)
-        {
-            case 0:
-                windSpeed = 2.5f;
-                break;
-            case 1:
-                windSpeed = 5f;
-                break;
-            case 2:
-                windSpeed = 10f;
-                break;
-            case 3:
-                windSpeed = 20f;
-                break;
-            case 4:
-                windSpeed = 40f;
-                break;
-        }
+        windSpeed = Random.Range(2.5f, 40f);
+
+        //switch (timeScale)
+        //{
+        //    case 0:
+        //        windSpeed = 2.5f;
+        //        break;
+        //    case 1:
+        //        windSpeed = 5f;
+        //        break;
+        //    case 2:
+        //        windSpeed = 10f;
+        //        break;
+        //    case 3:
+        //        windSpeed = 20f;
+        //        break;
+        //    case 4:
+        //        windSpeed = 40f;
+        //        break;
+        //}
     }
 
     void CheckDirRandomPos()
