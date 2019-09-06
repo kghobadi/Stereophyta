@@ -41,7 +41,7 @@ public class WindGen : RhythmProducer {
                 windCounter = 0;
 
                 //only spawn wind if player is somewhat near 
-                if(Vector3.Distance(player.transform.position, transform.position) < (distanceToDestroy * 2))
+                if(Vector3.Distance(player.transform.position, transform.position) < (distanceToDestroy * 1.5f))
                 {
                     SpawnWind();
                 }
@@ -83,7 +83,7 @@ public class WindGen : RhythmProducer {
 
         //keep updated bpm 
         lastBPM = sunScript.clockBPM;
-        Debug.Log(gameObject.name + "evaluated rhythm interval to: " + windInterval);
+        //Debug.Log(gameObject.name + "evaluated rhythm interval to: " + windInterval);
     }
 
     //unchild all the winds so they don't disappear totally when the day transitions 

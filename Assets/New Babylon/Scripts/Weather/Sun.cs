@@ -40,7 +40,8 @@ public class Sun : MonoBehaviour
     public Light sun;
     public Color morn, mid, dusk, night;
     public Color ambientMorn, ambientMid, ambientDusk, ambientNight;
-    public Material skyMorn, skyMid, skyDusk, skyNight;
+    public Material skyDay, skyNight;
+    public Material[] skyOptionsDay, skyOptionsNight;
 
     //wind stuff
     [Header("Wind")]
@@ -51,7 +52,6 @@ public class Sun : MonoBehaviour
     [Header("Rain & Clouds")]
     public int rainCounter = 0;
     public GameObject[] rainDirections;
-    public GameObject[] cloudDirections;
 
     //stars
     [Header("Stars & Water")]
@@ -72,6 +72,7 @@ public class Sun : MonoBehaviour
     
     void Start()
     {
+        Random.InitState(System.DateTime.Now.Millisecond);
         //clock ref
         clock = GameObject.FindGameObjectWithTag("Clock").GetComponent<SimpleClock>();
         clockBPM = (int)clock.BPM;
@@ -113,8 +114,9 @@ public class Sun : MonoBehaviour
 
         // randomize wind && rains
         SetClockBPM();
+        RandomizeSkybox();
         RandomizeWinds();
-        RandomizeRains();
+        //RandomizeRains();
     }
 
     void Update()
@@ -152,14 +154,14 @@ public class Sun : MonoBehaviour
             }
            
             //lighting
-            LerpLighting(morn, ambientMorn, skyMorn);
+            LerpLighting(morn, ambientMorn, skyDay);
            
         }
         //is Midday
         else if (angleInDegrees > middayInterval && angleInDegrees < duskInterval)
         {
             //lighting
-            LerpLighting(mid, ambientMid, skyMid);
+            LerpLighting(mid, ambientMid, skyDay);
             //time bool
             timeState = TimeState.MIDDAY;
         }
@@ -167,7 +169,7 @@ public class Sun : MonoBehaviour
         else if (angleInDegrees > duskInterval && angleInDegrees < nightInterval)
         {
             //lighting
-            LerpLighting(dusk, ambientDusk, skyDusk);
+            LerpLighting(dusk, ambientDusk, skyDay);
             //time bool
             timeState = TimeState.DUSK;
         }
@@ -195,7 +197,11 @@ public class Sun : MonoBehaviour
     {
         sun.color = Color.Lerp(sun.color, sunC, Time.deltaTime / 10);
         RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientC, Time.deltaTime / 10);
-        RenderSettings.skybox = skyboxC;
+
+        if(RenderSettings.skybox != skyboxC)
+        {
+            RenderSettings.skybox = skyboxC;
+        }
     }
 
     //called every morning
@@ -207,8 +213,9 @@ public class Sun : MonoBehaviour
 
         // randomize wind && rains
         SetClockBPM();
+        RandomizeSkybox();
         RandomizeWinds();
-        RandomizeRains();
+        //RandomizeRains();
 
         //subtract from player's days to sleep
         if (tpc.sleeping)
@@ -328,6 +335,16 @@ public class Sun : MonoBehaviour
         }
     }
 
+    //randomizes skybox for the new day 
+    void RandomizeSkybox()
+    {
+        int randomSky = Random.Range(0, skyOptionsDay.Length);
+
+        skyDay = skyOptionsDay[randomSky];
+
+        skyNight = skyOptionsNight[randomSky];
+    }
+
     //randomizes the wind generators active, their speeds & direction
     void RandomizeRains()
     {
@@ -335,7 +352,6 @@ public class Sun : MonoBehaviour
         for (int i = 0; i < rainDirections.Length; i++)
         {
             rainDirections[i].SetActive(false);
-            cloudDirections[i].SetActive(false);
         }
 
         float chanceToRain = Random.Range(0f, 100f);
@@ -366,8 +382,6 @@ public class Sun : MonoBehaviour
         //not raining, just normal clouds!
         //Debug.Log("normal clouds...");
         rainCounter = Random.Range(0, 4);
-
-        cloudDirections[rainCounter].SetActive(true);
 
         //randomize time scales of winds
         for (int i = 0; i < rainDirections[rainCounter].transform.childCount; i++)

@@ -69,15 +69,17 @@ public class Plont : MonoBehaviour {
     public GameObject plantPrefab;
     public float seedSpawnChance = 10;
     public ObjectPooler seedPooler;
+    public ObjectPooler plontPooler;
 
     public PlantType myPlantType;
     //mostly used for saving / loading 
     public enum PlantType
     {
-        PIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR, TRUMPET
+        PIANO, BLISTERPIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR, TRUMPET
     }
     
 	void Start () {
+        Random.InitState(System.DateTime.Now.Millisecond);
         //hail the sun
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
@@ -128,42 +130,26 @@ public class Plont : MonoBehaviour {
 
         //get the obj pooler
         FindObjPoolers();
-
+        if (GetComponent<PooledObject>())
+        {
+            plontPooler = GetComponent<PooledObject>().m_ObjectPooler;
+        }
+       
         //call funcs
         PlayPlantingEffect();
         GrowPlant(true);
     }
 
-    //shitty method but fuck it it finds the object pooler scripts easy
     void FindObjPoolers()
     {
-        if(myPlantType == PlantType.BELL)
+        GameObject[] objPools = GameObject.FindGameObjectsWithTag("ObjectPool");
+
+        for (int i = 0; i < objPools.Length; i++)
         {
-            seedPooler = GameObject.Find("BellPepperSeedPool").GetComponent<ObjectPooler>();
-        }
-        if (myPlantType == PlantType.PIANO)
-        {
-            seedPooler = GameObject.Find("PianoSeedPool").GetComponent<ObjectPooler>();
-        }
-        if (myPlantType == PlantType.GUITAR)
-        {
-            seedPooler = GameObject.Find("GuitarSeedPool").GetComponent<ObjectPooler>();
-        }
-        if (myPlantType == PlantType.EGUITAR)
-        {
-            seedPooler = GameObject.Find("EguitarSeedPool").GetComponent<ObjectPooler>();
-        }
-        if (myPlantType == PlantType.SUCCULENTAR)
-        {
-            seedPooler = GameObject.Find("SucculentarSeedPool").GetComponent<ObjectPooler>();
-        }
-        if (myPlantType == PlantType.TRIANGULAR)
-        {
-            seedPooler = GameObject.Find("TriangulationSeedPool").GetComponent<ObjectPooler>();
-        }
-        if (myPlantType == PlantType.TRUMPET)
-        {
-            seedPooler = GameObject.Find("TrumpetSeedPool").GetComponent<ObjectPooler>();
+            if (objPools[i].GetComponent<ObjectPooler>().objectPrefab == seedPrefab)
+            {
+                seedPooler = objPools[i].GetComponent<ObjectPooler>();
+            }
         }
     }
 
@@ -305,6 +291,27 @@ public class Plont : MonoBehaviour {
         StartCoroutine(WaitToSetParticles());
     }
 
+    //sets the growth and audio vars for next stage 
+    void SetNextStage()
+    {
+        //set nextStage
+        nextStage = myAge + myGrowthStages[currentStage].growthDays;
+        //set current clip randomly out of available stage audio clips 
+        int clipCount = myGrowthStages[currentStage].stageAudioClips.Length;
+        if (clipCount > 0)
+        {
+            currentClip = myGrowthStages[currentStage].stageAudioClips[Random.Range(0, clipCount)];
+        }
+        //only one sound, just set it 
+        else
+        {
+            currentClip = stageSounds[currentStage];
+        }
+
+        //set particles duration to our current audio clip's length
+        StartCoroutine(WaitToSetParticles());
+    }
+
     //this is to fix that assertion error i was getting constantly
     IEnumerator WaitToSetParticles()
     {
@@ -316,8 +323,14 @@ public class Plont : MonoBehaviour {
         soundsPlayer.duration = currentClip.length;
     }
 
-    //generally only called by loading script
-    public IEnumerator AgeAtStart(int ages)
+    //public call for age on start 
+    public void Age(int ages)
+    {
+        StartCoroutine(AgeAtStart(ages));
+    }
+
+    //generally only called by loading script or spawner 
+    IEnumerator AgeAtStart(int ages)
     {
         yield return new WaitForSeconds(0.1f);
 
@@ -381,9 +394,16 @@ public class Plont : MonoBehaviour {
         {
             SpawnSeed();
         }
-    
 
-        Destroy(gameObject);
+        //return to pool or destroy if no pool
+        if (plontPooler)
+        {
+            plontPooler.ReturnObject(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     //spawn seed from object pooler script 
@@ -391,6 +411,7 @@ public class Plont : MonoBehaviour {
     {
         Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
         GameObject newSeed = seedPooler.GrabObject();
+        newSeed.GetComponent<Seed>().plontPooler = plontPooler;
         newSeed.transform.position = spawnPos;
     }
 
@@ -427,7 +448,7 @@ public class Plont : MonoBehaviour {
         }
     }
 
-    void AdjustHeight()
+    public void AdjustHeight()
     {
         RaycastHit hit;
 

@@ -12,6 +12,16 @@ public class Spawner : MonoBehaviour {
         RANDOM, SQUARE, PAIRS, GROUPS,
     }
 
+    public ObjectType objectType;
+    public enum ObjectType
+    {
+        PLONT, CROPSEED, SHROOM, 
+    }
+
+    [Header("Collision Avoidance")]
+    public LayerMask collidableObjects;
+    public float checkDist;
+
     //for RANDOM
     [Header("RANDOM")]
     public int generationAmount;
@@ -24,6 +34,7 @@ public class Spawner : MonoBehaviour {
     public float distBetweenX, distBetweenY;
     
 	void Start () {
+        Random.InitState(System.DateTime.Now.Millisecond);
         generatedObjs = new GameObject[generationAmount];
         GenerateObjects();
 	}
@@ -48,18 +59,63 @@ public class Spawner : MonoBehaviour {
         }
     }
 
+    //any additional functions we need to call depending on the object's type 
+    void SwitchObjectType(GameObject genObject)
+    {
+        switch (objectType)
+        {
+            case ObjectType.PLONT:
+                int randomAge = Random.Range(0, 3);
+                genObject.GetComponent<Plont>().Age(randomAge);
+                genObject.GetComponent<Plont>().AdjustHeight();
+                break;
+            case ObjectType.CROPSEED:
+                genObject.GetComponent<Seed>().plantOnStart = true;
+                int randomStage = Random.Range(0, 3);
+                genObject.GetComponent<Seed>().ageAmount = randomStage;
+                genObject.GetComponent<Seed>().RaycastToGround();
+                break;
+        }
+    }
+
+    bool CheckForSpawnCollisions(Vector3 point)
+    {
+        //check in radius of planting point if its too close to others
+        Collider[] hitColliders = Physics.OverlapSphere(point, checkDist, collidableObjects);
+        if(hitColliders.Length > 0)
+        {
+            //COLLIDED, RUN AGAIN
+            return true;
+        }
+        else
+        {
+            //NO COLLISIONS, WE'RE CLEAR 
+            return false;
+        }
+    }
+
     //generate objects in a random unit circle 
     void GenerateRandom()
     {
         for(int i = 0; i < generationAmount;i++)
         {
             Vector2 xz = Random.insideUnitCircle * generationRadius;
-
+            
             Vector3 spawnPos = transform.position + new Vector3(xz.x, 0, xz.y);
+
+            //this loop ends if obj is not colliding with things 
+            while (CheckForSpawnCollisions(spawnPos) == true)
+            {
+                xz = Random.insideUnitCircle * generationRadius;
+
+                spawnPos = transform.position + new Vector3(xz.x, 0, xz.y);
+            }
 
             generatedObjs[i] = objectPooler.GrabObject();
 
             generatedObjs[i].transform.position = spawnPos;
+
+            SwitchObjectType(generatedObjs[i]);
         }
     }
 
@@ -78,6 +134,8 @@ public class Spawner : MonoBehaviour {
                 Vector3 spawnPos = new Vector3(x * distBetweenX, transform.position.y, y * distBetweenY) + transform.position;
 
                 generatedObjs[i].transform.position = spawnPos;
+
+                SwitchObjectType(generatedObjs[i]);
             }
         }
     }

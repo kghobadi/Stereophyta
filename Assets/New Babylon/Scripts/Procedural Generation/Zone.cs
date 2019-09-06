@@ -12,8 +12,10 @@ public class Zone : MonoBehaviour {
 
     [Header("Zone info")]
     public string zoneName;
+    public bool playerHasBeenHereBefore;
     public bool playerInZone;
     public TerrainGridSystem zoneTGS;
+    public GridManager zoneGridMan;
     public Spawner[] zoneSpawners;
     [Header("Audio snapshots")]
     public AudioMixerSnapshot Ocean;
@@ -26,6 +28,7 @@ public class Zone : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        zoneGridMan = transform.parent.GetComponent<GridManager>();
     }
 
     void OnTriggerEnter(Collider other)
@@ -38,8 +41,18 @@ public class Zone : MonoBehaviour {
                 tpc.currentZone = this;
                 tpc.currentTGS = zoneTGS;
                 tpc.currentZoneName = zoneName;
+                tpc.currentGridMan = zoneGridMan;
                 zoneSnapshot.TransitionTo(3f);
                 Debug.Log("Player entered zone: " + zoneName);
+
+                //if (!playerHasBeenHereBefore)
+                //{
+                //    for(int i = 0; i < zoneSpawners.Length; i++)
+                //    {
+                //        zoneSpawners[i].GenerateObjects();
+                //    }
+                //    playerHasBeenHereBefore = true;
+                //}
             }
         }
         

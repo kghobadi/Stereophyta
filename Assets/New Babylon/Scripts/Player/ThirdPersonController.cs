@@ -34,6 +34,7 @@ public class ThirdPersonController : MonoBehaviour
     public Zone currentZone;
     public string currentZoneName;
     public TerrainGridSystem currentTGS;
+    public GridManager currentGridMan;
 
     //PS4 move variables
     //move states
