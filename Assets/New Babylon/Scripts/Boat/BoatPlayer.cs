@@ -23,18 +23,22 @@ public class BoatPlayer : MonoBehaviour
     public AudioClip[] paddles;
     public AudioClip[] bigPaddles;
     int currentPaddle = 0, currentBigPaddle = 0;
-    //min z force for big paddle sound
-    public float bigPaddleMin;
-
-    //set publicly to tell this script what raycasts can and can't go thru
-    public LayerMask boatMask;
-
+  
     //only true once player has clicked on waters
-    public bool checkingPaddle;
     //mouse pos variables for calculating paddle forces
     Vector3 characterPosOnSreen;
     Vector3 origMousePos, currentMousePos, lastMousePos, finalMousePos;
+    [Header("Boat States")]
+    public BoatStates boatState;
+    public enum BoatStates
+    {
+        IDLE, CHECKINGPADDLE, ANIMATINGROW, TURNINGBOAT, 
+    }
     public float angleInDegrees;
+    //min z force for big paddle sound
+    public float bigPaddleMin;
+    //set publicly to tell this script what raycasts can and can't go thru
+    public LayerMask boatMask;
 
     //physics vars 
     [HideInInspector]
@@ -48,8 +52,8 @@ public class BoatPlayer : MonoBehaviour
     public float waterResistanceFwd, waterResistanceAng;
     //turning & torque force
     [Header("Turning Physics")]
-    public bool turningBoat;
-    public float division, indForce, indTorque;
+    public float division;
+    public float indForce, indTorque;
     public int torqueApplier = 0;
    
     [Header("Animation & FX")]
@@ -89,6 +93,9 @@ public class BoatPlayer : MonoBehaviour
         boatCol = GetComponent<BoxCollider>();
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
+
+        //starting state is idle 
+        boatState = BoatStates.IDLE;
     }
 
     void Update()
@@ -114,37 +121,22 @@ public class BoatPlayer : MonoBehaviour
             paddleIdleTimer += Time.deltaTime;
             
             //click to move to point
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && boatState == BoatStates.IDLE)
             {
                 //use raycast from cam to screen point
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-
-                //raycast info
-                if (Physics.Raycast(ray, out hit, 100, boatMask))
-                {
-                    if (hit.transform.gameObject.tag == "Water")
-                    {
-                        origMousePos = currentMousePos;
-                        checkingPaddle = true;
-                    }
-                }
+                origMousePos = currentMousePos;
+                boatState = BoatStates.CHECKINGPADDLE;
             }
 
-            //called to adjust the oar in space while row is happening
-            if (checkingPaddle)
-            {
-                //right now nothing, could use this space to run procedural animations for oars and stuff 
-            }
             //apply slow down to boat
-            else
+            if(boatState == BoatStates.IDLE)
             {
                 boatBody.velocity = Vector3.Lerp(boatBody.velocity, Vector3.zero, waterResistanceFwd * Time.deltaTime);
                 boatBody.angularVelocity = Vector3.Lerp(boatBody.angularVelocity, Vector3.zero, waterResistanceAng * Time.deltaTime);
             }
 
             //mouse button is being released
-            if (Input.GetMouseButtonUp(0))
+            if (Input.GetMouseButtonUp(0) && boatState == BoatStates.CHECKINGPADDLE)
             {
                 CalcPaddleForce();
             }
@@ -173,6 +165,8 @@ public class BoatPlayer : MonoBehaviour
                 {
                     useBoatScript.ExitBoat(exitSpot);
                     paddleIdleTimer = 0;
+                    //set to idle 
+                    boatState = BoatStates.IDLE;
                 }
             }
 
@@ -186,9 +180,8 @@ public class BoatPlayer : MonoBehaviour
     void CalcPaddleForce()
     {
         //stop checking paddle and set final mouse pos
-        checkingPaddle = false;
         finalMousePos = currentMousePos;
-
+        boatState = BoatStates.ANIMATINGROW;
         //how far did the player drag mouse on input Y? could be either pos or neg
         float paddleDistY =  origMousePos.y - finalMousePos.y;
         //calc z force based on this ^
@@ -255,15 +248,14 @@ public class BoatPlayer : MonoBehaviour
     IEnumerator WaitToApplyForce()
     {
         yield return new WaitForSeconds(0.8f);
-
+        boatState = BoatStates.TURNINGBOAT;
         //z forward force applied with AddForce (0, 0, zForce);
         indForce = paddleForceZ / division;
         //x force applied with AddTorqur(0, xTorque, 0) 
         indTorque = paddleForceX / division;
         //reset torqueApplier & set turning boat 
         torqueApplier = 0;
-        turningBoat = true;
-
+        
         //decide which paddle sound
         if (Mathf.Abs(paddleForceZ) > bigPaddleMin)
         {
@@ -280,7 +272,7 @@ public class BoatPlayer : MonoBehaviour
     void FixedUpdate()
     {
         //boat turns over time in the fixed update so it is not frame dependent
-        if (turningBoat)
+        if (boatState == BoatStates.TURNINGBOAT)
         {
             //add the force
             boatBody.AddRelativeForce(0, indForce, 0);
@@ -292,7 +284,7 @@ public class BoatPlayer : MonoBehaviour
             //split up force and find time val
             if (torqueApplier == division)
             {
-                turningBoat = false;
+                boatState = BoatStates.IDLE;
             }
         }
     }

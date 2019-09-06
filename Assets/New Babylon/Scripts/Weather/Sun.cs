@@ -4,19 +4,26 @@ using UnityEngine.Audio;
 
 public class Sun : MonoBehaviour
 {
+    //clock stuff
+    SimpleClock clock;
+    [Header("Clock")]
+    public int clockBPM;
+    public int minBPM, maxBPM;
+
     //startView ref
     public StartView startViewer;
 
     //player refs
+    PlayerCameraController cammy;
     GameObject _player;
     ThirdPersonController tpc;
-    //day counters
-    public int yesterday, dayCounter = 0;
-
+    
     //rotation speed refs
+    [Header("Sun rotation & time states")]
     public Transform rotation;
     public float rotationSpeed = 10, sleepRotation, normalRotation;
-   
+    //day counters
+    public int yesterday, dayCounter = 0;
     //angle of sun's rotation
     public float angleInDegrees;
     //time state enum
@@ -29,34 +36,47 @@ public class Sun : MonoBehaviour
     public float rotationDiameter, morningInterval, middayInterval, duskInterval, nightInterval;
 
     //lighting color settings
+    [Header("Sun Lighting")]
     public Light sun;
     public Color morn, mid, dusk, night;
     public Color ambientMorn, ambientMid, ambientDusk, ambientNight;
-    public Material skyMorn, skyMid, skyDusk, skyNight;
+    public Material skyDay, skyNight;
+    public Material[] skyOptionsDay, skyOptionsNight;
 
     //wind stuff
+    [Header("Wind")]
     public int windCounter = 0;
     public GameObject[] windDirections, northWinds, southWinds, eastWinds, westWinds;
 
     //raincloud stuff
+    [Header("Rain & Clouds")]
     public int rainCounter = 0;
     public GameObject[] rainDirections;
-    public GameObject[] cloudDirections;
 
     //stars
+    [Header("Stars & Water")]
     public GameObject stars;
     ParticleSystem starParticles;
     //waters 
     public GameObject waterDay, waterNight;
-    //save ref
-    public SleepSave saveScript;
+    //ocean audio
+    public AudioSource oceanSource;
+    public AudioClip[] oceanSounds;
 
+    //save ref 
+    [Header("Saving")]
+    public SleepSave saveScript;
     //sun saver anim
     public FadeUI sunSaver;
     public FadeUItmp sunSavingText, sunSavingOutline;
-
+    
     void Start()
     {
+        Random.InitState(System.DateTime.Now.Millisecond);
+        //clock ref
+        clock = GameObject.FindGameObjectWithTag("Clock").GetComponent<SimpleClock>();
+        clockBPM = (int)clock.BPM;
+
         //player refs
         _player = GameObject.FindGameObjectWithTag("Player");
         tpc = _player.GetComponent<ThirdPersonController>();
@@ -91,11 +111,12 @@ public class Sun : MonoBehaviour
         {
             rotationSpeed = normalRotation;
         }
-       
 
         // randomize wind && rains
+        SetClockBPM();
+        RandomizeSkybox();
         RandomizeWinds();
-        RandomizeRains();
+        //RandomizeRains();
     }
 
     void Update()
@@ -133,14 +154,14 @@ public class Sun : MonoBehaviour
             }
            
             //lighting
-            LerpLighting(morn, ambientMorn, skyMorn);
+            LerpLighting(morn, ambientMorn, skyDay);
            
         }
         //is Midday
         else if (angleInDegrees > middayInterval && angleInDegrees < duskInterval)
         {
             //lighting
-            LerpLighting(mid, ambientMid, skyMid);
+            LerpLighting(mid, ambientMid, skyDay);
             //time bool
             timeState = TimeState.MIDDAY;
         }
@@ -148,7 +169,7 @@ public class Sun : MonoBehaviour
         else if (angleInDegrees > duskInterval && angleInDegrees < nightInterval)
         {
             //lighting
-            LerpLighting(dusk, ambientDusk, skyDusk);
+            LerpLighting(dusk, ambientDusk, skyDay);
             //time bool
             timeState = TimeState.DUSK;
         }
@@ -176,7 +197,11 @@ public class Sun : MonoBehaviour
     {
         sun.color = Color.Lerp(sun.color, sunC, Time.deltaTime / 10);
         RenderSettings.ambientLight = Color.Lerp(RenderSettings.ambientLight, ambientC, Time.deltaTime / 10);
-        RenderSettings.skybox = skyboxC;
+
+        if(RenderSettings.skybox != skyboxC)
+        {
+            RenderSettings.skybox = skyboxC;
+        }
     }
 
     //called every morning
@@ -187,8 +212,10 @@ public class Sun : MonoBehaviour
         PlayerPrefs.SetInt("dayCounter", dayCounter);
 
         // randomize wind && rains
+        SetClockBPM();
+        RandomizeSkybox();
         RandomizeWinds();
-        RandomizeRains();
+        //RandomizeRains();
 
         //subtract from player's days to sleep
         if (tpc.sleeping)
@@ -223,12 +250,28 @@ public class Sun : MonoBehaviour
         }
     }
 
+    //called in newDay
+    void SetClockBPM()
+    {
+        int randomBPM = Random.Range(minBPM, maxBPM);
+
+        clock.SetBPM(randomBPM);
+
+        clockBPM = (int)clock.BPM;
+    }
+
     //randomizes the wind generators active, their speeds & direction
     void RandomizeWinds()
     {
         windCounter = Random.Range(0, 4);
         
         SwitchWinds(windCounter);
+
+        //set ocean source
+        AudioClip randomOceanSound = oceanSounds[Random.Range(0, oceanSounds.Length)];
+        oceanSource.Stop();
+        oceanSource.clip = randomOceanSound;
+        oceanSource.Play();
 
         //randomize time scales of all winds
         for(int i = 0; i < windDirections[windCounter].transform.childCount; i++)
@@ -245,6 +288,12 @@ public class Sun : MonoBehaviour
         //turn off all winds
         for (int i = 0; i < windDirections.Length; i++)
         {
+            //have the active wind gens release their winds for now 
+            for(int w = 0; w < windDirections[i].transform.childCount; w++)
+            {
+                windDirections[i].transform.GetChild(w).GetComponent<WindGen>().ReleaseWinds();
+            }
+
             windDirections[i].SetActive(false);
         }
 
@@ -286,6 +335,16 @@ public class Sun : MonoBehaviour
         }
     }
 
+    //randomizes skybox for the new day 
+    void RandomizeSkybox()
+    {
+        int randomSky = Random.Range(0, skyOptionsDay.Length);
+
+        skyDay = skyOptionsDay[randomSky];
+
+        skyNight = skyOptionsNight[randomSky];
+    }
+
     //randomizes the wind generators active, their speeds & direction
     void RandomizeRains()
     {
@@ -293,7 +352,6 @@ public class Sun : MonoBehaviour
         for (int i = 0; i < rainDirections.Length; i++)
         {
             rainDirections[i].SetActive(false);
-            cloudDirections[i].SetActive(false);
         }
 
         float chanceToRain = Random.Range(0f, 100f);
@@ -305,27 +363,25 @@ public class Sun : MonoBehaviour
         }
 
         //activate rain with 1 / 4 chance
-        //if (chanceToRain < 25f)
-        //{
-        //    Debug.Log("its raining!");
-        //    rainCounter = Random.Range(0, 4);
+        if (chanceToRain < 25f)
+        {
+            Debug.Log("its raining!");
+            rainCounter = Random.Range(0, 4);
 
-        //    rainDirections[rainCounter].SetActive(true);
+            rainDirections[rainCounter].SetActive(true);
 
-        //    //randomize time scales of winds
-        //    for (int i = 0; i < rainDirections[rainCounter].transform.childCount; i++)
-        //    {
-        //        int randomScale = Random.Range(0, 4);
-        //        rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().timeScale = randomScale;
-        //        rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().SwitchTimeScale();
-        //    }
-        //}
+            //randomize time scales of winds
+            for (int i = 0; i < rainDirections[rainCounter].transform.childCount; i++)
+            {
+                int randomScale = Random.Range(0, 4);
+                rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().timeScale = randomScale;
+                rainDirections[rainCounter].transform.GetChild(i).GetComponent<CloudGenerator>().SwitchTimeScale();
+            }
+        }
 
         //not raining, just normal clouds!
         //Debug.Log("normal clouds...");
         rainCounter = Random.Range(0, 4);
-
-        cloudDirections[rainCounter].SetActive(true);
 
         //randomize time scales of winds
         for (int i = 0; i < rainDirections[rainCounter].transform.childCount; i++)

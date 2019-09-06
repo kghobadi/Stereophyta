@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TGS;
 
-public class Shroom : MonoBehaviour
+public class Shroom : RhythmProducer
 { 
     [Header("Prefab & Pooler")]
     //for spawning shrooms
@@ -15,8 +15,6 @@ public class Shroom : MonoBehaviour
 
     //player and sun ref
     Sun sun;
-    GameObject player;
-    ThirdPersonController tpc;
     public bool hasReleasedSpores;
 
     //for inv
@@ -63,14 +61,12 @@ public class Shroom : MonoBehaviour
     public bool blowing;
     bool breathingIn, breathingOut;
     public float breatheSpeedFlat, currentBreatheSpeed, breatheDistance;
-    public int rhythm;
     //rhythm indicator
     SpriteRenderer rhythmSR;
     Animator rhythmIndicator;
     FadeSprite rhythmFader;
     //timers for how long indicator appears
     public bool changedRhythm;
-    private float disappearTimer, disappearTimerTotal = 1.5f;
 
     //for shroom growth 
     public int myAge, deathDay;
@@ -97,7 +93,7 @@ public class Shroom : MonoBehaviour
     public ParticleSystem shroomSpores;
     ParticleSystem.MainModule sporeMain;
     ShroomSpores sporeScript;
-
+    
     void Start()
     {
         //player and environment 
@@ -112,7 +108,7 @@ public class Shroom : MonoBehaviour
         gridMan = tgs.transform.parent.GetComponent<GridManager>();
         groundTexture = gridMan.groundTexture;
 
-        //obj refs
+        //shroom phsyx 
         shroomCol = GetComponent<BoxCollider>();
         shroomBody = GetComponent<Rigidbody>();
         shroomAnimator = GetComponent<Animator>();
@@ -125,16 +121,33 @@ public class Shroom : MonoBehaviour
         rhythmIndicator = rhythmSR.GetComponent<Animator>();
         rhythmFader = rhythmSR.GetComponent<FadeSprite>();
 
+        FindPoolers();
+
         //spores
         shroomSpores = transform.GetChild(1).GetComponent<ParticleSystem>();
         sporeMain = shroomSpores.main;
         sporeScript = shroomSpores.GetComponent<ShroomSpores>();
+        if(sporeScript.shroomParent == null)
+        {
+            sporeScript.shroomParent = this;
+            sporeScript.shroomPool = shroomPooler;
+            sporeScript.seedIndex = mySeedIndex;
+        }
 
         AdjustHeight();
         SetShroom();
     }
 
-    void Update()
+    //finds obj poolers for this type of shroom 
+    void FindPoolers()
+    {
+        //obj refs
+        _pooledObj = GetComponent<PooledObject>();
+        shroomPooler = _pooledObj.m_ObjectPooler;
+        shroomPrefab = shroomPooler.objectPrefab;
+    }
+
+    public override void Update()
     {
         //they are alive and breathing --- not in inventory 
         if (plantingState == PlantingState.PLANTED)
@@ -147,25 +160,35 @@ public class Shroom : MonoBehaviour
                 //increasing in size
                 if (breathingIn)
                 {
-                    transform.localScale = Vector3.Lerp(transform.localScale, largeSize, currentBreatheSpeed * Time.deltaTime);
-
-                    if (Vector3.Distance(transform.localScale, largeSize) < 0.1f)
+                    //only increase scale until reaching large scale 
+                    if (Vector3.Distance(transform.localScale, largeSize) > 0.1f)
                     {
-                        BreatheOut();
+                        transform.localScale = Vector3.Lerp(transform.localScale, largeSize, currentBreatheSpeed * Time.deltaTime);
                     }
 
+                    //time to breatheOut
+                    if (showRhythm)
+                    {
+                        BreatheOut();
+                        showRhythm = false;
+                    }
                 }
 
                 //decreasing in size
                 if (breathingOut)
                 {
-                    transform.localScale = Vector3.Lerp(transform.localScale, originalSize, currentBreatheSpeed * Time.deltaTime);
-
-                    if (Vector3.Distance(transform.localScale, originalSize) < 0.1f)
+                    //only decrease scale until reach orig size 
+                    if (Vector3.Distance(transform.localScale, originalSize) > 0.1f)
                     {
-                        BreatheIn();
+                        transform.localScale = Vector3.Lerp(transform.localScale, originalSize, currentBreatheSpeed * Time.deltaTime);
                     }
 
+                    //time to breathe in 
+                    if (showRhythm)
+                    {
+                        BreatheIn();
+                        showRhythm = false;
+                    }
                 }
             }
 
@@ -194,6 +217,7 @@ public class Shroom : MonoBehaviour
                 transform.localEulerAngles = new Vector3(70f, transform.localEulerAngles.y + (Time.deltaTime * currentBreatheSpeed * 15), 0);
             }
 
+            //check for player to vortex
             if (Vector3.Distance(transform.position, player.transform.position) < 5)
             {
                 plantingState = PlantingState.VORTEXING;
@@ -238,36 +262,16 @@ public class Shroom : MonoBehaviour
                 SwitchRhythm();
 
                 //reached next stage, grow
-                if (myAge == deathDay)
+                if (myAge == deathDay && plantingState != PlantingState.UNPLANTED)
                 {
-                    float chanceToUproot = Random.Range(0f, 100f);
-
-                    //50% chance to uproot
-                    if(chanceToUproot > 50f)
-                    {
-                        //uproot shroom for 1 day
-                        UprootShroom();
-                    }
-                    //otherwise destroy right away
-                    else
-                    {
-                        //remove plant from grid
-                        if (plantedOnGrid)
-                        {
-                            //nothing planted tag
-                            tgs.CellSetTag(cellIndex, 0);
-                            //ground texture
-                            tgs.CellToggleRegionSurface(cellIndex, true, groundTexture);
-                        }
-
-                        Destroy(gameObject);
-                    }
+                    ReleaseSpores();
+                    StartCoroutine(WaitToUproot());
                 }
 
-                //destroy...
-                if(myAge > deathDay || plantingState == PlantingState.UNPLANTED)
+                //return to pool 
+                if(myAge > deathDay && plantingState == PlantingState.UNPLANTED)
                 {
-                    Destroy(gameObject);
+                    shroomPooler.ReturnObject(gameObject);
                 }
 
                 dayPassed = true;
@@ -307,7 +311,7 @@ public class Shroom : MonoBehaviour
     }
 
     //called when shroom is first planted
-    void SetShroom()
+    public void SetShroom()
     {
         //random mushroom sound
         int mushroomSize = Random.Range(0, breathingSounds.Length);
@@ -340,23 +344,17 @@ public class Shroom : MonoBehaviour
         transform.localEulerAngles = new Vector3(0, randomRotate, 0);
 
         //random start rhythm
-        rhythm = Random.Range(0, 5);
+        timeScale = Random.Range(0, 5);
         SetVisualRhythm();
 
         //set breathe speed
-        if (rhythm == 0)
-        {
-            currentBreatheSpeed = breatheSpeedFlat;
-        }
-        else
-        {
-            currentBreatheSpeed = breatheSpeedFlat * rhythm;
-        }
+        SetBreatheSpeed();
         
         //random lifespan 
         deathDay = Random.Range(3, 5);
 
         //end
+        shroomMR.material = myShroomShader;
         plantingState = PlantingState.PLANTED;
         shroomAnimator.SetBool("planted", true);
         BreatheIn();
@@ -366,38 +364,43 @@ public class Shroom : MonoBehaviour
     public void SwitchRhythm()
     {
         //rhythm increments upward
-        if(rhythm < 4)
+        if(timeScale < 4)
         {
-            rhythm++;
+            timeScale++;
         }
         else
         {
-            rhythm = 0;
+            timeScale = 0;
         }
 
+        SetBreatheSpeed();
+
+        SetVisualRhythm();
+    }
+
+    void SetBreatheSpeed()
+    {
         //set breathe speed
-        if(rhythm == 0)
+        if (timeScale == 0)
         {
             currentBreatheSpeed = breatheSpeedFlat;
         }
         else
         {
-            currentBreatheSpeed = breatheSpeedFlat * rhythm;
+            currentBreatheSpeed = breatheSpeedFlat * timeScale;
         }
-
-        SetVisualRhythm();
     }
 
     //called whenever rhythm is changed;
     public void SetVisualRhythm()
     {
-        rhythmIndicator.SetInteger("Level", rhythm);
+        rhythmIndicator.SetInteger("Level", timeScale);
 
         changedRhythm = true;
         disappearTimer = disappearTimerTotal;
 
         //sound to indicate dif rhythm
-        shroomSource.PlayOneShot(changeRhythms[rhythm], 1f);
+        //shroomSource.PlayOneShot(changeRhythms[timeScale], 1f);
 
         //only if player is close by, show the indicator
         if (Vector3.Distance(transform.position, tpc.transform.position) < 10f)
@@ -407,6 +410,13 @@ public class Shroom : MonoBehaviour
                 rhythmFader.FadeIn();
             }
         }
+    }
+
+    IEnumerator WaitToUproot()
+    {
+        yield return new WaitForSeconds(1f);
+
+        UprootShroom();
     }
 
     //called to move shroom to unplanted state so player can harvest
@@ -468,13 +478,12 @@ public class Shroom : MonoBehaviour
         inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
 
         tpc.SeedCollect();
-
-        //because of those pesky starting seeds
-        Destroy(gameObject);
+        
+        shroomPooler.ReturnObject(gameObject);
     }
 
 
-    void AdjustHeight()
+    public void AdjustHeight()
     {
         Vector3 down = transform.TransformDirection(Vector3.down) * 10;
 

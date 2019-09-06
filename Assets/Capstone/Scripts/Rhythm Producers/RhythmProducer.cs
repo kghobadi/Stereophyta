@@ -3,22 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class RhythmProducer : MonoBehaviour {
+    protected Sun sunScript;
     protected GameObject player;
     protected ThirdPersonController tpc;
 
     public AudioClip[] basicBeats;
     protected AudioSource beatSource;
-
-    //public Animator rhythmIndicator;
-
+    
     protected bool playedAudio, showRhythm;
 
     public int timeScale;
 
-    public float disappearTimer, disappearTimerTotal = 1f;
+    protected float disappearTimer, disappearTimerTotal = 1f;
+
+    protected int lastBPM;
 
     public virtual void Awake()
     {
+        sunScript = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
     }
@@ -75,10 +77,8 @@ public abstract class RhythmProducer : MonoBehaviour {
         }
 
     }
-
-    // Update is called once per frame
+    
     public virtual void Update () {
-        //may need to qualify this with and if statement in override
         AudioRhythm();
     }
 

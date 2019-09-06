@@ -17,6 +17,7 @@ public class Seed : MonoBehaviour {
     public bool plantingOnGrid;
     [Header("Important Bools")]
     public bool plantOnStart;
+    public int ageAmount;
     public bool UIseed, startingSeed;
     public bool dayPassed;
 
@@ -46,6 +47,7 @@ public class Seed : MonoBehaviour {
     [Header("Plant Prefab & Obj Pooling")]
     public GameObject plantPrefab;
     public ObjectPooler seedPooler;
+    public ObjectPooler plontPooler;
     PooledObject _pooledObj;
     Vector3 originalPos;
     GameObject plantClone;
@@ -95,6 +97,8 @@ public class Seed : MonoBehaviour {
         seedSource = GetComponent<AudioSource>();
         origScale = transform.localScale;
 
+        FindObjPoolers();
+
         //dif settings for UI seeds
         if (!UIseed)
         {
@@ -115,6 +119,19 @@ public class Seed : MonoBehaviour {
             inventoryParent = transform.parent;
         }
 	}
+
+    void FindObjPoolers()
+    {
+        GameObject[] objPools = GameObject.FindGameObjectsWithTag("ObjectPool");
+
+        for(int i = 0; i < objPools.Length; i++)
+        {
+            if (objPools[i].GetComponent<ObjectPooler>().objectPrefab == plantPrefab)
+            {
+                plontPooler = objPools[i].GetComponent<ObjectPooler>();
+            }
+        }
+    }
 
     //called when it falls off a plant from chop / plant death at start 
     public void SeedFall()
@@ -208,7 +225,7 @@ public class Seed : MonoBehaviour {
     }
 
     //raycat logic 
-    void RaycastToGround()
+    public void RaycastToGround()
     {
         RaycastHit hit;
         // Does the ray intersect any objects excluding the player layer
@@ -219,6 +236,7 @@ public class Seed : MonoBehaviour {
                 //check if this spot is on the TGS
                 //grabs Cell tile and index
                 tgs = tpc.currentTGS;
+                gridMan = tpc.currentGridMan;
                 currentCell = tgs.CellGetAtPosition(hit.point, true);
 
                 //we have a grid cell
@@ -275,8 +293,11 @@ public class Seed : MonoBehaviour {
         }
 
         //If it's a new cell, set last cell back to fertileTexture
-        if (tgs.CellGetTag(previousCellIndex) == 0)
-            StartCoroutine(ChangeTexture(currentCellIndex, groundTexture));
+        if ( tgs.CellGetTag(previousCellIndex) == 0)
+        {
+            StartCoroutine(ChangeTexture(cellIndex, gridMan.groundTexture));
+        }
+            
     }
 
     //planting on terrain without grid
@@ -327,7 +348,10 @@ public class Seed : MonoBehaviour {
         transform.SetParent(null);
         seedBody.isKinematic = false;
         seedBody.useGravity = true;
-        seedSource.PlayOneShot(dropSeed);
+        if (!plantOnStart)
+        {
+            seedSource.PlayOneShot(dropSeed);
+        }
     }
 
     void OnCollisionEnter(Collision collision)
@@ -354,7 +378,10 @@ public class Seed : MonoBehaviour {
     void SpawnPlant()
     {
         //play spawn plant sound
-        seedSource.PlayOneShot(spawnPlant);
+        if (!plantOnStart)
+        {
+            seedSource.PlayOneShot(spawnPlant);
+        }
         //set plant spawn pos to seed pos
         Vector3 plantSpawnPos = transform.position;
 
@@ -370,7 +397,8 @@ public class Seed : MonoBehaviour {
         }
 
         //generate clone and set Plont script values
-        plantClone = Instantiate(plantPrefab, plantSpawnPos, Quaternion.Euler(tpc.transform.localEulerAngles));
+        plantClone = plontPooler.GrabObject();
+        plantClone.transform.position = plantSpawnPos;
         Plont plontScript = plantClone.GetComponent<Plont>();
         plontScript.plantPrefab = plantPrefab;
         plontScript.seedPooler = seedPooler;
@@ -410,6 +438,7 @@ public class Seed : MonoBehaviour {
 
             //set this back to false
             plantingOnGrid = false;
+            seedState = SeedStates.SEEDSELECTED;
         }
     }
     

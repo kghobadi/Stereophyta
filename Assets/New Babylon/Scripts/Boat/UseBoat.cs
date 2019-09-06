@@ -11,7 +11,6 @@ public class UseBoat : PickUp {
     BoatPlayer boatScript;
     //cursor ref
     public GameObject cursor;
-    public bool firstTime;
 
     //boat instructions
     [Header("Instruction refs")]
@@ -27,7 +26,6 @@ public class UseBoat : PickUp {
 
     void Start()
     {
-        firstTime = true;
         boatScript = GetComponent<BoatPlayer>();
         camController = Camera.main.GetComponent<PlayerCameraController>();
 
@@ -57,6 +55,7 @@ public class UseBoat : PickUp {
         }
     }
 
+    //ENTER BOAT 
     public override void PickUpTool(bool playSound)
     {
         //a lil time sets this after an exit 
@@ -70,13 +69,13 @@ public class UseBoat : PickUp {
             cursor.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
 
-            //set boats rotation to player's current forward
-            if (!firstTime)
+            //player has used boat before 
+            if (PlayerPrefs.GetString("hasUsedBoat") == "yes")
             {
-                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, tpc.characterBody.rotation.y);
-                transform.localPosition += new Vector3(0, 0, 5f);
+                //rotate boat so it's facing departure direction 
+                //transform.localEulerAngles += new Vector3(0f, 180f, 0f);
             }
-            //first time, so fade in boat usage instructions 
+            //player hasn't used boat before, so fade in instructions 
             else
             {
                 txtFader.FadeIn();
@@ -85,6 +84,9 @@ public class UseBoat : PickUp {
                 animator.active = true;
                 animFaderRight.FadeIn();
                 animatorRight.active = true;
+
+                //set has used boat for the first time 
+                PlayerPrefs.SetString("hasUsedBoat", "yes");
             }
 
             //in case you are jumping 
@@ -95,10 +97,23 @@ public class UseBoat : PickUp {
                 tpc.jumpTrail.GetComponent<JumpTrail>().StartCoroutine(tpc.jumpTrail.GetComponent<JumpTrail>().Deactivate());
             }
 
+            //check for swimming
+            if (tpc.swimming)
+            {
+                tpc.swimming = false;
+                tpc.currentMovement.y = 0;
+                tpc.swimTrail.enabled = false;
+                tpc.swimWhiteTrail.enabled = false;
+                tpc.swimRipples.Stop();
+                tpc.swimSplashL.Stop();
+                tpc.swimSplashR.Stop();
+                tpc.ActivateCloak(0.5f);
+            }
+
             //turn off player movment
-            tpc.playerCanMove = false;
             tpc.SetAnimator("idle");
-            tpc.runParticles.SetActive(false);
+            tpc.playerCanMove = false;
+            tpc.runParticles.Stop();
             tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
             camController.canLook = false;
             //child cam to boat
@@ -121,7 +136,6 @@ public class UseBoat : PickUp {
             //set oar anim
             boatScript.oarAnimator.SetTrigger("activateBoat");
             boatScript.oarAnimator.SetBool("rightOrLeft", true);
-            firstTime = false;
 
             DeactivatePrompt();
         }

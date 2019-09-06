@@ -10,7 +10,9 @@ public class CloudGenerator : RhythmProducer
     public float cloudSpeed;
     public float distanceToDestroy;
 
-    public int cloudCounter = 0;
+    int cloudCounter = 0;
+    public int cloudInterval = 3;
+    public int rainInterval = 4;
     public bool rainGen;
 
     public override void Awake()
@@ -29,7 +31,7 @@ public class CloudGenerator : RhythmProducer
             if (rainGen)
             {
                 //to help trim down cloud count
-                if (cloudCounter < 4)
+                if (cloudCounter < rainInterval)
                 {
                     cloudCounter++;
                 }
@@ -44,7 +46,7 @@ public class CloudGenerator : RhythmProducer
             else
             {
                 //to help trim down cloud count
-                if (cloudCounter < 3)
+                if (cloudCounter < cloudInterval)
                 {
                     cloudCounter++;
                 }
@@ -61,6 +63,47 @@ public class CloudGenerator : RhythmProducer
             showRhythm = false;
         }
 
+        //check if clockBPM changed 
+        if (lastBPM != sunScript.clockBPM)
+        {
+            EvaluateRhythmInterval();
+        }
+    }
+
+
+    //adjusts cloud interval based on what the clock bpm is 
+    void EvaluateRhythmInterval()
+    {
+        //if last bpm is lower than new one, increase interval
+        if (sunScript.clockBPM >= 10 && sunScript.clockBPM < 15)
+        {
+            cloudInterval = 3;
+            rainInterval = 4;
+        }
+        if (sunScript.clockBPM >= 15 && sunScript.clockBPM < 20)
+        {
+            cloudInterval = Random.Range(3, 5);
+            rainInterval = Random.Range(4, 6);
+        }
+        if (sunScript.clockBPM >= 20 && sunScript.clockBPM < 30)
+        {
+            cloudInterval = Random.Range(3, 6);
+            rainInterval = Random.Range(4, 8);
+        }
+        if (sunScript.clockBPM >= 30 && sunScript.clockBPM < 40)
+        {
+            cloudInterval = Random.Range(4, 8);
+            rainInterval = Random.Range(5, 10);
+        }
+        if (sunScript.clockBPM >= 40 && sunScript.clockBPM <= 50)
+        {
+            cloudInterval = Random.Range(5, 10);
+            rainInterval = Random.Range(6, 12);
+        }
+
+        //keep updated bpm 
+        lastBPM = sunScript.clockBPM;
+        Debug.Log(gameObject.name + "evaluated rhythm interval to: " + cloudInterval);
     }
 
     //spawn normal cloud

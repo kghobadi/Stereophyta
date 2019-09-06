@@ -18,7 +18,8 @@ public class ThirdPersonController : MonoBehaviour
     //player controller and cam controller ref
     [Header("Component Refs")]
     public CharacterController controller;
-    PlayerCameraController playerCameraController;
+    [HideInInspector]
+    public PlayerCameraController playerCameraController;
     Transform cameraTransform;
     public Transform characterBody, waterCaster;
     public Animator poopShoes;
@@ -33,6 +34,7 @@ public class ThirdPersonController : MonoBehaviour
     public Zone currentZone;
     public string currentZoneName;
     public TerrainGridSystem currentTGS;
+    public GridManager currentGridMan;
 
     //PS4 move variables
     //move states
@@ -42,7 +44,7 @@ public class ThirdPersonController : MonoBehaviour
     public bool playerCanMove, menuOpen;
     public bool indoors;
     public Transform houseCam;
-    public GameObject runParticles;
+    public ParticleSystem runParticles;
     [HideInInspector]
     public Vector3 currentMovement;
     Vector3 targetMovementTotal;
@@ -85,9 +87,15 @@ public class ThirdPersonController : MonoBehaviour
 
     //swim fx
     [Header("Swim FX")]
-    public GameObject swimRipples;
+    public ParticleSystem swimRipples;
+    public TrailRenderer swimTrail, swimWhiteTrail;
     public ParticleSystem swimSplashL, swimSplashR;
     ParticleSystem.MainModule splashMainL, splashMainR;
+    public float swimJumpTotal = 10f;
+    float swimJumpTimer;
+    int swimJumpCounter;
+    public float swimJumpForce = 50f;
+    public bool swimJump;
 
     //inventory ref
     public Inventory myInventory;
@@ -100,8 +108,8 @@ public class ThirdPersonController : MonoBehaviour
     AudioSource cameraAudSource;
     [Header("Audio")]
     public AudioSource playerSource;
-    public AudioClip[] jumpSounds;
-    public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps, noNo;
+    public AudioClip[] jumpSounds, swimJumps;
+    public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps,  noNo;
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
     float footStepTimer = 0;
     public int currentStep = 0;
@@ -154,7 +162,8 @@ public class ThirdPersonController : MonoBehaviour
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
         //wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
-        myInventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
+        if(myInventory == null)
+            myInventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
         playerRunCollider = GetComponent<BoxCollider>();
         playerRunCollider.enabled = false;
 
@@ -177,9 +186,11 @@ public class ThirdPersonController : MonoBehaviour
         //set loose particles
         splashScript = dustSplash.GetComponent<DustSplash>();
         sleepParticles.SetActive(false);
-        runParticles.SetActive(false);
+        runParticles.Stop();
         swimSpeed = movespeed / 2;
-        swimRipples.SetActive(false);
+        swimRipples.Stop();
+        swimSplashL.Stop();
+        swimSplashR.Stop();
         splashMainL = swimSplashL.main;
         splashMainR = swimSplashR.main;
 
@@ -273,14 +284,24 @@ public class ThirdPersonController : MonoBehaviour
             RunWalk();
             JumpCheck();
             JumpInputs();
-            swimRipples.SetActive(false);
             currentMovement.y = verticalSpeed;
+
+            //turn off all the swim fx 
+            if (swimTrail.enabled)
+            {
+                swimTrail.enabled = false;
+                swimWhiteTrail.enabled = false;
+                swimRipples.Stop();
+                swimSplashL.Stop();
+                swimSplashR.Stop();
+            }
         }
         //swimming
         else
         {
+            swimTrail.enabled = true;
+            swimWhiteTrail.enabled = true;
             Swim();
-            swimRipples.SetActive(true);
             currentMovement.y = 0;
         }
         
@@ -359,13 +380,13 @@ public class ThirdPersonController : MonoBehaviour
                     SetAnimator("running");
                     playerRunCollider.enabled = true;
                     running = true;
-                    runParticles.SetActive(true);
+                    runParticles.Play();
                 }
             }
             //not moving 
             else
             {
-                runParticles.SetActive(false);
+                runParticles.Stop();
                 //idling
                 if (poopShoes.GetBool("idle") != true)
                 {
@@ -387,7 +408,7 @@ public class ThirdPersonController : MonoBehaviour
                     SetAnimator("walking");
                     playerRunCollider.enabled = false;
                     running = false;
-                    runParticles.SetActive(false);
+                    runParticles.Stop();
                 }
             }
             //not moving
@@ -418,37 +439,67 @@ public class ThirdPersonController : MonoBehaviour
     void Swim()
     {
         currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
-        runParticles.SetActive(false);
+        runParticles.Stop();
         AdjustSwimHeight();
         //playerCloak.enabled = false;
         //need to figure out what to do with the cloth while swimming...
+        //timer for swimjump
+        swimJumpTimer -= Time.deltaTime;
 
-        //swim faster!
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        //swim jump input 
+        if (Input.GetKey(KeyCode.Space) && !swimJump && swimJumpTimer < 0)
         {
-            swimSpeed = movespeed;
-            poopShoes.speed = 2f;
-
-            //alter splash fx
-            splashMainL.startLifetime = 0.5f;
-            splashMainR.startLifetime = 0.5f;
-         
+            swimJump = true;
+            int randomSwimJump = Random.Range(0, swimJumps.Length);
+            playerSource.PlayOneShot(swimJumps[randomSwimJump]);
         }
-        //normal swim speed
-        else
+
+        //actual force applied 
+        if (swimJump)
         {
-            swimSpeed = movespeed / 2f;
-            poopShoes.speed = 1f;
+            swimSpeed += swimJumpForce;
+            swimJumpCounter++;
 
-            //alter splash fx
-            splashMainL.startLifetime = 1f;
-            splashMainR.startLifetime = 1f;
+            if (swimJumpCounter > 10)
+            {
+                swimJumpCounter = 0;
+                swimJumpTimer = swimJumpTotal;
+                swimSpeed = movespeed;
+                swimJump = false;
+            }
         }
+
+        if (!swimJump)
+        {
+            //swim faster!
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            {
+                swimSpeed = movespeed;
+                poopShoes.speed = 2f;
+
+                //alter splash fx
+                splashMainL.startLifetime = 0.5f;
+                splashMainR.startLifetime = 0.5f;
+
+            }
+            //normal swim speed
+            else
+            {
+                swimSpeed = movespeed / 2f;
+                poopShoes.speed = 1f;
+
+                //alter splash fx
+                splashMainL.startLifetime = 1f;
+                splashMainR.startLifetime = 1f;
+            }
+        }
+       
         //swimming
         if (targetMovementTotal.magnitude > 0)
         {
-            swimSplashL.gameObject.SetActive(true);
-            swimSplashR.gameObject.SetActive(true);
+            swimRipples.Stop();
+            swimSplashL.Play();
+            swimSplashR.Play();
             //always swimmin
             if (poopShoes.GetBool("swimming") != true)
             {
@@ -458,8 +509,9 @@ public class ThirdPersonController : MonoBehaviour
         //treading water idle
         else
         {
-            swimSplashL.gameObject.SetActive(false);
-            swimSplashR.gameObject.SetActive(false);
+            swimSplashL.Stop();
+            swimSplashR.Stop();
+            swimRipples.Play();
             //always swimmin
             if (poopShoes.GetBool("swimIdle") != true)
             {
@@ -470,14 +522,13 @@ public class ThirdPersonController : MonoBehaviour
 
    
 
-    //called either when player presses B or has passed out from exhaustion
+    //called either when player presses Z or has passed out from exhaustion
     public void Sleep(bool pressedOrPassed)
     {
         Debug.Log("sleep time");
         //set bools
         sleeping = true;
         playerCanMove = false;
-        playerCameraController.enabled = false;
         myInventory.gameObject.SetActive(false);
 
         //player just pressed Z
@@ -505,6 +556,7 @@ public class ThirdPersonController : MonoBehaviour
             //sleep where player is standing
             SetAnimator("sleeping");
             sleepParticles.SetActive(true);
+            playerCloak.gameObject.SetActive(false);
         }
         //on home island, return to bed 
         else
@@ -571,12 +623,18 @@ public class ThirdPersonController : MonoBehaviour
         //set animator
         SetAnimator("idle");
 
-        StartCoroutine(WaitToActivateCloak());
+        StartCoroutine(WaitToActivateCloak(0.75f));
     }
 
-    IEnumerator WaitToActivateCloak()
+    //public call for waitToactivate    
+    public void ActivateCloak(float time)
     {
-        yield return new WaitForSeconds(0.5f);
+        StartCoroutine(WaitToActivateCloak(time));
+    }
+
+    IEnumerator WaitToActivateCloak(float time)
+    {
+        yield return new WaitForSeconds(time);
 
         playerCloak.gameObject.SetActive(true);
     }
