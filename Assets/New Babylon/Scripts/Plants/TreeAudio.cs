@@ -4,18 +4,23 @@ using UnityEngine;
 using UnityEngine.Audio;
 
 public class TreeAudio : MonoBehaviour {
+    //player ref
     GameObject player;
+    //aud source ref
     AudioSource treeAudio;
+
+    [Header("Stored Audio")]
     public AudioClip[] treeSounds;
     public AudioMixerGroup treeMixerGroup;
 
-    public float treeNoteTimer, treeNoteTimerTotal, randomTimeMin, randomTimeMax;
+    [Header("Audio Frequency")]
+    public float treeNoteTimer;
+    public float treeNoteTimerTotal, randomTimeMin, randomTimeMax;
 
     public TreeType treeSpecie;
-
     public enum TreeType
     {
-        EVERGREENE, PAINTEDTREE, PURPLETREE,
+        PAINTEDZEBRA, 
     }
 
 	void Start () {
@@ -28,18 +33,23 @@ public class TreeAudio : MonoBehaviour {
 	}
 	
 	void Update () {
+        //check distance from player
 		if(Vector3.Distance(transform.position, player.transform.position) < (treeAudio.maxDistance))
         {
             treeNoteTimer -= Time.deltaTime;
 
+            //time to make a sound -- also not already playing 
             if (treeNoteTimer < 0 && !treeAudio.isPlaying)
             {
+                //select random sound 
                 int randomNote = Random.Range(0, treeSounds.Length);
                 treeAudio.PlayOneShot(treeSounds[randomNote]);
 
+                //reset sound timer 
                 treeNoteTimer = treeNoteTimerTotal + Random.Range(randomTimeMin, randomTimeMax);
             }
         }
+        //stop audio when out of range
         else
         {
             if (treeAudio.isPlaying)
