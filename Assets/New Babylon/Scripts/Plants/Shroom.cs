@@ -12,7 +12,7 @@ public class Shroom : RhythmProducer
     //for obj pooling 
     public ObjectPooler shroomPooler;
     PooledObject _pooledObj;
-
+    public float heightAdjust = 0;
     //player and sun ref
     Sun sun;
     public bool hasReleasedSpores;
@@ -80,6 +80,7 @@ public class Shroom : RhythmProducer
     public AudioClip mushroomSound;
     public AudioClip noNo, uprootSound;
     public AudioClip[] changeRhythms;
+    ParticleSystem beatParticles;
 
     //for player to take!!
     Animator shroomAnimator;
@@ -120,6 +121,7 @@ public class Shroom : RhythmProducer
         rhythmSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
         rhythmIndicator = rhythmSR.GetComponent<Animator>();
         rhythmFader = rhythmSR.GetComponent<FadeSprite>();
+        beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
 
         FindPoolers();
 
@@ -170,6 +172,7 @@ public class Shroom : RhythmProducer
                     if (showRhythm)
                     {
                         BreatheOut();
+                        beatParticles.Play();
                         showRhythm = false;
                     }
                 }
@@ -187,6 +190,7 @@ public class Shroom : RhythmProducer
                     if (showRhythm)
                     {
                         BreatheIn();
+                        beatParticles.Play();
                         showRhythm = false;
                     }
                 }
@@ -357,6 +361,7 @@ public class Shroom : RhythmProducer
         shroomMR.material = myShroomShader;
         plantingState = PlantingState.PLANTED;
         shroomAnimator.SetBool("planted", true);
+        blowing = false;
         BreatheIn();
     }
 
@@ -482,6 +487,17 @@ public class Shroom : RhythmProducer
         shroomPooler.ReturnObject(gameObject);
     }
 
+    //for player collision
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player" )
+        {
+            //change rhythm & release spores 
+            SwitchRhythm();
+            ReleaseSpores();
+        }
+    }
+
 
     public void AdjustHeight()
     {
@@ -493,7 +509,7 @@ public class Shroom : RhythmProducer
         {
             if (hit.transform.gameObject.tag == "Ground")
             {
-                transform.position = hit.point + new Vector3(0, 1f, 0);
+                transform.position = hit.point + new Vector3(0, heightAdjust, 0);
             }
         }
     }

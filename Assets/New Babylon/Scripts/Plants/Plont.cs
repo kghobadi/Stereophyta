@@ -305,7 +305,7 @@ public class Plont : MonoBehaviour {
         ParticleSystem.MainModule soundsPlayer = soundPlaying.main;
         soundPlaying.Stop();
 
-        yield return new WaitUntil(() => soundPlaying.isStopped == true);
+        yield return new WaitUntil(() => soundPlaying.isPlaying == false);
 
         soundsPlayer.duration = currentClip.length;
     }

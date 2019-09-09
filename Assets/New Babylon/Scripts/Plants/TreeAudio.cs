@@ -7,7 +7,8 @@ public class TreeAudio : MonoBehaviour {
     //player ref
     GameObject player;
     //aud source ref
-    AudioSource treeAudio;
+    [HideInInspector]
+    public AudioSource treeAudio;
 
     [Header("Stored Audio")]
     public AudioClip[] treeSounds;
@@ -20,7 +21,7 @@ public class TreeAudio : MonoBehaviour {
     public TreeType treeSpecie;
     public enum TreeType
     {
-        PAINTEDZEBRA, 
+        SPRITE, GARANGULA, 
     }
 
 	void Start () {
@@ -41,9 +42,7 @@ public class TreeAudio : MonoBehaviour {
             //time to make a sound -- also not already playing 
             if (treeNoteTimer < 0 && !treeAudio.isPlaying)
             {
-                //select random sound 
-                int randomNote = Random.Range(0, treeSounds.Length);
-                treeAudio.PlayOneShot(treeSounds[randomNote]);
+                //PlayRandomSound();
 
                 //reset sound timer 
                 treeNoteTimer = treeNoteTimerTotal + Random.Range(randomTimeMin, randomTimeMax);
@@ -56,4 +55,11 @@ public class TreeAudio : MonoBehaviour {
                 treeAudio.Stop();
         }
 	}
+
+    public void PlayRandomSound()
+    {
+        //select random sound 
+        int randomNote = Random.Range(0, treeSounds.Length);
+        treeAudio.PlayOneShot(treeSounds[randomNote]);
+    }
 }

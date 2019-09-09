@@ -89,6 +89,8 @@ public class MovingWind : Rhythm {
                 //Debug.Log("hit shroom");
             }
         }
+
+      
     }
 
     public override void OnTriggerStay(Collider other)

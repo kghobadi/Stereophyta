@@ -17,6 +17,7 @@ public class Spawner : MonoBehaviour {
     {
         PLONT, CROPSEED, SHROOM, 
     }
+    public bool overlapsWithSaveSystem;
 
     [Header("Collision Avoidance")]
     public LayerMask collidableObjects;
@@ -36,7 +37,24 @@ public class Spawner : MonoBehaviour {
 	void Start () {
         Random.InitState(System.DateTime.Now.Millisecond);
         generatedObjs = new GameObject[generationAmount];
-        GenerateObjects();
+
+        //this object type overlaps with the save system, no need to spawn on start 
+        if (overlapsWithSaveSystem)
+        {
+            if (PlayerPrefs.GetString("hasSaved") == "yes")
+            {
+                Debug.Log("no spawn, loaded from save");
+            }
+            else
+            {
+                GenerateObjects();
+            }
+        }
+        //just go ahead and generate
+        else
+        {
+            GenerateObjects();
+        }
 	}
 	
     //switch statement tells us which way to generate

@@ -25,10 +25,15 @@ public class Rhythm : MonoBehaviour {
                 other.gameObject.GetComponent<Shroom>().ReleaseSpores();
             }
         }
-        else if (other.gameObject.tag == "Tree")
+        //make tree play sound 
+        if (other.gameObject.tag == "Tree")
         {
-            other.gameObject.GetComponent<AncientTree>().PlaySound();
-            //Debug.Log("Tree played sound");
+            TreeAudio treeAud = other.gameObject.GetComponent<TreeAudio>();
+            //only play if it is not already playing 
+            if (!treeAud.treeAudio.isPlaying)
+            {
+                treeAud.PlayRandomSound();
+            }
         }
     }
     

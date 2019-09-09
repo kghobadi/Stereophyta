@@ -122,6 +122,8 @@ public class SleepSave : MonoBehaviour {
         File.WriteAllText(filePath, dataAsJson);
         //adjust playerprefs so we know we save
         PlayerPrefs.SetInt("sessionNumber", 1);
+        //this should actually be set to PlayerPrefs.GetInt("sessionNumber")+1
+        PlayerPrefs.SetString("hasSaved", "yes");
 
         Debug.Log("called save");
     }

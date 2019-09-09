@@ -16,7 +16,7 @@ public class AudioGeneration : MonoBehaviour
     
     void Start()
     {
-        terrain = transform.parent.GetComponent<Terrain>();
+        terrain = GetComponent<Terrain>();
 
         //assign the positions by grabbing terrain data and multiplying by terrain size + terrain world pos
         for (int i = 0; i < terrain.terrainData.treeInstances.Length; i++)
