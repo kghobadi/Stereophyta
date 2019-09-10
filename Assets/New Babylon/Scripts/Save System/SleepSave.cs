@@ -55,6 +55,11 @@ public class SleepSave : MonoBehaviour {
         {
             LoadGameData();
         }
+        //we actually haven't saved 
+        else
+        {
+            PlayerPrefs.SetString("hasSaved", "no");
+        }
     }
 
     public void SaveGameData()
