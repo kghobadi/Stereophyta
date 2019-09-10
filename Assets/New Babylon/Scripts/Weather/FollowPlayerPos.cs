@@ -8,6 +8,8 @@ public class FollowPlayerPos : MonoBehaviour {
     GameObject _player;
     ThirdPersonController tpc;
 
+    public float heightAdjust = 0;
+
     void Start () {
         //player refs
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -15,6 +17,6 @@ public class FollowPlayerPos : MonoBehaviour {
     }
 	
 	void Update () {
-        transform.position = tpc.transform.position;
+        transform.position = tpc.transform.position + new Vector3(0, heightAdjust, 0);
 	}
 }

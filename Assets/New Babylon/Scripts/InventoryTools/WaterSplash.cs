@@ -86,11 +86,17 @@ public class WaterSplash : Rhythm {
                 }
             }
 
-            //for animals
+            //animals
             if (other.gameObject.tag == "Animal")
             {
-                if (!other.gameObject.GetComponent<Crab>().animalAudio.isPlaying)
-                    other.gameObject.GetComponent<Crab>().PlaySound(other.gameObject.GetComponent<Crab>().running);
+                //crab
+                if (other.gameObject.GetComponent<Crab>())
+                {
+                    if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                    {
+                        other.gameObject.GetComponent<Crab>().Interrupt();
+                    }
+                }
             }
 
             //wind fan

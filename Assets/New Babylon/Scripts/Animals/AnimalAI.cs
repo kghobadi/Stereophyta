@@ -8,6 +8,7 @@ using UnityEngine.AI;
 public abstract class AnimalAI : MonoBehaviour {
     //player reference
     protected GameObject player;
+    protected Sun sunScript;
 
     //privately referenced usable components of this game object
     [HideInInspector]
@@ -23,16 +24,17 @@ public abstract class AnimalAI : MonoBehaviour {
     public AnimalAIStates animalState;
     public enum AnimalAIStates
     {
-        IDLE, MOVING, RUNNING,
+        IDLE, MOVING, RUNNING, SLEEPING, INTERRUPTED,
     }
 
     //audio clip arrays for different audio stages
     //these get pulled from to play out sounds based on frequency
     [Header("Audio")]
     public AudioClip[] idle;
-    public AudioClip[] walking, running;
+    public AudioClip[] walking, running, sleeping;
+    public AudioClip interruptSound;
     //frequency timers for all the various sounds to play out
-    public float nextNoteIn = 0.25f, soundTimerTotal = 0.25f, walkTimerTotal = 0.5f, runTimerTotal = 0.15f;
+    public float nextNoteIn = 0.25f, soundTimerTotal = 0.25f, walkTimerTotal = 0.5f, runTimerTotal = 0.15f, sleepTimerTotal = 0.5f;
 
     
     //radius within which crab can move, and movement speeds
@@ -46,18 +48,20 @@ public abstract class AnimalAI : MonoBehaviour {
     public float moveTimerTotal = 5f;
     //are you close enough to spook' em??? -- distance when animal decides it has reached dest
     public float  spookDistance = 15, stopMovingDistance = 5;
-    NavMeshAgent myNavMesh;
+    protected NavMeshAgent myNavMesh;
     public float randomScaleMin = 0.5f, randomScaleMax = 2;
 
     //for color lerping animal's materials
     [Header("Material Settings")]
     public SkinnedMeshRenderer myMR;
-    public Color idleSilent, idleAudible, walkingSilent, walkingAudible, runningSilent, runningAudible;
+    public Color idleSilent, idleAudible, walkingSilent, walkingAudible, runningSilent, runningAudible, sleepingSilent, sleepingAudible;
     //lerps colors
     public float lerpSpeed;
     public LayerMask grounded;
 
 	public virtual void Start () {
+        //hail the sun
+        sunScript = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         //find our player!
         player = GameObject.FindGameObjectWithTag("Player");
 
@@ -136,12 +140,34 @@ public abstract class AnimalAI : MonoBehaviour {
             }
         }
 
-        //getting spooked check
-        if (Vector3.Distance(transform.position, player.transform.position) < spookDistance && animalState != AnimalAIStates.RUNNING)
+        //getting spooked check -- only RunAway if not already running / sleeping 
+        if (Vector3.Distance(transform.position, player.transform.position) < spookDistance 
+            && animalState != AnimalAIStates.RUNNING && animalState != AnimalAIStates.SLEEPING && animalState != AnimalAIStates.INTERRUPTED)
         {
             RunAway();
         }
 
+        //animals sleep at night right?
+        if (sunScript.timeState == Sun.TimeState.NIGHT && animalState != AnimalAIStates.SLEEPING)
+        {
+            animalState = AnimalAIStates.SLEEPING;
+            soundTimerTotal = sleepTimerTotal;
+            SetAnimator("sleeping");
+        }
+
+        //what the animal does while sleeping
+        if(animalState == AnimalAIStates.SLEEPING)
+        {
+            SoundCountdown(sleeping);
+            SetLerpColor(sleepingAudible, sleepingSilent);
+
+            //once it's morning, return to idle
+            if(sunScript.timeState == Sun.TimeState.MORNING)
+            {
+                StopMoving();
+            }
+        }
+        
         //looks like its time to reset this feller 
         if (Vector3.Distance(transform.position, origPosition) > 75)
         {
@@ -169,11 +195,11 @@ public abstract class AnimalAI : MonoBehaviour {
     {
         if (animalAudio.isPlaying)
         {
-            myMR.material.color = Color.Lerp(myMR.material.color, idleAudible, Time.deltaTime * lerpSpeed);
+            myMR.material.color = Color.Lerp(myMR.material.color, audible, Time.deltaTime * lerpSpeed);
         }
         else
         {
-            myMR.material.color = Color.Lerp(myMR.material.color, idleSilent, Time.deltaTime * lerpSpeed);
+            myMR.material.color = Color.Lerp(myMR.material.color, silent, Time.deltaTime * lerpSpeed);
         }
     }
 
@@ -237,6 +263,7 @@ public abstract class AnimalAI : MonoBehaviour {
         animator.SetBool("idle", false);
         animator.SetBool("walking", false);
         animator.SetBool("running", false);
+        animator.SetBool("sleeping", false);
 
         animator.SetBool(nextState, true);
     }
