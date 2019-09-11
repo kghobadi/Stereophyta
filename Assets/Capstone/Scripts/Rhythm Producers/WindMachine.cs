@@ -202,14 +202,14 @@ public class WindMachine : Tool {
         transform.SetParent(null);
         transform.position = placeMentSpot;
 
-        inventoryScript.SwitchItem(true);
+        inventoryScript.SwitchTool(true);
 
         gameObject.SetActive(true);
 
         //remove from inventory lists
-        int index = inventoryScript.myItems.IndexOf(gameObject);
+        int index = inventoryScript.myTools.IndexOf(gameObject);
 
-        inventoryScript.myItems.Remove(gameObject);
+        inventoryScript.myTools.Remove(gameObject);
         inventoryScript.toolSprites.RemoveAt(index);
         
         StartCoroutine(WaitToSetFanActive());

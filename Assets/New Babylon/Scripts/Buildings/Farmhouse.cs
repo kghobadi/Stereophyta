@@ -40,7 +40,6 @@ public class Farmhouse : MonoBehaviour {
                 //disable playercam
                 playerCamera.GetComponent<Camera>().enabled = false;
                 playerCamera.GetComponent<PlayerCameraController>().enabled = false;
-                playerCamera.GetComponent<AudioListener>().enabled = false;
 
                 playerInventory.SetActive(false);
                 lastFootsteps = tpc.currentFootsteps;
@@ -111,7 +110,6 @@ public class Farmhouse : MonoBehaviour {
                 //reset playercam
                 playerCamera.GetComponent<Camera>().enabled = true;
                 playerCamera.GetComponent<PlayerCameraController>().enabled = true;
-                playerCamera.GetComponent<AudioListener>().enabled = true;
 
                 playerInventory.SetActive(true);
                 tpc.currentFootsteps = lastFootsteps;

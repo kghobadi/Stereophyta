@@ -20,6 +20,8 @@ public class Sickle : Tool {
     //trail
     public TrailRenderer sickleTrail;
 
+    public ObjectPooler sickleWindPool;
+
     void Start () {
         //all my refs
         mySickleBody = GetComponent<Rigidbody>();
@@ -85,7 +87,15 @@ public class Sickle : Tool {
     //spawns one sickle wind
     void SpawnSickleWind (Vector3 spawnPoint)
     {
-        GameObject sickleWind = Instantiate(sickleWindPrefab, spawnPoint, tpc.characterBody.rotation);
+        GameObject sickleWind = sickleWindPool.GrabObject();
+
+        sickleWind.transform.localScale = sickleWind.GetComponent<PooledObject>().originalScale;
+
+        sickleWind.transform.position = spawnPoint;
+
+        sickleWind.GetComponent<SickleWind>().originalPos = spawnPoint;
+
+        sickleWind.transform.rotation = tpc.characterBody.rotation;
 
         sickleWind.transform.localEulerAngles += new Vector3(0, -90, 0);
 

@@ -51,6 +51,7 @@ public class StartView : MonoBehaviour {
         {
             //disable playerCam
             playerCamera.GetComponent<Camera>().enabled = false;
+            tpc.GetComponent<AudioListener>().enabled = false;
             playerInventory.SetActive(false);
             startCam.fieldOfView = 75f;
             clickToStart.SetActive(true);
@@ -63,7 +64,7 @@ public class StartView : MonoBehaviour {
 
             if (PlayerPrefs.GetString("hasBook") == "yes")
             {
-                playerCamera.GetComponent<AudioListener>().enabled = false;
+               
             }
 
             //fade in menu UI
@@ -79,6 +80,7 @@ public class StartView : MonoBehaviour {
             GetComponent<AudioListener>().enabled = false;
             startCam.enabled = false;
             playerCamera.GetComponent<PlayerCameraController>().canLook = true;
+            tpc.GetComponent<AudioListener>().enabled = true;
         }
     }
 	
@@ -148,7 +150,7 @@ public class StartView : MonoBehaviour {
             playerInventory.SetActive(true);
             playerCamera.GetComponent<PlayerCameraController>().canLook = true;
             playerCamera.GetComponent<Camera>().enabled = true;
-            playerCamera.GetComponent<AudioListener>().enabled = true;
+            tpc.GetComponent<AudioListener>().enabled = true;
 
             //disable start view stuff
             sunScript.rotationSpeed = sunScript.normalRotation;

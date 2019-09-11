@@ -21,14 +21,15 @@ public class Plont : MonoBehaviour {
     //tgs logic
     [Header("TGS")]
     public TerrainGridSystem tgs;
-    Zone myZone;
-    GridManager gridMan;
+    public GridManager gridMan;
+    public Zone myZone;
     public bool plantedOnGrid;
     public int cellIndex;
 
     //All possible texture references. 
     Texture2D groundTexture;
     Texture2D wateredTexture;
+    [HideInInspector]
     public Texture2D plantedTexture;
 
     //physics 
@@ -87,11 +88,16 @@ public class Plont : MonoBehaviour {
         saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
 
         //tgs refs
-        tgs = tpc.currentTGS;
-        myZone = tpc.currentZone;
-        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        if(tgs == null)
+        {
+            tgs = tpc.currentTGS;
+            gridMan = tgs.transform.parent.GetComponent<GridManager>();
+            myZone = tpc.currentZone;
+        }
+      
         groundTexture = gridMan.groundTexture;
         wateredTexture = gridMan.wateredTexture;
+        plantedTexture = gridMan.plantedTexture;
 
         //add data to save script
         if (!startingPlant)
@@ -137,7 +143,7 @@ public class Plont : MonoBehaviour {
        
         //call funcs
         PlayPlantingEffect();
-        GrowPlant(true);
+        GrowPlant(true, true);
     }
 
     void FindObjPoolers()
@@ -175,7 +181,7 @@ public class Plont : MonoBehaviour {
                 //reached next stage, grow
                 if (myAge == nextStage)
                 {
-                    GrowPlant(true);
+                    GrowPlant(true, true);
                 }
 
                 dayPassed = true;
@@ -201,7 +207,7 @@ public class Plont : MonoBehaviour {
         }
 	}
 
-    public void GrowPlant(bool growOrShrink)
+    public void GrowPlant(bool growOrShrink, bool spawnSeeds)
     {
         //grow
         if (growOrShrink)
@@ -221,7 +227,7 @@ public class Plont : MonoBehaviour {
                     //random chance to spawn a seed each time plant ages
                     float randomSpawn = Random.Range(0, 100);
 
-                    if (randomSpawn < seedSpawnChance)
+                    if (randomSpawn < seedSpawnChance && spawnSeeds)
                     {
                         SpawnSeed();
                     }
@@ -311,19 +317,19 @@ public class Plont : MonoBehaviour {
     }
 
     //public call for age on start 
-    public void Age(int ages)
+    public void Age(int ages, float waitTime)
     {
-        StartCoroutine(AgeAtStart(ages));
+        StartCoroutine(AgeAtStart(ages, waitTime));
     }
 
     //generally only called by loading script or spawner 
-    IEnumerator AgeAtStart(int ages)
+    IEnumerator AgeAtStart(int ages, float wait)
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(wait);
 
         for(int i = 0; i < ages; i++)
         {
-            GrowPlant(true);
+            GrowPlant(true, false);
         }
 
         //Debug.Log("grew at start");
@@ -351,7 +357,7 @@ public class Plont : MonoBehaviour {
     //called by water or rains
     public void WaterPlant()
     {
-        GrowPlant(true);
+        GrowPlant(true, true);
         tgs.CellToggleRegionSurface(cellIndex, true, wateredTexture);
         hasBeenWatered = true;
     }

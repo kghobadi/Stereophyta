@@ -13,7 +13,6 @@ public class WaterSplash : Rhythm {
     //audio for splashing
     AudioSource splashAudio;
     public AudioClip[] splashSounds;
-    public AudioClip[] oneNotes, twoNotes, threeNotes, fourNotes, fiveNotes;
 
     //obj refs
     Vector3 originalPosition;
@@ -43,7 +42,7 @@ public class WaterSplash : Rhythm {
         int randomSplash = Random.Range(0, splashSounds.Length);
         splashAudio.PlayOneShot(splashSounds[randomSplash], 0.25f);
         splashing = true;
-        yield return new WaitForSeconds(splashMain.duration);
+        yield return new WaitForSeconds(splashSounds[randomSplash].length);
         splashing = false;
         splashEffect.Stop();
         sphereCol.enabled = false;

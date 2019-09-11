@@ -62,17 +62,17 @@ public abstract class Tool : MonoBehaviour {
         transform.localScale = localScale;
 
         //add to tools list,
-        inventoryScript.myItems.Add(gameObject);
+        inventoryScript.myTools.Add(gameObject);
         inventoryScript.toolSprites.Add(inventorySprite);
 
-        //set current inventory item to this
-        if(inventoryScript.currenItemObj != null)
+        //set current inventory Tool to this
+        if(inventoryScript.currentToolObj != null)
         {
-            inventoryScript.currenItemObj.SetActive(false);
+            inventoryScript.currentToolObj.SetActive(false);
         }
           
-        inventoryScript.currenItemObj = gameObject;
-        inventoryScript.currentItem = inventoryScript.myItems.Count - 1;
+        inventoryScript.currentToolObj = gameObject;
+        inventoryScript.currentTool = inventoryScript.myTools.Count - 1;
         inventoryScript.SetToolSprite();
 
         if (playSound)
@@ -173,6 +173,12 @@ public abstract class Tool : MonoBehaviour {
                 }
                
             }
+        }
+
+        //tool time scale always equal to that of the inventory 
+        if (hasBeenAcquired)
+        {
+            timeScale = inventoryScript.toolTimeScale;
         }
 	}
 

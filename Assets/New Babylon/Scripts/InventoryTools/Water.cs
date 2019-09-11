@@ -130,43 +130,19 @@ public class Water : MonoBehaviour
             //can mess with speeds here to vary it up even more!
             //should also vary number of particles emitted since faster rhythms are overburdened
             case 0:
-                for (int i = 0; i < waterSplashes.Count; i++)
-                {
-                    WaterSplash waterSplash = waterSplashes[i].GetComponent<WaterSplash>();
-                    waterSplash.splashSounds = waterSplash.oneNotes;
-                }
+                mainRain.simulationSpeed = 0.5f;
                 break;
             case 1:
                 mainRain.simulationSpeed = 1f;
-                for (int i = 0; i < waterSplashes.Count; i++)
-                {
-                    WaterSplash waterSplash = waterSplashes[i].GetComponent<WaterSplash>();
-                    waterSplash.splashSounds = waterSplash.twoNotes;
-                }
                 break;
             case 2:
                 mainRain.simulationSpeed = 2f;
-                for (int i = 0; i < waterSplashes.Count; i++)
-                {
-                    WaterSplash waterSplash = waterSplashes[i].GetComponent<WaterSplash>();
-                    waterSplash.splashSounds = waterSplash.threeNotes;
-                }
                 break;
             case 3:
-                mainRain.simulationSpeed = 2f;
-                for (int i = 0; i < waterSplashes.Count; i++)
-                {
-                    WaterSplash waterSplash = waterSplashes[i].GetComponent<WaterSplash>();
-                    waterSplash.splashSounds = waterSplash.fourNotes;
-                }
+                mainRain.simulationSpeed = 4f;
                 break;
             case 4:
-                mainRain.simulationSpeed = 2f;
-                for (int i = 0; i < waterSplashes.Count; i++)
-                {
-                    WaterSplash waterSplash = waterSplashes[i].GetComponent<WaterSplash>();
-                    waterSplash.splashSounds = waterSplash.fiveNotes;
-                }
+                mainRain.simulationSpeed = 8f;
                 break;
         }
     }

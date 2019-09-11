@@ -103,7 +103,6 @@ public class UseBoat : PickUp {
                 tpc.swimming = false;
                 tpc.currentMovement.y = 0;
                 tpc.swimTrail.enabled = false;
-                tpc.swimWhiteTrail.enabled = false;
                 tpc.swimRipples.Stop();
                 tpc.swimSplashL.Stop();
                 tpc.swimSplashR.Stop();

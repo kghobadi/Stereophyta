@@ -19,6 +19,8 @@ public class Ax : Tool {
 
     public TrailRenderer axtrail;
 
+    public ObjectPooler axWindPool;
+
     void Start () {
         //all my refs
         myAxBody = GetComponent<Rigidbody>();
@@ -94,23 +96,19 @@ public class Ax : Tool {
     //spawns one ax wind
     void SpawnAxWinds(Vector3 spawnPoint)
     {
-        GameObject axWindCenter = Instantiate(axWindPrefab, spawnPoint, tpc.characterBody.rotation);
+        GameObject axWindCenter = axWindPool.GrabObject();
+
+        axWindCenter.transform.localScale = axWindCenter.GetComponent<PooledObject>().originalScale;
+
+        axWindCenter.transform.position = spawnPoint;
+
+        axWindCenter.GetComponent<AxWind>().originalPos = spawnPoint;
+
+        axWindCenter.transform.rotation = tpc.characterBody.rotation;
 
         axWindCenter.transform.localEulerAngles += new Vector3(0, -90, 0);
 
         axWindCenter.GetComponent<AxWind>().myAxDaddy = this;
-
-        //Vector3 leftRot = new Vector3(tpc.transform.localEulerAngles.x, tpc.transform.localEulerAngles.y - 45, tpc.transform.localEulerAngles.z);
-
-        //GameObject axWindLeft = Instantiate(axWindPrefab, spawnPoint, Quaternion.Euler(leftRot));
-
-        //axWindLeft.GetComponent<AxWind>().myAxDaddy = this;
-
-        //Vector3 rightRot = new Vector3(tpc.transform.localEulerAngles.x, tpc.transform.localEulerAngles.y + 45, tpc.transform.localEulerAngles.z);
-
-        //GameObject axWindRight = Instantiate(axWindPrefab, spawnPoint, Quaternion.Euler(rightRot));
-
-        //axWindRight.GetComponent<AxWind>().myAxDaddy = this;
     }
 
     IEnumerator DisableTrail()

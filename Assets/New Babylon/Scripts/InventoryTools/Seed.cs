@@ -5,15 +5,12 @@ using TGS;
 
 public class Seed : MonoBehaviour {
     //tgs logic
-    TerrainGridSystem tgs;
-    GridManager gridMan;
+    public TerrainGridSystem tgs;
+    public GridManager gridMan;
     Cell currentCell;
     int currentCellIndex, previousCellIndex;
     //All possible texture references. 
-    Texture2D groundTexture;
-    Texture2D canClickTexture;
     [Header("TGS")]
-    public Texture2D plantedTexture;
     public bool plantingOnGrid;
     [Header("Important Bools")]
     public bool plantOnStart;
@@ -80,10 +77,11 @@ public class Seed : MonoBehaviour {
         _pooledObj = GetComponent<PooledObject>();
 
         //set tgs stuff
-        tgs = tpc.currentTGS;
-        gridMan = tgs.transform.parent.GetComponent<GridManager>();
-        groundTexture = gridMan.groundTexture;
-        canClickTexture = plantedTexture;
+        if (!plantOnStart)
+        {
+            tgs = tpc.currentTGS;
+            gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        }
 
         //seed start vars
         seedAnimator = GetComponent<Animator>();
@@ -235,8 +233,12 @@ public class Seed : MonoBehaviour {
             {
                 //check if this spot is on the TGS
                 //grabs Cell tile and index
-                tgs = tpc.currentTGS;
-                gridMan = tpc.currentGridMan;
+                if (!plantOnStart)
+                {
+                    tgs = tpc.currentTGS;
+                    gridMan = tpc.currentGridMan;
+                }
+               
                 currentCell = tgs.CellGetAtPosition(hit.point, true);
 
                 //we have a grid cell
@@ -272,7 +274,7 @@ public class Seed : MonoBehaviour {
         if (tgs.CellGetTag(cellIndex) == 0)
         {
             //Sets texture to clickable
-            tgs.CellToggleRegionSurface(cellIndex, true, canClickTexture);
+            tgs.CellToggleRegionSurface(cellIndex, true, gridMan.canPlantTexture);
 
             //If player clicks, we plant seed and clear up Equip slot
             if (Input.GetButton("Plant") || plantOnStart)
@@ -311,10 +313,11 @@ public class Seed : MonoBehaviour {
             int i = 0;
             while (i < hitColliders.Length)
             {
-                if (hitColliders[i].gameObject.tag == "Plant")
+                if (hitColliders[i].gameObject.tag == "Plant" || hitColliders[i].gameObject.tag == "Tree" 
+                    || hitColliders[i].gameObject.tag == "Building")
                 {
                     nearOtherPlant = true;
-                    Debug.Log("hit other plant");
+                    Debug.Log("too near something");
                 }
                 i++;
             }
@@ -393,7 +396,7 @@ public class Seed : MonoBehaviour {
             //planted tag
             tgs.CellSetTag(currentCell, 1);
             //planted texture
-            tgs.CellToggleRegionSurface(currentCellIndex, true, plantedTexture);
+            tgs.CellToggleRegionSurface(currentCellIndex, true, gridMan.plantedTexture);
         }
 
         //generate clone and set Plont script values
@@ -414,7 +417,25 @@ public class Seed : MonoBehaviour {
         if (plantOnStart)
         {
             plontScript.startingPlant = true;
-            Destroy(gameObject);
+            plontScript.tgs = tgs;
+            plontScript.gridMan = gridMan;
+            plontScript.myZone = gridMan.transform.GetChild(1).GetComponent<Zone>();
+
+            //age plant on start 
+            if(ageAmount > 0)
+            {
+                plontScript.Age(ageAmount, 0.5f);
+            }
+
+            //remove from pool &/or destroy 
+            if(_pooledObj != null)
+            {
+                _pooledObj.m_ObjectPooler.RemoveFromPool(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
         //normal UI seed plant -- returns to inventory 
         else

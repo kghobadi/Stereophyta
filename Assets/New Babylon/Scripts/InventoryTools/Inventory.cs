@@ -17,10 +17,11 @@ public class Inventory : MonoBehaviour {
     ThirdPersonController tpc;
 
     //tools inv
-    [Header ("Tools Inv")]
-    public int currentItem = 0;
-    public GameObject currenItemObj;
-    public List<GameObject> myItems = new List<GameObject>();
+    [Header("Tools Inv")]
+    public int toolTimeScale;
+    public int currentTool = 0;
+    public GameObject currentToolObj;
+    public List<GameObject> myTools = new List<GameObject>();
     //UI
     [Header("Tools UI")]
     public GameObject toolInvVisual;
@@ -60,6 +61,15 @@ public class Inventory : MonoBehaviour {
     public AudioSource inventoryAudio;
     public AudioClip switchSeedsUp,switchSeedsDown, switchTools;
 
+    //rhythm indicator
+    [Header("Player Rhythm Indicator")]
+    public SpriteRenderer rhythmSR;
+    Animator rhythmIndicator;
+    FadeSprite rhythmFader;
+    float disappearTimer, disappearTimerTotal = 1f;
+    //timers for how long indicator appears
+    public bool changedRhythm;
+
     void Awake()
     {
         //Debug.Log("hello I am here PLEASE FIND ME !");  
@@ -71,15 +81,15 @@ public class Inventory : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
 
         //if have tools
-        if(myItems.Count > 0)
+        if(myTools.Count > 0)
         {
             //set tool
-            currenItemObj = myItems[currentItem];
+            currentToolObj = myTools[currentTool];
             //turn off all other tools
-            for (int i = 0; i < myItems.Count; i++)
+            for (int i = 0; i < myTools.Count; i++)
             {
-                if (i != currentItem)
-                    myItems[i].SetActive(false);
+                if (i != currentTool)
+                    myTools[i].SetActive(false);
             }
         }
        
@@ -100,15 +110,21 @@ public class Inventory : MonoBehaviour {
         fadeSeeds = FadeOutSeedVis();
 
         inventoryAudio = GetComponent<AudioSource>();
+
+        //rhythm indicator
+        rhythmIndicator = rhythmSR.GetComponent<Animator>();
+        rhythmFader = rhythmSR.GetComponent<FadeSprite>();
     }
 	
 	void Update () {
+        //timer for switching tools
         inputTimerT -= Time.deltaTime;
         if(inputTimerT < 0)
         {
             canSwitchTools = true;
         }
 
+        //timer for switching seeds
         inputTimerS -= Time.deltaTime;
         if (inputTimerS < 0)
         {
@@ -117,11 +133,10 @@ public class Inventory : MonoBehaviour {
 
         if (!tpc.menuOpen)
         {
-
             //switch current item +
-            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchTools && myItems.Count > 1)
+            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchTools && myTools.Count > 1)
             {
-                SwitchItem(true);
+                SwitchTool(true);
             }
             //switch current item -
             if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchSeeds 
@@ -131,9 +146,52 @@ public class Inventory : MonoBehaviour {
             }
 
             //auto switch to next seed with a count if you run out of seeds
-            if(seedStorage[currentSeed].seedCount == 0 && CheckPlayerHasSeed() >= 1)
+            if(seedStorage[currentSeed].seedCount == 0 && CheckPlayerHasSeed() >= 1 && !currenSeedObj.GetComponent<Item>().CheckSeedPlanting())
             {
                 SwitchSeed(true);
+            }
+
+            //input for switching player rhythm
+            if (Input.GetKeyDown(KeyCode.LeftAlt)) 
+            {
+                if (toolTimeScale > 0)
+                {
+                    toolTimeScale--;
+                }
+                else
+                {
+                    toolTimeScale = 4;
+                }
+
+                SetVisualRhythm();
+            }
+
+            //input for switching player rhythm
+            if (Input.GetKeyDown(KeyCode.RightAlt))
+            {
+                if (toolTimeScale < 4)
+                {
+                    toolTimeScale++;
+                }
+                else
+                {
+                    toolTimeScale = 0;
+                }
+
+                SetVisualRhythm();
+            }
+        }
+
+        //for rhythm visual
+        if (changedRhythm)
+        {
+            disappearTimer -= Time.deltaTime;
+
+            //fade out visual
+            if (disappearTimer < 0)
+            {
+                rhythmFader.FadeOut();
+                changedRhythm = false;
             }
         }
 
@@ -156,6 +214,17 @@ public class Inventory : MonoBehaviour {
         }
 
         SetSeedText();
+    }
+
+    //called whenever rhythm is changed;
+    public void SetVisualRhythm()
+    {
+        rhythmIndicator.SetInteger("Level", toolTimeScale);
+
+        changedRhythm = true;
+        disappearTimer = disappearTimerTotal;
+
+        rhythmFader.FadeIn();
     }
 
     //alter count of current seed
@@ -186,41 +255,41 @@ public class Inventory : MonoBehaviour {
     }
 
     //switches thru tools
-    public void SwitchItem(bool posOrNeg)
+    public void SwitchTool(bool posOrNeg)
     {
-        currenItemObj.SetActive(false);
+        currentToolObj.SetActive(false);
 
         //switch pos
         if (posOrNeg)
         {
             //increment item counter
-            if (currentItem < myItems.Count - 1)
+            if (currentTool < myTools.Count - 1)
             {
-                currentItem++;
+                currentTool++;
             }
             else
             {
-                currentItem = 0;
+                currentTool = 0;
             }
         }
         //switch neg
         else
         {
             //increment item counter
-            if (currentItem > 0)
+            if (currentTool > 0)
             {
-                currentItem--;
+                currentTool--;
             }
             else
             {
-                currentItem = myItems.Count - 1;
+                currentTool = myTools.Count - 1;
             }
         }
 
 
         //set new tool
-        currenItemObj = myItems[currentItem];
-        currenItemObj.SetActive(true);
+        currentToolObj = myTools[currentTool];
+        currentToolObj.SetActive(true);
 
         SetToolSprite();
 
@@ -234,24 +303,24 @@ public class Inventory : MonoBehaviour {
     public void SetToolSprite()
     {
         //change inv visuals
-        currentToolImg.sprite = toolSprites[currentItem];
+        currentToolImg.sprite = toolSprites[currentTool];
         
         //more than one item
-        if(myItems.Count > 1)
+        if(myTools.Count > 1)
         {
             //for wrapping counter
-            if (currentItem > 0)
+            if (currentTool > 0)
             {
-                lastToolImg.sprite = toolSprites[currentItem - 1];
+                lastToolImg.sprite = toolSprites[currentTool - 1];
             }
             else
             {
-                lastToolImg.sprite = toolSprites[myItems.Count - 1];
+                lastToolImg.sprite = toolSprites[myTools.Count - 1];
             }
             //wrapping counter
-            if (currentItem < myItems.Count - 1)
+            if (currentTool < myTools.Count - 1)
             {
-                nextToolImg.sprite = toolSprites[currentItem + 1];
+                nextToolImg.sprite = toolSprites[currentTool + 1];
             }
             else
             {
@@ -259,7 +328,7 @@ public class Inventory : MonoBehaviour {
             }
         }
         //only one item so all the sprites are nothing
-        else if(myItems.Count == 1)
+        else if(myTools.Count == 1)
         {
             lastToolImg.sprite = nadaSprite;
             nextToolImg.sprite = nadaSprite;

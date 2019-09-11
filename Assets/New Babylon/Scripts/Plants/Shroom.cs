@@ -404,9 +404,6 @@ public class Shroom : RhythmProducer
         changedRhythm = true;
         disappearTimer = disappearTimerTotal;
 
-        //sound to indicate dif rhythm
-        //shroomSource.PlayOneShot(changeRhythms[timeScale], 1f);
-
         //only if player is close by, show the indicator
         if (Vector3.Distance(transform.position, tpc.transform.position) < 10f)
         {

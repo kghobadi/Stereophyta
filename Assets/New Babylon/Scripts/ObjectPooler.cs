@@ -31,6 +31,7 @@ public class ObjectPooler : MonoBehaviour {
         //add pooledObj script
         newObject.AddComponent<PooledObject>();
         newObject.GetComponent<PooledObject>().m_ObjectPooler = this;
+        newObject.GetComponent<PooledObject>().originalScale = newObject.transform.localScale;
         //add to available objects
         availableObjects.Add(newObject);
         //set active false & parent to this
@@ -48,6 +49,7 @@ public class ObjectPooler : MonoBehaviour {
         //add pooledObj script
         newObject.AddComponent<PooledObject>();
         newObject.GetComponent<PooledObject>().m_ObjectPooler = this;
+        newObject.GetComponent<PooledObject>().originalScale = newObject.transform.localScale;
         //set poolsize
         poolSize = availableObjects.Count + objectsInUse.Count;
         return newObject;
@@ -95,5 +97,20 @@ public class ObjectPooler : MonoBehaviour {
         objectsInUse.Remove(returnedObject);
         //add to availabeObjects
         availableObjects.Add(returnedObject);
+    }
+
+    //removes object from lists and destroys it 
+    public virtual void RemoveFromPool(GameObject removeIt)
+    {
+        if (objectsInUse.Contains(removeIt))
+        {
+            objectsInUse.Remove(removeIt);
+        }
+        if (availableObjects.Contains(removeIt))
+        {
+            availableObjects.Remove(removeIt);
+        }
+
+        Destroy(removeIt);
     }
 }

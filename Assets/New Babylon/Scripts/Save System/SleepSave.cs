@@ -179,7 +179,7 @@ public class SleepSave : MonoBehaviour {
                 mySaveStorage.plantScripts[i] = plontScript;
 
                 //age the plant the number of timems stored in the age list
-                plontScript.Age(mySaveStorage.plantAges[i]);
+                plontScript.Age(mySaveStorage.plantAges[i], 0.1f);
 
                 //check if the plant is on grid
                 if (mySaveStorage.plantedOnGrid[i])
