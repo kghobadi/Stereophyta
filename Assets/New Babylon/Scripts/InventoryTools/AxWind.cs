@@ -92,6 +92,19 @@ public class AxWind : Rhythm {
             other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
             //Debug.Log("ax inceased tempo");
         }
+
+        //animals
+        if (other.gameObject.tag == "Animal")
+        {
+            //crab
+            if (other.gameObject.GetComponent<Crab>())
+            {
+                if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                {
+                    other.gameObject.GetComponent<Crab>().Interrupt();
+                }
+            }
+        }
     }
 
     //adds on ax sound (guitar notes

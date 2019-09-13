@@ -21,10 +21,15 @@ public class AudioGeneration : MonoBehaviour
         //assign the positions by grabbing terrain data and multiplying by terrain size + terrain world pos
         for (int i = 0; i < terrain.terrainData.treeInstances.Length; i++)
         {
+            //rotate tree randomly 
+            terrain.terrainData.treeInstances[i].rotation = Random.Range(0f, 1f);
+
+            //set pos of audio obj
             Vector3 genPos = new Vector3(terrain.terrainData.treeInstances[i].position.x * terrain.terrainData.size.x + terrain.transform.position.x,
                 terrain.terrainData.treeInstances[i].position.y * terrain.terrainData.size.y + terrain.transform.position.y,
                 terrain.terrainData.treeInstances[i].position.z * terrain.terrainData.size.z + terrain.transform.position.z);
 
+            //add to list 
             treeAudioSources.Add(Instantiate(audioSourcePrefab, genPos, Quaternion.identity, treeAudioParent.transform));
         }
     }

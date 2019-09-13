@@ -174,6 +174,7 @@ public class StartView : MonoBehaviour {
             tpc.playerCanMove = true;
             houseCamera.SetActive(true);
             playerCamera.GetComponent<PlayerCameraController>().canLook = true;
+            tpc.GetComponent<AudioListener>().enabled = true;
 
             //disable start view stuff
             sunScript.rotationSpeed = sunScript.normalRotation;

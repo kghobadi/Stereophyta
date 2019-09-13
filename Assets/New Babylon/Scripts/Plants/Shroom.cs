@@ -54,7 +54,7 @@ public class Shroom : RhythmProducer
     public ShroomType shroomType;
     public enum ShroomType
     {
-        OCTA, SPHEROCYBIN, 
+        OCTA, SPHEROCYBIN, FLAT, AMANITA,  
     }
 
     //active planted bools
@@ -498,7 +498,7 @@ public class Shroom : RhythmProducer
 
     public void AdjustHeight()
     {
-        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+        Vector3 down = transform.TransformDirection(Vector3.down) * 100f;
 
         RaycastHit hit;
 

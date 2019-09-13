@@ -21,7 +21,7 @@ public class TreeAudio : MonoBehaviour {
     public TreeType treeSpecie;
     public enum TreeType
     {
-        SPRITE, GARANGULA, 
+        SPRITE, GARANGULA, STALNIK, 
     }
 
 	void Start () {

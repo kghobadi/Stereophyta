@@ -34,7 +34,7 @@ public class DrumCollider : Rhythm {
         }
         if (other.gameObject.tag == "Plant")
         {
-            other.gameObject.GetComponent<Plont>().PlaySound();
+            other.gameObject.GetComponent<Plont>().PlaySound(1f);
         }
     }
 

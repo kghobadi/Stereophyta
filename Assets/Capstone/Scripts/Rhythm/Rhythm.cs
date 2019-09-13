@@ -14,7 +14,7 @@ public class Rhythm : MonoBehaviour {
             //plont plays sound
             if (other.gameObject.GetComponent<Plont>())
             {
-                other.gameObject.GetComponent<Plont>().PlaySound();
+                other.gameObject.GetComponent<Plont>().PlaySound(1f);
             }
 
             //shroom should release spores

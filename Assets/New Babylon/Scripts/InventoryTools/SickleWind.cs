@@ -93,6 +93,19 @@ public class SickleWind : Rhythm
             other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
             //Debug.Log("sickle hit wind machine");
         }
+
+        //animals
+        if (other.gameObject.tag == "Animal")
+        {
+            //crab
+            if (other.gameObject.GetComponent<Crab>())
+            {
+                if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                {
+                    other.gameObject.GetComponent<Crab>().Interrupt();
+                }
+            }
+        }
     }
 
     //adds on ax sound (guitar notes

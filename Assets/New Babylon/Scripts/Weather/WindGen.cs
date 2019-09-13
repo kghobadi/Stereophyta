@@ -62,23 +62,23 @@ public class WindGen : RhythmProducer {
     {
         if(sunScript.clockBPM >= 10 && sunScript.clockBPM < 15)
         {
-            windInterval = 0;
+            windInterval = Random.Range(0, 2);
         }
         if (sunScript.clockBPM >= 15 && sunScript.clockBPM < 20)
         {
-            windInterval = 1;
+            windInterval = Random.Range(2, 4);
         }
         if (sunScript.clockBPM >= 20 && sunScript.clockBPM < 30)
         {
-            windInterval = Random.Range(1, 3);
+            windInterval = Random.Range(3, 6);
         }
         if (sunScript.clockBPM >= 30 && sunScript.clockBPM < 40)
         {
-            windInterval = Random.Range(2, 5);
+            windInterval = Random.Range(4, 8);
         }
         if (sunScript.clockBPM >= 40 && sunScript.clockBPM <= 50)
         {
-            windInterval = Random.Range(3, 6);
+            windInterval = Random.Range(5, 10);
         }
 
         //keep updated bpm 

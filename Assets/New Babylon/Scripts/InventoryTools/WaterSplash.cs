@@ -65,7 +65,7 @@ public class WaterSplash : Rhythm {
                 {
                     //play sound from plant
                     if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-                        other.gameObject.GetComponent<Plont>().PlaySound();
+                        other.gameObject.GetComponent<Plont>().PlaySound(1f);
 
                     //if it hasn't been watered, grow and water
                     if (!other.gameObject.GetComponent<Plont>().hasBeenWatered)

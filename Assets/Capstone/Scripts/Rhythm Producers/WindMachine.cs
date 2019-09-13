@@ -3,24 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class WindMachine : Tool {
-
     //WindMachine itself -- pick up and wind gen
+    [Header("Wind staff vars")]
     public ObjectPooler fanWindPooler;
     GameObject windClone;
-    
-    //speed vars 
-    public float windSpeed, rotationSpeed;
-    public float distanceToDestroy;
-
-    //audio
-    public AudioClip selectLower;
-    public AudioClip placementSound, noNo;
-    Vector3 placeMentSpot;
 
     //animator
     public Transform fanObj;
+    //speed vars 
+    public float windSpeed;
+    public float rotationSpeed;
+    public float distanceToDestroy;
 
+    //audio
+    [Header("Audio")]
+    public AudioClip selectLower;
+    public AudioClip placementSound, noNo;
+    Vector3 placeMentSpot;
+    
     //Rhythm lever vars
+    [Header("Rhythm Settings")]
     public int timeScaleMax;
 
     //rhythm indicator
@@ -98,12 +100,7 @@ public class WindMachine : Tool {
             {
                 if (showRhythm)
                 {
-                    //grab wind from pool, set pos, rotation, ref to this
-                    windClone = fanWindPooler.GrabObject();
-                    windClone.transform.position = transform.position + new Vector3(0, 5, 0);
-                    windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
-                    windClone.GetComponent<PuzzleWind>()._windGen = this;
-                    showRhythm = false;
+                    SpawnWind();
                 }
             }
 
@@ -130,6 +127,16 @@ public class WindMachine : Tool {
                 MainAction();
             }
         }
+    }
+
+    void SpawnWind()
+    {
+        //grab wind from pool, set pos, rotation, ref to this
+        windClone = fanWindPooler.GrabObject();
+        windClone.transform.position = transform.position + new Vector3(0, 5, 0);
+        windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
+        windClone.GetComponent<PuzzleWind>()._windGen = this;
+        showRhythm = false;
     }
 
     //WIND STAFF FUNCTIONS

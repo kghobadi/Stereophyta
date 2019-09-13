@@ -10,6 +10,7 @@ public abstract class Tool : MonoBehaviour {
     protected ThirdPersonController tpc;
     //audio source reference
     protected AudioSource toolSource;
+    [Header("Tool Vars")]
     public Animator toolAnimator;
     //rhythm vars
     public bool showRhythm;
@@ -25,6 +26,7 @@ public abstract class Tool : MonoBehaviour {
     //for setting local transform under inventory
     public Vector3 localPos, localRot, localScale;
     //ui refs for pickup prompt
+    [Header("Initial Pickup Prompt")]
     public Text pickUpText;
     public string pickUpMessage;
     public FadeUI[] interactPrompts;

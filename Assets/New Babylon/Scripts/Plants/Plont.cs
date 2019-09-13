@@ -140,7 +140,22 @@ public class Plont : MonoBehaviour {
         {
             plontPooler = GetComponent<PooledObject>().m_ObjectPooler;
         }
-       
+
+        // higher chance to spawn seeds, plant grows as fast as possible 
+        if (plantedOnGrid)
+        {
+            seedSpawnChance += 25f;
+
+            //bring growth days down 
+            for(int i = 0; i < myGrowthStages.Length; i++)
+            {
+                if(myGrowthStages[i].growthDays > 2)
+                {
+                    myGrowthStages[i].growthDays = 2;
+                }
+            }
+        }
+
         //call funcs
         PlayPlantingEffect();
         GrowPlant(true, true);
@@ -336,7 +351,7 @@ public class Plont : MonoBehaviour {
     }
     
     //plays current audio clip and wobbles plant
-    public void PlaySound()
+    public void PlaySound(float volume)
     {
         plantSource.PlayOneShot(currentClip);
         soundPlaying.Play();
@@ -428,15 +443,23 @@ public class Plont : MonoBehaviour {
     {
         if (other.gameObject.tag == "Player" && !plantSource.isPlaying )
         {
-            //Debug.Log("player triggered");
-            PlaySound();
-
-            //player might knock a seed down
-            float randomChanceToDropSeed = Random.Range(0f, 100f);
-
-            if(randomChanceToDropSeed < 1f)
+            //when player runs thru me 
+            if (tpc.running)
             {
-                SpawnSeed();
+                PlaySound(1f);
+
+                //player might knock a seed down
+                float randomChanceToDropSeed = Random.Range(0f, 100f);
+
+                if (randomChanceToDropSeed < 1f)
+                {
+                    SpawnSeed();
+                }
+            }
+            //walking
+            else
+            {
+                PlaySound(0.25f);
             }
         }
     }
@@ -445,7 +468,7 @@ public class Plont : MonoBehaviour {
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 35f))
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f))
         {
             if (hit.transform.gameObject.tag == "Ground")
             {
