@@ -5,18 +5,21 @@ using UnityEngine;
 public class SickleWind : Rhythm
 {
     public Sickle mySickleDaddy;
-
-    Vector3 originalPos;
+    
+    [HideInInspector]
+    public Vector3 originalPos;
 
     public float axDist;
     public float scaleIncrease;
+    
+    PooledObject pooledObj;
 
     void Start()
     {
+        pooledObj = GetComponent<PooledObject>();
         currentSpeed = mySickleDaddy.sickleWindSpeed;
         axDist = mySickleDaddy.distanceToDestroyWinds;
         scaleIncrease = mySickleDaddy.scaleIncrease;
-        originalPos = transform.position;
     }
 
     void Update()
@@ -26,13 +29,18 @@ public class SickleWind : Rhythm
         transform.localScale -= (Vector3.one * scaleIncrease * Time.deltaTime);
 
         if (Vector3.Distance(transform.position, originalPos) > mySickleDaddy.distanceToDestroyWinds)
-        { 
+        {
             //unchild all dem seeds
             for (int i = 0; i < transform.childCount; i++)
             {
-                transform.GetChild(i).SetParent(null);
+                GameObject child = transform.GetChild(i).gameObject;
+
+                child.transform.SetParent(null);
+
+                child.transform.localScale = child.GetComponent<Seed>().origScale;
             }
-            Destroy(gameObject);
+
+            pooledObj.ReturnToPool();
         }
 
         AdjustHeight();
@@ -65,7 +73,7 @@ public class SickleWind : Rhythm
                 if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
                 {
                     //shrink plant and play guitar sound
-                    other.GetComponent<Plont>().GrowPlant(false);
+                    other.GetComponent<Plont>().GrowPlant(false, true);
                     PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, mySickleDaddy.sickleHits);
                 }
             }
@@ -76,7 +84,7 @@ public class SickleWind : Rhythm
                 other.GetComponent<Shroom>().UprootShroom();
             }
 
-            Destroy(gameObject);
+            pooledObj.ReturnToPool();
         }
 
         //when u hit on wind fan increase the rhythm
@@ -84,6 +92,19 @@ public class SickleWind : Rhythm
         {
             other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
             //Debug.Log("sickle hit wind machine");
+        }
+
+        //animals
+        if (other.gameObject.tag == "Animal")
+        {
+            //crab
+            if (other.gameObject.GetComponent<Crab>())
+            {
+                if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                {
+                    other.gameObject.GetComponent<Crab>().Interrupt();
+                }
+            }
         }
     }
 

@@ -50,7 +50,7 @@ public class WateringCan : Tool
             }
 
             //if swinging and anim over, switch back to idle
-            if ((watering || toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("water!")) && toolAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
+            if ((watering || toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("water")) && toolAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
             {
                 watering = false;
                 toolAnimator.SetBool("watering", false);
@@ -65,7 +65,7 @@ public class WateringCan : Tool
         if (!watering)
         {
             //Debug.Log("water already!1!");
-            toolAnimator.SetTrigger("water1");
+            toolAnimator.SetTrigger("water");
             toolAnimator.SetBool("watering", true);
             waterParticles.waterEffect.Play();
             watering = true;

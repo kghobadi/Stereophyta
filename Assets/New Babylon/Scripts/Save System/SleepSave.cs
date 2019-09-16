@@ -55,6 +55,11 @@ public class SleepSave : MonoBehaviour {
         {
             LoadGameData();
         }
+        //we actually haven't saved 
+        else
+        {
+            PlayerPrefs.SetString("hasSaved", "no");
+        }
     }
 
     public void SaveGameData()
@@ -122,6 +127,8 @@ public class SleepSave : MonoBehaviour {
         File.WriteAllText(filePath, dataAsJson);
         //adjust playerprefs so we know we save
         PlayerPrefs.SetInt("sessionNumber", 1);
+        //this should actually be set to PlayerPrefs.GetInt("sessionNumber")+1
+        PlayerPrefs.SetString("hasSaved", "yes");
 
         Debug.Log("called save");
     }
@@ -172,7 +179,7 @@ public class SleepSave : MonoBehaviour {
                 mySaveStorage.plantScripts[i] = plontScript;
 
                 //age the plant the number of timems stored in the age list
-                plontScript.Age(mySaveStorage.plantAges[i]);
+                plontScript.Age(mySaveStorage.plantAges[i], 0.1f);
 
                 //check if the plant is on grid
                 if (mySaveStorage.plantedOnGrid[i])

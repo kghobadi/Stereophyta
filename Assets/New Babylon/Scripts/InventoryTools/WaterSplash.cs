@@ -13,7 +13,6 @@ public class WaterSplash : Rhythm {
     //audio for splashing
     AudioSource splashAudio;
     public AudioClip[] splashSounds;
-    public AudioClip[] oneNotes, twoNotes, threeNotes, fourNotes, fiveNotes;
 
     //obj refs
     Vector3 originalPosition;
@@ -43,7 +42,7 @@ public class WaterSplash : Rhythm {
         int randomSplash = Random.Range(0, splashSounds.Length);
         splashAudio.PlayOneShot(splashSounds[randomSplash], 0.25f);
         splashing = true;
-        yield return new WaitForSeconds(splashMain.duration);
+        yield return new WaitForSeconds(splashSounds[randomSplash].length);
         splashing = false;
         splashEffect.Stop();
         sphereCol.enabled = false;
@@ -66,7 +65,7 @@ public class WaterSplash : Rhythm {
                 {
                     //play sound from plant
                     if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-                        other.gameObject.GetComponent<Plont>().PlaySound();
+                        other.gameObject.GetComponent<Plont>().PlaySound(1f);
 
                     //if it hasn't been watered, grow and water
                     if (!other.gameObject.GetComponent<Plont>().hasBeenWatered)
@@ -86,11 +85,17 @@ public class WaterSplash : Rhythm {
                 }
             }
 
-            //for animals
+            //animals
             if (other.gameObject.tag == "Animal")
             {
-                if (!other.gameObject.GetComponent<Crab>().animalAudio.isPlaying)
-                    other.gameObject.GetComponent<Crab>().PlaySound(other.gameObject.GetComponent<Crab>().running);
+                //crab
+                if (other.gameObject.GetComponent<Crab>())
+                {
+                    if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                    {
+                        other.gameObject.GetComponent<Crab>().Interrupt();
+                    }
+                }
             }
 
             //wind fan

@@ -7,7 +7,7 @@ public class GridManager : MonoBehaviour {
     public TerrainGridSystem tgs;
     public Vector3 cellCenter;
 
-    public Texture2D groundTexture, wateredTexture;
+    public Texture2D groundTexture, canPlantTexture, plantedTexture, wateredTexture;
 
     void Start()
     {

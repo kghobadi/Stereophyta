@@ -20,11 +20,12 @@ public class PlayerCameraController : MonoBehaviour {
     [Header("Camera Characteristics")]
     public float rayHitMoveInFront = 0.1f;
     public float distanceFromPlayer = 5;
-    public float distanceFromPlayerMax;
+    public float distanceFromPlayerMin, distanceFromPlayerMax;
     public float heightFromPlayer = 3;
     public float heightMin, heightMax;
     public float yLookMin, yLookMax;
     public float zoomSpeed;
+    public float yLookSpeed;
     float zoomInput;
 
     //all the ps4 feel variables
@@ -63,7 +64,6 @@ public class PlayerCameraController : MonoBehaviour {
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         tpc = playerTransform.GetComponent<ThirdPersonController>();
         actualCam = GetComponent<Camera>();
-        distanceFromPlayerMax = distanceFromPlayer;
 
         //set original smooth vals 
         smoothLookOriginal = smoothLook;
@@ -114,12 +114,12 @@ public class PlayerCameraController : MonoBehaviour {
             //if mouse up and yLook is less than yLookMax
             if (verticalRotation.y > 0.25f && yLook.y < yLookMax)
             {
-                yLook += verticalRotation;
+                yLook = Vector3.Lerp(yLook, yLook + verticalRotation, Time.deltaTime * yLookSpeed);
             }
             //if mouse down and yLook is greater than yLookMin
             if (verticalRotation.y < -0.25f && yLook.y > yLookMin)
             {
-                yLook += verticalRotation;
+                yLook = Vector3.Lerp(yLook, yLook + verticalRotation, Time.deltaTime * yLookSpeed);
             }
 
             
@@ -189,6 +189,17 @@ public class PlayerCameraController : MonoBehaviour {
     {
         float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
         heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
+
+        if(distanceFromPlayer > distanceFromPlayerMin)
+        {
+            float newZ = distanceFromPlayer + (zoomSpeed * Time.deltaTime * (zoom / 2));
+            distanceFromPlayer = Mathf.Lerp(distanceFromPlayer, newZ, zoomSpeed * Time.deltaTime);
+        }
+        else
+        {
+            distanceFromPlayer = distanceFromPlayerMin;
+        }
+
         //see fuurther as it zooms in
         if (actualCam.farClipPlane < 1000)
             actualCam.farClipPlane += zoomSpeed * Time.deltaTime * 3;
@@ -199,6 +210,16 @@ public class PlayerCameraController : MonoBehaviour {
         float newHeight = heightFromPlayer + (zoomSpeed * Time.deltaTime * zoom);
         heightFromPlayer = Mathf.Lerp(heightFromPlayer, newHeight, zoomSpeed * Time.deltaTime);
 
+        if(distanceFromPlayer < distanceFromPlayerMax)
+        {
+            float newZ = distanceFromPlayer + (zoomSpeed * Time.deltaTime * (zoom / 2));
+            distanceFromPlayer = Mathf.Lerp(distanceFromPlayer, newZ, zoomSpeed * Time.deltaTime);
+        }
+        else
+        {
+            distanceFromPlayer = distanceFromPlayerMax;
+        }
+
         //see less as it zooms out
         if (actualCam.farClipPlane > 500)
             actualCam.farClipPlane -= zoomSpeed * Time.deltaTime * 3;
@@ -208,18 +229,22 @@ public class PlayerCameraController : MonoBehaviour {
     void CastToPlayer()
     {
         RaycastHit hit = new RaycastHit();
-        float radius = 1f;
         Vector3 dir = playerTransform.position - transform.position;
         float dist = Vector3.Distance(transform.position, playerTransform.position);
         //send raycast
         if (Physics.Raycast(transform.position, dir, out hit, dist , obstructionMask))
         {
-            //anything on layer mask that is not player
-            if(hit.transform.gameObject.layer != 8 )
+            //anytime we hit the ground or a building, zoome out 
+            if(hit.transform.gameObject.layer == 20 || hit.transform.gameObject.layer == 24)
             {
-                ZoomOut(0.025f);
-
-                //Debug.Log("cam hitting " + hit.transform.gameObject.name);
+                if(heightFromPlayer < heightMax)
+                    ZoomOut(0.05f);
+            }
+            //if it hits a tree, zoom in 
+            if(hit.transform.gameObject.tag == "Tree")
+            {
+                if(heightFromPlayer > heightMin)
+                    ZoomIn(-0.025f);
             }
         }
     }

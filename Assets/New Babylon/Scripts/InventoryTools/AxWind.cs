@@ -5,17 +5,20 @@ using UnityEngine;
 public class AxWind : Rhythm {
     public Ax myAxDaddy;
 
-    Vector3 originalPos;
+    [HideInInspector]
+    public Vector3 originalPos;
 
     public float axDist;
     public float scaleIncrease;
 
+    PooledObject pooledObj;
+
     void Start()
     {
+        pooledObj = GetComponent<PooledObject>();
         currentSpeed = myAxDaddy.axWindSpeed;
         axDist = myAxDaddy.distanceToDestroyWinds;
         scaleIncrease = myAxDaddy.scaleIncrease;
-        originalPos = transform.position;
     }
 
     void Update()
@@ -36,7 +39,7 @@ public class AxWind : Rhythm {
                 child.transform.localScale = child.GetComponent<Seed>().origScale;
             }
 
-            Destroy(gameObject);
+            pooledObj.ReturnToPool();
         }
 
         AdjustHeight();
@@ -70,7 +73,7 @@ public class AxWind : Rhythm {
                 if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
                 {
                     //shrink plant and play guitar sound
-                    other.GetComponent<Plont>().GrowPlant(false);
+                    other.GetComponent<Plont>().GrowPlant(false, true);
                     PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
                     //Debug.Log("played guitar sound");
                 }
@@ -88,6 +91,19 @@ public class AxWind : Rhythm {
         {
             other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
             //Debug.Log("ax inceased tempo");
+        }
+
+        //animals
+        if (other.gameObject.tag == "Animal")
+        {
+            //crab
+            if (other.gameObject.GetComponent<Crab>())
+            {
+                if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                {
+                    other.gameObject.GetComponent<Crab>().Interrupt();
+                }
+            }
         }
     }
 

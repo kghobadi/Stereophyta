@@ -14,7 +14,7 @@ public class Rhythm : MonoBehaviour {
             //plont plays sound
             if (other.gameObject.GetComponent<Plont>())
             {
-                other.gameObject.GetComponent<Plont>().PlaySound();
+                other.gameObject.GetComponent<Plont>().PlaySound(1f);
             }
 
             //shroom should release spores
@@ -25,10 +25,15 @@ public class Rhythm : MonoBehaviour {
                 other.gameObject.GetComponent<Shroom>().ReleaseSpores();
             }
         }
-        else if (other.gameObject.tag == "Tree")
+        //make tree play sound 
+        if (other.gameObject.tag == "Tree")
         {
-            other.gameObject.GetComponent<AncientTree>().PlaySound();
-            //Debug.Log("Tree played sound");
+            TreeAudio treeAud = other.gameObject.GetComponent<TreeAudio>();
+            //only play if it is not already playing 
+            if (!treeAud.treeAudio.isPlaying)
+            {
+                treeAud.PlayRandomSound();
+            }
         }
     }
     

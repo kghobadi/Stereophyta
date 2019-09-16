@@ -65,7 +65,7 @@ public class DustSplash : Rhythm {
             {
                 //not already playing sound 
                 if (!other.gameObject.GetComponent<Plont>().plantSource.isPlaying)
-                    other.gameObject.GetComponent<Plont>().PlaySound();
+                    other.gameObject.GetComponent<Plont>().PlaySound(1f);
             }
             //shroom
             if (other.GetComponent<Shroom>())
@@ -88,10 +88,17 @@ public class DustSplash : Rhythm {
         {
             other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
         }
+        //animals
         if (other.gameObject.tag == "Animal")
         {
-            if (!other.gameObject.GetComponent<Crab>().animalAudio.isPlaying)
-                other.gameObject.GetComponent<Crab>().PlaySound(other.gameObject.GetComponent<Crab>().running);
+            //crab
+            if (other.gameObject.GetComponent<Crab>())
+            {
+                if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                {
+                    other.gameObject.GetComponent<Crab>().Interrupt();
+                }
+            }
         }
     }
 

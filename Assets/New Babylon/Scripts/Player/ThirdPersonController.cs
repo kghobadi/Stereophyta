@@ -88,7 +88,7 @@ public class ThirdPersonController : MonoBehaviour
     //swim fx
     [Header("Swim FX")]
     public ParticleSystem swimRipples;
-    public TrailRenderer swimTrail, swimWhiteTrail;
+    public TrailRenderer swimTrail;
     public ParticleSystem swimSplashL, swimSplashR;
     ParticleSystem.MainModule splashMainL, splashMainR;
     public float swimJumpTotal = 10f;
@@ -266,7 +266,7 @@ public class ThirdPersonController : MonoBehaviour
         //Restart game
         if (Input.GetKeyDown(KeyCode.Delete))
         {
-            SceneManager.LoadScene("DemoIslandTest");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 
@@ -290,17 +290,16 @@ public class ThirdPersonController : MonoBehaviour
             if (swimTrail.enabled)
             {
                 swimTrail.enabled = false;
-                swimWhiteTrail.enabled = false;
-                swimRipples.Stop();
                 swimSplashL.Stop();
                 swimSplashR.Stop();
+                swimRipples.Stop();
             }
         }
         //swimming
         else
         {
             swimTrail.enabled = true;
-            swimWhiteTrail.enabled = true;
+            swimRipples.Play();
             Swim();
             currentMovement.y = 0;
         }
@@ -497,7 +496,6 @@ public class ThirdPersonController : MonoBehaviour
         //swimming
         if (targetMovementTotal.magnitude > 0)
         {
-            swimRipples.Stop();
             swimSplashL.Play();
             swimSplashR.Play();
             //always swimmin
@@ -511,7 +509,7 @@ public class ThirdPersonController : MonoBehaviour
         {
             swimSplashL.Stop();
             swimSplashR.Stop();
-            swimRipples.Play();
+            
             //always swimmin
             if (poopShoes.GetBool("swimIdle") != true)
             {
@@ -519,8 +517,6 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
     }
-
-   
 
     //called either when player presses Z or has passed out from exhaustion
     public void Sleep(bool pressedOrPassed)
@@ -544,7 +540,6 @@ public class ThirdPersonController : MonoBehaviour
 
         //increase sun rotationSpeed
         sunScript.rotationSpeed = sunScript.sleepRotation;
-        //Time.timeScale = 10f;
 
         //play random yawn sound
         int randomYawn = Random.Range(0, yawns.Length);

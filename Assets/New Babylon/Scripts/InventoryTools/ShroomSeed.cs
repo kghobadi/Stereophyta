@@ -67,7 +67,7 @@ public class ShroomSeed : MonoBehaviour {
         tgs = tpc.currentTGS;
         gridMan = tgs.transform.parent.GetComponent<GridManager>();
         groundTexture = gridMan.groundTexture;
-        canClickTexture = plantedTexture;
+        canClickTexture = gridMan.canPlantTexture;
 
         //aduio
         shroomBody = GetComponent<Rigidbody>();

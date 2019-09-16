@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour {
     [Header("Spawner Objects & Type")]
+    Zone zoneParent;
     public ObjectPooler objectPooler;
     public GameObject[] generatedObjs;
     public GenerationType generationType;
@@ -17,6 +18,7 @@ public class Spawner : MonoBehaviour {
     {
         PLONT, CROPSEED, SHROOM, 
     }
+    public bool overlapsWithSaveSystem;
 
     [Header("Collision Avoidance")]
     public LayerMask collidableObjects;
@@ -34,9 +36,27 @@ public class Spawner : MonoBehaviour {
     public float distBetweenX, distBetweenY;
     
 	void Start () {
+        zoneParent = transform.parent.GetComponent<Zone>();
         Random.InitState(System.DateTime.Now.Millisecond);
         generatedObjs = new GameObject[generationAmount];
-        GenerateObjects();
+
+        //this object type overlaps with the save system, no need to spawn on start 
+        if (overlapsWithSaveSystem)
+        {
+            if (PlayerPrefs.GetString("hasSaved") == "yes")
+            {
+                Debug.Log("no spawn, loaded from save");
+            }
+            else
+            {
+                GenerateObjects();
+            }
+        }
+        //just go ahead and generate
+        else
+        {
+            GenerateObjects();
+        }
 	}
 	
     //switch statement tells us which way to generate
@@ -65,15 +85,20 @@ public class Spawner : MonoBehaviour {
         switch (objectType)
         {
             case ObjectType.PLONT:
+                //assign random age & adjust height 
                 int randomAge = Random.Range(0, 3);
-                genObject.GetComponent<Plont>().Age(randomAge);
+                genObject.GetComponent<Plont>().Age(randomAge, 0.1f);
                 genObject.GetComponent<Plont>().AdjustHeight();
                 break;
             case ObjectType.CROPSEED:
-                genObject.GetComponent<Seed>().plantOnStart = true;
+                //set to plant to randomStage
                 int randomStage = Random.Range(0, 3);
                 genObject.GetComponent<Seed>().ageAmount = randomStage;
-                genObject.GetComponent<Seed>().RaycastToGround();
+                //set tgs
+                genObject.GetComponent<Seed>().gridMan = zoneParent.zoneGridMan;
+                genObject.GetComponent<Seed>().tgs = zoneParent.zoneTGS;
+                //tell it to plant on start
+                genObject.GetComponent<Seed>().plantOnStart = true;
                 break;
         }
     }
