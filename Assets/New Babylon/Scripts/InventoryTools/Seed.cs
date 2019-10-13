@@ -16,7 +16,6 @@ public class Seed : MonoBehaviour {
     public bool plantOnStart;
     public int ageAmount;
     public bool UIseed, startingSeed;
-    public bool dayPassed;
 
     //for inv
     public int mySeedIndex;
@@ -60,21 +59,22 @@ public class Seed : MonoBehaviour {
     [Header ("Misc. Settings")]
     public float distFromOtherPlants;
     public float vortexSpeed = 7.5f;
+    float vortexOrig = 7.5f;
     //for planting itself after a few days
     public int daysBeforePlanting;
     
     //wind blow reset
     [HideInInspector]
     public Vector3 origScale;
-  
-    void Start () {
+
+    void Awake()
+    {
         //sun and player refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
-        _pooledObj = GetComponent<PooledObject>();
 
         //set tgs stuff
         if (!plantOnStart)
@@ -85,16 +85,20 @@ public class Seed : MonoBehaviour {
 
         //seed start vars
         seedAnimator = GetComponent<Animator>();
-        if(seedAnimator == null)
+        if (seedAnimator == null)
         {
             seedAnimator = GetComponentInChildren<Animator>();
         }
         seedBody = GetComponent<Rigidbody>();
-        seedBody.isKinematic = true;
         seedCollider = GetComponent<SphereCollider>();
         seedSource = GetComponent<AudioSource>();
-        origScale = transform.localScale;
+    }
 
+    void Start () {
+        sunScript.newDay.AddListener(DayPass);
+        seedBody.isKinematic = true;
+        origScale = transform.localScale;
+        _pooledObj = GetComponent<PooledObject>();
         FindObjPoolers();
 
         //dif settings for UI seeds
@@ -129,6 +133,12 @@ public class Seed : MonoBehaviour {
                 plontPooler = objPools[i].GetComponent<ObjectPooler>();
             }
         }
+
+        //if it's pooled ... get seed pooler!
+        if (_pooledObj)
+        {
+            seedPooler = _pooledObj.m_ObjectPooler;
+        }
     }
 
     //called when it falls off a plant from chop / plant death at start 
@@ -136,39 +146,13 @@ public class Seed : MonoBehaviour {
     {
         seedBody.isKinematic = false;
         seedBody.useGravity = true;
-        seedBody.AddRelativeForce(0, 15, 5);
-
+        seedCollider.isTrigger = false;
+        seedBody.AddRelativeForce(Random.Range(-15, 15), 150, Random.Range(-15, 15));
+        vortexSpeed = vortexOrig;
         seedState = SeedStates.FALLING;
     }
 
     void Update () {
-        //counting days is hard work (for spawned seeds only)
-        if (!UIseed)
-        {
-            if (sunScript.dayCounter > sunScript.yesterday)
-            {
-                if (!dayPassed)
-                {
-                    daysBeforePlanting--;
-
-                    //plant spawned seed 
-                    if (daysBeforePlanting == 0)
-                    {
-                        DropSeed();
-                    }
-
-                    dayPassed = true;
-                }
-
-            }
-
-            //reset dayPassed 
-            if (sunScript.yesterday == sunScript.dayCounter)
-            {
-                dayPassed = false;
-            }
-        }
-     
         //idle seed
         if(seedState == SeedStates.IDLE)
         {
@@ -185,7 +169,7 @@ public class Seed : MonoBehaviour {
         //right after spawning
         if (seedState == SeedStates.FALLING)
         {
-            seedBody.AddForce(1, -3, 1);
+            seedBody.AddForce(Random.Range(-5, 5), -5, Random.Range(-5, 5));
         }
 
         //when player is near and IDLE / BLOWING
@@ -219,6 +203,22 @@ public class Seed : MonoBehaviour {
             transform.localEulerAngles = Vector3.zero;
             
             AdjustHeight();
+        }
+    }
+
+    //called when sun sets new day 
+    void DayPass()
+    {
+        if (!UIseed)
+        {
+            //Debug.Log("seed day passed!");
+            daysBeforePlanting--;
+
+            //plant spawned seed 
+            if (daysBeforePlanting == 0)
+            {
+                DropSeed();
+            }
         }
     }
 

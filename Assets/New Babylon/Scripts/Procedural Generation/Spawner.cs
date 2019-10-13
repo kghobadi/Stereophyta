@@ -19,9 +19,13 @@ public class Spawner : MonoBehaviour {
         PLONT, CROPSEED, SHROOM, 
     }
     public bool overlapsWithSaveSystem;
+    public bool plantOnStart = true;
+    public int ageMin=0, ageMax=3;
 
     [Header("Collision Avoidance")]
     public LayerMask collidableObjects;
+    public LayerMask grounded ;
+    public float heightAdjust;
     public float checkDist;
 
     //for RANDOM
@@ -34,31 +38,15 @@ public class Spawner : MonoBehaviour {
     public int gridSizeX;
     public int gridSizeY;
     public float distBetweenX, distBetweenY;
-    
-	void Start () {
+
+    void Start () {
         zoneParent = transform.parent.GetComponent<Zone>();
         Random.InitState(System.DateTime.Now.Millisecond);
         generatedObjs = new GameObject[generationAmount];
 
-        //this object type overlaps with the save system, no need to spawn on start 
-        if (overlapsWithSaveSystem)
-        {
-            if (PlayerPrefs.GetString("hasSaved") == "yes")
-            {
-                Debug.Log("no spawn, loaded from save");
-            }
-            else
-            {
-                GenerateObjects();
-            }
-        }
-        //just go ahead and generate
-        else
-        {
-            GenerateObjects();
-        }
-	}
-	
+        gameObject.name = generationType.ToString() + " " + objectPooler.name + " Spawner";
+    }
+
     //switch statement tells us which way to generate
     public void GenerateObjects()
     {
@@ -85,20 +73,41 @@ public class Spawner : MonoBehaviour {
         switch (objectType)
         {
             case ObjectType.PLONT:
-                //assign random age & adjust height 
-                int randomAge = Random.Range(0, 3);
+                //assign random age 
+                int randomAge = Random.Range(ageMin, ageMax);
                 genObject.GetComponent<Plont>().Age(randomAge, 0.1f);
-                genObject.GetComponent<Plont>().AdjustHeight();
+                genObject.GetComponent<Plont>().gridMan = zoneParent.zoneGridMan;
+                genObject.GetComponent<Plont>().tgs = zoneParent.zoneTGS;
+                genObject.GetComponent<Plont>().myZone = zoneParent;
+                //adjust height 
+                AdjustHeight(genObject);
                 break;
             case ObjectType.CROPSEED:
-                //set to plant to randomStage
-                int randomStage = Random.Range(0, 3);
-                genObject.GetComponent<Seed>().ageAmount = randomStage;
+                if (plantOnStart)
+                { 
+                    //tell it to plant on start
+                    genObject.GetComponent<Seed>().plantOnStart = true;
+                    //set to plant to randomStage
+                    int randomStage = Random.Range(ageMin, ageMax);
+                    genObject.GetComponent<Seed>().ageAmount = randomStage;
+                    //this is so pooled seeeds dont fucking vortex to you 
+                    genObject.GetComponent<Seed>().seedState = Seed.SeedStates.IDLE;
+                    genObject.GetComponent<Seed>().RaycastToGround();
+                }
+                else
+                {
+                    //this is also so pooled seeeds dont fucking vortex to you 
+                    genObject.GetComponent<Seed>().SeedFall();
+                }
                 //set tgs
                 genObject.GetComponent<Seed>().gridMan = zoneParent.zoneGridMan;
                 genObject.GetComponent<Seed>().tgs = zoneParent.zoneTGS;
-                //tell it to plant on start
-                genObject.GetComponent<Seed>().plantOnStart = true;
+                
+                break;
+            case ObjectType.SHROOM:
+                genObject.GetComponent<Shroom>().gridMan = zoneParent.zoneGridMan;
+                genObject.GetComponent<Shroom>().tgs = zoneParent.zoneTGS;
+                genObject.GetComponent<Shroom>().myZone = zoneParent;
                 break;
         }
     }
@@ -175,5 +184,44 @@ public class Spawner : MonoBehaviour {
     void GenerateGroups()
     {
 
+    }
+
+    //called when player enters zone 
+    public void RegenerateObjects()
+    {
+        int inactive = 0;
+        for(int i = 0; i < generatedObjs.Length; i++)
+        {
+            //if null or inactive
+            if(generatedObjs[i] == null || generatedObjs[i].activeSelf == false)
+            {
+                inactive++;
+            }
+        }
+
+        //inactive count is greater than half of original list  && not cropseed plantOnStart
+        if(inactive >= (generatedObjs.Length / 2))
+        {
+            generatedObjs = new GameObject[generationAmount];
+
+            GenerateObjects();
+        }
+    }
+
+    //adjust height of generated obj 
+    void AdjustHeight(GameObject obj)
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(obj.transform.position, Vector3.down, out hit, Mathf.Infinity, grounded))
+        {
+            if (hit.transform.gameObject.tag == "Ground")
+            {
+                obj.transform.position = new Vector3(obj.transform.position.x, hit.point.y + heightAdjust, obj.transform.position.z);
+            }
+
+            Debug.DrawLine(obj.transform.position, hit.point);
+        }
+        
     }
 }

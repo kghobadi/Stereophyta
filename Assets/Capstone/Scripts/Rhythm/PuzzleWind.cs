@@ -5,7 +5,7 @@ using UnityEngine;
 public class PuzzleWind : Rhythm
 {
     PooledObject poolObj;
-    public WindMachine _windGen;
+    public Items.WindMachine _windGen;
     ParticleSystem windParticles;
 
     public LayerMask ground;

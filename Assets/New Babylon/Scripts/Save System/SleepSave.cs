@@ -214,4 +214,21 @@ public class SleepSave : MonoBehaviour {
             //Debug.Log("finished loading!");
         }
     }
+
+    //go through sleep save lists and remove plant from everything
+    public void AddPlant(Plont plant)
+    {
+        mySaveStorage.plants.Add(plant.gameObject);
+        mySaveStorage.plantScripts.Add(plant);
+        mySaveStorage.plantType.Add(plant.myPlantType.ToString());
+    }
+
+    //go through sleep save lists and remove plant from everything
+    public void RemovePlant(Plont plant )
+    {
+        int indexToRemove = mySaveStorage.plants.IndexOf(plant.gameObject);
+        mySaveStorage.plants.Remove(plant.gameObject);
+        mySaveStorage.plantScripts.Remove(plant);
+        mySaveStorage.plantType.RemoveAt(indexToRemove);
+    }
 }

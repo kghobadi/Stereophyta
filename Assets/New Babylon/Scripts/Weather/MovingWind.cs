@@ -29,18 +29,19 @@ public class MovingWind : Rhythm {
             }
             StartCoroutine(DissipateWind());
         }
+
         AdjustHeight();
     }
 
     void AdjustHeight()
     {
-        Vector3 down = transform.TransformDirection(Vector3.down) * 10;
+        Vector3 down = transform.TransformDirection(Vector3.down);
 
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, down, out hit, 150f))
+        if (Physics.Raycast(transform.position, down, out hit, Mathf.Infinity))
         {
-            if (hit.transform.gameObject.tag == "Ground")
+            if (hit.transform.gameObject.tag == "Ground" || hit.transform.gameObject.tag == "Water")
             {
                 transform.position = hit.point + new Vector3(0, 5f, 0);
             }

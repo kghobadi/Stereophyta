@@ -71,15 +71,18 @@ public class Inventory : MonoBehaviour {
     public bool changedRhythm;
 
     void Awake()
-    {
-        //Debug.Log("hello I am here PLEASE FIND ME !");  
-    }
-
-    void Start () {
+    { 
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        inventoryAudio = GetComponent<AudioSource>();
 
+        //rhythm indicator
+        rhythmIndicator = rhythmSR.GetComponent<Animator>();
+        rhythmFader = rhythmSR.GetComponent<FadeSprite>();
+    }
+
+    void Start () {
         //if have tools
         if(myTools.Count > 0)
         {
@@ -108,12 +111,6 @@ public class Inventory : MonoBehaviour {
         }
         seedInvVisual.SetActive(false);
         fadeSeeds = FadeOutSeedVis();
-
-        inventoryAudio = GetComponent<AudioSource>();
-
-        //rhythm indicator
-        rhythmIndicator = rhythmSR.GetComponent<Animator>();
-        rhythmFader = rhythmSR.GetComponent<FadeSprite>();
     }
 	
 	void Update () {
@@ -140,7 +137,7 @@ public class Inventory : MonoBehaviour {
             }
             //switch current item -
             if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchSeeds 
-                && currenSeedObj.GetComponent<Item>().CheckSeedPlanting() && CheckPlayerHasSeed() >= 2)
+                && currenSeedObj.GetComponent<Item>().CheckSeedPlanting() && CheckPlayerHasSeed() >= 1)
             {
                 SwitchSeed(true);
             }
@@ -257,7 +254,11 @@ public class Inventory : MonoBehaviour {
     //switches thru tools
     public void SwitchTool(bool posOrNeg)
     {
-        currentToolObj.SetActive(false);
+        //deactivate all tools 
+        for(int i = 0; i < myTools.Count; i++)
+        {
+            myTools[i].SetActive(false);
+        }
 
         //switch pos
         if (posOrNeg)

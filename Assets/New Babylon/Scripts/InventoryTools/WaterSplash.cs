@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using Items;
 
 public class WaterSplash : Rhythm {
     //player ref
@@ -78,9 +79,8 @@ public class WaterSplash : Rhythm {
                 if (other.GetComponent<Shroom>())
                 {
                     //change rhythm possible
-                    if (!other.GetComponent<Shroom>().changedRhythm)
-                        other.GetComponent<Shroom>().SwitchRhythm();
-
+                    other.GetComponent<Shroom>().SwitchRhythm();
+                    
                     other.GetComponent<Shroom>().ReleaseSpores();
                 }
             }
@@ -102,10 +102,7 @@ public class WaterSplash : Rhythm {
             if (other.gameObject.tag == "WindMachines")
             {
                 //dont want to change the tempo too many times
-                if (!other.gameObject.GetComponent<WindMachine>().changedRhythm)
-                {
-                    other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
-                }
+                other.gameObject.GetComponent<WindMachine>().IncreaseTempo();
             }
         }
       

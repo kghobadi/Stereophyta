@@ -3,102 +3,105 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-//abstract class to build tools from
-public abstract class Tool : MonoBehaviour {
-    //player vars
-    protected GameObject player;
-    protected ThirdPersonController tpc;
-    //audio source reference
-    protected AudioSource toolSource;
-    [Header("Tool Vars")]
-    public Animator toolAnimator;
-    //rhythm vars
-    public bool showRhythm;
-    public int timeScale;
-
-    //for adding to inventory
-    protected GameObject inventory;
-    protected Inventory inventoryScript;
-    public Sprite inventorySprite;
-    //is true once player picks it up
-    public bool playerWasNear, hasBeenAcquired;
-    public AudioClip pickupSound;
-    //for setting local transform under inventory
-    public Vector3 localPos, localRot, localScale;
-    //ui refs for pickup prompt
-    [Header("Initial Pickup Prompt")]
-    public Text pickUpText;
-    public string pickUpMessage;
-    public FadeUI[] interactPrompts;
-
-    public float interactDist = 10f;
-
-    //set tool refs in awake so that inventory can disable them at start
-    public virtual void Awake()
+namespace Items
+{
+    //abstract class to build tools from
+    public abstract class Tool : MonoBehaviour
     {
-        //player refs
-        player = GameObject.FindGameObjectWithTag("Player");
-        tpc = player.GetComponent<ThirdPersonController>();
+        //player vars
+        protected GameObject player;
+        protected ThirdPersonController tpc;
+        //audio source reference
+        protected AudioSource toolSource;
+        [Header("Tool Vars")]
+        public Animator toolAnimator;
+        //rhythm vars
+        public bool showRhythm;
+        public int timeScale;
 
-        toolSource = GetComponent<AudioSource>();
-        toolAnimator = GetComponent<Animator>();
-        toolAnimator.enabled = false;
+        //for adding to inventory
+        protected GameObject inventory;
+        protected Inventory inventoryScript;
+        public Sprite inventorySprite;
+        //is true once player picks it up
+        public bool playerWasNear, hasBeenAcquired;
+        public AudioClip pickupSound;
+        //for setting local transform under inventory
+        public Vector3 localPos, localRot, localScale;
+        //ui refs for pickup prompt
+        [Header("Initial Pickup Prompt")]
+        public Text pickUpText;
+        public string pickUpMessage;
+        public FadeUI[] interactPrompts;
 
-        //inventory ref
-        inventory = GameObject.FindGameObjectWithTag("Inventory");
-        inventoryScript = inventory.GetComponent<Inventory>();
-    }
+        public float interactDist = 10f;
 
-    //called to pick up tool for the first time
-    public virtual void PickUpTool(bool playSound)
-    {
-        hasBeenAcquired = true;
-      
-        //child to inventory & turn on animator
-        transform.SetParent(inventory.transform);
-        toolAnimator.enabled = true;
-
-        //set local transform
-        transform.localPosition = localPos;
-        transform.localEulerAngles = localRot;
-        transform.localScale = localScale;
-
-        //add to tools list,
-        inventoryScript.myTools.Add(gameObject);
-        inventoryScript.toolSprites.Add(inventorySprite);
-
-        //set current inventory Tool to this
-        if(inventoryScript.currentToolObj != null)
+        //set tool refs in awake so that inventory can disable them at start
+        public virtual void Awake()
         {
-            inventoryScript.currentToolObj.SetActive(false);
-        }
-          
-        inventoryScript.currentToolObj = gameObject;
-        inventoryScript.currentTool = inventoryScript.myTools.Count - 1;
-        inventoryScript.SetToolSprite();
+            //player refs
+            player = GameObject.FindGameObjectWithTag("Player");
+            tpc = player.GetComponent<ThirdPersonController>();
 
-        if (playSound)
-        {
-            //play this tools pickup sound
-            inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
+            toolSource = GetComponent<AudioSource>();
+            toolAnimator = GetComponent<Animator>();
+            toolAnimator.enabled = false;
+
+            //inventory ref
+            inventory = GameObject.FindGameObjectWithTag("Inventory");
+            inventoryScript = inventory.GetComponent<Inventory>();
         }
 
-        DeactivatePrompt();
-        //book notification??
-    }
+        //called to pick up tool for the first time
+        public virtual void PickUpTool(bool playSound)
+        {
+            hasBeenAcquired = true;
 
-    public void OnEnable()
-    {
-        SimpleClock.ThirtySecond += OnThirtySecond;
-    }
+            //child to inventory & turn on animator
+            transform.SetParent(inventory.transform);
+            toolAnimator.enabled = true;
 
-    public void OnDisable()
-    {
-        SimpleClock.ThirtySecond -= OnThirtySecond;
-    }
+            //set local transform
+            transform.localPosition = localPos;
+            transform.localEulerAngles = localRot;
+            transform.localScale = localScale;
 
-    public virtual void OnThirtySecond(BeatArgs e)
-    {
+            //add to tools list,
+            inventoryScript.myTools.Add(gameObject);
+            inventoryScript.toolSprites.Add(inventorySprite);
+
+            //set current inventory Tool to this
+            if (inventoryScript.currentToolObj != null)
+            {
+                inventoryScript.currentToolObj.SetActive(false);
+            }
+
+            inventoryScript.currentToolObj = gameObject;
+            inventoryScript.currentTool = inventoryScript.myTools.Count - 1;
+            inventoryScript.SetToolSprite();
+
+            if (playSound)
+            {
+                //play this tools pickup sound
+                inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
+            }
+
+            DeactivatePrompt();
+            //book notification??
+        }
+
+        public void OnEnable()
+        {
+            SimpleClock.ThirtySecond += OnThirtySecond;
+        }
+
+        public void OnDisable()
+        {
+            SimpleClock.ThirtySecond -= OnThirtySecond;
+        }
+
+        public virtual void OnThirtySecond(BeatArgs e)
+        {
             switch (timeScale)
             {
                 case 0:
@@ -137,88 +140,90 @@ public abstract class Tool : MonoBehaviour {
                     }
                     break;
             }
-    }
+        }
 
-    public virtual void Update ()
-    {
-        //just for pick up logic 
-        if (!hasBeenAcquired)
+        public virtual void Update()
         {
-            //dist from player
-            float dist = Vector3.Distance(transform.position, player.transform.position);
-            //if player is close
-            if(dist < interactDist)
+            //just for pick up logic 
+            if (!hasBeenAcquired)
             {
-                playerWasNear = true;
-                //so switch inv is not called 
-                inventoryScript.canSwitchTools = false;
-                inventoryScript.inputTimerT = 0.25f;
-
-                //fade in those prompts
-                if (pickUpText.color.a < 0.5f)
-                    ShowPickupPrompt();
-
-                //pick up when player presses E
-                if (Input.GetKeyDown(KeyCode.E))
+                //dist from player
+                float dist = Vector3.Distance(transform.position, player.transform.position);
+                //if player is close
+                if (dist < interactDist)
                 {
-                    PickUpTool(true);
+                    playerWasNear = true;
+                    //so switch inv is not called 
+                    inventoryScript.canSwitchTools = false;
+                    inventoryScript.inputTimerT = 0.25f;
+
+                    //fade in those prompts
+                    if (pickUpText.color.a < 0.5f)
+                        ShowPickupPrompt();
+
+                    //pick up when player presses E
+                    if (Input.GetKeyDown(KeyCode.E))
+                    {
+                        PickUpTool(true);
+                    }
+                }
+                //player has left
+                else if (dist > (interactDist + 5f))
+                {
+                    //fade out prompts
+                    if (playerWasNear)
+                    {
+                        DeactivatePrompt();
+                        playerWasNear = false;
+                    }
+
                 }
             }
-            //player has left
-            else if(dist > (interactDist + 5f))
+
+            //tool time scale always equal to that of the inventory 
+            if (hasBeenAcquired)
             {
-                //fade out prompts
-                if (playerWasNear)
-                {
-                    DeactivatePrompt();
-                    playerWasNear = false;
-                }
-               
+                timeScale = inventoryScript.toolTimeScale;
             }
         }
 
-        //tool time scale always equal to that of the inventory 
-        if (hasBeenAcquired)
+        //this will be filled in by each tool individually
+        public virtual void MainAction()
         {
-            timeScale = inventoryScript.toolTimeScale;
+
         }
-	}
 
-    //this will be filled in by each tool individually
-    public virtual void MainAction()
-    {
-
-    }
-
-    public virtual void PlaySound(AudioSource audSource, AudioClip[] sounds)
-    {
-        int randomSound = Random.Range(0, sounds.Length);
-        audSource.PlayOneShot(sounds[randomSound]);
-    }
-
-
-    //pick up prompt for when player is near 
-    void ShowPickupPrompt()
-    {
-        //Debug.Log("show pickup prompt");
-        //set text prompt
-        pickUpText.text = pickUpMessage;
-
-        //fade em in
-        for (int i = 0; i < interactPrompts.Length; i++)
+        public virtual void PlaySound(AudioSource audSource, AudioClip[] sounds)
         {
-            interactPrompts[i].FadeIn();
+            int randomSound = Random.Range(0, sounds.Length);
+            audSource.PlayOneShot(sounds[randomSound]);
         }
-    }
 
-    //turn off prompt
-    void DeactivatePrompt()
-    {
-        //Debug.Log("deactivating prompt");
-        //fade em out
-        for (int i = 0; i < interactPrompts.Length; i++)
+
+        //pick up prompt for when player is near 
+        void ShowPickupPrompt()
         {
-            interactPrompts[i].FadeOut();
+            //Debug.Log("show pickup prompt");
+            //set text prompt
+            pickUpText.text = pickUpMessage;
+
+            //fade em in
+            for (int i = 0; i < interactPrompts.Length; i++)
+            {
+                interactPrompts[i].FadeIn();
+            }
+        }
+
+        //turn off prompt
+        void DeactivatePrompt()
+        {
+            //Debug.Log("deactivating prompt");
+            //fade em out
+            for (int i = 0; i < interactPrompts.Length; i++)
+            {
+                interactPrompts[i].FadeOut();
+            }
         }
     }
+
 }

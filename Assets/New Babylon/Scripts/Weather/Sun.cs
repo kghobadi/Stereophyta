@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Audio;
+using UnityEngine.Events;
 
 public class Sun : MonoBehaviour
 {
@@ -17,9 +18,10 @@ public class Sun : MonoBehaviour
     PlayerCameraController cammy;
     GameObject _player;
     ThirdPersonController tpc;
-    
+
     //rotation speed refs
     [Header("Sun rotation & time states")]
+    public UnityEvent newDay;
     public Transform rotation;
     public float rotationSpeed = 10, sleepRotation, normalRotation;
     //day counters
@@ -69,30 +71,31 @@ public class Sun : MonoBehaviour
     //sun saver anim
     public FadeUI sunSaver;
     public FadeUItmp sunSavingText, sunSavingOutline;
-    
-    void Start()
+
+    void Awake()
     {
-        Random.InitState(System.DateTime.Now.Millisecond);
         //clock ref
         clock = GameObject.FindGameObjectWithTag("Clock").GetComponent<SimpleClock>();
-        clockBPM = (int)clock.BPM;
-
         //player refs
         _player = GameObject.FindGameObjectWithTag("Player");
         tpc = _player.GetComponent<ThirdPersonController>();
+        //stars
+        starParticles = stars.GetComponent<ParticleSystem>();
+    }
 
+    void Start()
+    {
+        //random setting & clock bpm 
+        Random.InitState(System.DateTime.Now.Millisecond);
+        clockBPM = (int)clock.BPM;
+        
         //set lighting settings to morning at start
         RenderSettings.ambientLight = ambientMorn;
 		sun.color = morn;
 
         //find the total diameter of the suns rotation path
         rotationDiameter = Mathf.Abs(transform.position.x * 2);
-
-        //stars
-        starParticles = stars.GetComponent<ParticleSystem>();
-        //stars.SetActive(true);
-        //starParticles.Stop();
-
+        
         timeState = TimeState.MORNING;
 
         //set dayCounter to saved player pref
@@ -125,7 +128,7 @@ public class Sun : MonoBehaviour
         transform.RotateAround(Vector3.zero, Vector3.forward, rotationSpeed * Time.deltaTime);
 
         //always look at center of the map
-        transform.LookAt(tpc.transform);
+        transform.LookAt(Vector3.zero);
 
         CheckSunsRotation();
     }
@@ -207,6 +210,7 @@ public class Sun : MonoBehaviour
     //called every morning
     void NewDay()
     {
+        newDay.Invoke();
         dayCounter++;
         //set day counter player pref
         PlayerPrefs.SetInt("dayCounter", dayCounter);
@@ -215,7 +219,7 @@ public class Sun : MonoBehaviour
         SetClockBPM();
         RandomizeSkybox();
         RandomizeWinds();
-        //RandomizeRains();
+        RandomizeOcean();
 
         //subtract from player's days to sleep
         if (tpc.sleeping)
@@ -267,19 +271,23 @@ public class Sun : MonoBehaviour
         
         SwitchWinds(windCounter);
 
+        //randomize time scales of all winds
+        for(int i = 0; i < windDirections[windCounter].transform.childCount; i++)
+        {
+            if (windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().randomizes)
+            {
+                windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
+            }
+        }
+    }
+
+    void RandomizeOcean()
+    {
         //set ocean source
         AudioClip randomOceanSound = oceanSounds[Random.Range(0, oceanSounds.Length)];
         oceanSource.Stop();
         oceanSource.clip = randomOceanSound;
         oceanSource.Play();
-
-        //randomize time scales of all winds
-        for(int i = 0; i < windDirections[windCounter].transform.childCount; i++)
-        {
-            int randomScale = Random.Range(0, 4);
-            windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().timeScale = randomScale;
-            windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
-        }
     }
 
     //sets wind direction active globally 
@@ -334,6 +342,8 @@ public class Sun : MonoBehaviour
                 break;
         }
     }
+
+    //Could set the wind directions to cycle every day in order, as if it were a clock. 4 beats... N E S W N E S W
 
     //randomizes skybox for the new day 
     void RandomizeSkybox()

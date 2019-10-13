@@ -17,12 +17,13 @@ public class Plont : MonoBehaviour {
     ThirdPersonController tpc;
     SleepSave saveScript;
     public bool startingPlant;
+    int enableCounter;
 
     //tgs logic
+    [HideInInspector] public TerrainGridSystem tgs;
+    [HideInInspector] public GridManager gridMan;
+    [HideInInspector] public Zone myZone;
     [Header("TGS")]
-    public TerrainGridSystem tgs;
-    public GridManager gridMan;
-    public Zone myZone;
     public bool plantedOnGrid;
     public int cellIndex;
 
@@ -51,7 +52,7 @@ public class Plont : MonoBehaviour {
     public int myAge;
     public int currentStage;
     public int nextStage;
-    public bool dayPassed, hasBeenWatered;
+    public bool hasBeenWatered;
     public GrowthStages[] myGrowthStages;
     public AudioClip[] stageSounds;
     public AudioClip sicknessSound;
@@ -78,39 +79,25 @@ public class Plont : MonoBehaviour {
     {
         PIANO, BLISTERPIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR, TRUMPET
     }
-    
-	void Start () {
-        Random.InitState(System.DateTime.Now.Millisecond);
+
+    void Awake()
+    {
         //hail the sun
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
-
+        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();  
+        
         //tgs refs
-        if(tgs == null)
+        if (tgs == null)
         {
             tgs = tpc.currentTGS;
             gridMan = tgs.transform.parent.GetComponent<GridManager>();
             myZone = tpc.currentZone;
         }
-      
-        groundTexture = gridMan.groundTexture;
-        wateredTexture = gridMan.wateredTexture;
-        plantedTexture = gridMan.plantedTexture;
-
-        //add data to save script
-        if (!startingPlant)
-        {
-            saveScript.mySaveStorage.plants.Add(gameObject);
-            saveScript.mySaveStorage.plantScripts.Add(this);
-            saveScript.mySaveStorage.plantType.Add(myPlantType.ToString());
-            //Debug.Log("added this plant to save storage");
-        }
 
         //colliders and rigibodys
         plantBody = GetComponent<Rigidbody>();
-        plantBody.isKinematic = true;
         plantCollider = GetComponent<BoxCollider>();
         if (!animatorInChildren)
         {
@@ -120,12 +107,36 @@ public class Plont : MonoBehaviour {
         //grab audio sources
         plantSource = GetComponent<AudioSource>();
         extraVoice = transform.GetChild(1).GetComponent<AudioSource>();
+        soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
+
+        //get the obj poolers
+        FindObjPoolers();
+    }
+
+    void Start () {
+        Random.InitState(System.DateTime.Now.Millisecond);
+        sun.newDay.AddListener(DayPass);
+        //add to zone list 
+        if (!myZone.plants.Contains(gameObject))
+            myZone.plants.Add(gameObject);
+        transform.SetParent(myZone.plantParent);
+
+        //set tgs textures 
+        groundTexture = gridMan.groundTexture;
+        wateredTexture = gridMan.wateredTexture;
+        plantedTexture = gridMan.plantedTexture;
+
+        //add data to save script
+        if (!startingPlant)
+        {
+            saveScript.AddPlant(this);
+        }
         
         //scale and set stages
         originalScale = transform.localScale;
+        plantBody.isKinematic = true;
         myAge = 0;
         currentStage = 0;
-        soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
         soundPlaying.Stop();
 
         //turn off all the crop bundles at start
@@ -133,14 +144,7 @@ public class Plont : MonoBehaviour {
         {
             cropBundles[i].SetActive(false);
         }
-
-        //get the obj pooler
-        FindObjPoolers();
-        if (GetComponent<PooledObject>())
-        {
-            plontPooler = GetComponent<PooledObject>().m_ObjectPooler;
-        }
-
+        
         // higher chance to spawn seeds, plant grows as fast as possible 
         if (plantedOnGrid)
         {
@@ -160,6 +164,20 @@ public class Plont : MonoBehaviour {
         PlayPlantingEffect();
         GrowPlant(true, true);
     }
+    
+    //use to reset plant 
+    void OnEnable()
+    {
+        if(enableCounter > 0)
+        {
+            if (myAge > 0)
+            {
+                ResetPlantAge();
+            }
+        }
+
+        enableCounter++;
+    }
 
     void FindObjPoolers()
     {
@@ -172,43 +190,15 @@ public class Plont : MonoBehaviour {
                 seedPooler = objPools[i].GetComponent<ObjectPooler>();
             }
         }
+
+        if (GetComponent<PooledObject>())
+        {
+            plontPooler = GetComponent<PooledObject>().m_ObjectPooler;
+        }
     }
 
-    public void Update() {
+    void Update() {
         
-        //counting days is hard work
-        if (sun.dayCounter > sun.yesterday)
-        {
-            if (!dayPassed)
-            {
-                //increment age (within stage)
-                myAge++;
-
-                //reset watered vars
-                hasBeenWatered = false;
-
-                //ground texture
-                if (plantedOnGrid)
-                {
-                    tgs.CellToggleRegionSurface(cellIndex, true, plantedTexture);
-                }
-                
-                //reached next stage, grow
-                if (myAge == nextStage)
-                {
-                    GrowPlant(true, true);
-                }
-
-                dayPassed = true;
-            }
-        }
-
-        //resets day passed when sun increments its day counter ahead of its yesterday int
-        if (sun.yesterday == sun.dayCounter)
-        {
-            dayPassed = false;
-        }
-
         //lerps scale up as plants grow
         if (growing)
         {
@@ -222,80 +212,110 @@ public class Plont : MonoBehaviour {
         }
 	}
 
+    //called when sun invokes NewDay()
+    public void DayPass()
+    {
+        //increment age (within stage)
+        myAge++;
+
+        //reset watered vars
+        hasBeenWatered = false;
+
+        //ground texture
+        if (plantedOnGrid)
+        {
+            tgs.CellToggleRegionSurface(cellIndex, true, plantedTexture);
+        }
+
+        //reached next stage, grow
+        if (myAge == nextStage)
+        {
+            GrowPlant(true, true);
+        }
+
+        //Debug.Log("plant day passed");
+    }
+
+    //called within Plont or by other objects 
     public void GrowPlant(bool growOrShrink, bool spawnSeeds)
     {
         //grow
         if (growOrShrink)
         {
-            //increment current stage based on number of growth stages
-            if (currentStage < myGrowthStages.Length - 1)
-            {
-                //set active next crop bundle
-                if (cropBundles[currentStage] != null)
-                    cropBundles[currentStage].SetActive(true);
-
-                currentStage++;
-
-                //if older than 1
-                if(currentStage > 1)
-                {
-                    //random chance to spawn a seed each time plant ages
-                    float randomSpawn = Random.Range(0, 100);
-
-                    if (randomSpawn < seedSpawnChance && spawnSeeds)
-                    {
-                        SpawnSeed();
-                    }
-                }
-
-                //set growing 
-                newScale = (originalScale * currentStage) / 1.5f;
-                growing = true;
-
-                SetNextStage();
-            }
-            //time to die!
-            else
-            {
-                //a little less than total # of crop bundles on plant death
-                int randomDrop = Random.Range(cropBundles.Length - 3, cropBundles.Length);
-                //spawn a bunch of seeds and die
-                for (int i = 0; i < randomDrop; i++)
-                {
-                    SpawnSeed();
-                }
-
-                //from old age
-                Die();
-            }
+            Grow(spawnSeeds);
         }
         //shrink
         else
         {
-            //high chance to spawn seed when cut // always drops when plant is on last life
-            float randomChance = Random.Range(0, 100);
-            if (randomChance > 50 || currentStage == 1)
-            {
-                CutCrop();
-            }
-            
-            //Debug.Log("shrinking!!");
-            //increment current stage based on number of growth stages
+            Shrink();
+        }
+    }
+
+    void Grow(bool spawnsSeeds)
+    {
+        //increment current stage based on number of growth stages
+        if (currentStage < myGrowthStages.Length - 1)
+        {
+            //set active next crop bundle
+            if (cropBundles[currentStage] != null)
+                cropBundles[currentStage].SetActive(true);
+
+            currentStage++;
+
+            //if older than 1
             if (currentStage > 1)
             {
-                currentStage--;
+                //random chance to spawn a seed each time plant ages
+                float randomSpawn = Random.Range(0, 100);
 
-                //set scale to lower value 
-                transform.localScale = (originalScale * currentStage) / 1.5f;
-
-                SetNextStage();
+                if (randomSpawn < seedSpawnChance && spawnsSeeds)
+                {
+                    SpawnSeed();
+                }
             }
-            //time to die!
-            else
+
+            //set growing 
+            newScale = (originalScale * currentStage) / 1.5f;
+            growing = true;
+
+            SetNextStage();
+        }
+        //time to die!
+        else
+        {
+            //a little less than total # of crop bundles on plant death
+            int randomDrop = Random.Range(cropBundles.Length - 3, cropBundles.Length);
+            //spawn a bunch of seeds and die
+            for (int i = 0; i < randomDrop; i++)
             {
-                //from cutting down
-                Die();
+                SpawnSeed();
             }
+
+            //from old age
+            Die();
+        }
+    }
+
+    void Shrink()
+    {
+        //high chance to spawn seed when cut // always drops when plant is on last life
+        CutCrop();
+
+        //increment current stage based on number of growth stages
+        if (currentStage > 1)
+        {
+            currentStage--;
+
+            //set scale to lower value 
+            transform.localScale = (originalScale * currentStage) / 1.5f;
+
+            SetNextStage();
+        }
+        //time to die!
+        else
+        {
+            //from cutting down
+            Die();
         }
     }
 
@@ -318,6 +338,14 @@ public class Plont : MonoBehaviour {
 
         //set particles duration to our current audio clip's length
         StartCoroutine(WaitToSetParticles());
+    }
+
+    //reset age to 0 and size to original 
+    void ResetPlantAge()
+    {
+        myAge = 0;
+        currentStage = 0;
+        transform.localScale = originalScale;
     }
 
     //this is to fix that assertion error i was getting constantly
@@ -363,10 +391,15 @@ public class Plont : MonoBehaviour {
     //called when chop and when plant dies
     public void CutCrop()
     {
-        if(cropBundles[currentStage].activeSelf)
-            cropBundles[currentStage].SetActive(false);
-        //SPAWN SEED HERE
-        SpawnSeed();
+        float randomChance = Random.Range(0, 100);
+        if (randomChance > 50 || currentStage == 1)
+        {
+            //SPAWN SEED HERE
+            SpawnSeed();
+        }
+
+        if (cropBundles[currentStage - 1] != null)
+            cropBundles[currentStage - 1].SetActive(false);
     }
 
     //called by water or rains
@@ -391,17 +424,17 @@ public class Plont : MonoBehaviour {
         //Debug.Log("Rip " + gameObject.name);
         if (!startingPlant)
         {
-            //go through sleep save lists and remove me from everything
-            int indexToRemove = saveScript.mySaveStorage.plants.IndexOf(gameObject);
-            saveScript.mySaveStorage.plants.Remove(gameObject);
-            saveScript.mySaveStorage.plantScripts.Remove(this);
-            saveScript.mySaveStorage.plantType.RemoveAt(indexToRemove);
+            saveScript.RemovePlant(this);
         }
         //auto drop seeds on death
         else
         {
             SpawnSeed();
         }
+
+        //remove from zone list 
+        if(myZone.plants.Contains(gameObject))
+            myZone.plants.Remove(gameObject);
 
         //return to pool or destroy if no pool
         if (plontPooler)
@@ -417,10 +450,11 @@ public class Plont : MonoBehaviour {
     //spawn seed from object pooler script 
     void SpawnSeed()
     {
-        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
+        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 1 + new Vector3(0, 1, 0);
         GameObject newSeed = seedPooler.GrabObject();
-        newSeed.GetComponent<Seed>().plontPooler = plontPooler;
         newSeed.transform.position = spawnPos;
+        newSeed.GetComponent<Seed>().plontPooler = plontPooler;
+        newSeed.GetComponent<Seed>().SeedFall();
     }
 
     //plays the dirt planting effect at start
@@ -468,7 +502,7 @@ public class Plont : MonoBehaviour {
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f))
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
         {
             if (hit.transform.gameObject.tag == "Ground")
             {
@@ -477,4 +511,5 @@ public class Plont : MonoBehaviour {
             }
         }
     }
+
 }

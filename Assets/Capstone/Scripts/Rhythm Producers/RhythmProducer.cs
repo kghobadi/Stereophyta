@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class RhythmProducer : MonoBehaviour {
+public abstract class RhythmProducer : AudioHandler {
     protected Sun sunScript;
     protected GameObject player;
     protected ThirdPersonController tpc;
 
     public AudioClip[] basicBeats;
-    protected AudioSource beatSource;
     
     protected bool playedAudio, showRhythm;
 
@@ -18,8 +17,9 @@ public abstract class RhythmProducer : MonoBehaviour {
 
     protected int lastBPM;
 
-    public virtual void Awake()
+    public override void Awake()
     {
+        base.Awake();
         sunScript = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
@@ -92,7 +92,7 @@ public abstract class RhythmProducer : MonoBehaviour {
         }
         else
         {
-            if (!beatSource.isPlaying)
+            if (!myAudioSource.isPlaying)
             {
                 SwitchTimeScale();
                 playedAudio = false;

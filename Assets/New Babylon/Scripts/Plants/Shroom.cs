@@ -14,7 +14,6 @@ public class Shroom : RhythmProducer
     PooledObject _pooledObj;
     public float heightAdjust = 0;
     //player and sun ref
-    Sun sun;
     public bool hasReleasedSpores;
 
     //for inv
@@ -22,9 +21,9 @@ public class Shroom : RhythmProducer
     public int mySeedIndex;
 
     //tgs logic
-    TerrainGridSystem tgs;
-    Zone myZone;
-    GridManager gridMan;
+    [HideInInspector] public TerrainGridSystem tgs;
+    [HideInInspector] public Zone myZone;
+    [HideInInspector] public GridManager gridMan;
     [Header("TGS")]
     public bool plantedOnGrid;
     public int cellIndex;
@@ -40,6 +39,7 @@ public class Shroom : RhythmProducer
     //physics
     Rigidbody shroomBody;
     BoxCollider shroomCol;
+    float vortexOrig = 7.5f;
     float vortexSpeed = 7.5f;
     
     //lerp bools
@@ -61,16 +61,9 @@ public class Shroom : RhythmProducer
     public bool blowing;
     bool breathingIn, breathingOut;
     public float breatheSpeedFlat, currentBreatheSpeed, breatheDistance;
-    //rhythm indicator
-    SpriteRenderer rhythmSR;
-    Animator rhythmIndicator;
-    FadeSprite rhythmFader;
-    //timers for how long indicator appears
-    public bool changedRhythm;
 
     //for shroom growth 
     public int myAge, deathDay;
-    public bool dayPassed;
 
     //audio for shroom
     AudioSource shroomSource;
@@ -94,48 +87,57 @@ public class Shroom : RhythmProducer
     public ParticleSystem shroomSpores;
     ParticleSystem.MainModule sporeMain;
     ShroomSpores sporeScript;
-    
-    void Start()
-    {
-        //player and environment 
-        sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
-        player = GameObject.FindGameObjectWithTag("Player");
-        tpc = player.GetComponent<ThirdPersonController>();
-        inventoryScript = tpc.myInventory;
 
-        //tgs refs
-        tgs = tpc.currentTGS;
-        myZone = tpc.currentZone;
-        gridMan = tgs.transform.parent.GetComponent<GridManager>();
-        groundTexture = gridMan.groundTexture;
+    public override void Awake()
+    {
+        base.Awake();
 
         //shroom phsyx 
         shroomCol = GetComponent<BoxCollider>();
         shroomBody = GetComponent<Rigidbody>();
         shroomAnimator = GetComponent<Animator>();
         shroomMR = GetComponent<MeshRenderer>();
-        myShroomShader = shroomMR.material;
         shroomSource = GetComponent<AudioSource>();
 
-        //rhythm indicator
-        rhythmSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
-        rhythmIndicator = rhythmSR.GetComponent<Animator>();
-        rhythmFader = rhythmSR.GetComponent<FadeSprite>();
+        //particles
         beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
+        shroomSpores = transform.GetChild(1).GetComponent<ParticleSystem>();
+        sporeScript = shroomSpores.GetComponent<ShroomSpores>();
+        
+        //tgs refs
+        if (tgs == null)
+        {
+            tgs = tpc.currentTGS;
+            myZone = tpc.currentZone;
+            gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        }
+    }
 
+    void Start()
+    {
+        //day passed listener
+        sunScript.newDay.AddListener(DayPassed);
+
+        //add to zone list 
+        if (!myZone.shrooms.Contains(gameObject))
+            myZone.shrooms.Add(gameObject);
+        transform.SetParent(myZone.shroomParent);
+
+        //player and environment 
+        inventoryScript = tpc.myInventory;
+        groundTexture = gridMan.groundTexture;
+        myShroomShader = shroomMR.material;
         FindPoolers();
 
         //spores
-        shroomSpores = transform.GetChild(1).GetComponent<ParticleSystem>();
         sporeMain = shroomSpores.main;
-        sporeScript = shroomSpores.GetComponent<ShroomSpores>();
         if(sporeScript.shroomParent == null)
         {
             sporeScript.shroomParent = this;
             sporeScript.shroomPool = shroomPooler;
             sporeScript.seedIndex = mySeedIndex;
         }
-
+        
         AdjustHeight();
         SetShroom();
     }
@@ -154,8 +156,6 @@ public class Shroom : RhythmProducer
         //they are alive and breathing --- not in inventory 
         if (plantingState == PlantingState.PLANTED)
         {
-            CheckGrowth();
-            
             //distance check 
             if (Vector3.Distance(transform.position, player.transform.position) < breatheDistance)
             {
@@ -195,26 +195,12 @@ public class Shroom : RhythmProducer
                     }
                 }
             }
-
-            //for rhythm visual
-            if (changedRhythm)
-            {
-                disappearTimer -= Time.deltaTime;
-
-                //fade out visual
-                if (disappearTimer < 0)
-                {
-                    rhythmFader.FadeOut();
-                    changedRhythm = false;
-                }
-            }
+            
         }
 
         //after they have been cut up by player (waiting to be vortexed)
         else if(plantingState == PlantingState.UNPLANTED)
         {
-            CheckGrowth();
-
             //hard coded spin animation
             if (!blowing)
             {
@@ -250,42 +236,31 @@ public class Shroom : RhythmProducer
         }
     }
 
-    void CheckGrowth()
+    //called when sun.newDay is invoked
+    void DayPassed()
     {
-        //counting days is hard work
-        if (sun.dayCounter > sun.yesterday)
+        //increment age (within stage)
+        myAge++;
+
+        //reset spore release
+        hasReleasedSpores = false;
+
+        SwitchRhythm();
+
+        //reached next stage, grow
+        if (myAge == deathDay && plantingState != PlantingState.UNPLANTED)
         {
-            if (!dayPassed)
-            {
-                //increment age (within stage)
-                myAge++;
-
-                //reset spore release
-                hasReleasedSpores = false;
-
-                SwitchRhythm();
-
-                //reached next stage, grow
-                if (myAge == deathDay && plantingState != PlantingState.UNPLANTED)
-                {
-                    ReleaseSpores();
-                    StartCoroutine(WaitToUproot());
-                }
-
-                //return to pool 
-                if(myAge > deathDay && plantingState == PlantingState.UNPLANTED)
-                {
-                    shroomPooler.ReturnObject(gameObject);
-                }
-
-                dayPassed = true;
-            }
+            ReleaseSpores();
+            StartCoroutine(WaitToUproot());
         }
 
-        //resets day passed when sun increments its day counter ahead of its yesterday int
-        if (sun.yesterday == sun.dayCounter)
+        //return to pool 
+        if (myAge > deathDay && plantingState == PlantingState.UNPLANTED)
         {
-            dayPassed = false;
+            //remove from zone list 
+            if (myZone.shrooms.Contains(gameObject))
+                myZone.shrooms.Remove(gameObject);
+            shroomPooler.ReturnObject(gameObject);
         }
     }
     
@@ -349,14 +324,14 @@ public class Shroom : RhythmProducer
 
         //random start rhythm
         timeScale = Random.Range(0, 5);
-        SetVisualRhythm();
 
         //set breathe speed
         SetBreatheSpeed();
+        vortexSpeed = vortexOrig;
         
         //random lifespan 
         deathDay = Random.Range(3, 5);
-
+        
         //end
         shroomMR.material = myShroomShader;
         plantingState = PlantingState.PLANTED;
@@ -379,8 +354,6 @@ public class Shroom : RhythmProducer
         }
 
         SetBreatheSpeed();
-
-        SetVisualRhythm();
     }
 
     void SetBreatheSpeed()
@@ -395,25 +368,7 @@ public class Shroom : RhythmProducer
             currentBreatheSpeed = breatheSpeedFlat * timeScale;
         }
     }
-
-    //called whenever rhythm is changed;
-    public void SetVisualRhythm()
-    {
-        rhythmIndicator.SetInteger("Level", timeScale);
-
-        changedRhythm = true;
-        disappearTimer = disappearTimerTotal;
-
-        //only if player is close by, show the indicator
-        if (Vector3.Distance(transform.position, tpc.transform.position) < 10f)
-        {
-            if (plantingState == PlantingState.PLANTED)
-            {
-                rhythmFader.FadeIn();
-            }
-        }
-    }
-
+    
     IEnumerator WaitToUproot()
     {
         yield return new WaitForSeconds(1f);
@@ -438,6 +393,7 @@ public class Shroom : RhythmProducer
         shroomMR.material = uprootMat;
         shroomAnimator.enabled = false;
 
+        transform.SetParent(null);
         transform.localScale = originalSize / 1.5f;
 
         shroomSource.pitch = Random.Range(0.8f, 1.2f);
@@ -460,15 +416,6 @@ public class Shroom : RhythmProducer
                 hasReleasedSpores = true;
             }
         }
-       
-        
-        //glow material 
-
-        //if on grid, auto plant spore on vertex pos of This Cell # 
-        //if no vertex pos open, spores can't plant here & die
-
-        //wiggle animation -- rotates particles and everythang... may want to detach model from script eventualmente
-        //shroomAnimator.SetTrigger("wiggle");
     }
 
     //called when vortexing reaches player

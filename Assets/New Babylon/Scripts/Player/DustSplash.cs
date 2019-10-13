@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using Items;
 
 public class DustSplash : Rhythm {
     AudioSource splashAudio;
@@ -71,9 +72,7 @@ public class DustSplash : Rhythm {
             if (other.GetComponent<Shroom>())
             {
                 //change rhythm possible
-                if(!other.GetComponent<Shroom>().changedRhythm)
-                    other.GetComponent<Shroom>().SwitchRhythm();
-
+                other.GetComponent<Shroom>().SwitchRhythm();
                 other.GetComponent<Shroom>().ReleaseSpores();
             }
 

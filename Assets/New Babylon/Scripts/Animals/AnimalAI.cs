@@ -5,14 +5,12 @@ using UnityEngine.AI;
 
 //Generic Animal script from which all animals inherit base movement and audio controls
 
-public abstract class AnimalAI : MonoBehaviour {
+public abstract class AnimalAI : AudioHandler {
     //player reference
     protected GameObject player;
     protected Sun sunScript;
 
     //privately referenced usable components of this game object
-    [HideInInspector]
-    public AudioSource animalAudio;
     protected Animator animator;
 
     [Header("Animal Type & AI State")]
@@ -59,18 +57,21 @@ public abstract class AnimalAI : MonoBehaviour {
     public float lerpSpeed;
     public LayerMask grounded;
 
-	public virtual void Start () {
+	public override void Awake () {
+        base.Awake();
         //hail the sun
         sunScript = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         //find our player!
         player = GameObject.FindGameObjectWithTag("Player");
 
         //get our various components
-        animalAudio = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         myNavMesh = GetComponent<NavMeshAgent>();
         myMR = GetComponentInChildren<SkinnedMeshRenderer>();
+    }
 
+    public virtual void Start()
+    {
         //set position and speed for navmesh movement!
         origPosition = transform.position;
         animator.speed = 1f;
@@ -80,7 +81,7 @@ public abstract class AnimalAI : MonoBehaviour {
 
         //random start state
         float randomStartMove = Random.Range(0, 100);
-        if(randomStartMove > 50)
+        if (randomStartMove > 50)
         {
             animalState = AnimalAIStates.MOVING;
         }
@@ -184,7 +185,7 @@ public abstract class AnimalAI : MonoBehaviour {
 
         if (nextNoteIn < 0)
         {
-            PlaySound(sounds);
+            PlayRandomSound(sounds, 1f);
 
             nextNoteIn = soundTimerTotal;
         }
@@ -193,7 +194,7 @@ public abstract class AnimalAI : MonoBehaviour {
     //lerps the animals colors 
     public virtual void SetLerpColor(Color audible, Color silent)
     {
-        if (animalAudio.isPlaying)
+        if (myAudioSource.isPlaying)
         {
             myMR.material.color = Color.Lerp(myMR.material.color, audible, Time.deltaTime * lerpSpeed);
         }
@@ -279,14 +280,7 @@ public abstract class AnimalAI : MonoBehaviour {
 
         //multiply scale AND volume by our random vals
         transform.localScale *= randomScale;
-        animalAudio.volume *= randomScale;
+        myAudioSource.volume *= randomScale;
     }
-
-    //Actually plays the animal's audio with random sound selection
-    public virtual void PlaySound(AudioClip[] animalSounds)
-    {
-        int randomSound = Random.Range(0, animalSounds.Length);
-        animalAudio.PlayOneShot(animalSounds[randomSound]);
-        //animalAudio.clip = animalSounds[randomSound];
-    }
+    
 }
