@@ -90,6 +90,14 @@ public class Spawner : MonoBehaviour {
                     //set to plant to randomStage
                     int randomStage = Random.Range(ageMin, ageMax);
                     genObject.GetComponent<Seed>().ageAmount = randomStage;
+                    //this is so pooled seeeds dont fucking vortex to you 
+                    genObject.GetComponent<Seed>().seedState = Seed.SeedStates.IDLE;
+                    genObject.GetComponent<Seed>().RaycastToGround();
+                }
+                else
+                {
+                    //this is also so pooled seeeds dont fucking vortex to you 
+                    genObject.GetComponent<Seed>().SeedFall();
                 }
                 //set tgs
                 genObject.GetComponent<Seed>().gridMan = zoneParent.zoneGridMan;
@@ -191,7 +199,7 @@ public class Spawner : MonoBehaviour {
             }
         }
 
-        //inactive count is greater than half of original list 
+        //inactive count is greater than half of original list  && not cropseed plantOnStart
         if(inactive >= (generatedObjs.Length / 2))
         {
             generatedObjs = new GameObject[generationAmount];

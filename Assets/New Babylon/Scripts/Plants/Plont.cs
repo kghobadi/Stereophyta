@@ -109,12 +109,8 @@ public class Plont : MonoBehaviour {
         extraVoice = transform.GetChild(1).GetComponent<AudioSource>();
         soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
 
-        //get the obj pooler
+        //get the obj poolers
         FindObjPoolers();
-        if (GetComponent<PooledObject>())
-        {
-            plontPooler = GetComponent<PooledObject>().m_ObjectPooler;
-        }
     }
 
     void Start () {
@@ -193,6 +189,11 @@ public class Plont : MonoBehaviour {
             {
                 seedPooler = objPools[i].GetComponent<ObjectPooler>();
             }
+        }
+
+        if (GetComponent<PooledObject>())
+        {
+            plontPooler = GetComponent<PooledObject>().m_ObjectPooler;
         }
     }
 
@@ -397,8 +398,8 @@ public class Plont : MonoBehaviour {
             SpawnSeed();
         }
 
-        if (cropBundles[currentStage] != null)
-            cropBundles[currentStage].SetActive(false);
+        if (cropBundles[currentStage - 1] != null)
+            cropBundles[currentStage - 1].SetActive(false);
     }
 
     //called by water or rains
@@ -449,10 +450,11 @@ public class Plont : MonoBehaviour {
     //spawn seed from object pooler script 
     void SpawnSeed()
     {
-        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 1;
+        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 1 + new Vector3(0, 1, 0);
         GameObject newSeed = seedPooler.GrabObject();
-        newSeed.GetComponent<Seed>().plontPooler = plontPooler;
         newSeed.transform.position = spawnPos;
+        newSeed.GetComponent<Seed>().plontPooler = plontPooler;
+        newSeed.GetComponent<Seed>().SeedFall();
     }
 
     //plays the dirt planting effect at start

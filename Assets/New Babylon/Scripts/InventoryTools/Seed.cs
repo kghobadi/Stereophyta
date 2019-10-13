@@ -133,6 +133,12 @@ public class Seed : MonoBehaviour {
                 plontPooler = objPools[i].GetComponent<ObjectPooler>();
             }
         }
+
+        //if it's pooled ... get seed pooler!
+        if (_pooledObj)
+        {
+            seedPooler = _pooledObj.m_ObjectPooler;
+        }
     }
 
     //called when it falls off a plant from chop / plant death at start 
@@ -140,7 +146,8 @@ public class Seed : MonoBehaviour {
     {
         seedBody.isKinematic = false;
         seedBody.useGravity = true;
-        seedBody.AddRelativeForce(Random.Range(-15, 15), 50, Random.Range(-15, 15));
+        seedCollider.isTrigger = false;
+        seedBody.AddRelativeForce(Random.Range(-15, 15), 150, Random.Range(-15, 15));
         vortexSpeed = vortexOrig;
         seedState = SeedStates.FALLING;
     }
@@ -171,7 +178,6 @@ public class Seed : MonoBehaviour {
             if(Vector3.Distance(transform.position, player.transform.position) < 5)
             {
                 seedState = SeedStates.VORTEXING;
-                Debug.Log("vortexing");
             }
         }
 
