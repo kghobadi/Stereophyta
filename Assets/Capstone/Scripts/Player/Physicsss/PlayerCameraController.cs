@@ -145,13 +145,13 @@ public class PlayerCameraController : MonoBehaviour {
             //zoom in
             if (zoomInput < 0 && heightFromPlayer > heightMin)
             {
-                //Debug.Log("zoom in");
+                Debug.Log("zoom in");
                 ZoomIn(zoomInput);
             }
             //and out
             if (zoomInput > 0 && heightFromPlayer < heightMax)
             {
-                //Debug.Log("zoom out");
+                Debug.Log("zoom out");
                 ZoomOut(zoomInput);
             }
 
@@ -177,12 +177,6 @@ public class PlayerCameraController : MonoBehaviour {
                 lerpingFOV = false;
             }
         }
-        
-        
-
-        //for y axis of right analogue, want to be able to set camera look up and down.
-        //pushing stick up moves camera down closer to and behind player, 
-        //while moving it down looks down at player and moves camera up? or the reverse...
     }
     
     void ZoomIn(float zoom)
@@ -201,7 +195,7 @@ public class PlayerCameraController : MonoBehaviour {
         }
 
         //see fuurther as it zooms in
-        if (actualCam.farClipPlane < 1000)
+        if (actualCam.farClipPlane < 1500)
             actualCam.farClipPlane += zoomSpeed * Time.deltaTime * 3;
     }
 

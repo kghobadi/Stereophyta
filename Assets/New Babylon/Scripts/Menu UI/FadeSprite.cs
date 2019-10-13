@@ -19,6 +19,7 @@ public class FadeSprite : MonoBehaviour {
     public float fadeInWait, fadeOutWait, fadeInSpeed = 0.75f, fadeOutSpeed = 1f;
 
     public bool fadeInAtStart;
+    public bool returnsToPool;
 
 	void Start () {
         //checks privately whether this object has image or text component
@@ -80,6 +81,10 @@ public class FadeSprite : MonoBehaviour {
                 if (!keepActive)
                 {
                     gameObject.SetActive(false);
+                }
+                if (returnsToPool)
+                {
+                    GetComponent<PooledObject>().ReturnToPool();
                 }
             }
         }

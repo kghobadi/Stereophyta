@@ -15,6 +15,7 @@ public class WindGen : RhythmProducer {
     int windCounter;
     public int windInterval = 0;
 
+    public bool randomizes = true;
     public WindDirection windDir;
     public enum WindDirection
     {
@@ -24,8 +25,13 @@ public class WindGen : RhythmProducer {
     public override void Awake()
     {
         base.Awake();
-        
+        Random.InitState(System.DateTime.Now.Millisecond);
         origPos = transform.position;
+
+        if (randomizes)
+        {
+            SwitchTimeScale();
+        }
     }
 
     public override void Update () {
@@ -35,6 +41,7 @@ public class WindGen : RhythmProducer {
             if (windCounter < windInterval)
             {
                 windCounter++;
+                showRhythm = false;
             }
             else
             {
@@ -60,25 +67,17 @@ public class WindGen : RhythmProducer {
     //adjusts wind interval based on what the clock bpm is 
     void EvaluateRhythmInterval()
     {
-        if(sunScript.clockBPM >= 10 && sunScript.clockBPM < 15)
+        //10 is the standard bpm, therefore when we are near it, wind interval is 0
+        float div = (sunScript.clockBPM / 10);
+        //interval is always going to be BPM / 10 to the nearest int 
+        if (div >= 1.5f)
         {
-            windInterval = Random.Range(0, 2);
+            windInterval = Mathf.RoundToInt(div) * 2;
         }
-        if (sunScript.clockBPM >= 15 && sunScript.clockBPM < 20)
+        //otherwise 0
+        else
         {
-            windInterval = Random.Range(2, 4);
-        }
-        if (sunScript.clockBPM >= 20 && sunScript.clockBPM < 30)
-        {
-            windInterval = Random.Range(3, 6);
-        }
-        if (sunScript.clockBPM >= 30 && sunScript.clockBPM < 40)
-        {
-            windInterval = Random.Range(4, 8);
-        }
-        if (sunScript.clockBPM >= 40 && sunScript.clockBPM <= 50)
-        {
-            windInterval = Random.Range(5, 10);
+            windInterval = 0;
         }
 
         //keep updated bpm 
@@ -110,29 +109,29 @@ public class WindGen : RhythmProducer {
     public override void SwitchTimeScale()
     {
         base.SwitchTimeScale();
-
+        timeScale = Random.Range(0, 5);
         CheckDirRandomPos();
 
-        windSpeed = Random.Range(2.5f, 40f);
+        //windSpeed = Random.Range(2.5f, 40f);
 
-        //switch (timeScale)
-        //{
-        //    case 0:
-        //        windSpeed = 2.5f;
-        //        break;
-        //    case 1:
-        //        windSpeed = 5f;
-        //        break;
-        //    case 2:
-        //        windSpeed = 10f;
-        //        break;
-        //    case 3:
-        //        windSpeed = 20f;
-        //        break;
-        //    case 4:
-        //        windSpeed = 40f;
-        //        break;
-        //}
+        switch (timeScale)
+        {
+            case 0:
+                windSpeed = 2.5f;
+                break;
+            case 1:
+                windSpeed = 5f;
+                break;
+            case 2:
+                windSpeed = 10f;
+                break;
+            case 3:
+                windSpeed = 20f;
+                break;
+            case 4:
+                windSpeed = 40f;
+                break;
+        }
     }
 
     void CheckDirRandomPos()

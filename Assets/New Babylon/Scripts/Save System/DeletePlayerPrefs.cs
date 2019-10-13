@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DeletePlayerPrefs : MonoBehaviour {
 
@@ -15,6 +16,7 @@ public class DeletePlayerPrefs : MonoBehaviour {
     public void DeletePrefs()
     {
         PlayerPrefs.DeleteAll();
-        Debug.Log("deleted Prefs ");
+       
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

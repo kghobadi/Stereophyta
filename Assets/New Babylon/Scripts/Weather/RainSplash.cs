@@ -90,16 +90,10 @@ public class RainSplash : Rhythm
             if (other.GetComponent<Shroom>())
             {
                 //change rhythm possible
-                if (!other.GetComponent<Shroom>().changedRhythm)
-                    other.GetComponent<Shroom>().SwitchRhythm();
+                other.GetComponent<Shroom>().SwitchRhythm();
 
                 other.GetComponent<Shroom>().ReleaseSpores();
             }
-            //if (other.gameObject.tag == "Animal")
-            //{
-            //    if (!other.gameObject.GetComponent<Crab>().animalAudio.isPlaying)
-            //        other.gameObject.GetComponent<Crab>().PlaySound(other.gameObject.GetComponent<Crab>().running);
-            //}
         }
     }
 }

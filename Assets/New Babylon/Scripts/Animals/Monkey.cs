@@ -13,11 +13,11 @@ public class Monkey : AnimalAI {
         float randomScale = Random.Range(randomScaleMin, randomScaleMax);
 
         //if we are 'shrinking' the monkey, increase it's pitch
-        animalAudio.pitch += (0.5f - randomScale);
+        myAudioSource.pitch += (0.5f - randomScale);
 
         //multiply scale AND volume by our random vals
         transform.localScale *= randomScale;
-        animalAudio.volume *= randomScale;
+        myAudioSource.volume *= randomScale;
         
 
     }

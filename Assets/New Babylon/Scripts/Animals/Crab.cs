@@ -48,10 +48,10 @@ public class Crab : AnimalAI {
     {
         animalState = AnimalAIStates.INTERRUPTED;
         animator.SetTrigger("fall");
-        animalAudio.Stop();
+        myAudioSource.Stop();
         interruptedPos = transform.position;
         origPosition = interruptedPos;
-        animalAudio.PlayOneShot(interruptSound);
+        PlaySound(interruptSound, 1f);
         myNavMesh.isStopped = true;
         myNavMesh.velocity = Vector3.zero;
         interruptedTimer = interruptedTimeTotal;

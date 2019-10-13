@@ -7,7 +7,7 @@ using UnityEngine.AI;
 public class GuitarNPC : NPC {
     protected List<GuitarPlant> currentFlowers = new List<GuitarPlant>();
     protected List<GuitarPlant> flowersToTake = new List<GuitarPlant>();
-    public WindMachine windMachine;
+    public Items.WindMachine windMachine;
 
     public ParticleSystem triRipple;
 

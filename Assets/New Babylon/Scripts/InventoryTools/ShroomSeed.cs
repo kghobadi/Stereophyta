@@ -54,25 +54,30 @@ public class ShroomSeed : MonoBehaviour {
     //for identifying shroom type
     public Shroom.ShroomType shroomSeedType;
 
-    void Start () {
+    void Awake()
+    {
         //player & environment refs
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
         inventoryParent = inventoryScript.transform;
-        originalPos = transform.localPosition;
 
         //tgs refs 
         tgs = tpc.currentTGS;
         gridMan = tgs.transform.parent.GetComponent<GridManager>();
-        groundTexture = gridMan.groundTexture;
-        canClickTexture = gridMan.canPlantTexture;
 
-        //aduio
+        //audio
         shroomBody = GetComponent<Rigidbody>();
         shroomCol = GetComponent<SphereCollider>();
         shroomSource = GetComponent<AudioSource>();
+    }
+
+    void Start ()
+    {
+        originalPos = transform.localPosition;
+        groundTexture = gridMan.groundTexture;
+        canClickTexture = gridMan.canPlantTexture;
     }
 	
 	void Update () {
