@@ -176,7 +176,7 @@ public class BoatPlayer : MonoBehaviour
     }
 
     // now that we have our inputs, we need to 
-    //Apply Physical Forces
+    //Calculate Physical Forces
     void CalcPaddleForce()
     {
         //stop checking paddle and set final mouse pos
@@ -192,51 +192,33 @@ public class BoatPlayer : MonoBehaviour
         //calc x force 
         paddleForceX = (Mathf.Abs(paddleDistY) * boatSpeedX ) + (Mathf.Abs(paddleDistX) * boatSpeedX);
 
-        //check if the row was on left or right
-        if(characterPosOnSreen.x < origMousePos.x)
+        //RIGHT SIDE 
+        //row was left to right & forward
+        if(origMousePos.x < finalMousePos.x && paddleForceZ > 0)
         {
-            //was left of player and trying to move forward, so make x force negative
-            if(paddleForceZ > 0)
-            {
-                paddleForceX *= -1;
-            }
-
+            paddleForceX *= -1;
             oarAnimator.SetBool("rightOrLeft", true);
-
-            //right f 2 b
-            if (paddleForceZ > 0)
-            {
-                oarAnimator.SetTrigger("rowRightF2B");
-            }
-            //right b 2 f
-            else
-            {
-                oarAnimator.SetTrigger("rowRightB2F");
-            }
-
+            oarAnimator.SetTrigger("rowRightF2B");
         }
-
-        //was right of player
-        else
+        //row was right to left && backward
+        else if(origMousePos.x > finalMousePos.x && paddleForceZ < 0)
         {
-            //trying to move backward so now right is left
-            if (paddleForceZ < 0)
-            {
-                paddleForceX *= -1;
-            }
-
+            oarAnimator.SetBool("rightOrLeft", true);
+            oarAnimator.SetTrigger("rowRightB2F");
+        }
+        //LEFT SIDE 
+        //row was right to left & forward
+        else if(origMousePos.x > finalMousePos.x && paddleForceZ > 0)
+        {
             oarAnimator.SetBool("rightOrLeft", false);
-
-            //left f 2 b
-            if (paddleForceZ > 0)
-            {
-                oarAnimator.SetTrigger("rowLeftF2B");
-            }
-            //left b 2 f
-            else
-            {
-                oarAnimator.SetTrigger("rowLeftB2F");
-            }
+            oarAnimator.SetTrigger("rowLeftF2B");
+        }
+        //row was left to right & backward
+        else if(origMousePos.x < finalMousePos.x && paddleForceZ < 0)
+        {
+            paddleForceX *= -1;
+            oarAnimator.SetBool("rightOrLeft", false);
+            oarAnimator.SetTrigger("rowLeftB2F");
         }
 
         StartPaddleFX();
@@ -248,14 +230,14 @@ public class BoatPlayer : MonoBehaviour
     IEnumerator WaitToApplyForce()
     {
         yield return new WaitForSeconds(0.8f);
-        boatState = BoatStates.TURNINGBOAT;
+       
         //z forward force applied with AddForce (0, 0, zForce);
         indForce = paddleForceZ / division;
         //x force applied with AddTorqur(0, xTorque, 0) 
         indTorque = paddleForceX / division;
         //reset torqueApplier & set turning boat 
         torqueApplier = 0;
-        
+     
         //decide which paddle sound
         if (Mathf.Abs(paddleForceZ) > bigPaddleMin)
         {
@@ -266,6 +248,9 @@ public class BoatPlayer : MonoBehaviour
         {
             PlayPaddleSound();
         }
+
+        //start turning in fixedUpdate
+        boatState = BoatStates.TURNINGBOAT;
     }
 
     //this is where we actually apply the Forces
