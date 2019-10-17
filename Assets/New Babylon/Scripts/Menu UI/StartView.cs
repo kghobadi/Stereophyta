@@ -62,11 +62,6 @@ public class StartView : MonoBehaviour {
                 toolsNSeeds[i].FadeOut();
             }
 
-            if (PlayerPrefs.GetString("hasBook") == "yes")
-            {
-               
-            }
-
             //fade in menu UI
             for (int i = 0; i < menuFades.Length; i++)
             {
@@ -119,18 +114,7 @@ public class StartView : MonoBehaviour {
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mSmoothLook * Time.deltaTime);
 
                 //lerp functionality
-                //the game has been played before and the player has made it out of the house
-                //lerping to player cam 
-                if (PlayerPrefs.GetString("hasBook") == "yes")
-                {
-                    LerpToPlayer();
-                }
-                //first time starting, lerp to house Cam
-                else
-                {
-                    LerpToHouse();
-                }
-               
+                LerpToPlayer(); 
             }
         }
 	}

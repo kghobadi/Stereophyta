@@ -13,32 +13,21 @@ public class ZoomCamInstructions : MonoBehaviour {
     FadeUI animFader;
     AnimateDialogue animator;
 
-    void Start () {
-        if (PlayerPrefs.GetString("hasBook") == "yes")
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            //we good bitch
-            //ui refs
-            txtFader = clickNDragTxt.GetComponent<FadeUItmp>();
-            textBackFader = textBack.GetComponent<FadeUItmp>();
-            animFader = clickNDragAnim.GetComponent<FadeUI>();
-            animator = clickNDragAnim.GetComponent<AnimateDialogue>();
-        }
-	}
+    void Awake ()
+    {        
+        //ui refs
+        txtFader = clickNDragTxt.GetComponent<FadeUItmp>();
+        textBackFader = textBack.GetComponent<FadeUItmp>();
+        animFader = clickNDragAnim.GetComponent<FadeUI>();
+        animator = clickNDragAnim.GetComponent<AnimateDialogue>();
+    }
 
-    void OnTriggerEnter(Collider other)
+  
+    public void FadeInstructions()
     {
-        if(other.gameObject.tag == "Player")
-        {
-            txtFader.FadeIn();
-            textBackFader.FadeIn();
-            animFader.FadeIn();
-            animator.active = true;
-
-            Destroy(gameObject);
-        }
+        txtFader.FadeIn();
+        textBackFader.FadeIn();
+        animFader.FadeIn();
+        animator.active = true;
     }
 }

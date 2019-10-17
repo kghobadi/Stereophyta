@@ -77,7 +77,7 @@ public class Farmhouse : MonoBehaviour {
         if (Vector3.Distance(player.transform.position, bed.transform.position) < 5)
         {
             //check if we are sleeping or not
-            if (!showingSleepSymbols && !tpc.sleeping && tpc.daysWithoutSleep >= 1)
+            if (!showingSleepSymbols && !tpc.sleeping)
             {
                 sleepSymbolFade.FadeIn();
                 sleepParticles.Play();
