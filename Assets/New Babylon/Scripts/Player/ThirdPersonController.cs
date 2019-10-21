@@ -51,7 +51,8 @@ public class ThirdPersonController : MonoBehaviour
     Quaternion targetLook;
     public Vector3 horizontalInput;
     public Vector3 forwardInput;
-    public float movespeed = 5, runSpeed, swimSpeed;
+    public float movespeed = 5, walkSpeed = 5, runSpeed, swimSpeed;
+    float moveTimer, timeToRun = 3f;
     public float movespeedSmooth = 0.3f;
     public float rotateSpeed = 10;
     public float rotateSpeedSmooth = 0.3f;
@@ -366,8 +367,9 @@ public class ThirdPersonController : MonoBehaviour
         characterBody.transform.localPosition = new Vector3(0, -0.956f, 0);
         poopShoes.speed = 1f;
 
-        //run
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        //run if pressing shift keys OR move timer is great enough
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            || moveTimer > timeToRun)
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
 
@@ -385,6 +387,9 @@ public class ThirdPersonController : MonoBehaviour
             //not moving 
             else
             {
+                //reset walk speed 
+                moveTimer = 0;
+                movespeed = walkSpeed;
                 runParticles.Stop();
                 //idling
                 if (poopShoes.GetBool("idle") != true)
@@ -397,6 +402,9 @@ public class ThirdPersonController : MonoBehaviour
         else
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
+            //inc move speed & timer 
+            movespeed += 5 * Time.deltaTime;
+            moveTimer += Time.deltaTime;
 
             //movin
             if (targetMovementTotal.magnitude > 0)
@@ -413,6 +421,9 @@ public class ThirdPersonController : MonoBehaviour
             //not moving
             else
             {
+                //reset walk speed 
+                moveTimer = 0;
+                movespeed = walkSpeed;
                 //idling
                 if (poopShoes.GetBool("idle") != true)
                 {
