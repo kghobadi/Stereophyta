@@ -33,6 +33,7 @@ public class Shroom : RhythmProducer
     public Texture2D plantedTexture;
 
     //size and transform storage
+    Vector3 inherentScale;
     public Vector3 originalSize;
     Vector3 largeSize, originalPosition;
     
@@ -117,6 +118,7 @@ public class Shroom : RhythmProducer
     {
         //day passed listener
         sunScript.newDay.AddListener(DayPassed);
+        inherentScale = transform.localScale;
 
         //add to zone list 
         if (!myZone.shrooms.Contains(gameObject))
@@ -260,7 +262,8 @@ public class Shroom : RhythmProducer
             //remove from zone list 
             if (myZone.shrooms.Contains(gameObject))
                 myZone.shrooms.Remove(gameObject);
-            shroomPooler.ReturnObject(gameObject);
+
+            ResetShroom();
         }
     }
     
@@ -327,7 +330,6 @@ public class Shroom : RhythmProducer
 
         //set breathe speed
         SetBreatheSpeed();
-        vortexSpeed = vortexOrig;
         
         //random lifespan 
         deathDay = Random.Range(3, 5);
@@ -421,14 +423,11 @@ public class Shroom : RhythmProducer
     //called when vortexing reaches player
     void CollectShroom()
     {
-        SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
-        seedStorageTemp.seedCount++;
-
-        inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
+        inventoryScript.myItems[mySeedIndex].GetComponent<Item>().itemCount++;
 
         tpc.SeedCollect();
-        
-        shroomPooler.ReturnObject(gameObject);
+
+        ResetShroom();
     }
 
     //for player collision
@@ -442,6 +441,16 @@ public class Shroom : RhythmProducer
         }
     }
 
+    //resets age, spores, scale, and returns to pool
+    void ResetShroom()
+    {
+        myAge = 0;
+        hasReleasedSpores = false;
+        transform.localScale = inherentScale;
+        vortexSpeed = vortexOrig;
+        //the return...
+        shroomPooler.ReturnObject(gameObject);
+    }
 
     public void AdjustHeight()
     {

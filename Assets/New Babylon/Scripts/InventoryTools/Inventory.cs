@@ -3,72 +3,45 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-//seed storage info -- helps us count multiple seeds
-[System.Serializable]
-public struct SeedStorage
-{
-    public GameObject seedObj;
-    public int seedCount;
-}
-
 public class Inventory : MonoBehaviour {
     //player control ref
     GameObject player;
     ThirdPersonController tpc;
 
-    //tools inv
-    [Header("Tools Inv")]
-    public int toolTimeScale;
-    public int currentTool = 0;
-    public GameObject currentToolObj;
-    public List<GameObject> myTools = new List<GameObject>();
-    //UI
-    [Header("Tools UI")]
-    public GameObject toolInvVisual;
-    public Image currentToolImg, lastToolImg, nextToolImg;
-    public List<Sprite> toolSprites = new List<Sprite>();
-    public Sprite nadaSprite;
-    public FadeUI[] toolsUI;
-    IEnumerator fadeTools;
-
-    //seed inv
-    [Header("Seed Inv")]
+    //Items inv
+    [Header("Items Inv")]
+    public int ItemTimeScale;
+    public int currentItem = 0;
+    public GameObject currentItemObj;
+    public Item currentItemScript;
+    public List<GameObject> myItems = new List<GameObject>();
     public Vector3 localSeedSpot;
-    public int currentSeed = 0;
-    public GameObject currenSeedObj;
-    public List<SeedStorage> seedStorage = new List<SeedStorage>();
+    bool lastSwitch;
 
     //UI
-    [Header("Seed UI")]
-    public GameObject seedInvVisual;
-    public Image currentSeedImg, lastSeedImg, nextSeedImg;
-    public Text seedCounter;
-    public List<Sprite> seedSprites = new List<Sprite>();
-    public FadeUI[] seedsUI;
-    IEnumerator fadeSeeds;
+    [Header("Items UI")]
+    public GameObject ItemInvVisual;
+    public Image currentItemImg, lastItemImg, nextItemImg, lastImg1, nextImg1;
+    public Text itemCounter;
+    public List<Sprite> ItemSprites = new List<Sprite>();
+    public Sprite nadaSprite;
+    public FadeUI[] ItemsUI;
+    IEnumerator fadeItems;
+
     //for altering seed count text
-    public float seedTxtScale1 = 1f, seedTxtScale2 = 0.8f, seedTxtScale3 = 0.6f;
-    public float seedTxtPos1 = 69f, seedTxtPos2 = 50f, seedTxtPos3 = 45f;
+    public float txtScale1 = 1f, txtScale2 = 0.8f, txtScale3 = 0.6f;
 
     //for controlling switching
     [Header("Input Resets for Switching")]
-    public float inputTimerT;
-    public float inputTimerS;
-    public bool canSwitchTools, canSwitchSeeds;
+    public float inputTimer;
+    public bool canSwitchItems;
 
     //audio
     [Header("Audio")]
     public AudioSource inventoryAudio;
-    public AudioClip switchSeedsUp,switchSeedsDown, switchTools;
-
-    //rhythm indicator
-    [Header("Player Rhythm Indicator")]
-    public SpriteRenderer rhythmSR;
-    Animator rhythmIndicator;
-    FadeSprite rhythmFader;
-    float disappearTimer, disappearTimerTotal = 1f;
-    //timers for how long indicator appears
-    public bool changedRhythm;
+    public AudioClip switchSeedsUp, switchSeedsDown, switchItems;
+    //tempo indicator
+    TempoIndication tempoIndicator;
 
     void Awake()
     { 
@@ -76,476 +49,358 @@ public class Inventory : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryAudio = GetComponent<AudioSource>();
-
-        //rhythm indicator
-        rhythmIndicator = rhythmSR.GetComponent<Animator>();
-        rhythmFader = rhythmSR.GetComponent<FadeSprite>();
+        tempoIndicator = GetComponent<TempoIndication>();
     }
 
     void Start () {
-        //if have tools
-        if(myTools.Count > 0)
+        //if have Items
+        if(myItems.Count > 0)
         {
-            //set tool
-            currentToolObj = myTools[currentTool];
-            //turn off all other tools
-            for (int i = 0; i < myTools.Count; i++)
+            //set Item
+            currentItemObj = myItems[currentItem];
+            currentItemScript = currentItemObj.GetComponent<Item>();
+
+            //if it's a seed, select it 
+            if (currentItemScript.itemType == Item.ItemType.SEED)
             {
-                if (i != currentTool)
-                    myTools[i].SetActive(false);
+                currentItemScript.SelectSeed();
+            }
+
+            //turn off all other Items
+            for (int i = 0; i < myItems.Count; i++)
+            {
+                if (i != currentItem)
+                    myItems[i].SetActive(false);
             }
         }
        
-        toolInvVisual.SetActive(false);
-        fadeTools = FadeOutToolsVis();
-
-        //set current item
-        currenSeedObj = seedStorage[currentSeed].seedObj;
-        currenSeedObj.GetComponent<Seed>().seedState = Seed.SeedStates.SEEDSELECTED;
-
-        //turn off other seeds
-        for (int i = 0; i < seedStorage.Count; i++)
-        {
-            //if (i != currentSeed)
-                seedStorage[i].seedObj.SetActive(false);
-        }
-        seedInvVisual.SetActive(false);
-        fadeSeeds = FadeOutSeedVis();
+        ItemInvVisual.SetActive(false);
+        fadeItems = FadeOutItemsVis();
     }
 	
 	void Update () {
-        //timer for switching tools
-        inputTimerT -= Time.deltaTime;
-        if(inputTimerT < 0)
+        //timer for switching Items
+        inputTimer -= Time.deltaTime;
+        if(inputTimer < 0)
         {
-            canSwitchTools = true;
+            canSwitchItems = true;
         }
-
-        //timer for switching seeds
-        inputTimerS -= Time.deltaTime;
-        if (inputTimerS < 0)
-        {
-            canSwitchSeeds = true;
-        }
-
+        
         if (!tpc.menuOpen)
         {
             //switch current item +
-            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKeyDown(KeyCode.E)) && canSwitchTools && myTools.Count > 1)
+            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKey(KeyCode.E)) && canSwitchItems && myItems.Count > 1)
             {
-                SwitchTool(true);
+                SwitchItem(true, true);
             }
             //switch current item -
-            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKeyDown(KeyCode.Q)) && canSwitchSeeds 
-                && currenSeedObj.GetComponent<Item>().CheckSeedPlanting() && CheckPlayerHasSeed() >= 1)
+            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKey(KeyCode.Q)) && canSwitchItems && myItems.Count > 1)
             {
-                SwitchSeed(true);
+                SwitchItem(false, true);
             }
 
-            //auto switch to next seed with a count if you run out of seeds
-            if(seedStorage[currentSeed].seedCount == 0 && CheckPlayerHasSeed() >= 1 && !currenSeedObj.GetComponent<Item>().CheckSeedPlanting())
+            //auto switch to next seed with a count if you run out of item
+            if (currentItemScript.itemCount == 0 && myItems.Count > 1 && currentItemScript.CheckSeedPlanting())
             {
-                SwitchSeed(true);
+                SwitchItem(lastSwitch, false);
             }
 
             //input for switching player rhythm
             if (Input.GetKeyDown(KeyCode.LeftAlt)) 
             {
-                if (toolTimeScale > 0)
-                {
-                    toolTimeScale--;
-                }
-                else
-                {
-                    toolTimeScale = 4;
-                }
-
-                SetVisualRhythm();
+                ItemTimeScale = DecreaseListCounter(ItemTimeScale, 5);
+                tempoIndicator.SetVisualTempo(ItemTimeScale);
             }
 
             //input for switching player rhythm
             if (Input.GetKeyDown(KeyCode.RightAlt))
             {
-                if (toolTimeScale < 4)
-                {
-                    toolTimeScale++;
-                }
-                else
-                {
-                    toolTimeScale = 0;
-                }
-
-                SetVisualRhythm();
+                ItemTimeScale = IncreaseListCounter(ItemTimeScale, 5);
+                tempoIndicator.SetVisualTempo(ItemTimeScale);
             }
         }
-
-        //for rhythm visual
-        if (changedRhythm)
-        {
-            disappearTimer -= Time.deltaTime;
-
-            //fade out visual
-            if (disappearTimer < 0)
-            {
-                rhythmFader.FadeOut();
-                changedRhythm = false;
-            }
-        }
-
+        
         //fade out quick menus while sleeping
         if (tpc.sleeping)
         {
             StopAllCoroutines();
 
-            for (int i = 0; i < toolsUI.Length; i++)
+            for (int i = 0; i < ItemsUI.Length; i++)
             {
-                toolsUI[i].fadingIn = false;
-                toolsUI[i].fadingOut = true;
-            }
-
-            for (int i = 0; i < seedsUI.Length; i++)
-            {
-                seedsUI[i].fadingIn = false;
-                seedsUI[i].fadingOut = true;
+                ItemsUI[i].fadingIn = false;
+                ItemsUI[i].fadingOut = true;
             }
         }
 
-        SetSeedText();
-    }
-
-    //called whenever rhythm is changed;
-    public void SetVisualRhythm()
-    {
-        rhythmIndicator.SetInteger("Level", toolTimeScale);
-
-        changedRhythm = true;
-        disappearTimer = disappearTimerTotal;
-
-        rhythmFader.FadeIn();
+        SetItemText();
     }
 
     //alter count of current seed
-    void SetSeedText()
+    void SetItemText()
     {
         //set seed counter in inv UI
-        seedCounter.text = seedStorage[currentSeed].seedCount.ToString();
-
-        switch (seedCounter.text.Length)
+        if(currentItemScript.itemType == Item.ItemType.SEED)
         {
-            case 0:
-                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale1, seedTxtScale1, seedTxtScale1);
-                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos1, -60.5f, 0);
-                break;
-            case 1:
-                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale1, seedTxtScale1, seedTxtScale1);
-                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos1, -60.5f, 0);
-                break;
-            case 2:
-                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale2, seedTxtScale2, seedTxtScale2);
-                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos2, -60.5f, 0);
-                break;
-            case 3:
-                seedCounter.rectTransform.localScale = new Vector3(seedTxtScale3, seedTxtScale3, seedTxtScale3);
-                seedCounter.rectTransform.localPosition = new Vector3(seedTxtPos3, -60.5f, 0);
-                break;
-        }
-    }
+            itemCounter.text = currentItemScript.itemCount.ToString();
 
-    //switches thru tools
-    public void SwitchTool(bool posOrNeg)
-    {
-        //deactivate all tools 
-        for(int i = 0; i < myTools.Count; i++)
-        {
-            myTools[i].SetActive(false);
-        }
-
-        //switch pos
-        if (posOrNeg)
-        {
-            //increment item counter
-            if (currentTool < myTools.Count - 1)
+            switch (itemCounter.text.Length)
             {
-                currentTool++;
-            }
-            else
-            {
-                currentTool = 0;
+                case 0:
+                    itemCounter.rectTransform.localScale = new Vector3(txtScale1, txtScale1, txtScale1);
+                    break;
+                case 1:
+                    itemCounter.rectTransform.localScale = new Vector3(txtScale1, txtScale1, txtScale1);
+                    break;
+                case 2:
+                    itemCounter.rectTransform.localScale = new Vector3(txtScale2, txtScale2, txtScale2);
+                    break;
+                case 3:
+                    itemCounter.rectTransform.localScale = new Vector3(txtScale3, txtScale3, txtScale3);
+                    break;
             }
         }
-        //switch neg
+        //when it's a tool we don't need a count.
         else
         {
-            //increment item counter
-            if (currentTool > 0)
+            itemCounter.text = "";
+        }
+    }
+
+    //switches thru Items
+    public void SwitchItem(bool posOrNeg, bool audio)
+    {
+        DeactivateAllItems();
+        lastSwitch = posOrNeg;
+        int lastItem = currentItem;
+
+        //increment currentItem 
+        if (posOrNeg)
+        {
+            currentItem = IncreaseListCounter(currentItem, myItems.Count);
+        }
+        else
+        {
+            currentItem = DecreaseListCounter(currentItem, myItems.Count);
+        }
+
+        bool foundItem = true;
+        //keep looping until we find one with a count 
+        while(myItems[currentItem].GetComponent<Item>().itemCount < 1)
+        {
+            //increment currentItem 
+            if (posOrNeg)
             {
-                currentTool--;
+                currentItem = IncreaseListCounter(currentItem, myItems.Count);
             }
             else
             {
-                currentTool = myTools.Count - 1;
+                currentItem = DecreaseListCounter(currentItem, myItems.Count);
+            }
+
+            //escape while loop if we have no items 
+            if(currentItem == lastItem)
+            {
+                break;
             }
         }
 
+        //set new Item
+        currentItemObj = myItems[currentItem];
+        currentItemObj.SetActive(true);
+        currentItemScript = currentItemObj.GetComponent<Item>();
 
-        //set new tool
-        currentToolObj = myTools[currentTool];
-        currentToolObj.SetActive(true);
-
-        SetToolSprite();
+        //if its a tool or the seed's count is > 0
+        if(currentItemScript.itemType == Item.ItemType.TOOL || currentItemScript.itemCount > 0)
+            SetItemSprite();
+        //set seed selected 
+        if(currentItemScript.itemType == Item.ItemType.SEED)
+            currentItemScript.SelectSeed();
 
         //reset timer so not infinite switch
-        inputTimerT = 0.1f;
-        canSwitchTools = false;
+        inputTimer = 0.25f;
+        canSwitchItems = false;
 
-        inventoryAudio.PlayOneShot(switchTools);
+        if(audio)
+            inventoryAudio.PlayOneShot(switchItems);
     }
 
-    public void SetToolSprite()
+    public void SetItemSprite()
     {
         //change inv visuals
-        currentToolImg.sprite = toolSprites[currentTool];
+        currentItemImg.sprite = ItemSprites[currentItem];
         
         //more than one item
-        if(myTools.Count > 1)
+        if(myItems.Count > 1)
         {
-            //for wrapping counter
-            if (currentTool > 0)
+            //last img
+            if (currentItem > 0)
             {
-                lastToolImg.sprite = toolSprites[currentTool - 1];
+                lastItemImg.sprite = ItemSprites[currentItem - 1];
             }
             else
             {
-                lastToolImg.sprite = toolSprites[myTools.Count - 1];
+                lastItemImg.sprite = ItemSprites[myItems.Count - 1];
             }
-            //wrapping counter
-            if (currentTool < myTools.Count - 1)
+            //next img
+            if (currentItem < myItems.Count - 1)
             {
-                nextToolImg.sprite = toolSprites[currentTool + 1];
+                nextItemImg.sprite = ItemSprites[currentItem + 1];
             }
             else
             {
-                nextToolImg.sprite = toolSprites[0];
+                nextItemImg.sprite = ItemSprites[0];
+            }
+            //last img 1
+            if(currentItem - 1 > 0)
+            {
+                lastImg1.sprite = ItemSprites[currentItem - 2];
+            }
+            else
+            {
+                lastImg1.sprite = ItemSprites[myItems.Count - 2];
+            }
+            //next img 1
+            if((currentItem + 1) < myItems.Count - 1)
+            {
+                nextImg1.sprite = ItemSprites[currentItem + 2];
+            }
+            else
+            {
+                nextImg1.sprite = ItemSprites[1];
             }
         }
         //only one item so all the sprites are nothing
-        else if(myTools.Count == 1)
+        else if(myItems.Count == 1)
         {
-            lastToolImg.sprite = nadaSprite;
-            nextToolImg.sprite = nadaSprite;
+            lastItemImg.sprite = nadaSprite;
+            nextItemImg.sprite = nadaSprite;
         }
         
-
-        //tools vis
-        if(fadeTools != null)
-            StopCoroutine(fadeTools);
-        fadeTools = FadeOutToolsVis();
-        if(gameObject.activeSelf)
-            StartCoroutine(fadeTools);
+        //Items vis
+        if(fadeItems != null)
+            StopCoroutine(fadeItems);
+        fadeItems = FadeOutItemsVis();
+        StartCoroutine(fadeItems);
     }
 
-    //switch thru seeds
-   public void SwitchSeed(bool posOrNeg)
+    //Count up a list 
+    int IncreaseListCounter(int counter, int total)
     {
-        if(currenSeedObj != null)
+        if (counter < total - 1)
         {
-            if (currenSeedObj.activeSelf && CheckPlayerHasSeed() > 1)
+            counter++;
+        }
+        else
+        {
+            counter = 0;
+        }
+
+        return counter;
+    }
+
+    //Count down a list 
+    int DecreaseListCounter(int counter, int total)
+    {
+        if (counter > 0)
+        {
+            counter--;
+        }
+        else
+        {
+            counter = total - 1;
+        }
+
+        return counter;
+    }
+
+    //called to check item counts
+    int CheckPlayerHasItem()
+    {
+        int itemCounter = 0;
+        //loop thru item counts
+        for(int i = 0; i < myItems.Count; i++)
+        {
+            if(myItems[i].GetComponent<Item>().itemCount > 0)
             {
-                currenSeedObj.GetComponent<Item>().DeselectSeed();
-                currenSeedObj.SetActive(false);
+                itemCounter++;
             }
         }
 
-        //switch pos
-        if (posOrNeg)
-        {
-            CountSeedUp();
-        }
-        //switch neg
-        else
-        {
-            CountSeedDown();
-        }
-
-        //set new seed
-        currenSeedObj = seedStorage[currentSeed].seedObj;
-        //if seed count of this seed > 0
-        if(seedStorage[currentSeed].seedCount > 0)
-        {
-            currenSeedObj.SetActive(true);
-            currenSeedObj.GetComponent<Item>().SelectSeed();
-        }
-        //switch seed again -- this causes a StackOverflow if there's no seeds in your inv
-        else
-        {
-            SwitchSeed(true);
-        }
-
-        SetSeedSprite();
-      
-        //play switch sound 
-        if (posOrNeg && inputTimerS < 0)
-        {
-            inventoryAudio.PlayOneShot(switchSeedsUp);
-        }
-        else if (!posOrNeg &&  inputTimerS < 0)
-        {
-            inventoryAudio.PlayOneShot(switchSeedsDown);
-        }
-
-        //reset timer so not infinite switch
-        inputTimerS = 0.1f;
-        canSwitchSeeds = false;
-
-    }
-
-    public void SetSeedSprite()
-    {
-        //change inv visuals
-        currentSeedImg.sprite = seedSprites[currentSeed];
-        //for wrapping counter
-        if (currentSeed > 0)
-        {
-            lastSeedImg.sprite = seedSprites[currentSeed - 1];
-        }
-        else
-        {
-            lastSeedImg.sprite = seedSprites[seedStorage.Count - 1];
-        }
-        //wrapping counter
-        if (currentSeed < seedStorage.Count - 1)
-        {
-            nextSeedImg.sprite = seedSprites[currentSeed + 1];
-        }
-        else
-        {
-            nextSeedImg.sprite = seedSprites[0];
-        }
-
-
-        //seed vis 
-        if(fadeSeeds != null)
-            StopCoroutine(fadeSeeds);
-        fadeSeeds = FadeOutSeedVis();
-        if (gameObject.activeSelf)
-            StartCoroutine(fadeSeeds);
-    }
-
-    void CountSeedUp()
-    {
-        //increment item counter
-        if (currentSeed < seedStorage.Count - 1)
-        {
-            currentSeed++;
-        }
-        else
-        {
-            currentSeed = 0;
-        }
-    }
-
-    void CountSeedDown()
-    {
-        //increment item counter
-        if (currentSeed > 0)
-        {
-            currentSeed--;
-        }
-        else
-        {
-            currentSeed = seedStorage.Count - 1;
-        }
-    }
-
-    //called to check seed counts
-    int CheckPlayerHasSeed()
-    {
-        int seedCounter = 0;
-        //loop thru seed counts
-        for(int i = 0; i < seedStorage.Count; i++)
-        {
-            if(seedStorage[i].seedCount > 0)
-            {
-                seedCounter++;
-            }
-        }
-
-        return seedCounter;
+        return itemCounter;
     }
 
     //adds seed type to inv
-    public void AddSeedToInventory(GameObject seed, Sprite seedInvSprite)
+    public void AddItemToInventory(GameObject item, Sprite itemSprite)
     {
-        //new seed seedstorage struct
-        SeedStorage newSeed;
-        newSeed.seedObj = seed;
-        newSeed.seedCount = 1;
-
         //add to lists
-        seedStorage.Add(newSeed);
-        seedSprites.Add(seedInvSprite);
+        myItems.Add(item);
+        ItemSprites.Add(itemSprite);
+        //set item count to 1 
+        Item itemScript = item.GetComponent<Item>();
+        itemScript.itemCount = 1;
 
-        //set parent and pos
-        seed.transform.SetParent(transform);
-        seed.transform.localPosition = localSeedSpot;
+        //if it's a seed
+        if(itemScript.itemType == Item.ItemType.SEED)
+        {
+            //set parent and pos
+            item.transform.SetParent(transform);
+            item.transform.localPosition = localSeedSpot;
 
-        //set new seed index in seed & plant
-        seed.GetComponent<Item>().SetSeedIndex(seedStorage.Count - 1);
+            //set new seed index in seed & plant
+            itemScript.SetSeedIndex(myItems.Count - 1);
+        }
+    }
+
+    //switches to gameObject item
+    public void SwitchToItem(GameObject item)
+    {
+        //turn off all items 
+        DeactivateAllItems();
+        //set new current item 
+        currentItemObj = item;
+        currentItem = myItems.IndexOf(currentItemObj);
+        currentItemScript = currentItemObj.GetComponent<Item>();
+        //set sprite 
+        SetItemSprite();
     }
 
     //remove seed type from inv
-    public void RemoveSeedFromInventory(int index)
+    public void RemoveItemFromInventory(int index)
     {
         //turn off
-        seedStorage[index].seedObj.SetActive(false);
+        myItems[index].SetActive(false);
         //remove from lists
-        seedStorage.RemoveAt(index);
-        seedSprites.RemoveAt(index);
+        myItems.RemoveAt(index);
+        ItemSprites.RemoveAt(index);
     }
 
-    //fade in and out Tools inv
-    IEnumerator FadeOutToolsVis()
+    //deactivate all Items 
+    void DeactivateAllItems()
     {
-        if (!toolInvVisual.activeSelf)
+        for (int i = 0; i < myItems.Count; i++)
         {
-            toolInvVisual.SetActive(true);
+            myItems[i].SetActive(false);
+        }
+    }
+
+    //fade in and out Items inv
+    IEnumerator FadeOutItemsVis()
+    {
+        if (!ItemInvVisual.activeSelf)
+        {
+            ItemInvVisual.SetActive(true);
         }
         
-        for (int i = 0; i < toolsUI.Length; i++)
+        for (int i = 0; i < ItemsUI.Length; i++)
         {
-            toolsUI[i].fadingIn = true;
-            toolsUI[i].fadingOut = false;
+            ItemsUI[i].FadeIn();
         }
 
         yield return new WaitForSeconds(2f);
 
-        for (int i = 0; i < toolsUI.Length; i++)
+        for (int i = 0; i < ItemsUI.Length; i++)
         {
-            toolsUI[i].fadingIn = false;
-            toolsUI[i].fadingOut = true;
-        }
-    }
-
-    //fade in and out Seed inv
-    IEnumerator FadeOutSeedVis()
-    {
-        if (!seedInvVisual.activeSelf)
-        {
-            seedInvVisual.SetActive(true);
-        }
-
-        for(int i = 0; i < seedsUI.Length; i++)
-        {
-            seedsUI[i].fadingIn = true;
-            seedsUI[i].fadingOut = false;
-        }
-
-        yield return new WaitForSeconds(2f);
-        
-        for (int i = 0; i < seedsUI.Length; i++)
-        {
-            seedsUI[i].fadingIn = false;
-            seedsUI[i].fadingOut = true;
+            ItemsUI[i].FadeOut();
         }
     }
 

@@ -125,6 +125,8 @@ public class StartView : MonoBehaviour {
         transform.position = Vector3.Lerp(transform.position, playerCamera.transform.position, lerpSpeed * Time.deltaTime);
         //field of view
         startCam.fieldOfView = Mathf.Lerp(startCam.fieldOfView, 50f, lerpSpeed * Time.deltaTime);
+        //can't look until we arrive at player spot 
+        playerCamera.GetComponent<PlayerCameraController>().canLook = false;
 
         //distance check, once within reactivate everything and turn off start viewer
         if (Vector3.Distance(transform.position, playerCamera.transform.position) < 0.5f)

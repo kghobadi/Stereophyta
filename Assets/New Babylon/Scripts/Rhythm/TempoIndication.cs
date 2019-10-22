@@ -55,7 +55,9 @@ public class TempoIndication : MonoBehaviour {
         tempoFader.FadeIn();
 
         tempoIndicator.SetInteger("Level", timescale);
-        changeTempoFx.Play();
+        //particle fx
+        if(changeTempoFx)
+            changeTempoFx.Play();
 
         changedTempo = true;
         disappearTimer = disappearTimerTotal;

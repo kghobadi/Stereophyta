@@ -7,7 +7,7 @@ public class Item : MonoBehaviour {
     public ItemType itemType;
     public ToolType toolType;
     public SeedType seedType;
-
+    public int itemCount;
 
     public enum ItemType
     {

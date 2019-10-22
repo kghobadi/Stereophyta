@@ -67,22 +67,11 @@ namespace Items
             transform.localScale = localScale;
 
             //add to tools list,
-            inventoryScript.myTools.Add(gameObject);
-            inventoryScript.toolSprites.Add(inventorySprite);
-
-            //set current inventory Tool to this
-            if (inventoryScript.currentToolObj != null)
-            {
-                inventoryScript.currentToolObj.SetActive(false);
-            }
-
-            inventoryScript.currentToolObj = gameObject;
-            inventoryScript.currentTool = inventoryScript.myTools.Count - 1;
-            inventoryScript.SetToolSprite();
-
+            inventoryScript.AddItemToInventory(gameObject, inventorySprite);
+            inventoryScript.SwitchToItem(gameObject);
+            //play this tools pickup sound
             if (playSound)
             {
-                //play this tools pickup sound
                 inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
             }
 
@@ -154,8 +143,8 @@ namespace Items
                 {
                     playerWasNear = true;
                     //so switch inv is not called 
-                    inventoryScript.canSwitchTools = false;
-                    inventoryScript.inputTimerT = 0.25f;
+                    inventoryScript.canSwitchItems = false;
+                    inventoryScript.inputTimer = 0.25f;
 
                     //fade in those prompts
                     if (pickUpText.color.a < 0.5f)
@@ -183,7 +172,7 @@ namespace Items
             //tool time scale always equal to that of the inventory 
             if (hasBeenAcquired)
             {
-                timeScale = inventoryScript.toolTimeScale;
+                timeScale = inventoryScript.ItemTimeScale;
             }
         }
 

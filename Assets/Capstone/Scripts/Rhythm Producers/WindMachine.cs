@@ -191,15 +191,13 @@ namespace Items
             transform.SetParent(null);
             transform.position = placeMentSpot;
 
-            inventoryScript.SwitchTool(true);
+            inventoryScript.SwitchItem(true, true);
 
             gameObject.SetActive(true);
 
             //remove from inventory lists
-            int index = inventoryScript.myTools.IndexOf(gameObject);
-
-            inventoryScript.myTools.Remove(gameObject);
-            inventoryScript.toolSprites.RemoveAt(index);
+            int index = inventoryScript.myItems.IndexOf(gameObject);
+            inventoryScript.RemoveItemFromInventory(index);
 
             StartCoroutine(WaitToSetFanActive());
         }

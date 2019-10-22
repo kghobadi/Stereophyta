@@ -318,12 +318,11 @@ public class ShroomSeed : MonoBehaviour {
         planting = false;
 
         //set seed count
-        SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
-        seedStorageTemp.seedCount--;
-        inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
+        Item itemScript = GetComponent<Item>();
+        itemScript.itemCount--;
 
         //turn off if no more seeds
-        if (seedStorageTemp.seedCount == 0)
+        if (itemScript.itemCount == 0)
         {
             gameObject.SetActive(false);
         }
