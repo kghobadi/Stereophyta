@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using InControl;
 
 public class Inventory : MonoBehaviour {
     //player control ref
@@ -10,7 +11,6 @@ public class Inventory : MonoBehaviour {
 
     //Items inv
     [Header("Items Inv")]
-    public int ItemTimeScale;
     public int currentItem = 0;
     public GameObject currentItemObj;
     public Item currentItemScript;
@@ -49,7 +49,7 @@ public class Inventory : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryAudio = GetComponent<AudioSource>();
-        tempoIndicator = GetComponent<TempoIndication>();
+        tempoIndicator = tpc.GetComponent<TempoIndication>();
     }
 
     void Start () {
@@ -87,36 +87,45 @@ public class Inventory : MonoBehaviour {
         }
         
         if (!tpc.menuOpen)
-        {
+        { 
+            //get input device 
+            var inputDevice = InputManager.ActiveDevice;
+
             //switch current item +
-            if ((Input.GetAxis("SwitchItem") > 0 || Input.GetKey(KeyCode.E)) && canSwitchItems && myItems.Count > 1)
+            if ((inputDevice.DPadRight || Input.GetKey(KeyCode.E)) && canSwitchItems && myItems.Count > 1)
             {
-                SwitchItem(true, true);
+                if(currentItemScript.itemType == Item.ItemType.SEED)
+                {
+                    if (currentItemScript.CheckSeedPlanting())
+                    {
+                        SwitchItem(true, true);
+                    }
+                }
+                else if (currentItemScript.itemType == Item.ItemType.TOOL)
+                {
+                    SwitchItem(true, true);
+                }
             }
             //switch current item -
-            if ((Input.GetAxis("SwitchItem") < 0 || Input.GetKey(KeyCode.Q)) && canSwitchItems && myItems.Count > 1)
+            if ((inputDevice.DPadLeft || Input.GetKey(KeyCode.Q)) && canSwitchItems && myItems.Count > 1)
             {
-                SwitchItem(false, true);
+                if (currentItemScript.itemType == Item.ItemType.SEED)
+                {
+                    if (currentItemScript.CheckSeedPlanting())
+                    {
+                        SwitchItem(false, true);
+                    }
+                }
+                else if (currentItemScript.itemType == Item.ItemType.TOOL)
+                {
+                    SwitchItem(false, true);
+                }
             }
 
             //auto switch to next seed with a count if you run out of item
             if (currentItemScript.itemCount == 0 && myItems.Count > 1 && currentItemScript.CheckSeedPlanting())
             {
                 SwitchItem(lastSwitch, false);
-            }
-
-            //input for switching player rhythm
-            if (Input.GetKeyDown(KeyCode.LeftAlt)) 
-            {
-                ItemTimeScale = DecreaseListCounter(ItemTimeScale, 5);
-                tempoIndicator.SetVisualTempo(ItemTimeScale);
-            }
-
-            //input for switching player rhythm
-            if (Input.GetKeyDown(KeyCode.RightAlt))
-            {
-                ItemTimeScale = IncreaseListCounter(ItemTimeScale, 5);
-                tempoIndicator.SetVisualTempo(ItemTimeScale);
             }
         }
         
@@ -182,8 +191,7 @@ public class Inventory : MonoBehaviour {
         {
             currentItem = DecreaseListCounter(currentItem, myItems.Count);
         }
-
-        bool foundItem = true;
+        
         //keep looping until we find one with a count 
         while(myItems[currentItem].GetComponent<Item>().itemCount < 1)
         {
@@ -210,18 +218,39 @@ public class Inventory : MonoBehaviour {
         currentItemScript = currentItemObj.GetComponent<Item>();
 
         //if its a tool or the seed's count is > 0
-        if(currentItemScript.itemType == Item.ItemType.TOOL || currentItemScript.itemCount > 0)
+        if(currentItemScript.itemType == Item.ItemType.TOOL)
+        {
             SetItemSprite();
+            if (audio)
+            {
+                inventoryAudio.PlayOneShot(switchItems);
+            }
+                
+        } 
         //set seed selected 
         if(currentItemScript.itemType == Item.ItemType.SEED)
+        {
             currentItemScript.SelectSeed();
-
+            if (currentItemScript.itemCount > 0)
+            {
+                SetItemSprite();
+            }
+            if (audio)
+            {
+                if (posOrNeg)
+                {
+                    inventoryAudio.PlayOneShot(switchSeedsUp);
+                }
+                else
+                {
+                    inventoryAudio.PlayOneShot(switchSeedsDown);
+                }
+            }
+        }
+            
         //reset timer so not infinite switch
         inputTimer = 0.25f;
         canSwitchItems = false;
-
-        if(audio)
-            inventoryAudio.PlayOneShot(switchItems);
     }
 
     public void SetItemSprite()
@@ -284,7 +313,7 @@ public class Inventory : MonoBehaviour {
     }
 
     //Count up a list 
-    int IncreaseListCounter(int counter, int total)
+    public int IncreaseListCounter(int counter, int total)
     {
         if (counter < total - 1)
         {
@@ -299,7 +328,7 @@ public class Inventory : MonoBehaviour {
     }
 
     //Count down a list 
-    int DecreaseListCounter(int counter, int total)
+    public int DecreaseListCounter(int counter, int total)
     {
         if (counter > 0)
         {

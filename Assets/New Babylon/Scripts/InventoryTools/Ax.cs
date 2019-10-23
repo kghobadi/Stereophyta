@@ -59,11 +59,17 @@ namespace Items
                     MainAction();
                 }
 
+                //input -- can hold the water button down and it will do it on rhythm
+                if (Input.GetButton("MainAction") && !tpc.menuOpen && showRhythm && !axing)
+                {
+                    MainAction();
+                    showRhythm = false;
+                }
+
                 //if swinging and anim over, switch back to idle
                 if (axing && toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && toolAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
                 {
                     axing = false;
-                    //StartCoroutine(DisableTrail());
                 }
             }
 
@@ -86,7 +92,26 @@ namespace Items
         void OnTriggerEnter(Collider other)
         {
             //collided with plant
-           
+            //has plant tag
+            if (axing)
+            {
+                if (other.gameObject.tag == "Plant")
+                {
+                    //is it plont?
+                    if (other.gameObject.GetComponent<Plont>())
+                    {
+                        //shrink plant and play guitar sound
+                        other.GetComponent<Plont>().GrowPlant(false, true);
+                        PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, axHits);
+                    }
+                }
+                //is it a shroom?
+                if (other.GetComponent<Shroom>())
+                {
+                    other.GetComponent<Shroom>().UprootShroom();
+                }
+            }
+          
         }
 
         //spawns one ax wind
@@ -112,6 +137,7 @@ namespace Items
             yield return new WaitForSeconds(axtrail.time);
             axtrail.enabled = false;
         }
+        
     }
 
 }

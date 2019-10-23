@@ -6,14 +6,11 @@ public abstract class RhythmProducer : AudioHandler {
     protected Sun sunScript;
     protected GameObject player;
     protected ThirdPersonController tpc;
-
-    public AudioClip[] basicBeats;
     
-    protected bool playedAudio, showRhythm;
+    [HideInInspector]
+    public bool showRhythm;
 
     public int timeScale;
-
-    protected float disappearTimer, disappearTimerTotal = 1f;
 
     protected int lastBPM;
 
@@ -78,49 +75,4 @@ public abstract class RhythmProducer : AudioHandler {
 
     }
     
-    public virtual void Update () {
-        AudioRhythm();
-    }
-
-
-    public virtual void AudioRhythm()
-    {
-        if (!playedAudio)
-        {
-            SwitchTimeScale();
-            playedAudio = true;
-        }
-        else
-        {
-            if (!myAudioSource.isPlaying)
-            {
-                SwitchTimeScale();
-                playedAudio = false;
-
-            }
-        }
-    }
-
-    public virtual void SwitchTimeScale()
-    {
-        //rhythmIndicator.SetInteger("Level", timeScale);
-        //switch (timeScale)
-        //{
-        //    case 0:
-        //        beatSource.PlayScheduled(SimpleClock.AtNextMeasure());
-        //        break;
-        //    case 1:
-        //        beatSource.PlayScheduled(SimpleClock.AtNextQuarter());
-        //        break;
-        //    case 2:
-        //        beatSource.PlayScheduled(SimpleClock.AtNextEighth());
-        //        break;
-        //    case 3:
-        //        beatSource.PlayScheduled(SimpleClock.AtNextSixteenth());
-        //        break;
-        //    case 4:
-        //        beatSource.PlayScheduled(SimpleClock.AtNextThirtySecond());
-        //        break;
-        //}
-    }
 }

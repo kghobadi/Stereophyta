@@ -6,6 +6,7 @@ using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TGS;
+using InControl;
 
 public class ThirdPersonController : MonoBehaviour
 {
@@ -62,6 +63,7 @@ public class ThirdPersonController : MonoBehaviour
 
     //jump variables
     [Header("Jump Vars")]
+    public TempoIndication playerTempo;
     public float jumpSpeed = 20;
     public float smallJump, midJump, bigJump;
     public float jumpCharger, midJCharge, bigJCharge, jumpChargerMax;
@@ -93,7 +95,6 @@ public class ThirdPersonController : MonoBehaviour
     public ParticleSystem swimSplashL, swimSplashR;
     ParticleSystem.MainModule splashMainL, splashMainR;
     public float swimJumpTotal = 10f;
-    float swimJumpTimer;
     int swimJumpCounter;
     public float swimJumpForce = 50f;
     public bool swimJump;
@@ -158,7 +159,8 @@ public class ThirdPersonController : MonoBehaviour
         //grab sun refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
-        
+        playerTempo = GetComponent<TempoIndication>();
+
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
@@ -227,15 +229,32 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     void Update()
-    {
+    { 
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         //calls mouse move
-        if (playerCanMove && !menuOpen && playerCameraController.mouseControls)
+        if (playerCanMove && !menuOpen)
         {
-            MouseMovement();
+            Movement();
+        }
+
+        //input for switching player rhythm
+        if (Input.GetKeyDown(KeyCode.LeftAlt) || inputDevice.DPadDown.WasPressed)
+        {
+            playerTempo.timeScale = myInventory.DecreaseListCounter(playerTempo.timeScale, 5);
+            playerTempo.SetVisualTempo(playerTempo.timeScale);
+        }
+
+        //input for switching player rhythm
+        if (Input.GetKeyDown(KeyCode.RightAlt) || inputDevice.DPadUp.WasPressed)
+        {
+            playerTempo.timeScale = myInventory.IncreaseListCounter(playerTempo.timeScale, 5);
+            playerTempo.SetVisualTempo(playerTempo.timeScale);
         }
 
         //call sleep -- only works if you haven't slept for a day and you are on the ground
-        if(!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen && playerCanMove && !swimming) 
+        if (!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen && playerCanMove && !swimming) 
         {
             Sleep(true);
         }
@@ -257,7 +276,6 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
         
-
         //in case of weird sleep/ wake up bug
         if(!sleeping)
         {
@@ -272,7 +290,7 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     //same sort of logic for jump and other stuff, different core movement from ps4 controllers
-    void MouseMovement()
+    void Movement()
     {
         CalculateMovementInputs();
 
@@ -315,36 +333,45 @@ public class ThirdPersonController : MonoBehaviour
     // based on player inputs 
     void CalculateMovementInputs()
     {
-        //grab inputs from our axes
-        //z
-        forwardInput = new Vector3(0, 0, Input.GetAxis("Vertical"));
-        //x
-        horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+        //mouse
+        if (playerCameraController.mouseControls)
+        {
+            //z axis
+            forwardInput = new Vector3(0, 0, Input.GetAxis("Vertical"));
+            //x axis
+            horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
+        }
+        //controller
+        else
+        {
+            //left stick y
+            forwardInput = new Vector3(0, 0, inputDevice.LeftStickY);
+            //left stick x
+            horizontalInput = new Vector3(inputDevice.LeftStickX, 0, 0);
+        }
 
         //forward movement calculations
         Vector3 targetForwardMovement = forwardInput;
+        //horizontal movement calculations
+        Vector3 targetHorizontalMovement = horizontalInput;
+
         if (indoors)
         {
             targetForwardMovement = houseCam.rotation * forwardInput;
-        }
-        else
-        {
-            targetForwardMovement = transform.rotation * forwardInput;
-        }
-        targetForwardMovement.y = 0;
-        targetForwardMovement.Normalize();
-        targetForwardMovement *= forwardInput.magnitude;
-
-        //horizontal movement calculations
-        Vector3 targetHorizontalMovement = horizontalInput;
-        if (indoors)
-        {
             targetHorizontalMovement = houseCam.rotation * horizontalInput;
         }
         else
         {
+            targetForwardMovement = transform.rotation * forwardInput;
             targetHorizontalMovement = transform.rotation * horizontalInput;
         }
+        //forward
+        targetForwardMovement.y = 0;
+        targetForwardMovement.Normalize();
+        targetForwardMovement *= forwardInput.magnitude;
+        //horizontal
         targetHorizontalMovement.y = 0;
         targetHorizontalMovement.Normalize();
         targetHorizontalMovement *= horizontalInput.magnitude;
@@ -353,7 +380,6 @@ public class ThirdPersonController : MonoBehaviour
         targetMovementTotal = targetForwardMovement + targetHorizontalMovement;
         
         //add yLook to the player pos, then subtract cam pos to get the forward look
-        //movement input
         if (targetMovementTotal.magnitude > 0)
         {
             targetLook = Quaternion.LookRotation(targetMovementTotal);
@@ -451,17 +477,34 @@ public class ThirdPersonController : MonoBehaviour
         currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
         runParticles.Stop();
         AdjustSwimHeight();
-        //playerCloak.enabled = false;
         //need to figure out what to do with the cloth while swimming...
-        //timer for swimjump
-        swimJumpTimer -= Time.deltaTime;
 
         //swim jump input 
-        if (Input.GetKey(KeyCode.Space) && !swimJump && swimJumpTimer < 0)
+        if (Input.GetButton("Jump") && !swimJump && playerTempo.showRhythm)
         {
+            switch (playerTempo.timeScale)
+            {
+                case 0:
+                    swimJumpForce = 10f;
+                    break;
+                case 1:
+                    swimJumpForce = 8f;
+                    break;
+                case 2:
+                    swimJumpForce = 6f;
+                    break;
+                case 3:
+                    swimJumpForce = 4f;
+                    break;
+                case 4:
+                    swimJumpForce = 2f;
+                    break;
+            }
+
             swimJump = true;
             int randomSwimJump = Random.Range(0, swimJumps.Length);
             playerSource.PlayOneShot(swimJumps[randomSwimJump]);
+            playerTempo.showRhythm = false;
         }
 
         //actual force applied 
@@ -473,7 +516,6 @@ public class ThirdPersonController : MonoBehaviour
             if (swimJumpCounter > 10)
             {
                 swimJumpCounter = 0;
-                swimJumpTimer = swimJumpTotal;
                 swimSpeed = movespeed;
                 swimJump = false;
             }
@@ -815,15 +857,37 @@ public class ThirdPersonController : MonoBehaviour
 
     void JumpInputs()
     {
+        if (Input.GetButtonDown("Jump"))
+        {
+            playerTempo.showRhythm = false;
+        }
+
         //hold jump button to charge jump on rhythm
         if (Input.GetButton("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
         {
             jumpCharger += Time.deltaTime;
 
-            //reached capacity -- big jump
-            if (jumpCharger > jumpChargerMax)
+            //for holding down to enact rhythm
+            if (playerTempo.showRhythm)
             {
-                SetJump(2);
+                switch (playerTempo.timeScale)
+                {
+                    case 0:
+                        SetJump(2);
+                        break;
+                    case 1:
+                        SetJump(2);
+                        break;
+                    case 2:
+                        SetJump(1);
+                        break;
+                    case 3:
+                        SetJump(0);
+                        break;
+                    case 4:
+                        SetJump(0);
+                        break;
+                }
             }
         }
 
@@ -851,7 +915,8 @@ public class ThirdPersonController : MonoBehaviour
     //called to actually jump
     void SetJump(int jumpType)
     {
-        PlayJumpSound();
+        playerTempo.showRhythm = false;
+        //PlayJumpSound();
         //jump trail activation
         jumpTrail = jumpTrailPool.GrabObject();
         jumpTrail.transform.SetParent(characterBody);

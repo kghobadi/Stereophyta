@@ -71,12 +71,9 @@ public class SickleWind : Rhythm
             //if it is plont
             if (other.GetComponent<Plont>())
             {
-                if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
-                {
-                    //shrink plant and play guitar sound
-                    other.GetComponent<Plont>().GrowPlant(false, true);
-                    PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, mySickleDaddy.sickleHits);
-                }
+                //shrink plant and play guitar sound
+                other.GetComponent<Plont>().GrowPlant(false, true);
+                PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, mySickleDaddy.sickleHits);
             }
           
             //is it a shroom?

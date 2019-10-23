@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//This script just makes the rhythm indicator sprite look at the camera 
+
 public class RhythmIndicator : MonoBehaviour {
     //ref to player and their camera 
     GameObject player;

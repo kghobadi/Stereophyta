@@ -15,7 +15,9 @@ namespace Items
         public Transform fanObj;
         //speed vars 
         public float windSpeed;
+        float origWind;
         public float rotationSpeed;
+        float origRotate;
         public float distanceToDestroy;
 
         //audio
@@ -36,15 +38,17 @@ namespace Items
         {
             //set tempo indicator stuff 
             tempoIndicator = GetComponent<TempoIndication>();
-            if(tempoIndicator.source == null)
+            if(tempoIndicator.myAudioSource == null)
             {
-                tempoIndicator.source = toolSource;
+                tempoIndicator.myAudioSource = toolSource;
             }
             tempoIndicator.changeTempoSound = selectLower;
             //rhythm lever state -- timeScale should never exceed timeScaleMax 
-            timeScale = 2;
+            timeScale = 0;
             rotationSpeed = 3f;
+            origRotate = rotationSpeed;
             windSpeed = 5;
+            origWind = windSpeed;
 
             //this means we have set it before, so we have saved before
             if (PlayerPrefs.GetString("hasWindStaff") == "yes")
@@ -62,8 +66,7 @@ namespace Items
                 fanActive = true;
             }
         }
-
-
+        
         public override void PickUpTool(bool playSound)
         {
             base.PickUpTool(playSound);
@@ -191,14 +194,13 @@ namespace Items
             transform.SetParent(null);
             transform.position = placeMentSpot;
 
-            inventoryScript.SwitchItem(true, true);
-
-            gameObject.SetActive(true);
-
-            //remove from inventory lists
+            //remove from inventory lists 
             int index = inventoryScript.myItems.IndexOf(gameObject);
             inventoryScript.RemoveItemFromInventory(index);
-
+            //set obj active and switch inventory 
+            gameObject.SetActive(true);
+            inventoryScript.SwitchItem(true, true);
+            //set rotation 
             StartCoroutine(WaitToSetFanActive());
         }
 
@@ -230,8 +232,8 @@ namespace Items
             {
                 //reset 
                 timeScale = 0;
-                windSpeed -= (2 * timeScaleMax);
-                rotationSpeed /= (2 * timeScaleMax);
+                windSpeed = origWind;
+                rotationSpeed = origRotate;
             }
 
             //sets rhythm indicator 

@@ -34,7 +34,7 @@ public class WindGen : RhythmProducer {
         }
     }
 
-    public override void Update () {
+    void Update () {
         if (showRhythm)
         {
             //to help trim down cloud count
@@ -60,8 +60,6 @@ public class WindGen : RhythmProducer {
         {
             EvaluateRhythmInterval();
         }
-
-       
     }
 
     //adjusts wind interval based on what the clock bpm is 
@@ -106,9 +104,8 @@ public class WindGen : RhythmProducer {
         showRhythm = false;
     }
 
-    public override void SwitchTimeScale()
+    public void SwitchTimeScale()
     {
-        base.SwitchTimeScale();
         timeScale = Random.Range(0, 5);
         CheckDirRandomPos();
 

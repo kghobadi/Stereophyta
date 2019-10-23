@@ -2,29 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TempoIndication : MonoBehaviour {
+public class TempoIndication : RhythmProducer {
 
     //tempo indicator
     public SpriteRenderer tempoSR;
     Animator tempoIndicator;
     FadeSprite tempoFader;
-    //timers for how long indicator appears
-    public float disappearTimer, disappearTimerTotal = 1.5f;
-
+    //for tempo indication 
+    protected float disappearTimer, disappearTimerTotal = 1f;
     //change tempo particle
     public GameObject changeTempoObj;
     ParticleSystem changeTempoFx;
     public bool changedTempo;
-
     //audio
-    [Header("Audio")]
-    public AudioSource source;
     public AudioClip changeTempoSound;
 
-    void Awake()
+    public override void Awake()
     {
-        //tempo indicator
-        source = GetComponent<AudioSource>();
+        base.Awake();
+        
         tempoIndicator = tempoSR.GetComponent<Animator>();
         tempoFader = tempoSR.GetComponent<FadeSprite>();
         if (changeTempoObj != null)
@@ -32,8 +28,8 @@ public class TempoIndication : MonoBehaviour {
             changeTempoFx = changeTempoObj.GetComponent<ParticleSystem>();
         }
     }
-	
-	void Update () {
+
+    void Update () {
 
         //for tempo visual
         if (changedTempo)
@@ -63,6 +59,6 @@ public class TempoIndication : MonoBehaviour {
         disappearTimer = disappearTimerTotal;
 
         //sound to indicate dif tempo
-        source.PlayOneShot(changeTempoSound);
+        myAudioSource.PlayOneShot(changeTempoSound);
     }
 }

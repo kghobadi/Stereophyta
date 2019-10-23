@@ -87,7 +87,34 @@ namespace Items
             sickling = true;
         }
 
+        void OnTriggerEnter(Collider other)
+        {
+            //collided with plant
+            //has plant tag
+            if (sickling)
+            {
+                if (other.gameObject.tag == "Plant")
+                {
+                    //is it plont?
+                    if (other.gameObject.GetComponent<Plont>())
+                    {
+                        //shrink plant and play guitar sound
+                        if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
+                        {
+                            other.GetComponent<Plont>().GrowPlant(false, true);
+                            PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, sickleHits);
+                        }
+                    }
 
+                    //is it a shroom?
+                    if (other.GetComponent<Shroom>())
+                    {
+                        other.GetComponent<Shroom>().UprootShroom();
+                    }
+                }
+            }
+            
+        }
 
         //spawns one sickle wind
         void SpawnSickleWind(Vector3 spawnPoint)

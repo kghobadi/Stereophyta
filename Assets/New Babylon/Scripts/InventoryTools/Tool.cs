@@ -6,18 +6,12 @@ using UnityEngine.UI;
 namespace Items
 {
     //abstract class to build tools from
-    public abstract class Tool : MonoBehaviour
+    public abstract class Tool : RhythmProducer
     {
-        //player vars
-        protected GameObject player;
-        protected ThirdPersonController tpc;
         //audio source reference
         protected AudioSource toolSource;
         [Header("Tool Vars")]
         public Animator toolAnimator;
-        //rhythm vars
-        public bool showRhythm;
-        public int timeScale;
 
         //for adding to inventory
         protected GameObject inventory;
@@ -37,11 +31,9 @@ namespace Items
         public float interactDist = 10f;
 
         //set tool refs in awake so that inventory can disable them at start
-        public virtual void Awake()
+        public override void Awake()
         {
-            //player refs
-            player = GameObject.FindGameObjectWithTag("Player");
-            tpc = player.GetComponent<ThirdPersonController>();
+            base.Awake();
 
             toolSource = GetComponent<AudioSource>();
             toolAnimator = GetComponent<Animator>();
@@ -78,59 +70,7 @@ namespace Items
             DeactivatePrompt();
             //book notification??
         }
-
-        public void OnEnable()
-        {
-            SimpleClock.ThirtySecond += OnThirtySecond;
-        }
-
-        public void OnDisable()
-        {
-            SimpleClock.ThirtySecond -= OnThirtySecond;
-        }
-
-        public virtual void OnThirtySecond(BeatArgs e)
-        {
-            switch (timeScale)
-            {
-                case 0:
-                    if (e.TickMask[TickValue.Measure])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-                case 1:
-                    if (e.TickMask[TickValue.Quarter])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-                case 2:
-                    if (e.TickMask[TickValue.Eighth])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-                case 3:
-                    if (e.TickMask[TickValue.Sixteenth])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-                case 4:
-                    if (e.TickMask[TickValue.ThirtySecond])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-            }
-        }
-
+        
         public virtual void Update()
         {
             //just for pick up logic 
@@ -169,10 +109,10 @@ namespace Items
                 }
             }
 
-            //tool time scale always equal to that of the inventory 
+            //always set tempo to player Tempo while acquired
             if (hasBeenAcquired)
             {
-                timeScale = inventoryScript.ItemTimeScale;
+                timeScale = tpc.playerTempo.timeScale;
             }
         }
 

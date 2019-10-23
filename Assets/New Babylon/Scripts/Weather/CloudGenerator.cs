@@ -22,7 +22,7 @@ public class CloudGenerator : RhythmProducer
         SwitchTimeScale(); 
     }
 
-    public override void Update()
+    void Update()
     {
         //rhythm true from clock
         if (showRhythm)
@@ -153,10 +153,8 @@ public class CloudGenerator : RhythmProducer
     }
 
 
-    public override void SwitchTimeScale()
+    public void SwitchTimeScale()
     {
-        base.SwitchTimeScale();
-
         switch (timeScale)
         {
             case 0:

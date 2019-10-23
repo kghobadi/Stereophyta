@@ -153,7 +153,7 @@ public class Shroom : RhythmProducer
         shroomPrefab = shroomPooler.objectPrefab;
     }
 
-    public override void Update()
+    void Update()
     {
         //they are alive and breathing --- not in inventory 
         if (plantingState == PlantingState.PLANTED)

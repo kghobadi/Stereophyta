@@ -71,12 +71,12 @@ public class AxWind : Rhythm {
             //is it plont?
             if (other.gameObject.GetComponent<Plont>())
             {
+                
                 if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
                 {
                     //shrink plant and play guitar sound
                     other.GetComponent<Plont>().GrowPlant(false, true);
                     PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
-                    //Debug.Log("played guitar sound");
                 }
             }
 
