@@ -387,6 +387,7 @@ public class Inventory : MonoBehaviour {
         DeactivateAllItems();
         //set new current item 
         currentItemObj = item;
+        currentItemObj.SetActive(true);
         currentItem = myItems.IndexOf(currentItemObj);
         currentItemScript = currentItemObj.GetComponent<Item>();
         //set sprite 

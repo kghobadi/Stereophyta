@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using InControl;
 
 namespace Items
 {
@@ -53,9 +54,12 @@ namespace Items
 
             //only run if has been picked up
             if (hasBeenAcquired)
-            {
-                //take input 
-                if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !sickling)
+            {  
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
+
+                //on click 
+                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && !sickling)
                 {
                     MainAction();
                 }
@@ -70,7 +74,7 @@ namespace Items
                 }
 
                 //on release
-                if (Input.GetButtonUp("MainAction") && sickling)
+                if ((Input.GetButtonUp("MainAction") || inputDevice.Action3.WasReleased) && sickling)
                 {
                     toolAnimator.SetBool("sickling", false);
                     sickling = false;

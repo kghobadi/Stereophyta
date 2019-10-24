@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using InControl;
 
 namespace Items
 {
@@ -75,7 +76,9 @@ namespace Items
         {
             //just for pick up logic 
             if (!hasBeenAcquired)
-            {
+            {  
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
                 //dist from player
                 float dist = Vector3.Distance(transform.position, player.transform.position);
                 //if player is close
@@ -91,7 +94,7 @@ namespace Items
                         ShowPickupPrompt();
 
                     //pick up when player presses E
-                    if (Input.GetKeyDown(KeyCode.E))
+                    if (Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed)
                     {
                         PickUpTool(true);
                     }

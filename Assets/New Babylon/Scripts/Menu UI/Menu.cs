@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Audio;
+using InControl;
 
 public class Menu : MonoBehaviour {
     //sun
@@ -17,14 +18,21 @@ public class Menu : MonoBehaviour {
     public GameObject menuObj;
     public Book bookScript;
     //toggle mouse controls
+    [Header("Mouse -- PS4 Toggle")]
     public Toggle mouseControlsToggle;
+    public Sprite mouseControlsImg, ps4ControlsImg;
+    public Text dockEprompt, interactEprompt;
+        public Image dockPS4prompt, interactPS4prompt;
     public PlayerCameraController camController;
     public Slider mouseSensitivity;
     //store cam sensitivity values 
-    public float omTurnSmoothLook, omTurnSmoothMove;
+    [Header("Cam sensitivity values")]
+    public float omTurnSmoothLook;
+        public float omTurnSmoothMove;
     public float omMovingTurnLook, omMovingTurnMove;
     public float omSmoothLookOrig, omSmoothMoveOrig;
     //settings volume slider
+    [Header("Audio Settings")]
     public AudioMixerGroup[] mixerGroups;
     public Slider[] volumeSliders;
     //menu audio
@@ -35,7 +43,7 @@ public class Menu : MonoBehaviour {
     public FadeUI[] escNotices;
     public GameObject cursor;
 
-	void Start ()
+    void Awake()
     {
         //grab sun refs
         sun = GameObject.FindGameObjectWithTag("Sun");
@@ -44,13 +52,15 @@ public class Menu : MonoBehaviour {
         //player
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+    }
 
+    void Start ()
+    {
         //set initial values
         for(int i = 0; i < volumeSliders.Length; i++)
         {
             volumeSliders[i].value = 0;
         }
-        mouseControlsToggle.isOn = camController.mouseControls;
 
         //SET original sensitivity values
         //fast
@@ -68,11 +78,36 @@ public class Menu : MonoBehaviour {
         //turn off
         menuObj.SetActive(false);
         cursor.SetActive(false);
+
+        //set controls based on player pref 
+        if (PlayerPrefs.GetString("mouseOrController") != null)
+        {
+            if (PlayerPrefs.GetString("mouseOrController") == "mouse")
+            {
+                dockPS4prompt.enabled = false;
+                interactPS4prompt.enabled = false;
+                SetMouseControlsBool(true);
+            }
+            else
+            {
+                dockEprompt.enabled = false;
+                interactEprompt.enabled = false;
+                SetMouseControlsBool(false);
+            }
+        }
+        else
+        {
+            dockPS4prompt.enabled = false;
+            interactPS4prompt.enabled = false;
+            SetMouseControlsBool(true);
+        }
     }
 	
 	void Update () {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
         //only works if we have picked up the book
-        if (Input.GetKeyDown(KeyCode.Escape) && PlayerPrefs.GetString("hasBook") == "yes")
+        if ((Input.GetKeyDown(KeyCode.Escape) || inputDevice.Command.WasPressed) && PlayerPrefs.GetString("hasBook") == "yes")
         {
             //turn off
             if (menuObj.activeSelf && !bookScript.flipping)
@@ -179,18 +214,48 @@ public class Menu : MonoBehaviour {
         Application.Quit();
     }
 
-    //this toggles mouse v controller option
-    public void SetMouseControlsBool()
+    //toggle bool to opposite in UI 
+    public void ToggleMouseControls()
     {
-        camController.mouseControls = !camController.mouseControls;
+        bool toggle = !camController.mouseControls;
 
+        SetMouseControlsBool(toggle);
+    }
+
+    //this toggles mouse v controller option
+    public void SetMouseControlsBool(bool mouseOrController)
+    {
+        camController.mouseControls = mouseOrController;
+
+        //MOUSE enabled
         if (camController.mouseControls)
         {
             mouseControlsToggle.isOn = true;
+            bookScript.bookPages[0] = mouseControlsImg;
+            //change prompts
+            dockEprompt.enabled = true;
+            interactEprompt.enabled = true;
+
+            dockPS4prompt.enabled = false;
+            interactPS4prompt.enabled = false;
+
+            PlayerPrefs.SetString("mouseOrController", "mouse");
         }
+        //CONTROLLER enabled
         else
         {
             mouseControlsToggle.isOn = false;
+            bookScript.bookPages[0] = ps4ControlsImg;
+            //change prompts
+            dockEprompt.enabled = false;
+            interactEprompt.enabled = false;
+
+            dockPS4prompt.enabled = true;
+            interactPS4prompt.enabled = true;
+
+            PlayerPrefs.SetString("mouseOrController", "controller");
         }
+
+        bookScript.UpdateSprites();
     }
 }

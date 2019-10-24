@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using InControl;
 
 public class BoatPlayer : MonoBehaviour
 {
@@ -100,6 +101,9 @@ public class BoatPlayer : MonoBehaviour
 
     void Update()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         //only run this update code if the player is in the boat
         if (inBoat)
         {
@@ -161,7 +165,7 @@ public class BoatPlayer : MonoBehaviour
                 }
                 
                 //exit boat 
-                if (Input.GetKeyDown(KeyCode.E) && paddleIdleTimer > 0.5f)
+                if ((Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed) && paddleIdleTimer > 0.5f)
                 {
                     useBoatScript.ExitBoat(exitSpot);
                     paddleIdleTimer = 0;

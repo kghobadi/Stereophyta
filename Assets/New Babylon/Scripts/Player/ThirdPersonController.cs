@@ -254,7 +254,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //call sleep -- only works if you haven't slept for a day and you are on the ground
-        if (!sleeping && Input.GetKeyDown(KeyCode.Z) && controller.isGrounded && !menuOpen && playerCanMove && !swimming) 
+        if (!sleeping && (Input.GetKeyDown(KeyCode.Z) || inputDevice.Action4.WasPressed) && controller.isGrounded && !menuOpen && playerCanMove && !swimming) 
         {
             Sleep(true);
         }
@@ -474,13 +474,16 @@ public class ThirdPersonController : MonoBehaviour
 
     void Swim()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+        //move vector
         currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * swimSpeed, ref currentMovementV, moveSmoothUse);
         runParticles.Stop();
         AdjustSwimHeight();
         //need to figure out what to do with the cloth while swimming...
 
         //swim jump input 
-        if (Input.GetButton("Jump") && !swimJump && playerTempo.showRhythm)
+        if ((Input.GetButton("Jump") || inputDevice.Action1) && !swimJump && playerTempo.showRhythm)
         {
             switch (playerTempo.timeScale)
             {
@@ -856,14 +859,18 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     void JumpInputs()
-    {
-        if (Input.GetButtonDown("Jump"))
+    { 
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
+        //reset show rhythm on jump press 
+        if (Input.GetButtonDown("Jump") || inputDevice.Action1.WasPressed)
         {
             playerTempo.showRhythm = false;
         }
 
         //hold jump button to charge jump on rhythm
-        if (Input.GetButton("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
+        if ((Input.GetButton("Jump") || inputDevice.Action1) && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
         {
             jumpCharger += Time.deltaTime;
 
@@ -892,7 +899,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //release to set jump
-        if (Input.GetButtonUp("Jump") && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
+        if ((Input.GetButtonUp("Jump") || inputDevice.Action1.WasReleased) && !jumping && jumpWaitTimer < 0 && daysWithoutSleep < noSleepMax)
         {
             //small jump
             if (jumpCharger < midJCharge)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TGS;
+using InControl;
 
 public class Seed : MonoBehaviour {
     //tgs logic
@@ -260,6 +261,9 @@ public class Seed : MonoBehaviour {
     //planting on terrain grid
     void CheckCanPlantGrid()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         //get the index of this cell
         int cellIndex = tgs.CellGetIndex(currentCell);
         currentCellIndex = cellIndex;
@@ -277,7 +281,7 @@ public class Seed : MonoBehaviour {
             tgs.CellToggleRegionSurface(cellIndex, true, gridMan.canPlantTexture);
 
             //If player clicks, we plant seed and clear up Equip slot
-            if (Input.GetButton("Plant") || plantOnStart)
+            if ((Input.GetButton("Plant") || inputDevice.Action3) || plantOnStart)
             {
                 DropSeed();
                 plantingOnGrid = true;
@@ -287,7 +291,7 @@ public class Seed : MonoBehaviour {
         else
         {
             // cant plant here, grid spot is taken or not fertile
-            if (Input.GetButton("Plant"))
+            if ((Input.GetButton("Plant") || inputDevice.Action3))
             {
                 seedSource.PlayOneShot(noNO);
             }
@@ -304,7 +308,10 @@ public class Seed : MonoBehaviour {
     //planting on terrain without grid
     void CheckCanPlant(RaycastHit hit)
     {
-        if (Input.GetButton("Plant") || plantOnStart)
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
+        if ((Input.GetButton("Plant") || inputDevice.Action3) || plantOnStart)
         {
             //check in radius of planting point if its too close to others
             bool nearOtherPlant = false;

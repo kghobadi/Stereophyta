@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using InControl;
 
 namespace Items
 {
@@ -105,8 +106,11 @@ namespace Items
             //holding wind staff
             else
             {
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
+
                 //on click 
-                if (Input.GetButtonDown("MainAction") && !tpc.menuOpen)
+                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen)
                 {
                     MainAction();
                 }

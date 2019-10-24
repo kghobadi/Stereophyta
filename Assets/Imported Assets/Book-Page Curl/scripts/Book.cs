@@ -439,7 +439,7 @@ public class Book : MonoBehaviour {
         }
     }
     Coroutine currentCoroutine;
-    void UpdateSprites()
+    public void UpdateSprites()
     {
         LeftNext.sprite= (currentPage > 0 && currentPage <= bookPages.Count) ? bookPages[currentPage-1] : background;
         RightNext.sprite=(currentPage>=0 &&currentPage<bookPages.Count) ? bookPages[currentPage] : background;

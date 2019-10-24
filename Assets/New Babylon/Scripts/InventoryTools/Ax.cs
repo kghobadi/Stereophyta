@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using InControl;
 
 namespace Items
 {
@@ -53,14 +54,17 @@ namespace Items
             //only run if has been picked up
             if (hasBeenAcquired)
             {
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
+
                 //take input on button down
-                if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !axing)
+                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && !axing)
                 {
                     MainAction();
                 }
 
                 //input -- can hold the water button down and it will do it on rhythm
-                if (Input.GetButton("MainAction") && !tpc.menuOpen && showRhythm && !axing)
+                if ((Input.GetButton("MainAction") || inputDevice.Action3) && !tpc.menuOpen && showRhythm && !axing)
                 {
                     MainAction();
                     showRhythm = false;
