@@ -52,7 +52,7 @@ namespace Items
             base.Update();
 
             //only run if has been picked up
-            if (hasBeenAcquired)
+            if (hasBeenAcquired && inventoryScript.canSwitchItems)
             {
                 //get input device 
                 var inputDevice = InputManager.ActiveDevice;
@@ -71,7 +71,7 @@ namespace Items
                 }
 
                 //if swinging and anim over, switch back to idle
-                if (axing && toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && toolAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
+                if (axing && (toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") || toolAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f))
                 {
                     axing = false;
                 }
@@ -90,7 +90,6 @@ namespace Items
             SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
 
             axing = true;
-
         }
 
         void OnTriggerEnter(Collider other)

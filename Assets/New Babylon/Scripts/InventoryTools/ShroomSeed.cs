@@ -280,7 +280,7 @@ public class ShroomSeed : MonoBehaviour {
     void SpawnShroom()
     {
         //play spawn plant sound
-        shroomSource.PlayOneShot(spawnShroom);
+        tpc.seedAudio.PlayOneShot(spawnShroom);
         //set plant spawn pos to seed pos
         Vector3 plantSpawnPos = transform.position;
 

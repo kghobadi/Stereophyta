@@ -9,22 +9,24 @@ public class PuzzleWind : Rhythm
     ParticleSystem windParticles;
 
     public LayerMask ground;
-    Vector3 originalPos;
 
     void Start()
     {
-        currentSpeed = _windGen.windSpeed;
         windParticles = GetComponent<ParticleSystem>();
         poolObj = GetComponent<PooledObject>();
-        transform.SetParent(null);
-        originalPos = transform.position;
+    }
+
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        
     }
 
     void Update()
     {
         transform.Translate(currentSpeed * Time.deltaTime, 0, 0);
 
-        if (Vector3.Distance(transform.position, originalPos) > _windGen.distanceToDestroy)
+        if (Vector3.Distance(transform.position, _windGen.transform.position) > _windGen.distanceToDestroy)
         {
             //unchild all dem seeds
             for (int i = 0; i < transform.childCount; i++)

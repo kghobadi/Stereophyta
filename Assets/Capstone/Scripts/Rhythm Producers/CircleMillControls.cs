@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using InControl;
 
 public class CircleMillControls : MonoBehaviour {
     //player ref
@@ -49,13 +50,7 @@ public class CircleMillControls : MonoBehaviour {
     public Image rhythmHandle;
     public int rhythmState;
     public float rhythmInterval, windRadius;
-    //rhythm indicator stuff
-    public SpriteRenderer rhythmSR;
-    Animator rhythmIndicator;
-    FadeSprite rhythmFader;
-    //timers for how long indicator appears
-    public bool changedRhythm;
-    public float disappearTimer, disappearTimerTotal = 1.5f;
+    TempoIndication tempoIndicator;
 
     //lowering sound
     AudioSource controlsAudio;
@@ -69,27 +64,26 @@ public class CircleMillControls : MonoBehaviour {
     public string useMessage, leaveMessage;
     public FadeUI[] interactPrompts;
 
-    void Start()
+    void Awake()
     {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        //audio
+        controlsAudio = GetComponent<AudioSource>();
+        tempoIndicator = GetComponent<TempoIndication>();
+    }
 
-        //rhythm indicator
-        rhythmIndicator = rhythmSR.GetComponent<Animator>();
-        rhythmFader = rhythmSR.GetComponent<FadeSprite>();
-        rhythmSR.enabled = false;
-        disappearTimer = disappearTimerTotal;
-        
+    void Start()
+    {
         //mill refs
         circleMill = transform.parent;
-        controlsAudio = GetComponent<AudioSource>();
         operatingPos = transform.position + new Vector3(-1f, 1f, 0);
         exitPos = transform.position + new Vector3(-2f, 1f, 0);
 
         //add circle winds to the list
         currentCircleWinds = singleCircleWind;
-        for(int i = 0; i < allCircleWinds.Length; i++)
+        for (int i = 0; i < allCircleWinds.Length; i++)
         {
             allCircleWinds[i].DeactivateWind();
         }
@@ -103,7 +97,10 @@ public class CircleMillControls : MonoBehaviour {
     }
 
     void Update()
-    { 
+    {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         //just for interact logic 
         if (!playerOperating)
         {
@@ -119,7 +116,7 @@ public class CircleMillControls : MonoBehaviour {
                     ShowInteractPrompt(useMessage);
 
                 //pick up when player presses E
-                if (Input.GetKeyDown(KeyCode.E) && !tpc.menuOpen)
+                if ((Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed) && !tpc.menuOpen)
                 {
                     OperateControls();
                 }
@@ -143,21 +140,10 @@ public class CircleMillControls : MonoBehaviour {
             if(timeUntilLeaving > 0.5f)
             {
                 //pick up when player presses E
-                if (Input.GetKeyDown(KeyCode.E) && !tpc.menuOpen)
+                if ((Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed) && !tpc.menuOpen)
                 {
                     LeaveControls();
                 }
-            }
-        }
-
-        //deactivates rhythm indicator after disappearTimer
-        if (rhythmSR.enabled)
-        {
-            disappearTimer -= Time.deltaTime;
-            if (disappearTimer < 0)
-            {
-                rhythmSR.enabled = false;
-                disappearTimer = disappearTimerTotal;
             }
         }
 
@@ -245,10 +231,6 @@ public class CircleMillControls : MonoBehaviour {
     {
         //set rhythm state & rhythm indicator
         rhythmState = (int)rhythmSlider.value;
-        rhythmIndicator.SetInteger("Level", rhythmState);
-        rhythmFader.FadeIn();
-        changedRhythm = true;
-        disappearTimer = disappearTimerTotal;
         controlsAudio.PlayOneShot(selectionSounds[rhythmState], 1f);
         
         //loop thru wind circles and set new speeds

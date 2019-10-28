@@ -37,7 +37,7 @@ namespace Items
             base.Update();
 
             //only runs once player has picked it up
-            if (hasBeenAcquired)
+            if (hasBeenAcquired && inventoryScript.canSwitchItems)
             {
                 //get input device 
                 var inputDevice = InputManager.ActiveDevice;

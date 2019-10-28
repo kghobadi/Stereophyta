@@ -74,33 +74,27 @@ public class Menu : MonoBehaviour {
         //original
         omSmoothLookOrig = camController.mSmoothLookOriginal;
         omSmoothMoveOrig = camController.mSmoothMoveOriginal;
-
-        //turn off
-        menuObj.SetActive(false);
-        cursor.SetActive(false);
-
+        
         //set controls based on player pref 
         if (PlayerPrefs.GetString("mouseOrController") != null)
         {
             if (PlayerPrefs.GetString("mouseOrController") == "mouse")
             {
-                dockPS4prompt.enabled = false;
-                interactPS4prompt.enabled = false;
                 SetMouseControlsBool(true);
             }
             else
             {
-                dockEprompt.enabled = false;
-                interactEprompt.enabled = false;
                 SetMouseControlsBool(false);
             }
         }
         else
         {
-            dockPS4prompt.enabled = false;
-            interactPS4prompt.enabled = false;
             SetMouseControlsBool(true);
         }
+
+        //turn off
+        menuObj.SetActive(false);
+        cursor.SetActive(false);
     }
 	
 	void Update () {
@@ -127,9 +121,13 @@ public class Menu : MonoBehaviour {
         //cursor on
         Cursor.lockState = CursorLockMode.None;
         cursor.SetActive(true);
+        //turn off interact prompts 
+        interactEprompt.transform.parent.gameObject.SetActive(false);
+        dockEprompt.transform.parent.gameObject.SetActive(false);
 
         //menu on
         menuObj.SetActive(true);
+        bookScript.UpdateSprites();
         tpc.menuOpen = true;
         camController.enabled = false;
 
@@ -140,7 +138,10 @@ public class Menu : MonoBehaviour {
     }
 
     public void TurnOffMenu()
-    {
+    {   
+        //turn on interact prompts 
+        interactEprompt.transform.parent.gameObject.SetActive(true);
+        dockEprompt.transform.parent.gameObject.SetActive(true);
         //menu off
         menuObj.SetActive(false);
         tpc.menuOpen = false;
@@ -230,7 +231,7 @@ public class Menu : MonoBehaviour {
         //MOUSE enabled
         if (camController.mouseControls)
         {
-            mouseControlsToggle.isOn = true;
+            
             bookScript.bookPages[0] = mouseControlsImg;
             //change prompts
             dockEprompt.enabled = true;
@@ -240,11 +241,12 @@ public class Menu : MonoBehaviour {
             interactPS4prompt.enabled = false;
 
             PlayerPrefs.SetString("mouseOrController", "mouse");
+            mouseControlsToggle.isOn = true;
         }
         //CONTROLLER enabled
         else
         {
-            mouseControlsToggle.isOn = false;
+          
             bookScript.bookPages[0] = ps4ControlsImg;
             //change prompts
             dockEprompt.enabled = false;
@@ -254,6 +256,7 @@ public class Menu : MonoBehaviour {
             interactPS4prompt.enabled = true;
 
             PlayerPrefs.SetString("mouseOrController", "controller");
+            mouseControlsToggle.isOn = false;
         }
 
         bookScript.UpdateSprites();

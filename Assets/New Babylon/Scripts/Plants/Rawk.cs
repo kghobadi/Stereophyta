@@ -96,7 +96,6 @@ public class Rawk : MonoBehaviour {
         
 
         //call funcs
-        PlayPlantingEffect();
         GrowRock(true);
     }
 
@@ -297,22 +296,6 @@ public class Rawk : MonoBehaviour {
     {
         //Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 3 + new Vector3(0, 1f, 0);
         //GameObject newSeed = Instantiate(seedPrefab, spawnPos, Quaternion.Euler(player.transform.localEulerAngles));
-    }
-
-    //plays the dirt planting effect at start
-    public void PlayPlantingEffect()
-    {
-        tpc.plantingEffects[tpc.plantingEffectCounter].transform.position = transform.position;
-        tpc.plantingEffects[tpc.plantingEffectCounter].Play();
-
-        if(tpc.plantingEffectCounter < tpc.plantingEffects.Count - 1)
-        {
-            tpc.plantingEffectCounter++;
-        }
-        else
-        {
-            tpc.plantingEffectCounter = 0;
-        }
     }
 
     private void OnTriggerEnter(Collider other)

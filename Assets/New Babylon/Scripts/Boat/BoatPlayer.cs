@@ -74,7 +74,7 @@ public class BoatPlayer : MonoBehaviour
     public Vector3 exitSpot;
     public FadeUI[] dockprompts;  //dock boat prompt
 
-    void Start()
+    void Awake()
     {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
@@ -90,8 +90,13 @@ public class BoatPlayer : MonoBehaviour
         //ref to pickup script
         useBoatScript = GetComponent<UseBoat>();
         boatBody = GetComponent<Rigidbody>();
-        boatBody.isKinematic = false;
         boatCol = GetComponent<BoxCollider>();
+    }
+
+    void Start()
+    {
+        //set body & start angle
+        boatBody.isKinematic = false;
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
 
@@ -108,7 +113,7 @@ public class BoatPlayer : MonoBehaviour
         if (inBoat)
         {
             //if player anim not idle
-            if(tpc.poopShoes.GetNextAnimatorStateInfo(0).IsName("idle") != true)
+            if(tpc.samita.GetNextAnimatorStateInfo(0).IsName("idle") != true)
             {
                 tpc.SetAnimator("idle");
             }

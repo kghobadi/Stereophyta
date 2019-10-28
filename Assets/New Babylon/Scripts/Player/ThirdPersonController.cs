@@ -23,7 +23,7 @@ public class ThirdPersonController : MonoBehaviour
     public PlayerCameraController playerCameraController;
     Transform cameraTransform;
     public Transform characterBody, waterCaster;
-    public Animator poopShoes;
+    public Animator samita;
     BoxCollider playerRunCollider;
     public Cloth playerCloak;
    
@@ -110,6 +110,7 @@ public class ThirdPersonController : MonoBehaviour
     AudioSource cameraAudSource;
     [Header("Audio")]
     public AudioSource playerSource;
+    public AudioSource seedSource;
     public AudioClip[] jumpSounds, swimJumps;
     public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps,  noNo;
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
@@ -126,8 +127,7 @@ public class ThirdPersonController : MonoBehaviour
 
     //for planting effect 
     [Header("Planting FX")]
-    public List<ParticleSystem> plantingEffects = new List<ParticleSystem>();
-    public int plantingEffectCounter = 0;
+    public ObjectPooler plantingFXpooler;
     public AudioSource seedAudio;
     public AudioClip[] seedCollects;
 
@@ -141,7 +141,7 @@ public class ThirdPersonController : MonoBehaviour
     public int noSleepMax = 3;
     public AudioSource sleepSource;
     public AudioClip[] snores, yawns;
-    public GameObject sleepParticles;
+    public ParticleSystem sleepParticles;
 
     //dictionary to sort nearby audio sources by distance 
     [SerializeField]
@@ -178,17 +178,17 @@ public class ThirdPersonController : MonoBehaviour
         playerCameraController.enabled = true;
 
         //set animator state to idle
-        if(poopShoes.GetBool("idle") != true)
+        if(samita.GetBool("idle") != true)
         {
             SetAnimator("idle");
         }
-        poopShoes.speed = 1f;
-        characterBody = poopShoes.transform;
+        samita.speed = 1f;
+        characterBody = samita.transform;
         currentFootsteps = grassSteps;
 
         //set loose particles
         splashScript = dustSplash.GetComponent<DustSplash>();
-        sleepParticles.SetActive(false);
+        sleepParticles.Stop();
         runParticles.Stop();
         swimSpeed = movespeed / 2;
         swimRipples.Stop();
@@ -260,26 +260,9 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //set auto sleep when reach no sleep max
-        if(daysWithoutSleep > noSleepMax && !sleeping)
+        if(daysWithoutSleep > noSleepMax && !sleeping && !swimming && playerCanMove)
         {
             Sleep(true);
-        }
-
-        //repeatedly snore while sleeping
-        if (sleeping)
-        {
-            //play snore sounds
-            if (!sleepSource.isPlaying)
-            {
-                int randomSnore = Random.Range(0, snores.Length);
-                sleepSource.PlayOneShot(snores[randomSnore], 1f);
-            }
-        }
-        
-        //in case of weird sleep/ wake up bug
-        if(!sleeping)
-        {
-            sleepParticles.SetActive(false);
         }
 
         //Restart game
@@ -357,6 +340,7 @@ public class ThirdPersonController : MonoBehaviour
         //horizontal movement calculations
         Vector3 targetHorizontalMovement = horizontalInput;
 
+        //changes cam rotation it draws from 
         if (indoors)
         {
             targetForwardMovement = houseCam.rotation * forwardInput;
@@ -388,21 +372,28 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     void RunWalk()
-    {
+    { 
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
         //need to figure out how to reset the cloth to what it's like at start / before swimming 
         characterBody.transform.localPosition = new Vector3(0, -0.956f, 0);
-        poopShoes.speed = 1f;
+        samita.speed = 1f;
+
+        //too sleepy to run, show zzzs
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2) && daysWithoutSleep >= noSleepMax)
+        {
+            sleepParticles.Emit(1);
+        }
 
         //run if pressing shift keys OR move timer is great enough
-        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-            || moveTimer > timeToRun)
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2 || moveTimer > timeToRun ) && daysWithoutSleep < noSleepMax)
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
 
             if (targetMovementTotal.magnitude > 0)
             {
                 //set run
-                if (poopShoes.GetBool("running") != true)
+                if (samita.GetBool("running") != true)
                 {
                     SetAnimator("running");
                     playerRunCollider.enabled = true;
@@ -418,7 +409,7 @@ public class ThirdPersonController : MonoBehaviour
                 movespeed = walkSpeed;
                 runParticles.Stop();
                 //idling
-                if (poopShoes.GetBool("idle") != true)
+                if (samita.GetBool("idle") != true)
                 {
                     SetAnimator("idle");
                 }
@@ -428,15 +419,20 @@ public class ThirdPersonController : MonoBehaviour
         else
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
-            //inc move speed & timer 
-            movespeed += 5 * Time.deltaTime;
-            moveTimer += Time.deltaTime;
+
+            //only run if not sleepy 
+            if (daysWithoutSleep < noSleepMax)
+            {
+                //inc move speed & timer 
+                movespeed += 5 * Time.deltaTime;
+                moveTimer += Time.deltaTime;
+            }
 
             //movin
             if (targetMovementTotal.magnitude > 0)
             {
                 //set walk
-                if (poopShoes.GetBool("walking") != true)
+                if (samita.GetBool("walking") != true)
                 {
                     SetAnimator("walking");
                     playerRunCollider.enabled = false;
@@ -451,7 +447,7 @@ public class ThirdPersonController : MonoBehaviour
                 moveTimer = 0;
                 movespeed = walkSpeed;
                 //idling
-                if (poopShoes.GetBool("idle") != true)
+                if (samita.GetBool("idle") != true)
                 {
                     SetAnimator("idle");
                 }
@@ -483,7 +479,7 @@ public class ThirdPersonController : MonoBehaviour
         //need to figure out what to do with the cloth while swimming...
 
         //swim jump input 
-        if ((Input.GetButton("Jump") || inputDevice.Action1) && !swimJump && playerTempo.showRhythm)
+        if ((Input.GetButton("Jump") || inputDevice.Action1) && !swimJump && playerTempo.showRhythm && daysWithoutSleep < noSleepMax)
         {
             switch (playerTempo.timeScale)
             {
@@ -510,6 +506,12 @@ public class ThirdPersonController : MonoBehaviour
             playerTempo.showRhythm = false;
         }
 
+        //too sleepy to swimjump
+        if ((Input.GetButton("Jump") || inputDevice.Action1) && daysWithoutSleep >= noSleepMax)
+        {
+            sleepParticles.Emit(5);
+        }
+
         //actual force applied 
         if (swimJump)
         {
@@ -530,7 +532,7 @@ public class ThirdPersonController : MonoBehaviour
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 swimSpeed = movespeed;
-                poopShoes.speed = 2f;
+                samita.speed = 2f;
 
                 //alter splash fx
                 splashMainL.startLifetime = 0.5f;
@@ -541,7 +543,7 @@ public class ThirdPersonController : MonoBehaviour
             else
             {
                 swimSpeed = movespeed / 2f;
-                poopShoes.speed = 1f;
+                samita.speed = 1f;
 
                 //alter splash fx
                 splashMainL.startLifetime = 1f;
@@ -555,7 +557,7 @@ public class ThirdPersonController : MonoBehaviour
             swimSplashL.Play();
             swimSplashR.Play();
             //always swimmin
-            if (poopShoes.GetBool("swimming") != true)
+            if (samita.GetBool("swimming") != true)
             {
                 SetAnimator("swimming");
             }
@@ -567,7 +569,7 @@ public class ThirdPersonController : MonoBehaviour
             swimSplashR.Stop();
             
             //always swimmin
-            if (poopShoes.GetBool("swimIdle") != true)
+            if (samita.GetBool("swimIdle") != true)
             {
                 SetAnimator("swimIdle");
             }
@@ -606,7 +608,7 @@ public class ThirdPersonController : MonoBehaviour
         {
             //sleep where player is standing
             SetAnimator("sleeping");
-            sleepParticles.SetActive(true);
+            sleepParticles.Play();
             playerCloak.gameObject.SetActive(false);
         }
         //on home island, return to bed 
@@ -634,7 +636,7 @@ public class ThirdPersonController : MonoBehaviour
         transform.localEulerAngles = new Vector3(0, 180, 0);
         characterBody.localEulerAngles = new Vector3(0, 0, 0);
         characterBody.transform.localPosition = new Vector3(0, 0.3f, 0);
-        sleepParticles.SetActive(true);
+        sleepParticles.Play();
 
 
         yield return new WaitForSeconds(1f);
@@ -665,7 +667,7 @@ public class ThirdPersonController : MonoBehaviour
         int randomYawn = Random.Range(0, yawns.Length);
         sleepSource.PlayOneShot(yawns[randomYawn], 1f);
 
-        sleepParticles.SetActive(false);
+        sleepParticles.Stop();
 
         //reset sun rotationSpeed
         //Time.timeScale = 1f;
@@ -800,16 +802,16 @@ public class ThirdPersonController : MonoBehaviour
     public void SetAnimator(string newState)
     {
         //turn off all states
-        poopShoes.SetBool("idle", false);
-        poopShoes.SetBool("walking", false);
-        poopShoes.SetBool("running", false);
-        poopShoes.SetBool("jumping", false);
-        poopShoes.SetBool("sleeping", false);
-        poopShoes.SetBool("swimming", false);
-        poopShoes.SetBool("swimIdle", false);
+        samita.SetBool("idle", false);
+        samita.SetBool("walking", false);
+        samita.SetBool("running", false);
+        samita.SetBool("jumping", false);
+        samita.SetBool("sleeping", false);
+        samita.SetBool("swimming", false);
+        samita.SetBool("swimIdle", false);
 
         //set new state
-        poopShoes.SetBool(newState, true);
+        samita.SetBool(newState, true);
     }
 
 
@@ -843,7 +845,7 @@ public class ThirdPersonController : MonoBehaviour
             moveSmoothUse = movespeedSmooth;
 
             //if animator still jumping, set back to idle
-            if (poopShoes.GetBool("jumping") == true)
+            if (samita.GetBool("jumping") == true)
             {
                 SetAnimator("idle");
             }
@@ -867,6 +869,12 @@ public class ThirdPersonController : MonoBehaviour
         if (Input.GetButtonDown("Jump") || inputDevice.Action1.WasPressed)
         {
             playerTempo.showRhythm = false;
+
+            //show z particles when press to signify i am le tired 
+            if(daysWithoutSleep >= noSleepMax)
+            {
+                sleepParticles.Emit(5);
+            }
         }
 
         //hold jump button to charge jump on rhythm
@@ -889,7 +897,7 @@ public class ThirdPersonController : MonoBehaviour
                         SetJump(1);
                         break;
                     case 3:
-                        SetJump(0);
+                        SetJump(1);
                         break;
                     case 4:
                         SetJump(0);
@@ -1052,6 +1060,15 @@ public class ThirdPersonController : MonoBehaviour
             item.Key.priority = priority;
             priority++;
         }
+    }
+
+    //plays the dirt planting effect
+    public void PlayPlantingEffect(Vector3 plantingSpot)
+    {
+        GameObject plantingFX = plantingFXpooler.GrabObject();
+        plantingFX.transform.position = plantingSpot;
+
+        plantingFX.GetComponent<ParticleSystem>().Play();
     }
 
     public void SeedCollect()

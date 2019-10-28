@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using InControl;
 
 public class StartView : MonoBehaviour {
     //sun ref
@@ -82,18 +83,21 @@ public class StartView : MonoBehaviour {
 	void Update () {
         if (startView)
         {
+            //get input device 
+            var inputDevice = InputManager.ActiveDevice;
+
             //rotates camera around windmill
             if (!lerpToPlayer)
             {
                 //rotate around windmill
                 transform.RotateAround(rotationPoint.position, Vector3.up, rotationSpeed * Time.deltaTime);
                 //keep the house cam off 
-                if(houseCamera.activeSelf)
+                if (houseCamera.activeSelf)
                     houseCamera.SetActive(false);
             }
-            
+
             //check for spacebar input
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) || inputDevice.Action1 || inputDevice.Action2 || inputDevice.Action3 || inputDevice.Action4 )
             {
                 //fade out menu UI
                 for (int i = 0; i < menuFades.Length; i++)

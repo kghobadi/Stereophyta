@@ -53,7 +53,7 @@ namespace Items
             base.Update();
 
             //only run if has been picked up
-            if (hasBeenAcquired)
+            if (hasBeenAcquired && inventoryScript.canSwitchItems)
             {  
                 //get input device 
                 var inputDevice = InputManager.ActiveDevice;

@@ -108,7 +108,10 @@ public class Seed : MonoBehaviour {
             //plant immediately 
             if (plantOnStart)
             {
-                RaycastToGround();
+                if (inventoryScript.canSwitchItems)
+                {
+                    RaycastToGround();
+                }
             }
             //fall to ground --> IDLE state
             else
@@ -386,11 +389,6 @@ public class Seed : MonoBehaviour {
     //called when UI seed reaches the ground
     void SpawnPlant()
     {
-        //play spawn plant sound
-        if (!plantOnStart)
-        {
-            seedSource.PlayOneShot(spawnPlant);
-        }
         //set plant spawn pos to seed pos
         Vector3 plantSpawnPos = transform.position;
 
@@ -403,6 +401,13 @@ public class Seed : MonoBehaviour {
             tgs.CellSetTag(currentCell, 1);
             //planted texture
             tgs.CellToggleRegionSurface(currentCellIndex, true, gridMan.plantedTexture);
+        }
+
+        //play spawn plant sound
+        if (!plantOnStart)
+        {
+            tpc.seedAudio.PlayOneShot(spawnPlant);
+            tpc.PlayPlantingEffect(plantSpawnPos);
         }
 
         //generate clone and set Plont script values

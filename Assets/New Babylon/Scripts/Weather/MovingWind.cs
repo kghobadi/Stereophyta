@@ -12,12 +12,16 @@ public class MovingWind : Rhythm {
     PooledObject poolObj;
 
     void Start () {
-        currentSpeed = _windGen.windSpeed;
         windParticles = GetComponent<ParticleSystem>();
         poolObj = GetComponent<PooledObject>();
     }
-	
-	void Update () {
+
+    public override void OnEnable()
+    {
+        base.OnEnable();
+    }
+
+    void Update () {
         transform.Translate(currentSpeed * Time.deltaTime, 0, 0);
 
         if (Vector3.Distance(transform.position, _windGen.transform.position) > _windGen.distanceToDestroy)

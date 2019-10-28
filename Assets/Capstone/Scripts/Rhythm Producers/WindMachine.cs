@@ -12,6 +12,7 @@ namespace Items
         public ObjectPooler fanWindPooler;
         GameObject windClone;
 
+        public int staffID;
         //animator
         public Transform fanObj;
         //speed vars 
@@ -52,7 +53,7 @@ namespace Items
             origWind = windSpeed;
 
             //this means we have set it before, so we have saved before
-            if (PlayerPrefs.GetString("hasWindStaff") == "yes")
+            if (PlayerPrefs.GetString("hasWindStaff" + staffID.ToString()) == "yes")
             {
                 PickUpTool(false);
                 //Debug.Log("picked up windstaff on start");
@@ -72,7 +73,7 @@ namespace Items
         {
             base.PickUpTool(playSound);
 
-            PlayerPrefs.SetString("hasWindStaff", "yes");
+            PlayerPrefs.SetString("hasWindStaff" + staffID.ToString(), "yes");
 
             toolAnimator.enabled = true;
 
@@ -110,7 +111,7 @@ namespace Items
                 var inputDevice = InputManager.ActiveDevice;
 
                 //on click 
-                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen)
+                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && inventoryScript.canSwitchItems)
                 {
                     MainAction();
                 }
@@ -121,10 +122,15 @@ namespace Items
         {
             //grab wind from pool, set pos, rotation, ref to this
             windClone = fanWindPooler.GrabObject();
+            //set wind script
+            PuzzleWind tinyWind = windClone.GetComponent<PuzzleWind>();
+            tinyWind._windGen = this;
+            tinyWind.currentSpeed = windSpeed;
+            //set wind transform 
             windClone.transform.SetParent(null);
             windClone.transform.position = transform.position + new Vector3(0, 5, 0);
             windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
-            windClone.GetComponent<PuzzleWind>()._windGen = this;
+           
             showRhythm = false;
         }
 
@@ -191,6 +197,7 @@ namespace Items
         void PlaceFan()
         {
             //animate to become fan
+            timeScale = tpc.playerTempo.timeScale;
             toolAnimator.SetBool("fan", true);
             toolSource.PlayOneShot(placementSound, 0.1f);
 

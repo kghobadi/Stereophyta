@@ -13,7 +13,7 @@ public class ObjectPooler : MonoBehaviour {
     public PoolerType poolType;
     public enum PoolerType
     {
-        WIND, CLOUD, SHROOM, CROP, SEED,
+        WIND, CLOUD, SHROOM, CROP, SEED, FX,
     }
 
     protected virtual void Awake() {
