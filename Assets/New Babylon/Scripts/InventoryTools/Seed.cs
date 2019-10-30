@@ -97,6 +97,7 @@ public class Seed : MonoBehaviour {
 
     void Start () {
         sunScript.newDay.AddListener(DayPass);
+        daysBeforePlanting = Random.Range(2, 4);
         seedBody.isKinematic = true;
         origScale = transform.localScale;
         _pooledObj = GetComponent<PooledObject>();
@@ -215,13 +216,12 @@ public class Seed : MonoBehaviour {
     {
         if (!UIseed)
         {
-            //Debug.Log("seed day passed!");
             daysBeforePlanting--;
 
             //plant spawned seed 
-            if (daysBeforePlanting == 0)
+            if (daysBeforePlanting <= 0)
             {
-                DropSeed();
+                RaycastToGround();
             }
         }
     }

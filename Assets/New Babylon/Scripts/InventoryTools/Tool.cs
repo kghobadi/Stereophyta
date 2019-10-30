@@ -28,19 +28,21 @@ namespace Items
         public Text pickUpText;
         public string pickUpMessage;
         public FadeUI[] interactPrompts;
+        BookPage bookPage;
 
         public float interactDist = 10f;
+        [Header("Item grouping")]
         //my item script
         public Item itemScript;
         //my group leader
         public Item itemGrouper;
         public bool multiple;
-
+        
         //set tool refs in awake so that inventory can disable them at start
         public override void Awake()
         {
             base.Awake();
-
+            //tool components
             toolSource = GetComponent<AudioSource>();
             toolAnimator = GetComponent<Animator>();
             toolAnimator.enabled = false;
@@ -49,6 +51,8 @@ namespace Items
             inventory = GameObject.FindGameObjectWithTag("Inventory");
             inventoryScript = inventory.GetComponent<Inventory>();
             itemScript = GetComponent<Item>();
+            //my book page
+            bookPage = GetComponent<BookPage>();
         }
 
         //called to pick up tool for the first time
@@ -79,14 +83,26 @@ namespace Items
                 else
                 {
                     AddToolToInventory();
+
+                    //has a book page to add 
+                    if (bookPage)
+                    {
+                        bookPage.AddPage();
+                    }
                 }
             }
             //only one of this tool type, just add to inventory
             else
             {
                 AddToolToInventory();
+
+                //has a book page to add 
+                if (bookPage)
+                {
+                    bookPage.AddPage();
+                }
             }
-           
+
             //play this tools pickup sound
             if (playSound)
             {

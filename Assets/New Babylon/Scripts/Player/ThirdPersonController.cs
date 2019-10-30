@@ -98,6 +98,7 @@ public class ThirdPersonController : MonoBehaviour
     int swimJumpCounter;
     public float swimJumpForce = 50f;
     public bool swimJump;
+    public BoatPlayer boatScript;
 
     //inventory ref
     public Inventory myInventory;
@@ -637,7 +638,7 @@ public class ThirdPersonController : MonoBehaviour
         characterBody.localEulerAngles = new Vector3(0, 0, 0);
         characterBody.transform.localPosition = new Vector3(0, 0.3f, 0);
         sleepParticles.Play();
-
+        boatScript.ResetDockPos();
 
         yield return new WaitForSeconds(1f);
 

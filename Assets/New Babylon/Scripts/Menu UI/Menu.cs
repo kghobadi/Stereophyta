@@ -74,9 +74,9 @@ public class Menu : MonoBehaviour {
         //original
         omSmoothLookOrig = camController.mSmoothLookOriginal;
         omSmoothMoveOrig = camController.mSmoothMoveOriginal;
-        
+      
         //set controls based on player pref 
-        if (PlayerPrefs.GetString("mouseOrController") != null)
+        if (PlayerPrefs.HasKey("mouseOrController"))
         {
             if (PlayerPrefs.GetString("mouseOrController") == "mouse")
             {

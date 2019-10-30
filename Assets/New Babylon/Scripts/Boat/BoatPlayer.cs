@@ -16,7 +16,8 @@ public class BoatPlayer : MonoBehaviour
     //Camera ref variables
     AudioSource cameraAudSource;
     PlayerCameraController camControl;
-    
+
+    Vector3 origDockPos;
     //vars for footstep audio
     [HideInInspector]
     public AudioSource boatSource;
@@ -99,9 +100,17 @@ public class BoatPlayer : MonoBehaviour
         boatBody.isKinematic = false;
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
+        origDockPos = transform.position;
 
         //starting state is idle 
         boatState = BoatStates.IDLE;
+    }
+
+    //called when player sleeps in bed 
+    public void ResetDockPos()
+    {
+        transform.position = origDockPos;
+        transform.localEulerAngles = origRotation;
     }
 
     void Update()

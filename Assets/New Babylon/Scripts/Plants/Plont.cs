@@ -68,7 +68,7 @@ public class Plont : MonoBehaviour {
     [Header("Death Effect")]
     public bool dying;
     public Material plantDeath;
-    MeshRenderer[] pRenderers;
+    List<MeshRenderer> pRenderers = new List<MeshRenderer>();
     Material[] origMats;
     float tpLerper;
     float deathStart = -5f, deathEnd = 20f;
@@ -114,12 +114,34 @@ public class Plont : MonoBehaviour {
         }
 
         //renderer & mats
-        pRenderers = new MeshRenderer[transform.childCount - 2];
-        origMats = new Material[pRenderers.Length];
         for (int i = 2; i < transform.childCount; i++)
         {
-            pRenderers[i - 2] = transform.GetChild(i).GetComponent<MeshRenderer>();
-            origMats[i - 2] = pRenderers[i - 2].material;
+            Transform child = transform.GetChild(i);
+
+            //child has renderer
+            if (child.GetComponent<MeshRenderer>())
+            {
+                //add it 
+                pRenderers.Add(child.GetComponent<MeshRenderer>());
+            }
+            //child has children
+            if(child.childCount > 0)
+            {
+                //grab all renderers from child & below
+                MeshRenderer[] allChildRenderers = child.GetComponentsInChildren<MeshRenderer>();
+                // add all renderers to pRenderers
+                for (int t = 0; t < allChildRenderers.Length; t++)
+                {
+                    //add it 
+                    pRenderers.Add(allChildRenderers[t]);
+                }
+            }
+        }
+        //set mats array to same size as pRenderers and set mats 
+        origMats = new Material[pRenderers.Count];
+        for(int i = 0; i < pRenderers.Count; i++)
+        {
+            origMats[i] = pRenderers[i].material;
         }
 
         //grab audio sources
@@ -236,7 +258,7 @@ public class Plont : MonoBehaviour {
             tpLerper = Mathf.Lerp(tpLerper, deathEnd, Time.deltaTime * deathLerpSpeed);
 
             //loop thru all our renderers
-            for (int i = 0; i < pRenderers.Length; i++)
+            for (int i = 0; i < pRenderers.Count; i++)
             {
                 //get mat
                 Material mat = pRenderers[i].material;
@@ -245,7 +267,7 @@ public class Plont : MonoBehaviour {
             }
 
             //revert to orig scale 
-            transform.localScale = Vector3.Lerp(transform.localScale, originalScale, deathLerpSpeed * Time.deltaTime);
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, deathLerpSpeed * Time.deltaTime);
 
             //check for end
             if (tpLerper > deathEnd - 0.1f)
@@ -391,7 +413,7 @@ public class Plont : MonoBehaviour {
         transform.localScale = originalScale;
         plantAnimator.enabled = true;
         plantBody.isKinematic = true;
-        for(int i = 0; i < pRenderers.Length; i++)
+        for(int i = 0; i < pRenderers.Count; i++)
         {
             pRenderers[i].material = origMats[i];
         }
@@ -462,7 +484,7 @@ public class Plont : MonoBehaviour {
     //change mat & start lerping to deeath 
     void SetDeathEffect()
     {
-        for(int i = 0; i < pRenderers.Length; i++)
+        for(int i = 0; i < pRenderers.Count; i++)
         {
             pRenderers[i].material = plantDeath;
         }
