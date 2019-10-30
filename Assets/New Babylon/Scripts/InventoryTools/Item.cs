@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Items;
 
 public class Item : MonoBehaviour {
     //types
     public ItemType itemType;
     public ToolType toolType;
+    // only used if this is a multiple tool group, and it is the first picked up
+    public List<GameObject> toolGroup;
     public SeedType seedType;
     public int itemCount;
 

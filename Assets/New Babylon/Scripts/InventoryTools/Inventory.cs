@@ -151,27 +151,35 @@ public class Inventory : MonoBehaviour {
         if(currentItemScript.itemType == Item.ItemType.SEED)
         {
             itemCounter.text = currentItemScript.itemCount.ToString();
-
-            switch (itemCounter.text.Length)
-            {
-                case 0:
-                    itemCounter.rectTransform.localScale = new Vector3(txtScale1, txtScale1, txtScale1);
-                    break;
-                case 1:
-                    itemCounter.rectTransform.localScale = new Vector3(txtScale1, txtScale1, txtScale1);
-                    break;
-                case 2:
-                    itemCounter.rectTransform.localScale = new Vector3(txtScale2, txtScale2, txtScale2);
-                    break;
-                case 3:
-                    itemCounter.rectTransform.localScale = new Vector3(txtScale3, txtScale3, txtScale3);
-                    break;
-            }
         }
         //when it's a tool we don't need a count.
         else
         {
-            itemCounter.text = "";
+            if(currentItemScript.itemCount > 1)
+            {
+                itemCounter.text = currentItemScript.itemCount.ToString();
+            }
+            else
+            {
+                itemCounter.text = "";
+            }
+        }
+
+        //set text size  
+        switch (itemCounter.text.Length)
+        {
+            case 0:
+                itemCounter.rectTransform.localScale = new Vector3(txtScale1, txtScale1, txtScale1);
+                break;
+            case 1:
+                itemCounter.rectTransform.localScale = new Vector3(txtScale1, txtScale1, txtScale1);
+                break;
+            case 2:
+                itemCounter.rectTransform.localScale = new Vector3(txtScale2, txtScale2, txtScale2);
+                break;
+            case 3:
+                itemCounter.rectTransform.localScale = new Vector3(txtScale3, txtScale3, txtScale3);
+                break;
         }
     }
 
@@ -358,7 +366,7 @@ public class Inventory : MonoBehaviour {
         return itemCounter;
     }
 
-    //adds seed type to inv
+    //adds new item type to inv
     public void AddItemToInventory(GameObject item, Sprite itemSprite)
     {
         //add to lists
@@ -378,6 +386,32 @@ public class Inventory : MonoBehaviour {
             //set new seed index in seed & plant
             itemScript.SetSeedIndex(myItems.Count - 1);
         }
+    }
+
+    //looks in inventory Items to see if there is a Tool of this type
+    public Item CheckForToolType(Item.ToolType tool)
+    {
+        Item toolGroup = null;
+
+        for(int i = 0; i < myItems.Count; i++)
+        {
+            //return first toolgroup that matches the tool type 
+            if(myItems[i].GetComponent<Item>().toolType == tool)
+            {
+                toolGroup = myItems[i].GetComponent<Item>();
+                return toolGroup;
+            }
+        }
+
+        //returns null if we never find that tool type 
+        return toolGroup;
+    }
+
+    //add item to an already acquired item type (for tools)
+    public void AddItemToGroup(Item itemGroup, GameObject itemToAdd)
+    {
+        itemGroup.itemCount++;
+        itemGroup.toolGroup.Add(itemToAdd);
     }
 
     //switches to gameObject item
@@ -410,6 +444,25 @@ public class Inventory : MonoBehaviour {
         for (int i = 0; i < myItems.Count; i++)
         {
             myItems[i].SetActive(false);
+
+            Item item = myItems[i].GetComponent<Item>();
+
+            if(item.toolGroup.Count > 0)
+            {
+                DeactivateToolGroup(item);
+            }
+        }
+    }
+
+    //deactivates an item tool group 
+    void DeactivateToolGroup(Item item)
+    {
+        if (item.toolGroup.Count > 0)
+        {
+            for (int t = 0; t < item.toolGroup.Count; t++)
+            {
+                item.toolGroup[t].gameObject.SetActive(false);
+            }
         }
     }
 

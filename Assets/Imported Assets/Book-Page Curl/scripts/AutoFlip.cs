@@ -100,7 +100,7 @@ public class AutoFlip : MonoBehaviour {
     }
     IEnumerator FlipRTL(float xc, float xl, float h, float frameTime, float dx)
     {
-        ControledBook.DisableVideos();
+        ControledBook.DisableMedia();
 
         float x = xc + xl;
         float y = (-h / (xl * xl)) * (x - xc) * (x - xc);
@@ -117,7 +117,7 @@ public class AutoFlip : MonoBehaviour {
     }
     IEnumerator FlipLTR(float xc, float xl, float h, float frameTime, float dx)
     {
-        ControledBook.DisableVideos();
+        ControledBook.DisableMedia();
 
         float x = xc - xl;
         float y = (-h / (xl * xl)) * (x - xc) * (x - xc);

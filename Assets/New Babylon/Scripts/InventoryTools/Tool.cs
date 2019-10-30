@@ -30,6 +30,11 @@ namespace Items
         public FadeUI[] interactPrompts;
 
         public float interactDist = 10f;
+        //my item script
+        public Item itemScript;
+        //my group leader
+        public Item itemGrouper;
+        public bool multiple;
 
         //set tool refs in awake so that inventory can disable them at start
         public override void Awake()
@@ -43,6 +48,7 @@ namespace Items
             //inventory ref
             inventory = GameObject.FindGameObjectWithTag("Inventory");
             inventoryScript = inventory.GetComponent<Inventory>();
+            itemScript = GetComponent<Item>();
         }
 
         //called to pick up tool for the first time
@@ -58,10 +64,29 @@ namespace Items
             transform.localPosition = localPos;
             transform.localEulerAngles = localRot;
             transform.localScale = localScale;
+            
+            //check for previous pickup so we can just add to count 
+            if(multiple)
+            {
+                Item itemGroup = inventoryScript.CheckForToolType(itemScript.toolType);
 
-            //add to tools list,
-            inventoryScript.AddItemToInventory(gameObject, inventorySprite);
-            inventoryScript.SwitchToItem(gameObject);
+                //found my tool group
+                if(itemGroup != null)
+                {
+                    AddToolToGroup(itemGroup);
+                }
+                //couldnt find the group, first time pickup
+                else
+                {
+                    AddToolToInventory();
+                }
+            }
+            //only one of this tool type, just add to inventory
+            else
+            {
+                AddToolToInventory();
+            }
+           
             //play this tools pickup sound
             if (playSound)
             {
@@ -71,7 +96,41 @@ namespace Items
             DeactivatePrompt();
             //book notification??
         }
-        
+
+        //add tool to items list
+        protected virtual void AddToolToInventory()
+        {
+            inventoryScript.AddItemToInventory(gameObject, inventorySprite);
+            inventoryScript.SwitchToItem(gameObject);
+            itemGrouper = itemScript;
+        }
+
+        //add to group, and set my ItemScript ref to the itemGroup
+        protected virtual void AddToolToGroup(Item group)
+        {
+            inventoryScript.AddItemToGroup(group, gameObject);
+            inventoryScript.SwitchToItem(group.gameObject);
+            itemGrouper = group;
+        }
+
+        //removes this from the fan group
+        protected virtual void RemoveFromGroup()
+        {
+            itemGrouper.toolGroup.Remove(gameObject);
+            itemGrouper.itemCount--;
+            itemGrouper = null;
+        }
+
+        //remove windfan from inventory completely 
+        protected virtual void RemoveFromInventory()
+        {
+            //remove from inventory lists 
+            int index = inventoryScript.myItems.IndexOf(gameObject);
+            inventoryScript.RemoveItemFromInventory(index);
+            //set obj active and switch inventory 
+            inventoryScript.SwitchItem(true, true);
+        }
+
         public virtual void Update()
         {
             //just for pick up logic 

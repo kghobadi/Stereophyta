@@ -137,15 +137,30 @@ namespace Items
         //WIND STAFF FUNCTIONS
         public override void MainAction()
         {
-            //can place
-            if (CheckCanPlaceFan() == true)
+            //only works on main fan 
+            if(itemGrouper = itemScript)
             {
-                PlaceFan();
-            }
-            //blocked
-            else
-            {
-                toolSource.PlayOneShot(noNo);
+                //can place
+                if (CheckCanPlaceFan() == true)
+                {
+                    //in group
+                    if (itemGrouper.toolGroup.Count > 0)
+                    {
+                        itemGrouper.toolGroup[0].GetComponent<WindMachine>().placeMentSpot = placeMentSpot;
+                        itemGrouper.toolGroup[0].GetComponent<WindMachine>().PlaceFan(true);
+                    }
+                    //last one 
+                    else
+                    {
+                        PlaceFan(false);
+                    }
+
+                }
+                //blocked
+                else
+                {
+                    toolSource.PlayOneShot(noNo);
+                }
             }
         }
 
@@ -194,7 +209,7 @@ namespace Items
             }
         }
 
-        void PlaceFan()
+        public void PlaceFan(bool grouped)
         {
             //animate to become fan
             timeScale = tpc.playerTempo.timeScale;
@@ -205,12 +220,18 @@ namespace Items
             transform.SetParent(null);
             transform.position = placeMentSpot;
 
-            //remove from inventory lists 
-            int index = inventoryScript.myItems.IndexOf(gameObject);
-            inventoryScript.RemoveItemFromInventory(index);
-            //set obj active and switch inventory 
+            //in group
+            if (grouped)
+            {
+                RemoveFromGroup();
+            }
+            else
+            {
+                RemoveFromInventory();
+            }
+
+            //activate 
             gameObject.SetActive(true);
-            inventoryScript.SwitchItem(true, true);
             //set rotation 
             StartCoroutine(WaitToSetFanActive());
         }

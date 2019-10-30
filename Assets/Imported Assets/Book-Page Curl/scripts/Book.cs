@@ -15,25 +15,37 @@ public class Book : MonoBehaviour {
     public Canvas canvas;
     [SerializeField]
     RectTransform BookPanel;
+    [Header("Sprite pages")]
     public Sprite background;
     //array of sprites of the pages 
     public List<Sprite> bookPages = new List<Sprite>();
     //on first page of book
     public GameObject settingsObj;
-    //true while flipping pages
-    public bool flipping;
-    //should be same size as bookPages -- set bool to true if page has video
-    public List<bool> doesThisPageHaveVideo = new List<bool>();
+    //page types 
+    public enum PageType
+    {
+        NORMAL, ANIMATED, VIDEO,
+    }
+    //should be same size as bookPages 
+    public List<PageType> pageTypes = new List<PageType>();
+    [Header("Animation pages")]
+    public List<AnimationClip> bookAnimations = new List<AnimationClip>();
+    public Animation leftAnimator, rightAnimator;
     //for playing videos on book pages. bookvideos listed in order
+    [Header("Video pages")]
     public List<VideoClip> bookVideos = new List<VideoClip>();
     public VideoPlayer leftVidPlayer, rightVidPlayer;
     public RawImage leftVideo, rightVideo;
     //book option toggles
+    [Header("Other Book Settings")]
     public bool interactable=true;
     public bool enableShadowEffect=true;
     //represent the index of the sprite shown in the right page
     public int currentPage = 0, lastPage;
     public GameObject buttonNxt, buttonPrev;
+    //true while flipping pages
+    public bool flipping;
+
     public int TotalPageCount
     {
         get { return bookPages.Count; }
@@ -79,6 +91,15 @@ public class Book : MonoBehaviour {
     //current flip mode
     FlipMode mode;
 
+    //Add event listeners
+    void Awake()
+    {
+        BookEvents.NormalPageAdded += AddNormalPage;
+        BookEvents.AnimationPageAdded += AddAnimPage;
+        BookEvents.VideoPageAdded += AddVideoPage;
+        BookEvents.PageRemoved += RemovePage;
+    }
+
     void Start()
     {
         float scaleFactor = 1;
@@ -105,14 +126,16 @@ public class Book : MonoBehaviour {
         ShadowLTR.rectTransform.sizeDelta = new Vector2(scaledPageWidth, scaledPageHeight + scaledPageWidth * 0.6f);
         NextPageClip.rectTransform.sizeDelta = new Vector2(scaledPageWidth, scaledPageHeight + scaledPageWidth * 0.6f);
 
-        DisableVideos();
+        DisableMedia();
     }
+
     public Vector3 transformPoint(Vector3 global)
     {
         Vector2 localPos = BookPanel.InverseTransformPoint(global);
         //RectTransformUtility.ScreenPointToLocalPointInRectangle(BookPanel, global, null, out localPos);
         return localPos;
     }
+
     void Update()
     {
         if (pageDragging&&interactable)
@@ -126,7 +149,7 @@ public class Book : MonoBehaviour {
         if(lastPage != currentPage)
         {
             flipping = false;
-            CheckIfPagesHaveVideo();
+            CheckIfPagesHaveMedia();
         }
 
         //turn on settings on page 0 if not active and not flipping
@@ -160,8 +183,11 @@ public class Book : MonoBehaviour {
         }
     }
 
-    public void DisableVideos()
+    public void DisableMedia()
     {
+        //turn off animation
+        leftAnimator.enabled = false;
+        rightAnimator.enabled = false;
         //turn off all video stuff (a page was flipped)
         leftVidPlayer.enabled = false;
         rightVidPlayer.enabled = false;
@@ -171,9 +197,9 @@ public class Book : MonoBehaviour {
     }
 
     //called in update to see if either of current pages has video content
-    public void CheckIfPagesHaveVideo()
+    public void CheckIfPagesHaveMedia()
     {
-        DisableVideos();
+        DisableMedia();
 
         Debug.Log("checking " + currentPage);
      
@@ -182,16 +208,27 @@ public class Book : MonoBehaviour {
         {   
             //don't want to check if missing the last page but currentPage is one above it
             if(currentPage < bookPages.Count)
-            {
+            { 
+                //RIGHT PAGE
+                if (pageTypes[currentPage] == PageType.ANIMATED)
+                {
+                    rightAnimator.clip = bookAnimations[currentPage];
+                    rightAnimator.enabled = true;
+                }
                 //check current page -- right
-                if (doesThisPageHaveVideo[currentPage])
+                if (pageTypes[currentPage] == PageType.VIDEO)
                 {
                     LoadNPlayVideos(currentPage, false);
                 }
             }
-           
-            //check left page too
-            if (doesThisPageHaveVideo[currentPage - 1])
+
+            //LEFT PAGE 
+            if (pageTypes[currentPage - 1] == PageType.ANIMATED)
+            {
+                leftAnimator.clip = bookAnimations[currentPage - 1];
+                leftAnimator.enabled = true;
+            }
+            if (pageTypes[currentPage - 1] == PageType.VIDEO)
             {
                 LoadNPlayVideos(currentPage - 1, true);
             }
@@ -219,6 +256,57 @@ public class Book : MonoBehaviour {
 
             rightVideo.enabled = true;
         }
+    }
+
+    //adds sprite page & type 
+    public void AddNormalPage(Sprite page)
+    {
+        bookPages.Add(page);
+        pageTypes.Add(PageType.NORMAL);
+
+        UpdateSprites();
+    }
+
+    //adds animation page & type 
+    public void AddAnimPage(Sprite page, AnimationClip clip)
+    {
+        bookPages.Add(page);
+        pageTypes.Add(PageType.ANIMATED);
+        bookAnimations.Add(clip);
+
+        UpdateSprites();
+    }
+
+    //adds video page & type 
+    public void AddVideoPage(Sprite page, VideoClip clip)
+    {
+        bookPages.Add(page);
+        pageTypes.Add(PageType.VIDEO);
+        bookVideos.Add(clip);
+
+        UpdateSprites();
+    }
+
+    //removes a page from all the various lists
+    public void RemovePage(int pageToRemove, PageType pageTipo)
+    {
+        bookPages.RemoveAt(pageToRemove);
+        pageTypes.RemoveAt(pageToRemove);
+
+        switch (pageTipo)
+        {
+            case PageType.NORMAL:
+                //
+                break;
+            case PageType.ANIMATED:
+                bookAnimations.RemoveAt(pageToRemove);
+                break;
+            case PageType.VIDEO:
+                bookVideos.RemoveAt(pageToRemove);
+                break;
+        }
+
+        UpdateSprites();
     }
 
     public void UpdateBook()
@@ -519,5 +607,14 @@ public class Book : MonoBehaviour {
         }
         if (onFinish != null)
             onFinish();
+    }
+
+    //remove event listeners 
+    void OnDestroy()
+    {
+        BookEvents.NormalPageAdded -= AddNormalPage;
+        BookEvents.AnimationPageAdded -= AddAnimPage;
+        BookEvents.VideoPageAdded -= AddVideoPage;
+        BookEvents.PageRemoved -= RemovePage;
     }
 }
