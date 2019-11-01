@@ -90,8 +90,6 @@ public class MovingWind : Rhythm {
 
                     other.transform.localEulerAngles = new Vector3(0, 0, 0);
                 }
-
-                //Debug.Log("hit shroom");
             }
         }
 

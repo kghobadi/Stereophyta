@@ -61,6 +61,7 @@ namespace Items
                 if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && !axing)
                 {
                     MainAction();
+                    showRhythm = false;
                 }
 
                 //input -- can hold the water button down and it will do it on rhythm

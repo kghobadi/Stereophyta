@@ -86,7 +86,7 @@ public class Inventory : MonoBehaviour {
             canSwitchItems = true;
         }
         
-        if (!tpc.menuOpen)
+        if (!tpc.menuOpen && !tpc.jumping)
         { 
             //get input device 
             var inputDevice = InputManager.ActiveDevice;
@@ -106,6 +106,7 @@ public class Inventory : MonoBehaviour {
                     SwitchItem(true, true);
                 }
             }
+
             //switch current item -
             if ((inputDevice.DPadLeft || Input.GetKey(KeyCode.Q)) && canSwitchItems && myItems.Count > 1)
             {
@@ -199,9 +200,9 @@ public class Inventory : MonoBehaviour {
         {
             currentItem = DecreaseListCounter(currentItem, myItems.Count);
         }
-        
+
         //keep looping until we find one with a count 
-        while(myItems[currentItem].GetComponent<Item>().itemCount < 1)
+        while (myItems[currentItem].GetComponent<Item>().itemCount < 1)
         {
             //increment currentItem 
             if (posOrNeg)

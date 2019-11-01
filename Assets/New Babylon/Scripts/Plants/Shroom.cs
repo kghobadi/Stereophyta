@@ -27,6 +27,7 @@ public class Shroom : RhythmProducer
     [Header("TGS")]
     public bool plantedOnGrid;
     public int cellIndex;
+    TempoIndication tempoIndicator;
 
     //All possible texture references. 
     public Texture2D groundTexture;
@@ -104,6 +105,7 @@ public class Shroom : RhythmProducer
         beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
         shroomSpores = transform.GetChild(1).GetComponent<ParticleSystem>();
         sporeScript = shroomSpores.GetComponent<ShroomSpores>();
+        tempoIndicator = GetComponent<TempoIndication>();
         
         //tgs refs
         if (tgs == null)
@@ -355,7 +357,24 @@ public class Shroom : RhythmProducer
             timeScale = 0;
         }
 
+        SetTempoIndication();
         SetBreatheSpeed();
+    }
+
+    void SetTempoIndication()
+    {
+        //enable tempo indicator if shroom planted on grid 
+        if (plantedOnGrid && tempoIndicator.tempoSR.gameObject.activeSelf == false)
+        {
+            tempoIndicator.tempoSR.gameObject.SetActive(true);
+        }
+        //disable when not on grid 
+        else if (!plantedOnGrid && tempoIndicator.tempoSR.gameObject.activeSelf)
+        {
+            tempoIndicator.tempoSR.gameObject.SetActive(false);
+        }
+        //set sprite to timescale 
+        tempoIndicator.SetVisualTempo(timeScale);
     }
 
     void SetBreatheSpeed()

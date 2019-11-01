@@ -53,7 +53,7 @@ public class PuzzleWind : Rhythm
             if (hit.transform.gameObject.tag == "Ground")
             {
                 //Debug.Log("adjusting " + hit.point);
-                transform.position = hit.point + new Vector3(0, 3f, 0);
+                transform.position = hit.point + new Vector3(0, 5f, 0);
             }
         }
     }

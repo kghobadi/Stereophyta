@@ -72,6 +72,7 @@ public class BoatPlayer : MonoBehaviour
     [Header ("Entering & Exiting")]
     public bool inBoat;  //set when player is inBoat
     public float exitSphereRadius = 3f;
+    public float dockDistance = 15f;
     public Vector3 exitSpot;
     public FadeUI[] dockprompts;  //dock boat prompt
 
@@ -171,7 +172,7 @@ public class BoatPlayer : MonoBehaviour
                
 
                 //push boat away from land
-                if (distance < 7.5f)
+                if (distance < dockDistance)
                 {
                     boatBody.AddForce(-direction * boatSpeedZ);
                     //Debug.Log("heading = " + heading);

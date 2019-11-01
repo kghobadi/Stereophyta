@@ -102,6 +102,15 @@ public class DustSplash : Rhythm {
                     other.gameObject.GetComponent<Crab>().Interrupt();
                 }
             }
+
+            //Deer
+            if (other.gameObject.GetComponent<Deer>())
+            {
+                if (other.gameObject.GetComponent<Deer>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                {
+                    other.gameObject.GetComponent<Deer>().Interrupt();
+                }
+            }
         }
     }
 

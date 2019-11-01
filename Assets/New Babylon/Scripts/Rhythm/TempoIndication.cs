@@ -59,6 +59,7 @@ public class TempoIndication : RhythmProducer {
         disappearTimer = disappearTimerTotal;
 
         //sound to indicate dif tempo
-        myAudioSource.PlayOneShot(changeTempoSound);
+        if(changeTempoSound != null)
+            myAudioSource.PlayOneShot(changeTempoSound);
     }
 }

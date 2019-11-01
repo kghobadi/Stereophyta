@@ -19,11 +19,11 @@ public class Menu : MonoBehaviour {
     public Book bookScript;
     //toggle mouse controls
     [Header("Mouse -- PS4 Toggle")]
-    public Toggle mouseControlsToggle;
     public Sprite mouseControlsImg, ps4ControlsImg;
     public Text dockEprompt, interactEprompt;
-        public Image dockPS4prompt, interactPS4prompt;
+    public Image dockPS4prompt, interactPS4prompt;
     public PlayerCameraController camController;
+    public ZoomCamInstructions zoomInstructions;
     public Slider mouseSensitivity;
     //store cam sensitivity values 
     [Header("Cam sensitivity values")]
@@ -54,27 +54,27 @@ public class Menu : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
     }
 
-    void Start ()
+    void Start()
     {
         //set initial values
-        for(int i = 0; i < volumeSliders.Length; i++)
+        for (int i = 0; i < volumeSliders.Length; i++)
         {
             volumeSliders[i].value = 0;
         }
 
         //SET original sensitivity values
         //fast
-        omTurnSmoothLook = camController.mTurnSmoothLook ;
-        omTurnSmoothMove = camController.mTurnSmoothMove ;
+        omTurnSmoothLook = camController.mTurnSmoothLook;
+        omTurnSmoothMove = camController.mTurnSmoothMove;
 
         //medium
-        omMovingTurnLook = camController.mMovingTurnSmoothLook ;
-        omMovingTurnMove = camController.mMovingTurnSmoothMove ;
+        omMovingTurnLook = camController.mMovingTurnSmoothLook;
+        omMovingTurnMove = camController.mMovingTurnSmoothMove;
 
         //original
         omSmoothLookOrig = camController.mSmoothLookOriginal;
         omSmoothMoveOrig = camController.mSmoothMoveOriginal;
-      
+
         //set controls based on player pref 
         if (PlayerPrefs.HasKey("mouseOrController"))
         {
@@ -95,6 +95,9 @@ public class Menu : MonoBehaviour {
         //turn off
         menuObj.SetActive(false);
         cursor.SetActive(false);
+
+        //dont bother setting controls until menu obj active 
+        StartCoroutine(WaitToSetControls());
     }
 	
 	void Update () {
@@ -240,8 +243,8 @@ public class Menu : MonoBehaviour {
             dockPS4prompt.enabled = false;
             interactPS4prompt.enabled = false;
 
+            zoomInstructions.mouseOrPs4 = true;
             PlayerPrefs.SetString("mouseOrController", "mouse");
-            mouseControlsToggle.isOn = true;
         }
         //CONTROLLER enabled
         else
@@ -255,10 +258,17 @@ public class Menu : MonoBehaviour {
             dockPS4prompt.enabled = true;
             interactPS4prompt.enabled = true;
 
+            zoomInstructions.mouseOrPs4 = false;
             PlayerPrefs.SetString("mouseOrController", "controller");
-            mouseControlsToggle.isOn = false;
         }
 
         bookScript.UpdateSprites();
+    }
+
+    IEnumerator WaitToSetControls()
+    {
+        yield return new WaitUntil(() => menuObj.activeSelf == true);
+
+        
     }
 }

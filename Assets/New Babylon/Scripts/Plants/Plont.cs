@@ -263,7 +263,7 @@ public class Plont : MonoBehaviour {
                 //get mat
                 Material mat = pRenderers[i].material;
                 //set tp value
-                mat.SetFloat("Teleport", tpLerper);
+                mat.SetFloat("_Teleport", tpLerper);
             }
 
             //revert to orig scale 
