@@ -1082,12 +1082,6 @@ public class ThirdPersonController : MonoBehaviour
 
         StopCoroutine(ResetSeedPitch());
         StartCoroutine(ResetSeedPitch());
-
-        //if not holding a seed, switch seed
-        if (myInventory.currentItemObj == null || myInventory.currentItemScript.itemCount < 1)
-        {
-            myInventory.SwitchItem(true, true);
-        }
     }
 
     IEnumerator ResetSeedPitch()

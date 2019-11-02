@@ -312,6 +312,8 @@ public class Inventory : MonoBehaviour {
         {
             lastItemImg.sprite = nadaSprite;
             nextItemImg.sprite = nadaSprite;
+            lastImg1.sprite = nadaSprite;
+            nextImg1.sprite = nadaSprite;
         }
         
         //Items vis
@@ -376,17 +378,45 @@ public class Inventory : MonoBehaviour {
         //set item count to 1 
         Item itemScript = item.GetComponent<Item>();
         itemScript.itemCount = 1;
+        
+    }
 
-        //if it's a seed
-        if(itemScript.itemType == Item.ItemType.SEED)
+    //looks in inventory Items to see if there is a Tool of this type
+    public Item CheckForCropType(Plont.PlantType cropSeed)
+    {
+        Item seedGroup = null;
+
+        for (int i = 0; i < myItems.Count; i++)
         {
-            //set parent and pos
-            item.transform.SetParent(transform);
-            item.transform.localPosition = localSeedSpot;
-
-            //set new seed index in seed & plant
-            itemScript.SetSeedIndex(myItems.Count - 1);
+            //return first toolgroup that matches the tool type 
+            if (myItems[i].GetComponent<Item>().cropType == cropSeed)
+            {
+                seedGroup = myItems[i].GetComponent<Item>();
+                return seedGroup;
+            }
         }
+
+        //returns null if we never find that tool type 
+        return seedGroup;
+    }
+
+    //looks in inventory Items to see if there is a Tool of this type
+    public Item CheckForShroomType(Shroom.ShroomType shroom)
+    {
+        Item seedGroup = null;
+
+        for (int i = 0; i < myItems.Count; i++)
+        {
+            //return first toolgroup that matches the tool type 
+            if (myItems[i].GetComponent<Item>().shroomType == shroom)
+            {
+                seedGroup = myItems[i].GetComponent<Item>();
+                return seedGroup;
+            }
+        }
+
+        //returns null if we never find that tool type 
+        return seedGroup;
     }
 
     //looks in inventory Items to see if there is a Tool of this type
@@ -425,6 +455,11 @@ public class Inventory : MonoBehaviour {
         currentItemObj.SetActive(true);
         currentItem = myItems.IndexOf(currentItemObj);
         currentItemScript = currentItemObj.GetComponent<Item>();
+        //select that SHIT 
+        if(currentItemScript.itemType == Item.ItemType.SEED)
+        {
+            currentItemScript.SelectSeed();
+        }
         //set sprite 
         SetItemSprite();
     }
@@ -434,6 +469,15 @@ public class Inventory : MonoBehaviour {
     {
         //turn off
         myItems[index].SetActive(false);
+        //remove from lists
+        myItems.RemoveAt(index);
+        ItemSprites.RemoveAt(index);
+    }
+
+    //remove seed type from inv
+    public void RemoveObjFromInventory(GameObject obj)
+    {
+        int index = myItems.IndexOf(obj);
         //remove from lists
         myItems.RemoveAt(index);
         ItemSprites.RemoveAt(index);

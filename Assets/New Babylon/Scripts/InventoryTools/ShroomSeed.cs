@@ -14,8 +14,7 @@ public class ShroomSeed : MonoBehaviour {
     Inventory inventoryScript;
     Transform inventoryParent;
     [Header("Inventory")]
-    public Sprite inventorySprite;
-    public int mySeedIndex;
+    Item itemScript;
     
     //tgs logic
     TerrainGridSystem tgs;
@@ -62,6 +61,7 @@ public class ShroomSeed : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
         inventoryParent = inventoryScript.transform;
+        itemScript = GetComponent<Item>();
 
         //tgs refs 
         tgs = tpc.currentTGS;
@@ -110,8 +110,6 @@ public class ShroomSeed : MonoBehaviour {
                 }
             }
         }
-
-     
     }
 
     //planting on terrain grid
@@ -301,7 +299,6 @@ public class ShroomSeed : MonoBehaviour {
         Shroom shroomScript = shroomClone.GetComponent<Shroom>();
         shroomScript.shroomPrefab = shroomPrefab;
         shroomScript.shroomPooler = shroomPooler;
-        shroomScript.mySeedIndex = mySeedIndex;
 
         //set that shroom
         if (shroomScript.plantingState != Shroom.PlantingState.PLANTED)
@@ -324,13 +321,16 @@ public class ShroomSeed : MonoBehaviour {
         planting = false;
 
         //set seed count
-        Item itemScript = GetComponent<Item>();
         itemScript.itemCount--;
-
+        
         //turn off if no more seeds
         if (itemScript.itemCount == 0)
         {
-            gameObject.SetActive(false);
+            //Remove from Inventory 
+            inventoryScript.RemoveObjFromInventory(gameObject);
+
+            //destroy 
+            Destroy(gameObject);
         }
 
         //set this back to false

@@ -9,6 +9,7 @@ public class Shroom : RhythmProducer
     [Header("Prefab & Pooler")]
     //for spawning shrooms
     public GameObject shroomPrefab;
+    public GameObject shroomSeedPrefab;
     //for obj pooling 
     public ObjectPooler shroomPooler;
     PooledObject _pooledObj;
@@ -18,7 +19,6 @@ public class Shroom : RhythmProducer
 
     //for inv
     Inventory inventoryScript;
-    public int mySeedIndex;
 
     //tgs logic
     [HideInInspector] public TerrainGridSystem tgs;
@@ -139,7 +139,6 @@ public class Shroom : RhythmProducer
         {
             sporeScript.shroomParent = this;
             sporeScript.shroomPool = shroomPooler;
-            sporeScript.seedIndex = mySeedIndex;
         }
         
         AdjustHeight();
@@ -442,7 +441,21 @@ public class Shroom : RhythmProducer
     //called when vortexing reaches player
     void CollectShroom()
     {
-        inventoryScript.myItems[mySeedIndex].GetComponent<Item>().itemCount++;
+        //check for my item's crop type 
+        Item seedGroup = inventoryScript.CheckForShroomType(shroomType);
+
+        //does it exist in inventory?
+        if (seedGroup != null)
+        {
+            seedGroup.itemCount++;
+        }
+        //not in inventory, so instantiate shroomSeed & add it. 
+        else
+        {
+            GameObject shroomSeed = Instantiate(shroomSeedPrefab);
+            Item item = shroomSeed.GetComponent<Item>();
+            inventoryScript.AddItemToInventory(shroomSeed, item.itemSprite);
+        }
 
         tpc.SeedCollect();
 

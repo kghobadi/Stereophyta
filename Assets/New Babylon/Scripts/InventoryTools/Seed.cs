@@ -17,14 +17,13 @@ public class Seed : MonoBehaviour {
     public bool plantOnStart;
     public int ageAmount;
     public bool UIseed, startingSeed;
-
-    //for inv
-    public int mySeedIndex;
+    
     //player and inv ref
     GameObject player;
     ThirdPersonController tpc;
     Inventory inventoryScript;
     Transform inventoryParent;
+    Item itemScript;
     GameObject sun;
     Sun sunScript;
 
@@ -76,6 +75,8 @@ public class Seed : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
+        inventoryParent = inventoryScript.transform;
+        itemScript = GetComponent<Item>();
 
         //set tgs stuff
         if (!plantOnStart)
@@ -103,29 +104,21 @@ public class Seed : MonoBehaviour {
         _pooledObj = GetComponent<PooledObject>();
         FindObjPoolers();
 
-        //dif settings for UI seeds
-        if (!UIseed)
+        //plant immediately 
+        if (plantOnStart)
         {
-            //plant immediately 
-            if (plantOnStart)
+            if (inventoryScript.canSwitchItems)
             {
-                if (inventoryScript.canSwitchItems)
-                {
-                    RaycastToGround();
-                }
-            }
-            //fall to ground --> IDLE state
-            else
-            {
-                daysBeforePlanting = Random.Range(2, 4);
-                SeedFall();
+                RaycastToGround();
             }
         }
+        //fall to ground --> IDLE state
         else
         {
-            inventoryParent = transform.parent;
+            daysBeforePlanting = Random.Range(2, 4);
+            SeedFall();
         }
-	}
+    }
 
     void FindObjPoolers()
     {
@@ -143,6 +136,7 @@ public class Seed : MonoBehaviour {
         if (_pooledObj)
         {
             seedPooler = _pooledObj.m_ObjectPooler;
+            plontPooler = seedPooler.companionPooler;
         }
     }
 
@@ -360,6 +354,8 @@ public class Seed : MonoBehaviour {
         transform.SetParent(null);
         seedBody.isKinematic = false;
         seedBody.useGravity = true;
+        seedCollider.isTrigger = false;
+        seedAnimator.enabled = false;
         if (!plantOnStart)
         {
             seedSource.PlayOneShot(dropSeed);
@@ -411,7 +407,13 @@ public class Seed : MonoBehaviour {
         }
 
         //generate clone and set Plont script values
-        plantClone = plontPooler.GrabObject();
+        if(plontPooler)
+            plantClone = plontPooler.GrabObject();
+        else
+        {
+            plontPooler = seedPooler.companionPooler;
+            plantClone = plontPooler.GrabObject();
+        }
         plantClone.transform.position = plantSpawnPos;
         Plont plontScript = plantClone.GetComponent<Plont>();
         plontScript.plantPrefab = plantPrefab;
@@ -441,7 +443,7 @@ public class Seed : MonoBehaviour {
             //remove from pool &/or destroy 
             if(_pooledObj != null)
             {
-                _pooledObj.m_ObjectPooler.RemoveFromPool(gameObject);
+                _pooledObj.m_ObjectPooler.RemoveFromPool(gameObject, true);
             }
             else
             {
@@ -458,13 +460,18 @@ public class Seed : MonoBehaviour {
             seedBody.useGravity = false;
 
             //set seed count
-            Item itemScript = inventoryScript.myItems[mySeedIndex].GetComponent<Item>();
             itemScript.itemCount--;
 
             //turn off if no more seeds
             if (itemScript.itemCount == 0)
             {
-                gameObject.SetActive(false);
+                //Remove from Inventory 
+                inventoryScript.SwitchItem(true, true);
+                inventoryScript.RemoveObjFromInventory(gameObject);
+                UIseed = false;
+
+                //remove from pool &/or destroy 
+                Destroy(gameObject);
             }
 
             //set this back to false
@@ -476,20 +483,46 @@ public class Seed : MonoBehaviour {
     //called when vortexing reaches player
     void CollectSeed()
     {
-        inventoryScript.myItems[mySeedIndex].GetComponent<Item>().itemCount++;
+        //check for my item's crop type 
+        Item seedGroup = inventoryScript.CheckForCropType(itemScript.cropType);
 
-        tpc.SeedCollect();
-
-        //because of those pesky starting seeds
-        if (startingSeed)
+        //does it exist in inventory?
+        if (seedGroup != null)
         {
-            Destroy(gameObject);
+            seedGroup.itemCount++;
+
+            //because of those pesky starting seeds
+            if (startingSeed)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                _pooledObj.ReturnToPool();
+            }
         }
+        //not in inventory, so add it. 
         else
         {
-            _pooledObj.ReturnToPool();
+            //if it's pooled, remove it from the pool
+            if (_pooledObj)
+            {
+                _pooledObj.m_ObjectPooler.RemoveFromPool(gameObject, false);
+            }
+            //add it 
+            inventoryScript.AddItemToInventory(itemScript.gameObject, itemScript.itemSprite);
+            //set parent, local pos, & uiSeed
+            transform.SetParent(inventoryParent);
+            transform.localPosition = inventoryScript.localSeedSpot;
+            UIseed = true;
+            //make sure physics off 
+            seedBody.useGravity = false;
+            seedBody.isKinematic = true;
+            seedCollider.isTrigger = true;
+            gameObject.SetActive(false);
         }
-        
+
+        tpc.SeedCollect();
     }
     
     void AdjustHeight()

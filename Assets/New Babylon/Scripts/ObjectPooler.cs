@@ -10,6 +10,9 @@ public class ObjectPooler : MonoBehaviour {
     List<GameObject> availableObjects = new List<GameObject>();
     List<GameObject> objectsInUse = new List<GameObject>();
 
+    //to link seeds & plant poolers 
+    public ObjectPooler companionPooler;
+
     public PoolerType poolType;
     public enum PoolerType
     {
@@ -100,7 +103,7 @@ public class ObjectPooler : MonoBehaviour {
     }
 
     //removes object from lists and destroys it 
-    public virtual void RemoveFromPool(GameObject removeIt)
+    public virtual void RemoveFromPool(GameObject removeIt, bool destroy)
     {
         if (objectsInUse.Contains(removeIt))
         {
@@ -111,6 +114,9 @@ public class ObjectPooler : MonoBehaviour {
             availableObjects.Remove(removeIt);
         }
 
-        Destroy(removeIt);
+        if (destroy)
+        {
+            Destroy(removeIt);
+        }
     }
 }

@@ -11,6 +11,7 @@ public class Item : MonoBehaviour {
     public List<GameObject> toolGroup;
     public SeedType seedType;
     public int itemCount;
+    public Sprite itemSprite;
 
     public enum ItemType
     {
@@ -26,6 +27,10 @@ public class Item : MonoBehaviour {
     {
         CROP, TREE, SHROOM,
     }
+
+    //for seeds 
+    public Plont.PlantType cropType;
+    public Shroom.ShroomType shroomType;
 
     //called by inventory to check if the seed selected is planting
     //must return true if the player is going to switch seeds
@@ -86,20 +91,6 @@ public class Item : MonoBehaviour {
         else if (seedType == SeedType.SHROOM)
         {
             GetComponent<ShroomSeed>().shroomSelected = false;
-        }
-    }
-
-    public void SetSeedIndex(int newIndex)
-    {
-        //crop type -- Seed script
-        if (seedType == SeedType.CROP)
-        {
-            GetComponent<Seed>().mySeedIndex = newIndex;
-        }
-        //shroom type
-        else if (seedType == SeedType.SHROOM)
-        {
-            GetComponent<ShroomSeed>().mySeedIndex = newIndex;
         }
     }
 }

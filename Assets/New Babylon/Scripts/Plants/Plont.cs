@@ -413,6 +413,7 @@ public class Plont : MonoBehaviour {
         transform.localScale = originalScale;
         plantAnimator.enabled = true;
         plantBody.isKinematic = true;
+        hasBeenWatered = false;
         for(int i = 0; i < pRenderers.Count; i++)
         {
             pRenderers[i].material = origMats[i];
