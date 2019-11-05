@@ -326,6 +326,8 @@ public class ShroomSeed : MonoBehaviour {
         //turn off if no more seeds
         if (itemScript.itemCount == 0)
         {
+            //switch to next item
+            inventoryScript.SwitchItem(true, true);
             //Remove from Inventory 
             inventoryScript.RemoveObjFromInventory(gameObject);
 

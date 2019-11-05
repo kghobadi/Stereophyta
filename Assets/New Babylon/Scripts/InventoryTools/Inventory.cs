@@ -123,10 +123,21 @@ public class Inventory : MonoBehaviour {
                 }
             }
 
-            //auto switch to next seed with a count if you run out of item
-            if (currentItemScript.itemCount == 0 && myItems.Count > 1 && currentItemScript.CheckSeedPlanting())
+            if(currentItemScript != null)
             {
-                SwitchItem(lastSwitch, false);
+                //auto switch to next seed with a count if you run out of item
+                if (currentItemScript.itemCount == 0 && myItems.Count > 1 && currentItemScript.CheckSeedPlanting())
+                {
+                    SwitchItem(lastSwitch, false);
+                }
+            }
+            else
+            {
+                //switch to first & only item 
+                if(myItems.Count == 1)
+                {
+                    SwitchToItem(myItems[0]);
+                }
             }
         }
         
@@ -148,23 +159,27 @@ public class Inventory : MonoBehaviour {
     //alter count of current seed
     void SetItemText()
     {
-        //set seed counter in inv UI
-        if(currentItemScript.itemType == Item.ItemType.SEED)
+        if(currentItemScript != null)
         {
-            itemCounter.text = currentItemScript.itemCount.ToString();
-        }
-        //when it's a tool we don't need a count.
-        else
-        {
-            if(currentItemScript.itemCount > 1)
+            //set seed counter in inv UI
+            if (currentItemScript.itemType == Item.ItemType.SEED)
             {
                 itemCounter.text = currentItemScript.itemCount.ToString();
             }
+            //when it's a tool we don't need a count.
             else
             {
-                itemCounter.text = "";
+                if (currentItemScript.itemCount > 1)
+                {
+                    itemCounter.text = currentItemScript.itemCount.ToString();
+                }
+                else
+                {
+                    itemCounter.text = "";
+                }
             }
         }
+        
 
         //set text size  
         switch (itemCounter.text.Length)
@@ -271,40 +286,40 @@ public class Inventory : MonoBehaviour {
         if(myItems.Count > 1)
         {
             //last img
-            if (currentItem > 0)
+            if ((currentItem - 1) >= 0)
             {
                 lastItemImg.sprite = ItemSprites[currentItem - 1];
             }
             else
             {
-                lastItemImg.sprite = ItemSprites[myItems.Count - 1];
+                lastItemImg.sprite = ItemSprites[myItems.Count + (currentItem - 1)];
             }
             //next img
-            if (currentItem < myItems.Count - 1)
+            if ((currentItem + 1 ) <= myItems.Count - 1)
             {
                 nextItemImg.sprite = ItemSprites[currentItem + 1];
             }
             else
             {
-                nextItemImg.sprite = ItemSprites[0];
+                nextItemImg.sprite = ItemSprites[((currentItem + 1) - myItems.Count)];
             }
             //last img 1
-            if(currentItem - 1 > 0)
+            if((currentItem - 2) >= 0)
             {
                 lastImg1.sprite = ItemSprites[currentItem - 2];
             }
             else
             {
-                lastImg1.sprite = ItemSprites[myItems.Count - 2];
+                lastImg1.sprite = ItemSprites[myItems.Count + (currentItem - 2)];
             }
             //next img 1
-            if((currentItem + 1) < myItems.Count - 1)
+            if((currentItem + 2) <= myItems.Count - 1)
             {
                 nextImg1.sprite = ItemSprites[currentItem + 2];
             }
             else
             {
-                nextImg1.sprite = ItemSprites[1];
+                nextImg1.sprite = ItemSprites[((currentItem + 2) - myItems.Count)];
             }
         }
         //only one item so all the sprites are nothing
@@ -315,9 +330,14 @@ public class Inventory : MonoBehaviour {
             lastImg1.sprite = nadaSprite;
             nextImg1.sprite = nadaSprite;
         }
-        
+        else if (myItems.Count == 3)
+        {
+            lastImg1.sprite = nadaSprite;
+            nextImg1.sprite = nadaSprite;
+        }
+
         //Items vis
-        if(fadeItems != null)
+        if (fadeItems != null)
             StopCoroutine(fadeItems);
         fadeItems = FadeOutItemsVis();
         StartCoroutine(fadeItems);
@@ -378,7 +398,6 @@ public class Inventory : MonoBehaviour {
         //set item count to 1 
         Item itemScript = item.GetComponent<Item>();
         itemScript.itemCount = 1;
-        
     }
 
     //looks in inventory Items to see if there is a Tool of this type
@@ -388,8 +407,10 @@ public class Inventory : MonoBehaviour {
 
         for (int i = 0; i < myItems.Count; i++)
         {
-            //return first toolgroup that matches the tool type 
-            if (myItems[i].GetComponent<Item>().cropType == cropSeed)
+            //return first crop type that matches the crop type 
+            if (myItems[i].GetComponent<Item>().itemType == Item.ItemType.SEED
+                && myItems[i].GetComponent<Item>().seedType == Item.SeedType.CROP
+                && myItems[i].GetComponent<Item>().cropType == cropSeed)
             {
                 seedGroup = myItems[i].GetComponent<Item>();
                 return seedGroup;
@@ -407,8 +428,10 @@ public class Inventory : MonoBehaviour {
 
         for (int i = 0; i < myItems.Count; i++)
         {
-            //return first toolgroup that matches the tool type 
-            if (myItems[i].GetComponent<Item>().shroomType == shroom)
+            //return first shroom type that matches the shroom 
+            if (myItems[i].GetComponent<Item>().itemType == Item.ItemType.SEED
+                && myItems[i].GetComponent<Item>().seedType == Item.SeedType.SHROOM
+                && myItems[i].GetComponent<Item>().shroomType == shroom)
             {
                 seedGroup = myItems[i].GetComponent<Item>();
                 return seedGroup;
@@ -481,6 +504,7 @@ public class Inventory : MonoBehaviour {
         //remove from lists
         myItems.RemoveAt(index);
         ItemSprites.RemoveAt(index);
+        SetItemSprite();
     }
 
     //deactivate all Items 

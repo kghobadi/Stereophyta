@@ -19,7 +19,8 @@ public class Menu : MonoBehaviour {
     public Book bookScript;
     //toggle mouse controls
     [Header("Mouse -- PS4 Toggle")]
-    public Sprite mouseControlsImg, ps4ControlsImg;
+    public Sprite mouseControlsImg;
+    public Sprite ps4ControlsImg;
     public Text dockEprompt, interactEprompt;
     public Image dockPS4prompt, interactPS4prompt;
     public PlayerCameraController camController;
@@ -150,10 +151,13 @@ public class Menu : MonoBehaviour {
         tpc.menuOpen = false;
         camController.enabled = true;
 
-        //cursor off
-        Cursor.lockState = CursorLockMode.Locked;
-        cursor.SetActive(false);
-
+        //cursor off if not in boat 
+        if(tpc.boatScript.inBoat == false)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            cursor.SetActive(false);
+        }
+        
         //reset sun
         sunScript.rotationSpeed = lastSunSpeed;
         menuAudio.PlayOneShot(closeBook);

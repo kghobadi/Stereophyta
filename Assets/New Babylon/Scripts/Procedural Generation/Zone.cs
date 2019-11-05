@@ -66,7 +66,7 @@ public class Zone : MonoBehaviour {
                 tpc.currentZoneName = zoneName;
                 tpc.currentGridMan = zoneGridMan;
                 zoneSnapshot.TransitionTo(3f);
-                Debug.Log("Player entered zone: " + zoneName);
+                //Debug.Log("Player entered zone: " + zoneName);
 
                 if (!playerHasBeenHereBefore)
                 {
@@ -98,7 +98,7 @@ public class Zone : MonoBehaviour {
                 tpc.currentZone = null;
                 tpc.currentZoneName = "Ocean";
                 Ocean.TransitionTo(3f);
-                Debug.Log("Player left zone: " + zoneName);
+                //Debug.Log("Player left zone: " + zoneName);
             }
         }
     }

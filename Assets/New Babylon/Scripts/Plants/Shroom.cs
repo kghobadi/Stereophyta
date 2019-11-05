@@ -356,7 +356,9 @@ public class Shroom : RhythmProducer
             timeScale = 0;
         }
 
-        SetTempoIndication();
+        //set tempo indicator if player is nearby 
+        if(Vector3.Distance(transform.position, tpc.transform.position) < 15f)
+            SetTempoIndication();
         SetBreatheSpeed();
     }
 
@@ -448,6 +450,7 @@ public class Shroom : RhythmProducer
         if (seedGroup != null)
         {
             seedGroup.itemCount++;
+            ResetShroom();
         }
         //not in inventory, so instantiate shroomSeed & add it. 
         else
@@ -455,11 +458,14 @@ public class Shroom : RhythmProducer
             GameObject shroomSeed = Instantiate(shroomSeedPrefab);
             Item item = shroomSeed.GetComponent<Item>();
             inventoryScript.AddItemToInventory(shroomSeed, item.itemSprite);
+            //set parent, local pos, & deactivate
+            shroomSeed.transform.SetParent(inventoryScript.transform);
+            shroomSeed.transform.localPosition = inventoryScript.localSeedSpot;
+            shroomSeed.GetComponent<ShroomSeed>().shroomPooler = shroomPooler;
+            shroomSeed.SetActive(false);
         }
 
         tpc.SeedCollect();
-
-        ResetShroom();
     }
 
     //for player collision

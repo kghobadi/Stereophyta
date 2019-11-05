@@ -240,8 +240,12 @@ public class BoatPlayer : MonoBehaviour
             oarAnimator.SetTrigger("rowLeftB2F");
         }
 
-        StartPaddleFX();
-        
+        //so we don't play the fx for a measly click
+        if(paddleForceZ > 250f)
+        {
+            StartPaddleFX();
+        }
+
         StartCoroutine(WaitToApplyForce());
     }
 
