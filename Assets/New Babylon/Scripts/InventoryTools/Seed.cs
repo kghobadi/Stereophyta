@@ -407,13 +407,12 @@ public class Seed : MonoBehaviour {
         }
 
         //generate clone and set Plont script values
-        if(plontPooler)
-            plantClone = plontPooler.GrabObject();
-        else
+        if (plontPooler == null)
         {
             plontPooler = seedPooler.companionPooler;
-            plantClone = plontPooler.GrabObject();
+            plantPrefab = plontPooler.objectPrefab;
         }
+        plantClone = plontPooler.GrabObject();
         plantClone.transform.position = plantSpawnPos;
         Plont plontScript = plantClone.GetComponent<Plont>();
         plontScript.plantPrefab = plantPrefab;

@@ -19,6 +19,7 @@ public class Shroom : RhythmProducer
 
     //for inv
     Inventory inventoryScript;
+   
 
     //tgs logic
     [HideInInspector] public TerrainGridSystem tgs;
@@ -100,6 +101,7 @@ public class Shroom : RhythmProducer
         shroomAnimator = GetComponent<Animator>();
         shroomMR = GetComponent<MeshRenderer>();
         shroomSource = GetComponent<AudioSource>();
+        
 
         //particles
         beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
@@ -464,7 +466,7 @@ public class Shroom : RhythmProducer
             shroomSeed.GetComponent<ShroomSeed>().shroomPooler = shroomPooler;
             shroomSeed.SetActive(false);
         }
-
+        
         tpc.SeedCollect();
     }
 

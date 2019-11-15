@@ -140,6 +140,8 @@ public class ThirdPersonController : MonoBehaviour
     public int daysWithoutSleep = 0;
     public int daysToSleep;
     public int noSleepMax = 3;
+    public float sleepingTime = 0f;
+    public float timeToSleep = 5f;
     public AudioSource sleepSource;
     public AudioClip[] snores, yawns;
     public ParticleSystem sleepParticles;
@@ -264,6 +266,16 @@ public class ThirdPersonController : MonoBehaviour
         if(daysWithoutSleep > noSleepMax && !sleeping && !swimming && playerCanMove)
         {
             Sleep(true);
+        }
+        //add to sleeping time 
+        if (sleeping)
+        {
+            sleepingTime += Time.deltaTime;
+            //turn off run particles...
+            if (runParticles.isPlaying)
+            {
+                runParticles.Stop();
+            }
         }
 
         //Restart game
@@ -587,6 +599,7 @@ public class ThirdPersonController : MonoBehaviour
         myInventory.gameObject.SetActive(false);
 
         //player just pressed Z
+        sleepingTime = 0;
         if (pressedOrPassed)
         {
             daysToSleep = 1;
@@ -653,31 +666,28 @@ public class ThirdPersonController : MonoBehaviour
         //set bools
         characterBody.transform.localPosition = new Vector3(0, 0, 0);
         sleeping = false;
-        playerCanMove = true;
-        playerCameraController.enabled = true;
+       
         //if not in farmhouse
         if (Vector3.Distance(transform.position, bedPos.position) > 250f)
         {
             myInventory.gameObject.SetActive(true);
         }
-          
         daysWithoutSleep = 0;
 
         //play random yawn sound
         sleepSource.Stop();
         int randomYawn = Random.Range(0, yawns.Length);
         sleepSource.PlayOneShot(yawns[randomYawn], 1f);
-
         sleepParticles.Stop();
 
         //reset sun rotationSpeed
-        //Time.timeScale = 1f;
         sunScript.rotationSpeed = sunScript.normalRotation;
 
         //set animator
         SetAnimator("idle");
 
-        StartCoroutine(WaitToActivateCloak(0.75f));
+        StartCoroutine(WaitToActivateCloak(1.5f));
+        StartCoroutine(WaitToEnablePlayer(1.5f));
     }
 
     //public call for waitToactivate    
@@ -691,6 +701,14 @@ public class ThirdPersonController : MonoBehaviour
         yield return new WaitForSeconds(time);
 
         playerCloak.gameObject.SetActive(true);
+    }
+
+    IEnumerator WaitToEnablePlayer(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        playerCanMove = true;
+        playerCameraController.enabled = true;
     }
   
 

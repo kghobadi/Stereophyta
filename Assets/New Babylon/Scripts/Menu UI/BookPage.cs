@@ -17,6 +17,7 @@ public class BookPage : MonoBehaviour {
     FadeUI bookFader;
     AudioSource pageNotifAudio;
     public AudioClip pageNotif;
+    FadeUItmp firstPageTextBack;
     FadeUItmp firstPageText;
 
     StartView startViewer;
@@ -26,7 +27,8 @@ public class BookPage : MonoBehaviour {
         bookScript = GameObject.FindGameObjectWithTag("Book").GetComponent<Book>();
         bookFader = GameObject.FindGameObjectWithTag("BookEvents").GetComponent<FadeUI>();
         pageNotifAudio = bookFader.GetComponent<AudioSource>();
-        firstPageText = bookFader.transform.GetChild(0).GetComponent<FadeUItmp>();
+        firstPageTextBack = bookFader.transform.GetChild(0).GetComponent<FadeUItmp>();
+        firstPageText = bookFader.transform.GetChild(1).GetComponent<FadeUItmp>();
         startViewer = GameObject.FindGameObjectWithTag("StartView").GetComponent<StartView>();
         if (page)
         {
@@ -37,12 +39,9 @@ public class BookPage : MonoBehaviour {
     void Start()
     {
         //added in previous save, add again
-        if (page != null)
+        if (PlayerPrefs.GetString(pageName) == "added")
         {
-            if (PlayerPrefs.GetString(page.name) == "added")
-            {
-                AddPage();
-            }
+            AddPage();
         }
     }
 
@@ -69,7 +68,6 @@ public class BookPage : MonoBehaviour {
                 int indexAddedAt = bookScript.bookPages.Count - 1;
                 //save as added, & index added at 
                 PlayerPrefs.SetString(pageName, "added");
-                PlayerPrefs.SetInt(pageName, indexAddedAt);
                 //notify only when it's not start view 
                 if (!startViewer.startView)
                 {
@@ -92,6 +90,7 @@ public class BookPage : MonoBehaviour {
         if (PlayerPrefs.GetString("hasCollectedPage") != "yes")
         {
             firstPageText.FadeIn();
+            firstPageTextBack.FadeIn();
             PlayerPrefs.SetString("hasCollectedPage", "yes");
         }
     }

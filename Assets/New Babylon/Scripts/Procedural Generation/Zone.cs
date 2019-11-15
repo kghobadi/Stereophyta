@@ -28,7 +28,9 @@ public class Zone : MonoBehaviour {
     public List<GameObject> shrooms = new List<GameObject>();
     public Transform shroomParent;
     public List<GameObject> animals = new List<GameObject>();
-    public Transform animalParent; 
+    public Transform animalParent;
+
+    BookPage bookPage;
 
     void Awake()
     {
@@ -36,6 +38,7 @@ public class Zone : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         zoneGridMan = transform.parent.GetComponent<GridManager>();
+        bookPage = GetComponent<BookPage>();
 
         SetZoneSpawners();
     }
@@ -82,6 +85,17 @@ public class Zone : MonoBehaviour {
                     {
                         zoneSpawners[i].RegenerateObjects();
                     }
+                }
+
+                //first time collecting a shroom, add shroom page to book
+                if (PlayerPrefs.GetString("hasCollectedShroom") != "yes" || PlayerPrefs.HasKey("hasCollectedShroom") == false)
+                {
+                    if (bookPage)
+                    {
+                        bookPage.AddPage();
+                    }
+                    //set pref 
+                    PlayerPrefs.SetString("hasCollectedShroom", "yes");
                 }
             }
         }

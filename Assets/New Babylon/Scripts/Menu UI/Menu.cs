@@ -19,6 +19,7 @@ public class Menu : MonoBehaviour {
     public Book bookScript;
     //toggle mouse controls
     [Header("Mouse -- PS4 Toggle")]
+    public bool mouseOrPs4OnStart;
     public Sprite mouseControlsImg;
     public Sprite ps4ControlsImg;
     public Text dockEprompt, interactEprompt;
@@ -90,7 +91,15 @@ public class Menu : MonoBehaviour {
         }
         else
         {
-            SetMouseControlsBool(true);
+            //set true for auto start to mouse controls 
+            if (mouseOrPs4OnStart)
+            {
+                SetMouseControlsBool(true);
+            }
+            else
+            {
+                SetMouseControlsBool(false);
+            }
         }
 
         //turn off

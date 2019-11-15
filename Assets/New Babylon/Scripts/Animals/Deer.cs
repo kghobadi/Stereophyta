@@ -10,6 +10,7 @@ public class Deer : AnimalAI
     //if a crab runs into another crab, should have a claw fight
     public float interruptedTimer, interruptedTimeTotal;
     Vector3 interruptedPos;
+    public ParticleSystem sleepParticles;
     //crab can be knocked over by player's jump
 
     //crabs fall asleep at night 
@@ -18,6 +19,21 @@ public class Deer : AnimalAI
     {
         base.Update();
 
+        //activate & deactivate sleep particles 
+        if(animalState == AnimalAIStates.SLEEPING)
+        {
+            if(sleepParticles.isPlaying == false)
+            {
+                sleepParticles.Play();
+            }
+        }
+        else
+        {
+            if (sleepParticles.isPlaying == true)
+            {
+                sleepParticles.Stop();
+            }
+        }
     }
 
     //when collide with player

@@ -183,7 +183,7 @@ ModelImporter:
     - serializedVersion: 16
       name: stand up
       takeName: mixamo.com
-      firstFrame: 0
+      firstFrame: 80
       lastFrame: 248
       wrapMode: 0
       orientationOffsetY: 0

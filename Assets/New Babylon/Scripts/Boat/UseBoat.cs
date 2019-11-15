@@ -87,14 +87,14 @@ public class UseBoat : PickUp {
                 animFaderRight.FadeIn();
                 animatorRight.active = true;
 
+                //has a book page to add 
+                if (bookPage)
+                {
+                    bookPage.AddPage();
+                }
+
                 //set has used boat for the first time 
                 PlayerPrefs.SetString("hasUsedBoat", "yes");
-            }
-
-            //has a book page to add 
-            if (bookPage)
-            {
-                bookPage.AddPage();
             }
 
             //in case you are jumping 

@@ -504,7 +504,11 @@ public class Inventory : MonoBehaviour {
         //remove from lists
         myItems.RemoveAt(index);
         ItemSprites.RemoveAt(index);
-        SetItemSprite();
+        //causes issue if there's no items 
+        if(myItems.Count > 0)
+        {
+            SetItemSprite();
+        }
     }
 
     //deactivate all Items 
