@@ -46,29 +46,12 @@ public abstract class PickUpMaterial : MonoBehaviour {
         transform.localEulerAngles = localRot;
         transform.localScale = localScale;
 
-        //create seedStorage struct for this
-        SeedStorage newSeed;
-        newSeed.seedObj = gameObject;
-        newSeed.seedCount = 1;
-        
-        //add to invent lists
-        inventoryScript.seedStorage.Add(newSeed);
-        inventoryScript.seedSprites.Add(inventorySprite);
-
-        //set current inventory item to this
-        if (inventoryScript.currenSeedObj != null)
-        {
-            inventoryScript.currenSeedObj.SetActive(false);
-        }
-
-        //set current seed obj to this
-        inventoryScript.currenSeedObj = gameObject;
-        inventoryScript.currentSeed = inventoryScript.seedStorage.Count - 1;
-        inventoryScript.SetSeedSprite();
-
+        //add to items list,
+        inventoryScript.AddItemToInventory(gameObject, inventorySprite);
+        inventoryScript.SwitchToItem(gameObject);
+        //play this items pickup sound
         if (playSound)
         {
-            //play this tools pickup sound
             inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
         }
 

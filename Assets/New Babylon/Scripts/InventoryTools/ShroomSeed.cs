@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TGS;
+using InControl;
 
 public class ShroomSeed : MonoBehaviour {
     //player and sun ref
@@ -13,8 +14,7 @@ public class ShroomSeed : MonoBehaviour {
     Inventory inventoryScript;
     Transform inventoryParent;
     [Header("Inventory")]
-    public Sprite inventorySprite;
-    public int mySeedIndex;
+    Item itemScript;
     
     //tgs logic
     TerrainGridSystem tgs;
@@ -26,7 +26,6 @@ public class ShroomSeed : MonoBehaviour {
     Texture2D canClickTexture;
     public Texture2D plantedTexture;
    
-
     //physics
     Rigidbody shroomBody;
     SphereCollider shroomCol;
@@ -62,6 +61,7 @@ public class ShroomSeed : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
         inventoryParent = inventoryScript.transform;
+        itemScript = GetComponent<Item>();
 
         //tgs refs 
         tgs = tpc.currentTGS;
@@ -110,13 +110,14 @@ public class ShroomSeed : MonoBehaviour {
                 }
             }
         }
-
-     
     }
 
     //planting on terrain grid
     void CheckCanPlantGrid()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         //get the index of this cell
         int cellIndex = tgs.CellGetIndex(currentCell);
         currentCellIndex = cellIndex;
@@ -134,7 +135,7 @@ public class ShroomSeed : MonoBehaviour {
             tgs.CellToggleRegionSurface(cellIndex, true, canClickTexture);
 
             //If player clicks, we plant seed and clear up Equip slot
-            if (Input.GetButton("Plant"))
+            if (Input.GetButton("Plant") || inputDevice.Action3)
             {
                 DropShroom();
                 plantingOnGrid = true;
@@ -146,7 +147,7 @@ public class ShroomSeed : MonoBehaviour {
         if(tgs.CellGetTag(cellIndex) == 1)
         {
             //If player clicks, we plant seed and clear up Equip slot
-            if (Input.GetButton("Plant"))
+            if (Input.GetButton("Plant") || inputDevice.Action3)
             {
                 //check in center of cell for shroom
                 int vertexCount = tgs.CellGetVertexCount(cellIndex);
@@ -210,7 +211,10 @@ public class ShroomSeed : MonoBehaviour {
     //planting on terrain without grid
     void CheckCanPlant(RaycastHit hit)
     {
-        if (Input.GetButton("Plant"))
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
+        if (Input.GetButton("Plant") || inputDevice.Action3)
         {
             //check in radius of planting point if it theres too many other shrooms
             int otherShrooms = 0;
@@ -274,7 +278,7 @@ public class ShroomSeed : MonoBehaviour {
     void SpawnShroom()
     {
         //play spawn plant sound
-        shroomSource.PlayOneShot(spawnShroom);
+        tpc.seedAudio.PlayOneShot(spawnShroom);
         //set plant spawn pos to seed pos
         Vector3 plantSpawnPos = transform.position;
 
@@ -295,7 +299,6 @@ public class ShroomSeed : MonoBehaviour {
         Shroom shroomScript = shroomClone.GetComponent<Shroom>();
         shroomScript.shroomPrefab = shroomPrefab;
         shroomScript.shroomPooler = shroomPooler;
-        shroomScript.mySeedIndex = mySeedIndex;
 
         //set that shroom
         if (shroomScript.plantingState != Shroom.PlantingState.PLANTED)
@@ -318,14 +321,18 @@ public class ShroomSeed : MonoBehaviour {
         planting = false;
 
         //set seed count
-        SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
-        seedStorageTemp.seedCount--;
-        inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
-
+        itemScript.itemCount--;
+        
         //turn off if no more seeds
-        if (seedStorageTemp.seedCount == 0)
+        if (itemScript.itemCount == 0)
         {
-            gameObject.SetActive(false);
+            //switch to next item
+            inventoryScript.SwitchItem(true, true);
+            //Remove from Inventory 
+            inventoryScript.RemoveObjFromInventory(gameObject);
+
+            //destroy 
+            Destroy(gameObject);
         }
 
         //set this back to false

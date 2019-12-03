@@ -46,6 +46,12 @@ ModelImporter:
     100076: transform7
     100078: transform8
     100080: transform9
+    100082: pCylinder5
+    100084: polySurface7
+    100086: polySurface8
+    100088: transform20
+    100090: transform21
+    100092: transform22
     400000: //RootNode
     400002: pCylinder1
     400004: pCylinder2
@@ -87,12 +93,24 @@ ModelImporter:
     400076: transform7
     400078: transform8
     400080: transform9
+    400082: pCylinder5
+    400084: polySurface7
+    400086: polySurface8
+    400088: transform20
+    400090: transform21
+    400092: transform22
     2300000: pCylinder4
     2300002: pSphere3
+    2300004: polySurface7
+    2300006: polySurface8
     3300000: pCylinder4
     3300002: pSphere3
+    3300004: polySurface7
+    3300006: polySurface8
     4300000: pSphere3
     4300002: pCylinder4
+    4300004: polySurface7
+    4300006: polySurface8
     9500000: //RootNode
   externalObjects:
   - first:

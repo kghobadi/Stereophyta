@@ -34,7 +34,7 @@ public class WindGen : RhythmProducer {
         }
     }
 
-    public override void Update () {
+    void Update () {
         if (showRhythm)
         {
             //to help trim down cloud count
@@ -60,8 +60,6 @@ public class WindGen : RhythmProducer {
         {
             EvaluateRhythmInterval();
         }
-
-       
     }
 
     //adjusts wind interval based on what the clock bpm is 
@@ -96,19 +94,22 @@ public class WindGen : RhythmProducer {
 
     public void SpawnWind()
     {
-        //instantiate wind, show particles, etc.
         //grab obj from pool and set pos
         windClone = windPooler.GrabObject();
+        //set wind script
+        MovingWind movingWind = windClone.GetComponent<MovingWind>();
+        movingWind._windGen = this;
+        movingWind.currentSpeed = windSpeed;
+        //set wind transform
         windClone.transform.SetParent(transform);
         windClone.transform.position = transform.position;
         windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles);
-        windClone.GetComponent<MovingWind>()._windGen = this;
+        
         showRhythm = false;
     }
 
-    public override void SwitchTimeScale()
+    public void SwitchTimeScale()
     {
-        base.SwitchTimeScale();
         timeScale = Random.Range(0, 5);
         CheckDirRandomPos();
 

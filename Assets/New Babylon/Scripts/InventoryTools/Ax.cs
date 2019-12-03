@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using InControl;
 
 namespace Items
 {
@@ -51,19 +52,29 @@ namespace Items
             base.Update();
 
             //only run if has been picked up
-            if (hasBeenAcquired)
+            if (hasBeenAcquired && inventoryScript.canSwitchItems)
             {
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
+
                 //take input on button down
-                if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !axing)
+                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && !axing)
                 {
                     MainAction();
+                    showRhythm = false;
+                }
+
+                //input -- can hold the water button down and it will do it on rhythm
+                if ((Input.GetButton("MainAction") || inputDevice.Action3) && !tpc.menuOpen && showRhythm && !axing)
+                {
+                    MainAction();
+                    showRhythm = false;
                 }
 
                 //if swinging and anim over, switch back to idle
-                if (axing && toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") && toolAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
+                if (axing && (toolAnimator.GetCurrentAnimatorStateInfo(0).IsName("axSwing1") || toolAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f))
                 {
                     axing = false;
-                    //StartCoroutine(DisableTrail());
                 }
             }
 
@@ -80,13 +91,31 @@ namespace Items
             SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
 
             axing = true;
-
         }
 
         void OnTriggerEnter(Collider other)
         {
             //collided with plant
-           
+            //has plant tag
+            if (axing)
+            {
+                if (other.gameObject.tag == "Plant")
+                {
+                    //is it plont?
+                    if (other.gameObject.GetComponent<Plont>())
+                    {
+                        //shrink plant and play guitar sound
+                        other.GetComponent<Plont>().GrowPlant(false, true);
+                        PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, axHits);
+                    }
+                }
+                //is it a shroom?
+                if (other.GetComponent<Shroom>())
+                {
+                    other.GetComponent<Shroom>().UprootShroom();
+                }
+            }
+          
         }
 
         //spawns one ax wind
@@ -112,6 +141,7 @@ namespace Items
             yield return new WaitForSeconds(axtrail.time);
             axtrail.enabled = false;
         }
+        
     }
 
 }

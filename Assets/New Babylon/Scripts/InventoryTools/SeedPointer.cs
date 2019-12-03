@@ -18,13 +18,13 @@ public class SeedPointer : MonoBehaviour
         ring = transform.GetChild(1).GetComponent<MeshRenderer>();
 
         //currently has a seed active
-        if (inventory.currenSeedObj != null)
+        if (inventory.currentItemObj != null)
         {
-            if (inventory.currenSeedObj.activeSelf)
+            if (inventory.currentItemObj.activeSelf && inventory.currentItemScript.itemType == Item.ItemType.SEED)
             {
                 //set pointer material
-                arrow.material = inventory.currenSeedObj.GetComponent<MeshRenderer>().material;
-                ring.material = inventory.currenSeedObj.GetComponent<MeshRenderer>().material;
+                arrow.material = inventory.currentItemObj.GetComponent<MeshRenderer>().material;
+                ring.material = inventory.currentItemObj.GetComponent<MeshRenderer>().material;
             }
         }
     }
@@ -32,25 +32,25 @@ public class SeedPointer : MonoBehaviour
     void Update()
     {
         //currently has a seed active
-        if(inventory.currenSeedObj != null)
+        if(inventory.currentItemObj != null)
         {
-            if (inventory.currenSeedObj.activeSelf)
+            if (inventory.currentItemObj.activeSelf && inventory.currentItemScript.itemType == Item.ItemType.SEED)
             {
                 //set pointer material
-                if (inventory.currenSeedObj.GetComponent<MeshRenderer>())
+                if (inventory.currentItemObj.GetComponent<MeshRenderer>())
                 {
-                    arrow.material = inventory.currenSeedObj.GetComponent<MeshRenderer>().material;
-                    ring.material = inventory.currenSeedObj.GetComponent<MeshRenderer>().material;
+                    arrow.material = inventory.currentItemObj.GetComponent<MeshRenderer>().material;
+                    ring.material = inventory.currentItemObj.GetComponent<MeshRenderer>().material;
                 }
                 //seed has meshrenderer in children
                 else
                 {
-                    arrow.material = inventory.currenSeedObj.GetComponentInChildren<MeshRenderer>().material;
-                    ring.material = inventory.currenSeedObj.GetComponentInChildren<MeshRenderer>().material;
+                    arrow.material = inventory.currentItemObj.GetComponentInChildren<MeshRenderer>().material;
+                    ring.material = inventory.currentItemObj.GetComponentInChildren<MeshRenderer>().material;
                 }
 
                 //get lastSeed for next frame
-                lastSeed = inventory.currentSeed;
+                lastSeed = inventory.currentItem;
 
                 AdjustHeight();
             }
@@ -82,7 +82,7 @@ public class SeedPointer : MonoBehaviour
     {
         RaycastHit hit;
         // Does the ray intersect any objects excluding the player layer
-        if (Physics.Raycast(inventory.currenSeedObj.transform.position, Vector3.down, out hit, Mathf.Infinity))
+        if (Physics.Raycast(inventory.currentItemObj.transform.position, Vector3.down, out hit, Mathf.Infinity))
         {
             //we only care about hitting the ground
             if (hit.transform.gameObject.tag == "Ground")

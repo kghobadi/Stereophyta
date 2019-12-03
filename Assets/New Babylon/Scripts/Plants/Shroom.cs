@@ -9,6 +9,7 @@ public class Shroom : RhythmProducer
     [Header("Prefab & Pooler")]
     //for spawning shrooms
     public GameObject shroomPrefab;
+    public GameObject shroomSeedPrefab;
     //for obj pooling 
     public ObjectPooler shroomPooler;
     PooledObject _pooledObj;
@@ -18,7 +19,7 @@ public class Shroom : RhythmProducer
 
     //for inv
     Inventory inventoryScript;
-    public int mySeedIndex;
+   
 
     //tgs logic
     [HideInInspector] public TerrainGridSystem tgs;
@@ -27,12 +28,14 @@ public class Shroom : RhythmProducer
     [Header("TGS")]
     public bool plantedOnGrid;
     public int cellIndex;
+    TempoIndication tempoIndicator;
 
     //All possible texture references. 
     public Texture2D groundTexture;
     public Texture2D plantedTexture;
 
     //size and transform storage
+    Vector3 inherentScale;
     public Vector3 originalSize;
     Vector3 largeSize, originalPosition;
     
@@ -98,11 +101,13 @@ public class Shroom : RhythmProducer
         shroomAnimator = GetComponent<Animator>();
         shroomMR = GetComponent<MeshRenderer>();
         shroomSource = GetComponent<AudioSource>();
+        
 
         //particles
         beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
         shroomSpores = transform.GetChild(1).GetComponent<ParticleSystem>();
         sporeScript = shroomSpores.GetComponent<ShroomSpores>();
+        tempoIndicator = GetComponent<TempoIndication>();
         
         //tgs refs
         if (tgs == null)
@@ -117,6 +122,7 @@ public class Shroom : RhythmProducer
     {
         //day passed listener
         sunScript.newDay.AddListener(DayPassed);
+        inherentScale = transform.localScale;
 
         //add to zone list 
         if (!myZone.shrooms.Contains(gameObject))
@@ -135,7 +141,6 @@ public class Shroom : RhythmProducer
         {
             sporeScript.shroomParent = this;
             sporeScript.shroomPool = shroomPooler;
-            sporeScript.seedIndex = mySeedIndex;
         }
         
         AdjustHeight();
@@ -151,7 +156,7 @@ public class Shroom : RhythmProducer
         shroomPrefab = shroomPooler.objectPrefab;
     }
 
-    public override void Update()
+    void Update()
     {
         //they are alive and breathing --- not in inventory 
         if (plantingState == PlantingState.PLANTED)
@@ -260,7 +265,8 @@ public class Shroom : RhythmProducer
             //remove from zone list 
             if (myZone.shrooms.Contains(gameObject))
                 myZone.shrooms.Remove(gameObject);
-            shroomPooler.ReturnObject(gameObject);
+
+            ResetShroom();
         }
     }
     
@@ -327,7 +333,6 @@ public class Shroom : RhythmProducer
 
         //set breathe speed
         SetBreatheSpeed();
-        vortexSpeed = vortexOrig;
         
         //random lifespan 
         deathDay = Random.Range(3, 5);
@@ -353,7 +358,26 @@ public class Shroom : RhythmProducer
             timeScale = 0;
         }
 
+        //set tempo indicator if player is nearby 
+        if(Vector3.Distance(transform.position, tpc.transform.position) < 15f)
+            SetTempoIndication();
         SetBreatheSpeed();
+    }
+
+    void SetTempoIndication()
+    {
+        //enable tempo indicator if shroom planted on grid 
+        if (plantedOnGrid && tempoIndicator.tempoSR.gameObject.activeSelf == false)
+        {
+            tempoIndicator.tempoSR.gameObject.SetActive(true);
+        }
+        //disable when not on grid 
+        else if (!plantedOnGrid && tempoIndicator.tempoSR.gameObject.activeSelf)
+        {
+            tempoIndicator.tempoSR.gameObject.SetActive(false);
+        }
+        //set sprite to timescale 
+        tempoIndicator.SetVisualTempo(timeScale);
     }
 
     void SetBreatheSpeed()
@@ -421,14 +445,29 @@ public class Shroom : RhythmProducer
     //called when vortexing reaches player
     void CollectShroom()
     {
-        SeedStorage seedStorageTemp = inventoryScript.seedStorage[mySeedIndex];
-        seedStorageTemp.seedCount++;
+        //check for my item's crop type 
+        Item seedGroup = inventoryScript.CheckForShroomType(shroomType);
 
-        inventoryScript.seedStorage[mySeedIndex] = seedStorageTemp;
-
-        tpc.SeedCollect();
+        //does it exist in inventory?
+        if (seedGroup != null)
+        {
+            seedGroup.itemCount++;
+            ResetShroom();
+        }
+        //not in inventory, so instantiate shroomSeed & add it. 
+        else
+        {
+            GameObject shroomSeed = Instantiate(shroomSeedPrefab);
+            Item item = shroomSeed.GetComponent<Item>();
+            inventoryScript.AddItemToInventory(shroomSeed, item.itemSprite);
+            //set parent, local pos, & deactivate
+            shroomSeed.transform.SetParent(inventoryScript.transform);
+            shroomSeed.transform.localPosition = inventoryScript.localSeedSpot;
+            shroomSeed.GetComponent<ShroomSeed>().shroomPooler = shroomPooler;
+            shroomSeed.SetActive(false);
+        }
         
-        shroomPooler.ReturnObject(gameObject);
+        tpc.SeedCollect();
     }
 
     //for player collision
@@ -442,6 +481,16 @@ public class Shroom : RhythmProducer
         }
     }
 
+    //resets age, spores, scale, and returns to pool
+    void ResetShroom()
+    {
+        myAge = 0;
+        hasReleasedSpores = false;
+        transform.localScale = inherentScale;
+        vortexSpeed = vortexOrig;
+        //the return...
+        shroomPooler.ReturnObject(gameObject);
+    }
 
     public void AdjustHeight()
     {

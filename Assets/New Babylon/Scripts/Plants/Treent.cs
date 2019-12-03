@@ -101,7 +101,6 @@ public class Treent : MonoBehaviour
         soundPlaying.Stop();
 
         //call funcs
-        PlayPlantingEffect();
         GrowPlant(true);
     }
 
@@ -300,22 +299,7 @@ public class Treent : MonoBehaviour
         GameObject newSeed = seedPooler.GrabObject();
         newSeed.transform.position = spawnPos;
     }
-
-    //plays the dirt planting effect at start
-    public void PlayPlantingEffect()
-    {
-        tpc.plantingEffects[tpc.plantingEffectCounter].transform.position = transform.position;
-        tpc.plantingEffects[tpc.plantingEffectCounter].Play();
-
-        if (tpc.plantingEffectCounter < tpc.plantingEffects.Count - 1)
-        {
-            tpc.plantingEffectCounter++;
-        }
-        else
-        {
-            tpc.plantingEffectCounter = 0;
-        }
-    }
+    
 
     private void OnTriggerEnter(Collider other)
     {

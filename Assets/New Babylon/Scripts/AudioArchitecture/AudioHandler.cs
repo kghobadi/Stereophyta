@@ -10,8 +10,6 @@ public abstract class AudioHandler : MonoBehaviour
     public AudioSource myAudioSource;
     // pitch range
     public Vector2 pitchRange = new Vector2(0.9f, 1.1f);
-    //my mixer group
-    public AudioMixerGroup mixerGroup;
 
     public virtual void Awake()
     {
@@ -21,10 +19,6 @@ public abstract class AudioHandler : MonoBehaviour
         {
             myAudioSource = gameObject.AddComponent<AudioSource>();
         }
-
-        //set mixergroup 
-        if (myAudioSource.outputAudioMixerGroup == null && mixerGroup != null)
-            myAudioSource.outputAudioMixerGroup = mixerGroup;
     }
 
     //plays a sound with vol

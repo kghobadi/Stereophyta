@@ -225,8 +225,8 @@ public class Sun : MonoBehaviour
         if (tpc.sleeping)
         {
             tpc.daysToSleep--;
-            //wake player up if its time
-            if (tpc.daysToSleep <= 0)
+            //wake player up if they have slept long enough 
+            if (tpc.daysToSleep <= 0 && tpc.sleepingTime > tpc.timeToSleep)
             {
                 tpc.WakeUp();
             }

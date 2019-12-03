@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Rhythm : MonoBehaviour {
-    protected float currentSpeed;
+    public float currentSpeed;
     protected int enabledCounter = 0; // used to count # of enables
 
     public virtual void OnTriggerEnter(Collider other)
@@ -20,9 +20,9 @@ public class Rhythm : MonoBehaviour {
             //shroom should release spores
             if (other.gameObject.GetComponent<Shroom>())
             {
+                other.gameObject.GetComponent<Shroom>().ReleaseSpores();
                 //might want switch rhythm to only have a chance to happen if this is annoying 
                 other.gameObject.GetComponent<Shroom>().SwitchRhythm();
-                other.gameObject.GetComponent<Shroom>().ReleaseSpores();
             }
         }
         //make tree play sound 

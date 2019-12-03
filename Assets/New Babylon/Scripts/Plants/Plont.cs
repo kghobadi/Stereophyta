@@ -54,6 +54,7 @@ public class Plont : MonoBehaviour {
     public int nextStage;
     public bool hasBeenWatered;
     public GrowthStages[] myGrowthStages;
+    public GameObject[] cropBundles;
     public AudioClip[] stageSounds;
     public AudioClip sicknessSound;
     public Animator plantAnimator, extraAnimator;
@@ -63,8 +64,16 @@ public class Plont : MonoBehaviour {
     Vector3 originalScale;
     Vector3 newScale;
 
-    [Header("Crop Bundles")]
-    public GameObject[] cropBundles;
+    //death effect
+    [Header("Death Effect")]
+    public bool dying;
+    public Material plantDeath;
+    List<MeshRenderer> pRenderers = new List<MeshRenderer>();
+    Material[] origMats;
+    float tpLerper;
+    float deathStart = -5f, deathEnd = 20f;
+    public float deathLerpSpeed = 1f;
+    
     [Header("Prefab Refs")]
     //for spawning seeds when cut down
     public GameObject seedPrefab;
@@ -86,8 +95,8 @@ public class Plont : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();  
-        
+        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+
         //tgs refs
         if (tgs == null)
         {
@@ -104,6 +113,37 @@ public class Plont : MonoBehaviour {
             plantAnimator = GetComponent<Animator>();
         }
 
+        //renderer & mats
+        for (int i = 2; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+
+            //child has renderer
+            if (child.GetComponent<MeshRenderer>())
+            {
+                //add it 
+                pRenderers.Add(child.GetComponent<MeshRenderer>());
+            }
+            //child has children
+            if(child.childCount > 0)
+            {
+                //grab all renderers from child & below
+                MeshRenderer[] allChildRenderers = child.GetComponentsInChildren<MeshRenderer>();
+                // add all renderers to pRenderers
+                for (int t = 0; t < allChildRenderers.Length; t++)
+                {
+                    //add it 
+                    pRenderers.Add(allChildRenderers[t]);
+                }
+            }
+        }
+        //set mats array to same size as pRenderers and set mats 
+        origMats = new Material[pRenderers.Count];
+        for(int i = 0; i < pRenderers.Count; i++)
+        {
+            origMats[i] = pRenderers[i].material;
+        }
+
         //grab audio sources
         plantSource = GetComponent<AudioSource>();
         extraVoice = transform.GetChild(1).GetComponent<AudioSource>();
@@ -114,6 +154,7 @@ public class Plont : MonoBehaviour {
     }
 
     void Start () {
+        //randomness
         Random.InitState(System.DateTime.Now.Millisecond);
         sun.newDay.AddListener(DayPass);
         //add to zone list 
@@ -161,7 +202,6 @@ public class Plont : MonoBehaviour {
         }
 
         //call funcs
-        PlayPlantingEffect();
         GrowPlant(true, true);
     }
     
@@ -210,7 +250,32 @@ public class Plont : MonoBehaviour {
                 growing = false;
             }
         }
-	}
+
+        //lerps plantdeath material then call death
+        if (dying)
+        {
+            //lerp mat Tp value 
+            tpLerper = Mathf.Lerp(tpLerper, deathEnd, Time.deltaTime * deathLerpSpeed);
+
+            //loop thru all our renderers
+            for (int i = 0; i < pRenderers.Count; i++)
+            {
+                //get mat
+                Material mat = pRenderers[i].material;
+                //set tp value
+                mat.SetFloat("_Teleport", tpLerper);
+            }
+
+            //revert to orig scale 
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, deathLerpSpeed * Time.deltaTime);
+
+            //check for end
+            if (tpLerper > deathEnd - 0.1f)
+            {
+                Die();
+            }
+        }
+    }
 
     //called when sun invokes NewDay()
     public void DayPass()
@@ -292,7 +357,7 @@ public class Plont : MonoBehaviour {
             }
 
             //from old age
-            Die();
+            SetDeathEffect();
         }
     }
 
@@ -346,6 +411,13 @@ public class Plont : MonoBehaviour {
         myAge = 0;
         currentStage = 0;
         transform.localScale = originalScale;
+        plantAnimator.enabled = true;
+        plantBody.isKinematic = true;
+        hasBeenWatered = false;
+        for(int i = 0; i < pRenderers.Count; i++)
+        {
+            pRenderers[i].material = origMats[i];
+        }
     }
 
     //this is to fix that assertion error i was getting constantly
@@ -410,8 +482,23 @@ public class Plont : MonoBehaviour {
         hasBeenWatered = true;
     }
 
+    //change mat & start lerping to deeath 
+    void SetDeathEffect()
+    {
+        for(int i = 0; i < pRenderers.Count; i++)
+        {
+            pRenderers[i].material = plantDeath;
+        }
+
+        tpLerper = deathStart;
+        dying = true;
+    }
+
     void Die()
     {
+        //stop dying...
+        dying = false;
+
         //remove plant from grid
         if (plantedOnGrid)
         {
@@ -456,23 +543,7 @@ public class Plont : MonoBehaviour {
         newSeed.GetComponent<Seed>().plontPooler = plontPooler;
         newSeed.GetComponent<Seed>().SeedFall();
     }
-
-    //plays the dirt planting effect at start
-    public void PlayPlantingEffect()
-    {
-        tpc.plantingEffects[tpc.plantingEffectCounter].transform.position = transform.position;
-        tpc.plantingEffects[tpc.plantingEffectCounter].Play();
-
-        if(tpc.plantingEffectCounter < tpc.plantingEffects.Count - 1)
-        {
-            tpc.plantingEffectCounter++;
-        }
-        else
-        {
-            tpc.plantingEffectCounter = 0;
-        }
-    }
-
+    
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Player" && !plantSource.isPlaying )

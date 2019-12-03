@@ -43,8 +43,10 @@ public class WaterSplash : Rhythm {
         int randomSplash = Random.Range(0, splashSounds.Length);
         splashAudio.PlayOneShot(splashSounds[randomSplash], 0.25f);
         splashing = true;
-        yield return new WaitForSeconds(splashSounds[randomSplash].length);
+        yield return new WaitForSeconds(splashMain.duration);
+        //turn off splashing once the effect is done 
         splashing = false;
+        yield return new WaitForSeconds(splashSounds[randomSplash].length - splashMain.duration);
         splashEffect.Stop();
         sphereCol.enabled = false;
         transform.localPosition = new Vector3(0, -30, 0);
@@ -57,7 +59,6 @@ public class WaterSplash : Rhythm {
         //only trigger stuff when i am splashing from watering can
         if (splashing)
         {
-            //Debug.Log("spash triggering");
             //for plants
             if (other.gameObject.tag == "Plant")
             {
@@ -94,6 +95,14 @@ public class WaterSplash : Rhythm {
                     if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
                     {
                         other.gameObject.GetComponent<Crab>().Interrupt();
+                    }
+                }
+                //Deer
+                if (other.gameObject.GetComponent<Deer>())
+                {
+                    if (other.gameObject.GetComponent<Deer>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                    {
+                        other.gameObject.GetComponent<Deer>().Interrupt();
                     }
                 }
             }

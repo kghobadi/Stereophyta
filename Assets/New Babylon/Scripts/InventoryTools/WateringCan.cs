@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using InControl;
 
 namespace Items
 {
@@ -36,16 +37,19 @@ namespace Items
             base.Update();
 
             //only runs once player has picked it up
-            if (hasBeenAcquired)
+            if (hasBeenAcquired && inventoryScript.canSwitchItems)
             {
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
+
                 //on click 
-                if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !watering)
+                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && !watering)
                 {
                     MainAction();
                 }
 
                 //input -- can hold the water button down and it will do it on rhythm
-                if (Input.GetButton("MainAction") && !tpc.menuOpen && showRhythm && !watering)
+                if ((Input.GetButton("MainAction") || inputDevice.Action3) && !tpc.menuOpen && showRhythm && !watering)
                 {
                     MainAction();
                     showRhythm = false;

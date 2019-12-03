@@ -17,7 +17,7 @@ public class GridManager : MonoBehaviour {
     //paints the entire grid a texture 
     public void PaintGridCells(Texture2D texture)
     {
-        for (int i = 0; i<tgs.cells.Count; i++)
+        for (int i = -1; i < tgs.cells.Count; i++)
         {
             if (tgs.CellGetTag(i) == 0)
                 tgs.CellToggleRegionSurface(i, true, texture);

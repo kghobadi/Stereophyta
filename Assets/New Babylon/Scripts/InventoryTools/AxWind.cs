@@ -71,12 +71,12 @@ public class AxWind : Rhythm {
             //is it plont?
             if (other.gameObject.GetComponent<Plont>())
             {
+                
                 if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
                 {
                     //shrink plant and play guitar sound
                     other.GetComponent<Plont>().GrowPlant(false, true);
                     PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, myAxDaddy.axHits);
-                    //Debug.Log("played guitar sound");
                 }
             }
 
@@ -103,6 +103,14 @@ public class AxWind : Rhythm {
                 if (other.gameObject.GetComponent<Crab>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
                 {
                     other.gameObject.GetComponent<Crab>().Interrupt();
+                }
+            }
+            //Deer
+            if (other.gameObject.GetComponent<Deer>())
+            {
+                if (other.gameObject.GetComponent<Deer>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                {
+                    other.gameObject.GetComponent<Deer>().Interrupt();
                 }
             }
         }

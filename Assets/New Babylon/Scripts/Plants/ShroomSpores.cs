@@ -35,7 +35,6 @@ public class ShroomSpores : MonoBehaviour {
         //shroom stuff
         shroomParent = transform.parent.GetComponent<Shroom>();
         shroomPool = shroomParent.shroomPooler;
-        seedIndex = shroomParent.mySeedIndex;
         sporeParticles = GetComponent<ParticleSystem>();
         collisionEvents = new List<ParticleCollisionEvent>();
 
@@ -197,7 +196,6 @@ public class ShroomSpores : MonoBehaviour {
         Shroom shroomScript = shroomClone.GetComponent<Shroom>();
         shroomScript.shroomPrefab = shroomPool.objectPrefab;
         shroomScript.shroomPooler = shroomPool;
-        shroomScript.mySeedIndex = seedIndex;
 
         //set that shroom
         if (shroomScript.plantingState != Shroom.PlantingState.PLANTED)

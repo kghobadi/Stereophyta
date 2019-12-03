@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Audio;
+using InControl;
 
 public class Menu : MonoBehaviour {
     //sun
@@ -17,14 +18,23 @@ public class Menu : MonoBehaviour {
     public GameObject menuObj;
     public Book bookScript;
     //toggle mouse controls
-    public Toggle mouseControlsToggle;
+    [Header("Mouse -- PS4 Toggle")]
+    public bool mouseOrPs4OnStart;
+    public Sprite mouseControlsImg;
+    public Sprite ps4ControlsImg;
+    public Text dockEprompt, interactEprompt;
+    public Image dockPS4prompt, interactPS4prompt;
     public PlayerCameraController camController;
+    public ZoomCamInstructions zoomInstructions;
     public Slider mouseSensitivity;
     //store cam sensitivity values 
-    public float omTurnSmoothLook, omTurnSmoothMove;
+    [Header("Cam sensitivity values")]
+    public float omTurnSmoothLook;
+        public float omTurnSmoothMove;
     public float omMovingTurnLook, omMovingTurnMove;
     public float omSmoothLookOrig, omSmoothMoveOrig;
     //settings volume slider
+    [Header("Audio Settings")]
     public AudioMixerGroup[] mixerGroups;
     public Slider[] volumeSliders;
     //menu audio
@@ -35,7 +45,7 @@ public class Menu : MonoBehaviour {
     public FadeUI[] escNotices;
     public GameObject cursor;
 
-	void Start ()
+    void Awake()
     {
         //grab sun refs
         sun = GameObject.FindGameObjectWithTag("Sun");
@@ -44,35 +54,67 @@ public class Menu : MonoBehaviour {
         //player
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+    }
 
+    void Start()
+    {
         //set initial values
-        for(int i = 0; i < volumeSliders.Length; i++)
+        for (int i = 0; i < volumeSliders.Length; i++)
         {
             volumeSliders[i].value = 0;
         }
-        mouseControlsToggle.isOn = camController.mouseControls;
 
         //SET original sensitivity values
         //fast
-        omTurnSmoothLook = camController.mTurnSmoothLook ;
-        omTurnSmoothMove = camController.mTurnSmoothMove ;
+        omTurnSmoothLook = camController.mTurnSmoothLook;
+        omTurnSmoothMove = camController.mTurnSmoothMove;
 
         //medium
-        omMovingTurnLook = camController.mMovingTurnSmoothLook ;
-        omMovingTurnMove = camController.mMovingTurnSmoothMove ;
+        omMovingTurnLook = camController.mMovingTurnSmoothLook;
+        omMovingTurnMove = camController.mMovingTurnSmoothMove;
 
         //original
         omSmoothLookOrig = camController.mSmoothLookOriginal;
         omSmoothMoveOrig = camController.mSmoothMoveOriginal;
 
+        //set controls based on player pref 
+        if (PlayerPrefs.HasKey("mouseOrController"))
+        {
+            if (PlayerPrefs.GetString("mouseOrController") == "mouse")
+            {
+                SetMouseControlsBool(true);
+            }
+            else
+            {
+                SetMouseControlsBool(false);
+            }
+        }
+        else
+        {
+            //set true for auto start to mouse controls 
+            if (mouseOrPs4OnStart)
+            {
+                SetMouseControlsBool(true);
+            }
+            else
+            {
+                SetMouseControlsBool(false);
+            }
+        }
+
         //turn off
         menuObj.SetActive(false);
         cursor.SetActive(false);
+
+        //dont bother setting controls until menu obj active 
+        StartCoroutine(WaitToSetControls());
     }
 	
 	void Update () {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
         //only works if we have picked up the book
-        if (Input.GetKeyDown(KeyCode.Escape) && PlayerPrefs.GetString("hasBook") == "yes")
+        if ((Input.GetKeyDown(KeyCode.Escape) || inputDevice.Command.WasPressed) && PlayerPrefs.GetString("hasBook") == "yes")
         {
             //turn off
             if (menuObj.activeSelf && !bookScript.flipping)
@@ -92,9 +134,13 @@ public class Menu : MonoBehaviour {
         //cursor on
         Cursor.lockState = CursorLockMode.None;
         cursor.SetActive(true);
+        //turn off interact prompts 
+        interactEprompt.transform.parent.gameObject.SetActive(false);
+        dockEprompt.transform.parent.gameObject.SetActive(false);
 
         //menu on
         menuObj.SetActive(true);
+        bookScript.UpdateSprites();
         tpc.menuOpen = true;
         camController.enabled = false;
 
@@ -105,16 +151,22 @@ public class Menu : MonoBehaviour {
     }
 
     public void TurnOffMenu()
-    {
+    {   
+        //turn on interact prompts 
+        interactEprompt.transform.parent.gameObject.SetActive(true);
+        dockEprompt.transform.parent.gameObject.SetActive(true);
         //menu off
         menuObj.SetActive(false);
         tpc.menuOpen = false;
         camController.enabled = true;
 
-        //cursor off
-        Cursor.lockState = CursorLockMode.Locked;
-        cursor.SetActive(false);
-
+        //cursor off if not in boat 
+        if(tpc.boatScript.inBoat == false)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            cursor.SetActive(false);
+        }
+        
         //reset sun
         sunScript.rotationSpeed = lastSunSpeed;
         menuAudio.PlayOneShot(closeBook);
@@ -179,18 +231,57 @@ public class Menu : MonoBehaviour {
         Application.Quit();
     }
 
-    //this toggles mouse v controller option
-    public void SetMouseControlsBool()
+    //toggle bool to opposite in UI 
+    public void ToggleMouseControls()
     {
-        camController.mouseControls = !camController.mouseControls;
+        bool toggle = !camController.mouseControls;
 
+        SetMouseControlsBool(toggle);
+    }
+
+    //this toggles mouse v controller option
+    public void SetMouseControlsBool(bool mouseOrController)
+    {
+        camController.mouseControls = mouseOrController;
+
+        //MOUSE enabled
         if (camController.mouseControls)
         {
-            mouseControlsToggle.isOn = true;
+            
+            bookScript.bookPages[0] = mouseControlsImg;
+            //change prompts
+            dockEprompt.enabled = true;
+            interactEprompt.enabled = true;
+
+            dockPS4prompt.enabled = false;
+            interactPS4prompt.enabled = false;
+
+            zoomInstructions.mouseOrPs4 = true;
+            PlayerPrefs.SetString("mouseOrController", "mouse");
         }
+        //CONTROLLER enabled
         else
         {
-            mouseControlsToggle.isOn = false;
+          
+            bookScript.bookPages[0] = ps4ControlsImg;
+            //change prompts
+            dockEprompt.enabled = false;
+            interactEprompt.enabled = false;
+
+            dockPS4prompt.enabled = true;
+            interactPS4prompt.enabled = true;
+
+            zoomInstructions.mouseOrPs4 = false;
+            PlayerPrefs.SetString("mouseOrController", "controller");
         }
+
+        bookScript.UpdateSprites();
+    }
+
+    IEnumerator WaitToSetControls()
+    {
+        yield return new WaitUntil(() => menuObj.activeSelf == true);
+
+        
     }
 }

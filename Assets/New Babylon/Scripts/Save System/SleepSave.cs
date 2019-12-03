@@ -112,9 +112,9 @@ public class SleepSave : MonoBehaviour {
         mySaveStorage.inventorySeedCounts.Clear();
 
         //restore inventory seed counts
-        for (int i = 0; i < inventoryScript.seedStorage.Count; i++)
+        for (int i = 0; i < inventoryScript.myItems.Count; i++)
         {
-            mySaveStorage.inventorySeedCounts.Add(inventoryScript.seedStorage[i].seedCount);
+            mySaveStorage.inventorySeedCounts.Add(inventoryScript.myItems[i].GetComponent<Item>().itemCount);
         }
 
         //actual save to json functionality
@@ -200,15 +200,10 @@ public class SleepSave : MonoBehaviour {
 
             //Debug.Log("regenerated plants!");
 
-            //set inventory seed counts based on json data
-            for (int i = 0; i  < inventoryScript.seedStorage.Count; i++)
+            //set inventory item counts based on json data
+            for (int i = 0; i  < inventoryScript.myItems.Count; i++)
             {
-                //create temp ref
-                SeedStorage seedStorageTemp = inventoryScript.seedStorage[i];
-                //set seed count
-                seedStorageTemp.seedCount = mySaveStorage.inventorySeedCounts[i];
-                //set actual seed storage struct to temp values 
-                inventoryScript.seedStorage[i] = seedStorageTemp;
+                inventoryScript.myItems[i].GetComponent<Item>().itemCount = mySaveStorage.inventorySeedCounts[i];
             }
 
             //Debug.Log("finished loading!");

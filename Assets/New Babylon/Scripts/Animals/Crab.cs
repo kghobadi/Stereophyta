@@ -24,7 +24,7 @@ public class Crab : AnimalAI {
             interruptedTimer -= Time.deltaTime;
             if(interruptedTimer < 0)
             {
-                StopMoving();
+                SetIdle();
             }
         }
         

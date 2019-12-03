@@ -11,7 +11,7 @@ public class UseBoat : PickUp {
     BoatPlayer boatScript;
     //cursor ref
     public GameObject cursor;
-
+    BookPage bookPage;
     //boat instructions
     [Header("Instruction refs")]
     public TMP_Text clickNDragTxt;
@@ -24,11 +24,14 @@ public class UseBoat : PickUp {
     public bool canEnter = true;
     public float justExitedTimer, exitTimerTotal = 0.5f;
 
-    void Start()
+    public override void Awake()
     {
+        base.Awake();
+
         boatScript = GetComponent<BoatPlayer>();
         camController = Camera.main.GetComponent<PlayerCameraController>();
-
+        //my book page
+        bookPage = GetComponent<BookPage>();
         //ui refs
         txtFader = clickNDragTxt.GetComponent<FadeUItmp>();
         textBackFader = textBack.GetComponent<FadeUItmp>();
@@ -36,7 +39,6 @@ public class UseBoat : PickUp {
         animator = clickNDragAnim.GetComponent<AnimateDialogue>();
         animFaderRight = clickNDragAnimRight.GetComponent<FadeUI>();
         animatorRight = clickNDragAnimRight.GetComponent<AnimateDialogue>();
-
     }
 
     public override void Update()
@@ -84,6 +86,12 @@ public class UseBoat : PickUp {
                 animator.active = true;
                 animFaderRight.FadeIn();
                 animatorRight.active = true;
+
+                //has a book page to add 
+                if (bookPage)
+                {
+                    bookPage.AddPage();
+                }
 
                 //set has used boat for the first time 
                 PlayerPrefs.SetString("hasUsedBoat", "yes");

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using InControl;
 
 public class BoatPlayer : MonoBehaviour
 {
@@ -15,7 +16,8 @@ public class BoatPlayer : MonoBehaviour
     //Camera ref variables
     AudioSource cameraAudSource;
     PlayerCameraController camControl;
-    
+
+    Vector3 origDockPos;
     //vars for footstep audio
     [HideInInspector]
     public AudioSource boatSource;
@@ -70,10 +72,11 @@ public class BoatPlayer : MonoBehaviour
     [Header ("Entering & Exiting")]
     public bool inBoat;  //set when player is inBoat
     public float exitSphereRadius = 3f;
+    public float dockDistance = 15f;
     public Vector3 exitSpot;
     public FadeUI[] dockprompts;  //dock boat prompt
 
-    void Start()
+    void Awake()
     {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
@@ -89,22 +92,38 @@ public class BoatPlayer : MonoBehaviour
         //ref to pickup script
         useBoatScript = GetComponent<UseBoat>();
         boatBody = GetComponent<Rigidbody>();
-        boatBody.isKinematic = false;
         boatCol = GetComponent<BoxCollider>();
+    }
+
+    void Start()
+    {
+        //set body & start angle
+        boatBody.isKinematic = false;
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
+        origDockPos = transform.position;
 
         //starting state is idle 
         boatState = BoatStates.IDLE;
     }
 
+    //called when player sleeps in bed 
+    public void ResetDockPos()
+    {
+        transform.position = origDockPos;
+        transform.localEulerAngles = origRotation;
+    }
+
     void Update()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         //only run this update code if the player is in the boat
         if (inBoat)
         {
             //if player anim not idle
-            if(tpc.poopShoes.GetNextAnimatorStateInfo(0).IsName("idle") != true)
+            if(tpc.samita.GetNextAnimatorStateInfo(0).IsName("idle") != true)
             {
                 tpc.SetAnimator("idle");
             }
@@ -153,7 +172,7 @@ public class BoatPlayer : MonoBehaviour
                
 
                 //push boat away from land
-                if (distance < 7.5f)
+                if (distance < dockDistance)
                 {
                     boatBody.AddForce(-direction * boatSpeedZ);
                     //Debug.Log("heading = " + heading);
@@ -161,7 +180,7 @@ public class BoatPlayer : MonoBehaviour
                 }
                 
                 //exit boat 
-                if (Input.GetKeyDown(KeyCode.E) && paddleIdleTimer > 0.5f)
+                if ((Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed) && paddleIdleTimer > 0.5f)
                 {
                     useBoatScript.ExitBoat(exitSpot);
                     paddleIdleTimer = 0;
@@ -176,7 +195,7 @@ public class BoatPlayer : MonoBehaviour
     }
 
     // now that we have our inputs, we need to 
-    //Apply Physical Forces
+    //Calculate Physical Forces
     void CalcPaddleForce()
     {
         //stop checking paddle and set final mouse pos
@@ -192,55 +211,41 @@ public class BoatPlayer : MonoBehaviour
         //calc x force 
         paddleForceX = (Mathf.Abs(paddleDistY) * boatSpeedX ) + (Mathf.Abs(paddleDistX) * boatSpeedX);
 
-        //check if the row was on left or right
-        if(characterPosOnSreen.x < origMousePos.x)
+        //RIGHT SIDE 
+        //row was left to right & forward
+        if(origMousePos.x < finalMousePos.x && paddleForceZ > 0)
         {
-            //was left of player and trying to move forward, so make x force negative
-            if(paddleForceZ > 0)
-            {
-                paddleForceX *= -1;
-            }
-
+            paddleForceX *= -1;
             oarAnimator.SetBool("rightOrLeft", true);
-
-            //right f 2 b
-            if (paddleForceZ > 0)
-            {
-                oarAnimator.SetTrigger("rowRightF2B");
-            }
-            //right b 2 f
-            else
-            {
-                oarAnimator.SetTrigger("rowRightB2F");
-            }
-
+            oarAnimator.SetTrigger("rowRightF2B");
         }
-
-        //was right of player
-        else
+        //row was right to left && backward
+        else if(origMousePos.x > finalMousePos.x && paddleForceZ < 0)
         {
-            //trying to move backward so now right is left
-            if (paddleForceZ < 0)
-            {
-                paddleForceX *= -1;
-            }
-
+            oarAnimator.SetBool("rightOrLeft", true);
+            oarAnimator.SetTrigger("rowRightB2F");
+        }
+        //LEFT SIDE 
+        //row was right to left & forward
+        else if(origMousePos.x > finalMousePos.x && paddleForceZ > 0)
+        {
             oarAnimator.SetBool("rightOrLeft", false);
-
-            //left f 2 b
-            if (paddleForceZ > 0)
-            {
-                oarAnimator.SetTrigger("rowLeftF2B");
-            }
-            //left b 2 f
-            else
-            {
-                oarAnimator.SetTrigger("rowLeftB2F");
-            }
+            oarAnimator.SetTrigger("rowLeftF2B");
+        }
+        //row was left to right & backward
+        else if(origMousePos.x < finalMousePos.x && paddleForceZ < 0)
+        {
+            paddleForceX *= -1;
+            oarAnimator.SetBool("rightOrLeft", false);
+            oarAnimator.SetTrigger("rowLeftB2F");
         }
 
-        StartPaddleFX();
-        
+        //so we don't play the fx for a measly click
+        if(paddleForceZ > 250f)
+        {
+            StartPaddleFX();
+        }
+
         StartCoroutine(WaitToApplyForce());
     }
 
@@ -248,14 +253,14 @@ public class BoatPlayer : MonoBehaviour
     IEnumerator WaitToApplyForce()
     {
         yield return new WaitForSeconds(0.8f);
-        boatState = BoatStates.TURNINGBOAT;
+       
         //z forward force applied with AddForce (0, 0, zForce);
         indForce = paddleForceZ / division;
         //x force applied with AddTorqur(0, xTorque, 0) 
         indTorque = paddleForceX / division;
         //reset torqueApplier & set turning boat 
         torqueApplier = 0;
-        
+     
         //decide which paddle sound
         if (Mathf.Abs(paddleForceZ) > bigPaddleMin)
         {
@@ -266,6 +271,9 @@ public class BoatPlayer : MonoBehaviour
         {
             PlayPaddleSound();
         }
+
+        //start turning in fixedUpdate
+        boatState = BoatStates.TURNINGBOAT;
     }
 
     //this is where we actually apply the Forces

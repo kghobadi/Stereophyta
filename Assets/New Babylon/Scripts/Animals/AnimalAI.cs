@@ -45,7 +45,7 @@ public abstract class AnimalAI : AudioHandler {
     protected float moveTimer = 5;
     public float moveTimerTotal = 5f;
     //are you close enough to spook' em??? -- distance when animal decides it has reached dest
-    public float  spookDistance = 15, stopMovingDistance = 5;
+    public float  spookDistance = 15, SetIdleDistance = 5;
     protected NavMeshAgent myNavMesh;
     public float randomScaleMin = 0.5f, randomScaleMax = 2;
 
@@ -120,9 +120,9 @@ public abstract class AnimalAI : AudioHandler {
             SoundCountdown(walking);
 
             //stop running after we are close to position
-            if(Vector3.Distance(transform.position, targetPosition) < stopMovingDistance)
+            if(Vector3.Distance(transform.position, targetPosition) < SetIdleDistance)
             {
-                StopMoving();
+                SetIdle();
             }
         }
 
@@ -135,9 +135,9 @@ public abstract class AnimalAI : AudioHandler {
             SoundCountdown(running);
 
             //stop running after we are close to position
-            if (Vector3.Distance(transform.position, targetPosition) < stopMovingDistance)
+            if (Vector3.Distance(transform.position, targetPosition) < SetIdleDistance)
             {
-                StopMoving();
+                SetIdle();
             }
         }
 
@@ -163,9 +163,9 @@ public abstract class AnimalAI : AudioHandler {
             SetLerpColor(sleepingAudible, sleepingSilent);
 
             //once it's morning, return to idle
-            if(sunScript.timeState == Sun.TimeState.MORNING)
+            if(sunScript.timeState != Sun.TimeState.NIGHT)
             {
-                StopMoving();
+                SetIdle();
             }
         }
         
@@ -173,7 +173,7 @@ public abstract class AnimalAI : AudioHandler {
         if (Vector3.Distance(transform.position, origPosition) > 75)
         {
             transform.position = origPosition;
-            StopMoving();
+            SetIdle();
         }
 
     }
@@ -214,7 +214,7 @@ public abstract class AnimalAI : AudioHandler {
     }
 
     //stops movement
-    public virtual void StopMoving()
+    public virtual void SetIdle()
     {
         myNavMesh.speed = walkSpeed;
         myNavMesh.isStopped = true;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using InControl;
 
 public class StartView : MonoBehaviour {
     //sun ref
@@ -62,11 +63,6 @@ public class StartView : MonoBehaviour {
                 toolsNSeeds[i].FadeOut();
             }
 
-            if (PlayerPrefs.GetString("hasBook") == "yes")
-            {
-               
-            }
-
             //fade in menu UI
             for (int i = 0; i < menuFades.Length; i++)
             {
@@ -87,18 +83,21 @@ public class StartView : MonoBehaviour {
 	void Update () {
         if (startView)
         {
+            //get input device 
+            var inputDevice = InputManager.ActiveDevice;
+
             //rotates camera around windmill
             if (!lerpToPlayer)
             {
                 //rotate around windmill
                 transform.RotateAround(rotationPoint.position, Vector3.up, rotationSpeed * Time.deltaTime);
                 //keep the house cam off 
-                if(houseCamera.activeSelf)
+                if (houseCamera.activeSelf)
                     houseCamera.SetActive(false);
             }
-            
+
             //check for spacebar input
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) || inputDevice.Action1 || inputDevice.Action2 || inputDevice.Action3 || inputDevice.Action4 )
             {
                 //fade out menu UI
                 for (int i = 0; i < menuFades.Length; i++)
@@ -119,18 +118,7 @@ public class StartView : MonoBehaviour {
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mSmoothLook * Time.deltaTime);
 
                 //lerp functionality
-                //the game has been played before and the player has made it out of the house
-                //lerping to player cam 
-                if (PlayerPrefs.GetString("hasBook") == "yes")
-                {
-                    LerpToPlayer();
-                }
-                //first time starting, lerp to house Cam
-                else
-                {
-                    LerpToHouse();
-                }
-               
+                LerpToPlayer(); 
             }
         }
 	}
@@ -141,6 +129,8 @@ public class StartView : MonoBehaviour {
         transform.position = Vector3.Lerp(transform.position, playerCamera.transform.position, lerpSpeed * Time.deltaTime);
         //field of view
         startCam.fieldOfView = Mathf.Lerp(startCam.fieldOfView, 50f, lerpSpeed * Time.deltaTime);
+        //can't look until we arrive at player spot 
+        playerCamera.GetComponent<PlayerCameraController>().canLook = false;
 
         //distance check, once within reactivate everything and turn off start viewer
         if (Vector3.Distance(transform.position, playerCamera.transform.position) < 0.5f)

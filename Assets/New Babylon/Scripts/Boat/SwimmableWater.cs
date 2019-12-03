@@ -8,11 +8,14 @@ public class SwimmableWater : MonoBehaviour {
     GameObject player;
     ThirdPersonController tpc;
 
-    void Start()
+    ZoomCamInstructions howToZoom;
+
+    void Awake()
     {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        howToZoom = GetComponent<ZoomCamInstructions>();
     }
 
     //enter water
@@ -36,7 +39,14 @@ public class SwimmableWater : MonoBehaviour {
 
                     //bring down move speed 
                     tpc.currentMovement /= 3;
-                    tpc.currentMovementV /= 2;
+                    tpc.currentMovementV = Vector3.zero;
+                }
+
+                //first time swimmer eh?
+                if (PlayerPrefs.GetString("hasSwum") != "yes")
+                {
+                    howToZoom.FadeInstructions();
+                    PlayerPrefs.SetString("hasSwum", "yes");
                 }
             }
         }

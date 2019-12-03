@@ -11,11 +11,14 @@ public class PlayerBounding : MonoBehaviour
     public float heightOffset;
     public LayerMask groundMask;
 
+    ThirdPersonController tpc;
     Transform mainCam;
     PlayerCameraController pcc;
+    public BoatPlayer boat;
 
     void Awake()
     {
+        tpc = GetComponent<ThirdPersonController>();
         mainCam = Camera.main.transform;
         pcc = mainCam.GetComponent<PlayerCameraController>();
     }
@@ -54,7 +57,15 @@ public class PlayerBounding : MonoBehaviour
 
     void SetPositions(Vector3 teleportPos)
     {
-        transform.position = CheckY(teleportPos);
+        if (boat.inBoat)
+        {
+            boat.transform.position = CheckY(teleportPos);
+        }
+        else
+        {
+            transform.position = CheckY(teleportPos);
+        }
+
         mainCam.transform.position = transform.position + new Vector3(0, pcc.heightFromPlayer, pcc.distanceFromPlayer);
     }
 

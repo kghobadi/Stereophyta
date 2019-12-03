@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using InControl;
 
 namespace Items
 {
@@ -11,11 +12,14 @@ namespace Items
         public ObjectPooler fanWindPooler;
         GameObject windClone;
 
+        public int staffID;
         //animator
         public Transform fanObj;
         //speed vars 
         public float windSpeed;
+        float origWind;
         public float rotationSpeed;
+        float origRotate;
         public float distanceToDestroy;
 
         //audio
@@ -36,18 +40,20 @@ namespace Items
         {
             //set tempo indicator stuff 
             tempoIndicator = GetComponent<TempoIndication>();
-            if(tempoIndicator.source == null)
+            if(tempoIndicator.myAudioSource == null)
             {
-                tempoIndicator.source = toolSource;
+                tempoIndicator.myAudioSource = toolSource;
             }
             tempoIndicator.changeTempoSound = selectLower;
             //rhythm lever state -- timeScale should never exceed timeScaleMax 
-            timeScale = 2;
+            timeScale = 0;
             rotationSpeed = 3f;
+            origRotate = rotationSpeed;
             windSpeed = 5;
+            origWind = windSpeed;
 
             //this means we have set it before, so we have saved before
-            if (PlayerPrefs.GetString("hasWindStaff") == "yes")
+            if (PlayerPrefs.GetString("hasWindStaff" + staffID.ToString()) == "yes")
             {
                 PickUpTool(false);
                 //Debug.Log("picked up windstaff on start");
@@ -62,13 +68,12 @@ namespace Items
                 fanActive = true;
             }
         }
-
-
+        
         public override void PickUpTool(bool playSound)
         {
             base.PickUpTool(playSound);
 
-            PlayerPrefs.SetString("hasWindStaff", "yes");
+            PlayerPrefs.SetString("hasWindStaff" + staffID.ToString(), "yes");
 
             toolAnimator.enabled = true;
 
@@ -102,8 +107,11 @@ namespace Items
             //holding wind staff
             else
             {
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
+
                 //on click 
-                if (Input.GetButtonDown("MainAction") && !tpc.menuOpen)
+                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && inventoryScript.canSwitchItems)
                 {
                     MainAction();
                 }
@@ -114,25 +122,45 @@ namespace Items
         {
             //grab wind from pool, set pos, rotation, ref to this
             windClone = fanWindPooler.GrabObject();
+            //set wind script
+            PuzzleWind tinyWind = windClone.GetComponent<PuzzleWind>();
+            tinyWind._windGen = this;
+            tinyWind.currentSpeed = windSpeed;
+            //set wind transform 
             windClone.transform.SetParent(null);
             windClone.transform.position = transform.position + new Vector3(0, 5, 0);
             windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
-            windClone.GetComponent<PuzzleWind>()._windGen = this;
+           
             showRhythm = false;
         }
 
         //WIND STAFF FUNCTIONS
         public override void MainAction()
         {
-            //can place
-            if (CheckCanPlaceFan() == true)
+            //only works on main fan 
+            if(itemGrouper = itemScript)
             {
-                PlaceFan();
-            }
-            //blocked
-            else
-            {
-                toolSource.PlayOneShot(noNo);
+                //can place
+                if (CheckCanPlaceFan() == true)
+                {
+                    //in group
+                    if (itemGrouper.toolGroup.Count > 0)
+                    {
+                        itemGrouper.toolGroup[0].GetComponent<WindMachine>().placeMentSpot = placeMentSpot;
+                        itemGrouper.toolGroup[0].GetComponent<WindMachine>().PlaceFan(true);
+                    }
+                    //last one 
+                    else
+                    {
+                        PlaceFan(false);
+                    }
+
+                }
+                //blocked
+                else
+                {
+                    toolSource.PlayOneShot(noNo);
+                }
             }
         }
 
@@ -181,9 +209,10 @@ namespace Items
             }
         }
 
-        void PlaceFan()
+        public void PlaceFan(bool grouped)
         {
             //animate to become fan
+            timeScale = tpc.playerTempo.timeScale;
             toolAnimator.SetBool("fan", true);
             toolSource.PlayOneShot(placementSound, 0.1f);
 
@@ -191,16 +220,19 @@ namespace Items
             transform.SetParent(null);
             transform.position = placeMentSpot;
 
-            inventoryScript.SwitchTool(true);
+            //in group
+            if (grouped)
+            {
+                RemoveFromGroup();
+            }
+            else
+            {
+                RemoveFromInventory();
+            }
 
+            //activate 
             gameObject.SetActive(true);
-
-            //remove from inventory lists
-            int index = inventoryScript.myTools.IndexOf(gameObject);
-
-            inventoryScript.myTools.Remove(gameObject);
-            inventoryScript.toolSprites.RemoveAt(index);
-
+            //set rotation 
             StartCoroutine(WaitToSetFanActive());
         }
 
@@ -232,8 +264,8 @@ namespace Items
             {
                 //reset 
                 timeScale = 0;
-                windSpeed -= (2 * timeScaleMax);
-                rotationSpeed /= (2 * timeScaleMax);
+                windSpeed = origWind;
+                rotationSpeed = origRotate;
             }
 
             //sets rhythm indicator 

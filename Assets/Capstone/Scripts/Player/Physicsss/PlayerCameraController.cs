@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using InControl;
 
 public class PlayerCameraController : MonoBehaviour {
     //player refs
@@ -24,7 +25,7 @@ public class PlayerCameraController : MonoBehaviour {
     public float heightFromPlayer = 3;
     public float heightMin, heightMax;
     public float yLookMin, yLookMax;
-    public float zoomSpeed;
+    public float zoomSpeed, mouseZoom = 500f, controllerZoom = 25f;
     public float yLookSpeed;
     float zoomInput;
 
@@ -78,6 +79,8 @@ public class PlayerCameraController : MonoBehaviour {
 	
 	void LateUpdate ()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
         //lets set up right analogue stick to enable us to rotate the camera around player and redirect motion as we do so
         horizontalRotation = Vector3.zero;
         verticalRotation = Vector3.zero;
@@ -85,30 +88,26 @@ public class PlayerCameraController : MonoBehaviour {
         //not true until out of start view
         if (canLook)
         {
+            //set target move 
             targetMove = playerTransform.position + (playerTransform.rotation * new Vector3(0, heightFromPlayer, -distanceFromPlayer));
-
-            //as the player turns their body more intensely, we want to simultaneously increase smoothMove
-
-            if (mouseControls)
-            {
-                transform.position = Vector3.Lerp(transform.position, targetMove, mSmoothMove * Time.deltaTime);
-            }
-            else
-            {
-                transform.position = Vector3.Lerp(transform.position, targetMove, smoothMove * Time.deltaTime);
-            }
             
             //using mouse and WASD
             if (mouseControls)
             {
+                //cam pos
+                transform.position = Vector3.Lerp(transform.position, targetMove, mSmoothMove * Time.deltaTime);
+                //cam inputs
                 horizontalRotation = new Vector3(0, Input.GetAxis("mouse x") * cameraRotationSpeedXMouse, 0);
                 verticalRotation = new Vector3(0, Input.GetAxis("mouse y") * cameraRotationSpeedYMouse, 0);
             }
             //using ps4 controller
             else
             {
-                horizontalRotation = new Vector3(0, Input.GetAxis("Mouse X") * cameraRotationSpeedX, 0);
-                verticalRotation = new Vector3(0, Input.GetAxis("Mouse Y") * cameraRotationSpeedY, 0);
+                //cam pos
+                transform.position = Vector3.Lerp(transform.position, targetMove, smoothMove * Time.deltaTime);
+                //cam inputs
+                horizontalRotation = new Vector3(0, inputDevice.RightStickX * cameraRotationSpeedX, 0);
+                verticalRotation = new Vector3(0, inputDevice.RightStickY * cameraRotationSpeedY, 0);
             }
 
             //if mouse up and yLook is less than yLookMax
@@ -121,13 +120,10 @@ public class PlayerCameraController : MonoBehaviour {
             {
                 yLook = Vector3.Lerp(yLook, yLook + verticalRotation, Time.deltaTime * yLookSpeed);
             }
-
             
-
             //add yLook to the player pos, then subtract cam pos to get the forward look
             targetLook = Quaternion.LookRotation((playerTransform.position + yLook) - transform.position);
-
-
+            
             if (mouseControls)
             {
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, mSmoothLook * Time.deltaTime);
@@ -140,7 +136,25 @@ public class PlayerCameraController : MonoBehaviour {
 
             //ONLY GETS ZOOM INPUT IN CANLOOK
             //grab input from scroll wheel axis
-            zoomInput = Input.GetAxis("Mouse ScrollWheel");
+            if (mouseControls)
+            {
+                zoomInput = Input.GetAxis("Mouse ScrollWheel");
+                zoomSpeed = mouseZoom;
+            }
+            //zoom with left and right triggers 
+            else
+            {
+                if (inputDevice.LeftTrigger.IsPressed)
+                {
+                    zoomInput =  Mathf.Clamp(-inputDevice.LeftTrigger.Value, -1f, 0f);
+                }
+                if (inputDevice.RightTrigger.IsPressed)
+                {
+                    zoomInput = Mathf.Clamp( inputDevice.RightTrigger.Value, 0f, 1f);
+                }
+
+                zoomSpeed = controllerZoom;
+            }
 
             //zoom in
             if (zoomInput < 0 && heightFromPlayer > heightMin)
@@ -243,6 +257,7 @@ public class PlayerCameraController : MonoBehaviour {
         }
     }
 
+    //as the player turns their body more intensely, we want to simultaneously increase smoothMove
     void AlterSmoothValues()
     {
         //ps4 smooth move 

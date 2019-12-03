@@ -2,22 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using InControl;
 
 namespace Items
 {
     //abstract class to build tools from
-    public abstract class Tool : MonoBehaviour
+    public abstract class Tool : RhythmProducer
     {
-        //player vars
-        protected GameObject player;
-        protected ThirdPersonController tpc;
         //audio source reference
         protected AudioSource toolSource;
         [Header("Tool Vars")]
         public Animator toolAnimator;
-        //rhythm vars
-        public bool showRhythm;
-        public int timeScale;
 
         //for adding to inventory
         protected GameObject inventory;
@@ -33,16 +28,21 @@ namespace Items
         public Text pickUpText;
         public string pickUpMessage;
         public FadeUI[] interactPrompts;
+        BookPage bookPage;
 
         public float interactDist = 10f;
-
+        [Header("Item grouping")]
+        //my item script
+        public Item itemScript;
+        //my group leader
+        public Item itemGrouper;
+        public bool multiple;
+        
         //set tool refs in awake so that inventory can disable them at start
-        public virtual void Awake()
+        public override void Awake()
         {
-            //player refs
-            player = GameObject.FindGameObjectWithTag("Player");
-            tpc = player.GetComponent<ThirdPersonController>();
-
+            base.Awake();
+            //tool components
             toolSource = GetComponent<AudioSource>();
             toolAnimator = GetComponent<Animator>();
             toolAnimator.enabled = false;
@@ -50,6 +50,9 @@ namespace Items
             //inventory ref
             inventory = GameObject.FindGameObjectWithTag("Inventory");
             inventoryScript = inventory.GetComponent<Inventory>();
+            itemScript = GetComponent<Item>();
+            //my book page
+            bookPage = GetComponent<BookPage>();
         }
 
         //called to pick up tool for the first time
@@ -65,24 +68,44 @@ namespace Items
             transform.localPosition = localPos;
             transform.localEulerAngles = localRot;
             transform.localScale = localScale;
-
-            //add to tools list,
-            inventoryScript.myTools.Add(gameObject);
-            inventoryScript.toolSprites.Add(inventorySprite);
-
-            //set current inventory Tool to this
-            if (inventoryScript.currentToolObj != null)
+            
+            //check for previous pickup so we can just add to count 
+            if(multiple)
             {
-                inventoryScript.currentToolObj.SetActive(false);
+                Item itemGroup = inventoryScript.CheckForToolType(itemScript.toolType);
+
+                //found my tool group
+                if(itemGroup != null)
+                {
+                    AddToolToGroup(itemGroup);
+                }
+                //couldnt find the group, first time pickup
+                else
+                {
+                    AddToolToInventory();
+
+                    //has a book page to add 
+                    if (bookPage)
+                    {
+                        bookPage.AddPage();
+                    }
+                }
+            }
+            //only one of this tool type, just add to inventory
+            else
+            {
+                AddToolToInventory();
+
+                //has a book page to add 
+                if (bookPage)
+                {
+                    bookPage.AddPage();
+                }
             }
 
-            inventoryScript.currentToolObj = gameObject;
-            inventoryScript.currentTool = inventoryScript.myTools.Count - 1;
-            inventoryScript.SetToolSprite();
-
+            //play this tools pickup sound
             if (playSound)
             {
-                //play this tools pickup sound
                 inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
             }
 
@@ -90,63 +113,47 @@ namespace Items
             //book notification??
         }
 
-        public void OnEnable()
+        //add tool to items list
+        protected virtual void AddToolToInventory()
         {
-            SimpleClock.ThirtySecond += OnThirtySecond;
+            inventoryScript.AddItemToInventory(gameObject, inventorySprite);
+            inventoryScript.SwitchToItem(gameObject);
+            itemGrouper = itemScript;
         }
 
-        public void OnDisable()
+        //add to group, and set my ItemScript ref to the itemGroup
+        protected virtual void AddToolToGroup(Item group)
         {
-            SimpleClock.ThirtySecond -= OnThirtySecond;
+            inventoryScript.AddItemToGroup(group, gameObject);
+            inventoryScript.SwitchToItem(group.gameObject);
+            itemGrouper = group;
         }
 
-        public virtual void OnThirtySecond(BeatArgs e)
+        //removes this from the fan group
+        protected virtual void RemoveFromGroup()
         {
-            switch (timeScale)
-            {
-                case 0:
-                    if (e.TickMask[TickValue.Measure])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-                case 1:
-                    if (e.TickMask[TickValue.Quarter])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-                case 2:
-                    if (e.TickMask[TickValue.Eighth])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-                case 3:
-                    if (e.TickMask[TickValue.Sixteenth])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-                case 4:
-                    if (e.TickMask[TickValue.ThirtySecond])
-                    {
-                        // rhythm creation / beat visual
-                        showRhythm = true;
-                    }
-                    break;
-            }
+            itemGrouper.toolGroup.Remove(gameObject);
+            itemGrouper.itemCount--;
+            itemGrouper = null;
+        }
+
+        //remove windfan from inventory completely 
+        protected virtual void RemoveFromInventory()
+        {
+            //remove from inventory lists 
+            int index = inventoryScript.myItems.IndexOf(gameObject);
+            inventoryScript.RemoveItemFromInventory(index);
+            //set obj active and switch inventory 
+            inventoryScript.SwitchItem(true, true);
         }
 
         public virtual void Update()
         {
             //just for pick up logic 
             if (!hasBeenAcquired)
-            {
+            {  
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
                 //dist from player
                 float dist = Vector3.Distance(transform.position, player.transform.position);
                 //if player is close
@@ -154,15 +161,15 @@ namespace Items
                 {
                     playerWasNear = true;
                     //so switch inv is not called 
-                    inventoryScript.canSwitchTools = false;
-                    inventoryScript.inputTimerT = 0.25f;
+                    inventoryScript.canSwitchItems = false;
+                    inventoryScript.inputTimer = 0.25f;
 
                     //fade in those prompts
                     if (pickUpText.color.a < 0.5f)
                         ShowPickupPrompt();
 
                     //pick up when player presses E
-                    if (Input.GetKeyDown(KeyCode.E))
+                    if (Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed)
                     {
                         PickUpTool(true);
                     }
@@ -180,10 +187,10 @@ namespace Items
                 }
             }
 
-            //tool time scale always equal to that of the inventory 
+            //always set tempo to player Tempo while acquired
             if (hasBeenAcquired)
             {
-                timeScale = inventoryScript.toolTimeScale;
+                timeScale = tpc.playerTempo.timeScale;
             }
         }
 

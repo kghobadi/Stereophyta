@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using InControl;
 
 namespace Items
 {
@@ -52,10 +53,13 @@ namespace Items
             base.Update();
 
             //only run if has been picked up
-            if (hasBeenAcquired)
-            {
-                //take input 
-                if (Input.GetButtonDown("MainAction") && !tpc.menuOpen && !sickling)
+            if (hasBeenAcquired && inventoryScript.canSwitchItems)
+            {  
+                //get input device 
+                var inputDevice = InputManager.ActiveDevice;
+
+                //on click 
+                if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && !sickling)
                 {
                     MainAction();
                 }
@@ -70,7 +74,7 @@ namespace Items
                 }
 
                 //on release
-                if (Input.GetButtonUp("MainAction") && sickling)
+                if ((Input.GetButtonUp("MainAction") || inputDevice.Action3.WasReleased) && sickling)
                 {
                     toolAnimator.SetBool("sickling", false);
                     sickling = false;
@@ -87,7 +91,34 @@ namespace Items
             sickling = true;
         }
 
+        void OnTriggerEnter(Collider other)
+        {
+            //collided with plant
+            //has plant tag
+            if (sickling)
+            {
+                if (other.gameObject.tag == "Plant")
+                {
+                    //is it plont?
+                    if (other.gameObject.GetComponent<Plont>())
+                    {
+                        //shrink plant and play guitar sound
+                        if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
+                        {
+                            other.GetComponent<Plont>().GrowPlant(false, true);
+                            PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, sickleHits);
+                        }
+                    }
 
+                    //is it a shroom?
+                    if (other.GetComponent<Shroom>())
+                    {
+                        other.GetComponent<Shroom>().UprootShroom();
+                    }
+                }
+            }
+            
+        }
 
         //spawns one sickle wind
         void SpawnSickleWind(Vector3 spawnPoint)

@@ -7,7 +7,7 @@ using Items;
 public class DustSplash : Rhythm {
     AudioSource splashAudio;
     public AudioClip[] splashSounds;
-
+    public AudioClip[] smallJumps, medJumps, bigJumps;
     Vector3 originalPosition;
     ParticleSystem splashEffect;
     ParticleSystem.MainModule splashMain;
@@ -36,19 +36,23 @@ public class DustSplash : Rhythm {
         {
             case 0:
                 splashMain.startColor = tpc.smallJMat.color;
+                PlayRandomSound(smallJumps);
                 break;
             case 1:
                 splashMain.startColor = tpc.midJMat.color;
+                PlayRandomSound(medJumps);
                 break;
             case 2:
                 splashMain.startColor = tpc.bigJMat.color;
+                PlayRandomSound(bigJumps);
                 break;
         }
         transform.localScale = origScale * (jumpType + 1);
         splashEffect.Play();
         sphereCol.enabled = true;
         splashing = true;
-        PlaySplashSound(jumpType);
+       
+        
         yield return new WaitForSeconds(0.5f);
         splashing = false;
         splashEffect.Stop();
@@ -98,11 +102,26 @@ public class DustSplash : Rhythm {
                     other.gameObject.GetComponent<Crab>().Interrupt();
                 }
             }
+
+            //Deer
+            if (other.gameObject.GetComponent<Deer>())
+            {
+                if (other.gameObject.GetComponent<Deer>().animalState != AnimalAI.AnimalAIStates.SLEEPING)
+                {
+                    other.gameObject.GetComponent<Deer>().Interrupt();
+                }
+            }
         }
     }
 
     void PlaySplashSound(int jumpType)
     {
         splashAudio.PlayOneShot(splashSounds[jumpType], 1f);
+    }
+
+    void PlayRandomSound(AudioClip[] sounds)
+    {
+        AudioClip clip = sounds[Random.Range(0, sounds.Length)];
+        splashAudio.PlayOneShot(clip, 1f);
     }
 }

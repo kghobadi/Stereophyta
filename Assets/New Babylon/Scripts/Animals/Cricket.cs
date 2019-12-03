@@ -45,7 +45,7 @@ public class Cricket : RhythmProducer {
     }
 	
 	// my own update
-	public override void Update ()
+	void Update ()
     {
         //always idle in update check
         if (state == States.IDLE)

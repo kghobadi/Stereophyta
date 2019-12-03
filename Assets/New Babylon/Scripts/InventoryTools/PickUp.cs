@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using InControl;
 
 public abstract class PickUp : MonoBehaviour {
     //player vars
@@ -65,6 +66,9 @@ public abstract class PickUp : MonoBehaviour {
 
     public virtual void Update()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         //just for pick up logic 
         if (!hasBeenAcquired)
         {
@@ -80,7 +84,7 @@ public abstract class PickUp : MonoBehaviour {
                     ShowPickupPrompt();
 
                 //pick up when player presses E
-                if (Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed)
                 {
                     PickUpTool(true);
                 }
