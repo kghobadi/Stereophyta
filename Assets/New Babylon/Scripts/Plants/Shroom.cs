@@ -20,7 +20,6 @@ public class Shroom : RhythmProducer
     //for inv
     Inventory inventoryScript;
    
-
     //tgs logic
     [HideInInspector] public TerrainGridSystem tgs;
     [HideInInspector] public Zone myZone;
@@ -102,7 +101,6 @@ public class Shroom : RhythmProducer
         shroomMR = GetComponent<MeshRenderer>();
         shroomSource = GetComponent<AudioSource>();
         
-
         //particles
         beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
         shroomSpores = transform.GetChild(1).GetComponent<ParticleSystem>();
@@ -120,6 +118,9 @@ public class Shroom : RhythmProducer
 
     void Start()
     {
+        //add to save list if its not already
+        myZone.zoneSaver.AddShroom(this);
+
         //day passed listener
         sunScript.newDay.AddListener(DayPassed);
         inherentScale = transform.localScale;
@@ -482,13 +483,14 @@ public class Shroom : RhythmProducer
     }
 
     //resets age, spores, scale, and returns to pool
-    void ResetShroom()
+    public void ResetShroom()
     {
         myAge = 0;
         hasReleasedSpores = false;
         transform.localScale = inherentScale;
         vortexSpeed = vortexOrig;
         //the return...
+        myZone.zoneSaver.RemoveShroom(this);
         shroomPooler.ReturnObject(gameObject);
     }
 

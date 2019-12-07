@@ -16,7 +16,7 @@ public class Treent : MonoBehaviour
     Sun sun;
     GameObject player;
     ThirdPersonController tpc;
-    SleepSave saveScript;
+    //SleepSave saveScript;
     public bool startingPlant;
 
     //tgs logic
@@ -85,7 +85,7 @@ public class Treent : MonoBehaviour
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+        //saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
 
         AdjustHeight();
         

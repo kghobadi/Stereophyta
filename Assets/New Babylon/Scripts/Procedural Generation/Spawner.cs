@@ -10,7 +10,7 @@ public class Spawner : MonoBehaviour {
     public GenerationType generationType;
     public enum GenerationType
     {
-        RANDOM, SQUARE, PAIRS, GROUPS,
+        RANDOM, SQUARE, 
     }
 
     public ObjectType objectType;
@@ -26,7 +26,7 @@ public class Spawner : MonoBehaviour {
     public LayerMask collidableObjects;
     public LayerMask grounded ;
     public float heightAdjust;
-    public float checkDist;
+    public float checkDist = 1f;
 
     //for RANDOM
     [Header("RANDOM")]
@@ -57,12 +57,6 @@ public class Spawner : MonoBehaviour {
                 break;
             case GenerationType.SQUARE:
                 GenerateSquare();
-                break;
-            case GenerationType.PAIRS:
-                GeneratePairs();
-                break;
-            case GenerationType.GROUPS:
-                GenerateGroups();
                 break;
         }
     }
@@ -163,27 +157,18 @@ public class Spawner : MonoBehaviour {
         {
             for (int x = 0; x <= gridSizeX; x++, i++)
             {
-                generatedObjs[i] = objectPooler.GrabObject();
-
                 Vector3 spawnPos = new Vector3(x * distBetweenX, transform.position.y, y * distBetweenY) + transform.position;
 
-                generatedObjs[i].transform.position = spawnPos;
+                //only create the obj if there are no spawn collisions
+                if(CheckForSpawnCollisions(spawnPos) == false)
+                {
+                    generatedObjs[i] = objectPooler.GrabObject();
+                    generatedObjs[i].transform.position = spawnPos;
 
-                SwitchObjectType(generatedObjs[i]);
+                    SwitchObjectType(generatedObjs[i]);
+                }
             }
         }
-    }
-
-    //generate objects in semi-random pairs 
-    void GeneratePairs()
-    {
-
-    }
-
-    //generate objects in semi-random groups 
-    void GenerateGroups()
-    {
-
     }
 
     //called when player enters zone 
@@ -219,7 +204,10 @@ public class Spawner : MonoBehaviour {
             {
                 obj.transform.position = new Vector3(obj.transform.position.x, hit.point.y + heightAdjust, obj.transform.position.z);
             }
-
+            else
+            {
+                objectPooler.ReturnObject(obj);
+            }
             Debug.DrawLine(obj.transform.position, hit.point);
         }
         

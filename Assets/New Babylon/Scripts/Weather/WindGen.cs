@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WindGen : RhythmProducer {
     Vector3 origPos;
-
+    [Header("Wind Gen")]
     public ObjectPooler windPooler;
     GameObject windClone;
     
@@ -21,6 +21,11 @@ public class WindGen : RhythmProducer {
     {
         NORTH, EAST, SOUTH, WEST,
     }
+    [Header("Wind Sounds")]
+    public AudioClip[] currentWindSounds;
+    public AudioClip[] shortWindSounds;
+    public AudioClip[] mediumWindSounds;
+    public AudioClip[] longWindSounds;
 
     public override void Awake()
     {
@@ -104,7 +109,27 @@ public class WindGen : RhythmProducer {
         windClone.transform.SetParent(transform);
         windClone.transform.position = transform.position;
         windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles);
+
         
+        //switch (timeScale)
+        //{
+        //    case 0:
+        //        PlayRandomSound(longWindSounds, 1f);
+        //        break;
+        //    case 1:
+        //        PlayRandomSound(longWindSounds, 1f);
+        //        break;
+        //    case 2:
+        //        PlayRandomSound(mediumWindSounds, 1f);
+        //        break;
+        //    case 3:
+        //        PlayRandomSound(shortWindSounds, 1f);
+        //        break;
+        //    case 4:
+        //        PlayRandomSound(shortWindSounds, 1f);
+        //        break;
+        //}
+   
         showRhythm = false;
     }
 

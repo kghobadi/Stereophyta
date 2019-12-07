@@ -15,8 +15,6 @@ public class Plont : MonoBehaviour {
     Sun sun;
     GameObject player;
     ThirdPersonController tpc;
-    SleepSave saveScript;
-    public bool startingPlant;
     int enableCounter;
 
     //tgs logic
@@ -56,7 +54,6 @@ public class Plont : MonoBehaviour {
     public GrowthStages[] myGrowthStages;
     public GameObject[] cropBundles;
     public AudioClip[] stageSounds;
-    public AudioClip sicknessSound;
     public Animator plantAnimator, extraAnimator;
     public bool animatorInChildren, hasExtraAnimator;
     public bool growing;
@@ -95,7 +92,6 @@ public class Plont : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
 
         //tgs refs
         if (tgs == null)
@@ -168,10 +164,7 @@ public class Plont : MonoBehaviour {
         plantedTexture = gridMan.plantedTexture;
 
         //add data to save script
-        if (!startingPlant)
-        {
-            saveScript.AddPlant(this);
-        }
+        myZone.zoneSaver.AddPlant(this);
         
         //scale and set stages
         originalScale = transform.localScale;
@@ -406,7 +399,7 @@ public class Plont : MonoBehaviour {
     }
 
     //reset age to 0 and size to original 
-    void ResetPlantAge()
+    public void ResetPlantAge()
     {
         myAge = 0;
         currentStage = 0;
@@ -494,7 +487,7 @@ public class Plont : MonoBehaviour {
         dying = true;
     }
 
-    void Die()
+    public void Die()
     {
         //stop dying...
         dying = false;
@@ -507,20 +500,12 @@ public class Plont : MonoBehaviour {
             //ground texture
             tgs.CellToggleRegionSurface(cellIndex, true, groundTexture);
         }
-
-        //Debug.Log("Rip " + gameObject.name);
-        if (!startingPlant)
-        {
-            saveScript.RemovePlant(this);
-        }
-        //auto drop seeds on death
-        else
-        {
-            SpawnSeed();
-        }
+        
+        //remove from save list and spawn seed 
+        myZone.zoneSaver.RemovePlant(this);
 
         //remove from zone list 
-        if(myZone.plants.Contains(gameObject))
+        if (myZone.plants.Contains(gameObject))
             myZone.plants.Remove(gameObject);
 
         //return to pool or destroy if no pool
