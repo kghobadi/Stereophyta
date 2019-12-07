@@ -34,6 +34,7 @@ public class ThirdPersonController : MonoBehaviour
     public LayerMask groundedCheck;
     public Zone currentZone;
     public string currentZoneName;
+    public bool savingAndLoadingEnabled;
     public TerrainGridSystem currentTGS;
     public GridManager currentGridMan;
 

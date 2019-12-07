@@ -12,11 +12,12 @@ public class Zone : MonoBehaviour {
 
     [Header("Zone info")]
     public string zoneName;
-    public bool playerHasBeenHereBefore;
     public bool playerInZone;
+    public bool playerHasVisited;
     public TerrainGridSystem zoneTGS;
     public GridManager zoneGridMan;
     public Spawner[] zoneSpawners;
+    public ZoneSaver zoneSaver;
 
     [Header("Audio snapshots")]
     public AudioMixerSnapshot Ocean;
@@ -38,6 +39,12 @@ public class Zone : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
         zoneGridMan = transform.parent.GetComponent<GridManager>();
+        //zone saver...
+        zoneSaver = GetComponent<ZoneSaver>();
+        if(zoneSaver == null)
+        {
+            zoneSaver = gameObject.AddComponent<ZoneSaver>();
+        }
         bookPage = GetComponent<BookPage>();
 
         SetZoneSpawners();
@@ -71,35 +78,58 @@ public class Zone : MonoBehaviour {
                 zoneSnapshot.TransitionTo(3f);
                 //Debug.Log("Player entered zone: " + zoneName);
 
-                if (!playerHasBeenHereBefore)
+                //this means we have set been here before, so we have saved before
+                if (PlayerPrefs.GetInt(zoneName + "Visits") > 0 && tpc.savingAndLoadingEnabled)
                 {
-                    for (int i = 0; i < zoneSpawners.Length; i++)
+                    //only for this session
+                    if (!playerHasVisited)
                     {
-                        zoneSpawners[i].GenerateObjects();
+                        //first load
+                        zoneSaver.LoadGameData();
+                        //will not load again this session 
+                        playerHasVisited = true;
                     }
-                    playerHasBeenHereBefore = true;
+
+                    //wait then regen check 
+                    StartCoroutine(WaitToRegen());
                 }
+                //never been to zone, so just generate
                 else
                 {
-                    for (int i = 0; i < zoneSpawners.Length; i++)
+                    //only for this session
+                    if (!playerHasVisited)
                     {
-                        zoneSpawners[i].RegenerateObjects();
+                        //first time
+                        for (int i = 0; i < zoneSpawners.Length; i++)
+                        {
+                            zoneSpawners[i].GenerateObjects();
+                        }
+                        //will not load again this session 
+                        playerHasVisited = true;
                     }
-                }
-
-                //first time collecting a shroom, add shroom page to book
-                if (PlayerPrefs.GetString("hasCollectedShroom") != "yes" || PlayerPrefs.HasKey("hasCollectedShroom") == false)
-                {
-                    if (bookPage)
+                    else
                     {
-                        bookPage.AddPage();
+                        //then handle any regeneration
+                        for (int i = 0; i < zoneSpawners.Length; i++)
+                        {
+                            zoneSpawners[i].RegenerateObjects();
+                        }
                     }
-                    //set pref 
-                    PlayerPrefs.SetString("hasCollectedShroom", "yes");
                 }
             }
         }
         
+    }
+
+    IEnumerator WaitToRegen()
+    {
+        yield return new WaitForSeconds(0.25f);
+
+        //then handle any regeneration
+        for (int i = 0; i < zoneSpawners.Length; i++)
+        {
+            zoneSpawners[i].RegenerateObjects();
+        }
     }
 
     void OnTriggerExit(Collider other)
@@ -112,6 +142,9 @@ public class Zone : MonoBehaviour {
                 tpc.currentZone = null;
                 tpc.currentZoneName = "Ocean";
                 Ocean.TransitionTo(3f);
+               
+                //save what's in the zone
+                zoneSaver.SaveGameData();
                 //Debug.Log("Player left zone: " + zoneName);
             }
         }

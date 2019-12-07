@@ -14,7 +14,7 @@ public class Rawk : MonoBehaviour {
     Sun sun;
     GameObject player;
     ThirdPersonController tpc;
-    SleepSave saveScript;
+    //SleepSave saveScript;
     public bool startingRock;
 
     //physics 
@@ -63,7 +63,7 @@ public class Rawk : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
+        //saveScript = GameObject.FindGameObjectWithTag("SleepSave").GetComponent<SleepSave>();
         //add data to save script
         //if (!startingPlant)
         //{

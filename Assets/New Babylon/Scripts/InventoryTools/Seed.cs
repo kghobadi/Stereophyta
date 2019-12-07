@@ -428,7 +428,6 @@ public class Seed : MonoBehaviour {
         //if plant on start, set plant to startingPlant
         if (plantOnStart)
         {
-            plontScript.startingPlant = true;
             plontScript.tgs = tgs;
             plontScript.gridMan = gridMan;
             plontScript.myZone = gridMan.transform.GetChild(1).GetComponent<Zone>();
@@ -442,6 +441,7 @@ public class Seed : MonoBehaviour {
             //remove from pool &/or destroy 
             if(_pooledObj != null)
             {
+                plantOnStart = false;
                 _pooledObj.m_ObjectPooler.RemoveFromPool(gameObject, true);
             }
             else

@@ -67,7 +67,7 @@ public class Sun : MonoBehaviour
 
     //save ref 
     [Header("Saving")]
-    public SleepSave saveScript;
+    public InventorySaver saveScript;
     //sun saver anim
     public FadeUI sunSaver;
     public FadeUItmp sunSavingText, sunSavingOutline;
@@ -244,7 +244,7 @@ public class Sun : MonoBehaviour
         }
 
         //fade in and out sun saver IF saving enabled 
-        if (saveScript.savingAndLoadingEnabled)
+        if (tpc.savingAndLoadingEnabled)
         {
             sunSaver.FadeIn();
             sunSavingText.FadeIn();
@@ -408,7 +408,8 @@ public class Sun : MonoBehaviour
         //so that plants can grow before the save
         yield return new WaitForSeconds(0.25f);
         //save game upon waking up
-        saveScript.SaveGameData();
+        //saveScript.SaveInventory();
+        tpc.currentZone.zoneSaver.SaveGameData();
     }
 
     //jst for sleeping 
