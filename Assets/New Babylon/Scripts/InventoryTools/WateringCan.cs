@@ -11,10 +11,20 @@ namespace Items
 
         public bool watering;
 
+        [Header("Water can limitations")]
+        public int waterAmount;
+        public int waterMax = 20;
+
+        //becomes true when on a wells trigger
+        public bool nearWell;
+        public AudioClip fillUpWater;
+        public AudioClip nono;
+
         public override void Awake()
         {
             base.Awake();
             waterParticles = transform.GetChild(0).GetComponent<Water>();
+            waterAmount = waterMax;
 
             //this means we have set it before, so we have saved before
             if (PlayerPrefs.GetString("hasWaterCan") == "yes")
@@ -41,15 +51,31 @@ namespace Items
             {
                 //get input device 
                 var inputDevice = InputManager.ActiveDevice;
-
+                
                 //on click 
                 if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && !watering)
                 {
-                    MainAction();
+                    //check if near well
+                    if (nearWell)
+                    { 
+                        //refill water if not at max
+                        if(waterAmount != waterMax)
+                            RefillWaterCan();
+                        else
+                            MainAction();
+                    }
+                    //only water if have enough 
+                    else
+                    {
+                        if (waterAmount > 0)
+                            MainAction();
+                        else
+                            PlaySound(nono, 1f);
+                    }
                 }
 
                 //input -- can hold the water button down and it will do it on rhythm
-                if ((Input.GetButton("MainAction") || inputDevice.Action3) && !tpc.menuOpen && showRhythm && !watering)
+                if ((Input.GetButton("MainAction") || inputDevice.Action3) && !tpc.menuOpen && showRhythm && !watering && waterAmount > 0)
                 {
                     MainAction();
                     showRhythm = false;
@@ -65,6 +91,12 @@ namespace Items
 
         }
 
+        void RefillWaterCan()
+        {
+            waterAmount = waterMax;
+            PlaySoundRandomPitch(fillUpWater, 1f);
+        }
+        
         public override void MainAction()
         {
             base.MainAction();
@@ -75,6 +107,7 @@ namespace Items
                 toolAnimator.SetBool("watering", true);
                 waterParticles.waterEffect.Play();
                 watering = true;
+                waterAmount--;
             }
 
         }
