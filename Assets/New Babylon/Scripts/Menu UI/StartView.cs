@@ -73,10 +73,10 @@ public class StartView : MonoBehaviour {
         else
         {
             //enable player cam & disable start cam 
-            GetComponent<AudioListener>().enabled = false;
-            startCam.enabled = false;
-            playerCamera.GetComponent<PlayerCameraController>().canLook = true;
-            tpc.GetComponent<AudioListener>().enabled = true;
+            //GetComponent<AudioListener>().enabled = false;
+            //startCam.enabled = false;
+            //playerCamera.GetComponent<PlayerCameraController>().canLook = true;
+            //tpc.GetComponent<AudioListener>().enabled = true;
         }
     }
 	

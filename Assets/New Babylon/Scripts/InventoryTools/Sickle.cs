@@ -62,6 +62,10 @@ namespace Items
                 if ((Input.GetButtonDown("MainAction") || inputDevice.Action3.WasPressed) && !tpc.menuOpen && !sickling)
                 {
                     MainAction();
+                    //virtual play sounds
+                    PlaySound(toolSource, sickleHits);
+                    SpawnSickleWind(transform.position + new Vector3(0, 0, 1));
+                    showRhythm = false;
                 }
 
                 //while sickling && show rhythm is true, spawn 

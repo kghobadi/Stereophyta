@@ -212,33 +212,41 @@ public class BoatPlayer : MonoBehaviour
         paddleForceX = (Mathf.Abs(paddleDistY) * boatSpeedX ) + (Mathf.Abs(paddleDistX) * boatSpeedX);
 
         //RIGHT SIDE 
-        //row was left to right & forward
-        if(origMousePos.x < finalMousePos.x && paddleForceZ > 0)
+        if(origMousePos.x > characterPosOnSreen.x)
         {
-            paddleForceX *= -1;
-            oarAnimator.SetBool("rightOrLeft", true);
-            oarAnimator.SetTrigger("rowRightF2B");
+            //row was forward
+            if (paddleForceZ > 0)
+            {
+                paddleForceX *= -1;
+                oarAnimator.SetBool("rightOrLeft", true);
+                oarAnimator.SetTrigger("rowRightF2B");
+            }
+            //row was backward
+            else if (paddleForceZ < 0)
+            {
+                oarAnimator.SetBool("rightOrLeft", true);
+                oarAnimator.SetTrigger("rowRightB2F");
+            }
         }
-        //row was right to left && backward
-        else if(origMousePos.x > finalMousePos.x && paddleForceZ < 0)
-        {
-            oarAnimator.SetBool("rightOrLeft", true);
-            oarAnimator.SetTrigger("rowRightB2F");
-        }
+        
         //LEFT SIDE 
-        //row was right to left & forward
-        else if(origMousePos.x > finalMousePos.x && paddleForceZ > 0)
+        if(origMousePos.x < characterPosOnSreen.x)
         {
-            oarAnimator.SetBool("rightOrLeft", false);
-            oarAnimator.SetTrigger("rowLeftF2B");
+            //row was forward
+            if (paddleForceZ > 0)
+            {
+                oarAnimator.SetBool("rightOrLeft", false);
+                oarAnimator.SetTrigger("rowLeftF2B");
+            }
+            //row was backward
+            else if (paddleForceZ < 0)
+            {
+                paddleForceX *= -1;
+                oarAnimator.SetBool("rightOrLeft", false);
+                oarAnimator.SetTrigger("rowLeftB2F");
+            }
         }
-        //row was left to right & backward
-        else if(origMousePos.x < finalMousePos.x && paddleForceZ < 0)
-        {
-            paddleForceX *= -1;
-            oarAnimator.SetBool("rightOrLeft", false);
-            oarAnimator.SetTrigger("rowLeftB2F");
-        }
+      
 
         //so we don't play the fx for a measly click
         if(paddleForceZ > 250f)

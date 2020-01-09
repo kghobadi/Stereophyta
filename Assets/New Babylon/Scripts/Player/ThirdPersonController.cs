@@ -168,6 +168,7 @@ public class ThirdPersonController : MonoBehaviour
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
+
         //wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
         if(myInventory == null)
             myInventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
@@ -362,8 +363,8 @@ public class ThirdPersonController : MonoBehaviour
         }
         else
         {
-            targetForwardMovement = transform.rotation * forwardInput;
-            targetHorizontalMovement = transform.rotation * horizontalInput;
+            targetForwardMovement = cameraTransform.rotation * forwardInput;
+            targetHorizontalMovement = cameraTransform.rotation * horizontalInput;
         }
         //forward
         targetForwardMovement.y = 0;
@@ -400,7 +401,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //run if pressing shift keys OR move timer is great enough
-        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2 || moveTimer > timeToRun ) && daysWithoutSleep < noSleepMax)
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2 || moveTimer > timeToRun ) && daysWithoutSleep < noSleepMax && !indoors)
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
 
@@ -435,7 +436,7 @@ public class ThirdPersonController : MonoBehaviour
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
 
             //only run if not sleepy 
-            if (daysWithoutSleep < noSleepMax)
+            if (daysWithoutSleep < noSleepMax && !indoors)
             {
                 //inc move speed & timer 
                 movespeed += 5 * Time.deltaTime;
@@ -766,7 +767,7 @@ public class ThirdPersonController : MonoBehaviour
         footStepTimer = 0;
 
         //spawn footprints on land
-        if(!swimming)
+        if(!swimming && !indoors)
             SpawnFootprint();
     }
 

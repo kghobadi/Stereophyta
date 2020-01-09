@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cameras;
 
 public class Farmhouse : MonoBehaviour {
     //player vars
@@ -8,9 +9,10 @@ public class Farmhouse : MonoBehaviour {
     ThirdPersonController tpc;
 
     //these get turned on & off when player walks inside
-    public GameObject playerCamera;
+    CameraManager camManager;
+    public GameCamera playerCamera;
+    public GameCamera houseCamera;
     public GameObject playerInventory;
-    public GameObject houseCamera;
 
     //only true when player is inside house
     public bool occupied;
@@ -22,12 +24,11 @@ public class Farmhouse : MonoBehaviour {
     public FadeSprite sleepSymbolFade;
     public ParticleSystem sleepParticles;
     
-    void Start () {
+    void Awake () {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-
-        houseCamera.SetActive(false);
+        camManager = FindObjectOfType<CameraManager>();
     }
 
     //player entering, turn stuff off
@@ -37,15 +38,12 @@ public class Farmhouse : MonoBehaviour {
         {
             if (!occupied)
             {
-                //disable playercam
-                playerCamera.GetComponent<Camera>().enabled = false;
-                playerCamera.GetComponent<PlayerCameraController>().enabled = false;
+                camManager.Set(houseCamera);
 
                 playerInventory.SetActive(false);
                 lastFootsteps = tpc.currentFootsteps;
                 tpc.currentFootsteps = tpc.woodSteps;
                
-                houseCamera.SetActive(true);
                 occupied = true;
 
                 //wait to change controls rotation
@@ -64,7 +62,8 @@ public class Farmhouse : MonoBehaviour {
     IEnumerator WaitToSetIndoors()
     {
         yield return new WaitForSeconds(0.5f);
-        tpc.indoors = true;
+        if(occupied)
+            tpc.indoors = true;
     }
 
     //so when you sleep it stays off
@@ -108,14 +107,12 @@ public class Farmhouse : MonoBehaviour {
             if (occupied)
             {
                 //reset playercam
-                playerCamera.GetComponent<Camera>().enabled = true;
-                playerCamera.GetComponent<PlayerCameraController>().enabled = true;
+                camManager.Set(playerCamera);
 
                 playerInventory.SetActive(true);
                 tpc.currentFootsteps = lastFootsteps;
                 tpc.indoors = false;
                 tpc.transform.localEulerAngles = new Vector3(0, 105f, 0);
-                houseCamera.SetActive(false);
                 occupied = false;
 
                 if (showingSleepSymbols)

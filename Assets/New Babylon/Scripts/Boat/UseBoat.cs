@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Cameras; 
 
 public class UseBoat : PickUp {
-    PlayerCameraController camController;
+    CameraManager camManager;
+    public GameCamera playerCamera;
+    public GameCamera boatCamera;
     //position player should be teleported to
     public Vector3 playerLocalPos;
     BoatPlayer boatScript;
@@ -29,7 +32,7 @@ public class UseBoat : PickUp {
         base.Awake();
 
         boatScript = GetComponent<BoatPlayer>();
-        camController = Camera.main.GetComponent<PlayerCameraController>();
+        camManager = FindObjectOfType<CameraManager>();
         //my book page
         bookPage = GetComponent<BookPage>();
         //ui refs
@@ -123,13 +126,9 @@ public class UseBoat : PickUp {
             tpc.playerCanMove = false;
             tpc.runParticles.Stop();
             tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
-            camController.canLook = false;
-            //child cam to boat
-            camController.transform.SetParent(transform);
-            //adjust cam height & rotation
-            camController.transform.localPosition = new Vector3(0f, -10f, -8f);
-            camController.transform.localEulerAngles = new Vector3(-75f, 0f, 0f);
-            camController.LerpFOV(75f);
+
+            //cam
+            camManager.Set(boatCamera);
 
             //set boat as parent & position
             tpc.transform.SetParent(transform);
@@ -160,9 +159,8 @@ public class UseBoat : PickUp {
 
         //turn off player movment
         tpc.playerCanMove = true;
-        camController.canLook = true;
-        camController.transform.SetParent(null);
-        camController.LerpFOV(50f);
+        //cam
+        camManager.Set(playerCamera);
 
         //set boat as parent & position
         tpc.transform.SetParent(null);
