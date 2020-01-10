@@ -130,7 +130,7 @@ public class StartView : MonoBehaviour {
         //field of view
         startCam.fieldOfView = Mathf.Lerp(startCam.fieldOfView, 50f, lerpSpeed * Time.deltaTime);
         //can't look until we arrive at player spot 
-        playerCamera.GetComponent<PlayerCameraController>().canLook = false;
+        //playerCamera.GetComponent<PlayerCameraController>().canLook = false;
 
         //distance check, once within reactivate everything and turn off start viewer
         if (Vector3.Distance(transform.position, playerCamera.transform.position) < 0.5f)
@@ -138,7 +138,7 @@ public class StartView : MonoBehaviour {
             //enable player & player cam
             tpc.playerCanMove = true;
             playerInventory.SetActive(true);
-            playerCamera.GetComponent<PlayerCameraController>().canLook = true;
+            //playerCamera.GetComponent<PlayerCameraController>().canLook = true;
             playerCamera.GetComponent<Camera>().enabled = true;
             tpc.GetComponent<AudioListener>().enabled = true;
 
@@ -163,7 +163,7 @@ public class StartView : MonoBehaviour {
             //enable player movement and houseCam
             tpc.playerCanMove = true;
             houseCamera.SetActive(true);
-            playerCamera.GetComponent<PlayerCameraController>().canLook = true;
+            //playerCamera.GetComponent<PlayerCameraController>().canLook = true;
             tpc.GetComponent<AudioListener>().enabled = true;
 
             //disable start view stuff

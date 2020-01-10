@@ -63,20 +63,7 @@ public class Menu : MonoBehaviour {
         {
             volumeSliders[i].value = 0;
         }
-
-        //SET original sensitivity values
-        //fast
-        omTurnSmoothLook = camController.mTurnSmoothLook;
-        omTurnSmoothMove = camController.mTurnSmoothMove;
-
-        //medium
-        omMovingTurnLook = camController.mMovingTurnSmoothLook;
-        omMovingTurnMove = camController.mMovingTurnSmoothMove;
-
-        //original
-        omSmoothLookOrig = camController.mSmoothLookOriginal;
-        omSmoothMoveOrig = camController.mSmoothMoveOriginal;
-
+        
         //set controls based on player pref 
         if (PlayerPrefs.HasKey("mouseOrController"))
         {
@@ -212,17 +199,7 @@ public class Menu : MonoBehaviour {
     //sets the cam sensitivity values to their orig at start + value of the slider
     public void SetMouseSensitivity()
     {
-        //fast
-        camController.mTurnSmoothLook = omTurnSmoothLook + mouseSensitivity.value;
-        camController.mTurnSmoothMove = omTurnSmoothMove + mouseSensitivity.value;
-
-        //medium
-        camController.mMovingTurnSmoothLook = omMovingTurnLook + mouseSensitivity.value;
-        camController.mMovingTurnSmoothMove = omMovingTurnMove + mouseSensitivity.value;
-
-        //original
-        camController.mSmoothLookOriginal = omSmoothLookOrig + mouseSensitivity.value;
-        camController.mSmoothMoveOriginal = omSmoothMoveOrig + mouseSensitivity.value;
+        // Need to rework this once cinemachine cameras are properly set up
     }
 
     //for quit button press

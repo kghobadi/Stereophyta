@@ -15,8 +15,8 @@ using UnityEngine;
     {
         GameCamera[] cameras;
 
-        [SerializeField] GameCamera defaultCamera;
-        GameCamera previousCamera, currentCamera;
+        public GameCamera defaultCamera;
+        public GameCamera previousCamera, currentCamera;
 
         private void Awake()
         {
@@ -30,7 +30,7 @@ using UnityEngine;
             foreach (GameCamera cam in cameras)
             {
                 if (cam == defaultCamera) Enable(cam);
-                else Disable(cam);
+                else cam.gameObject.SetActive(false);
             }
         }
 

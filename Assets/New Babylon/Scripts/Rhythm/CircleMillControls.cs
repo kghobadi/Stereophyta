@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using InControl;
+using Cameras;
 
 public class CircleMillControls : MonoBehaviour {
     //player ref
     GameObject player;
     ThirdPersonController tpc;
+    CameraManager camManager;
 
     //camera refs
     [Header("Camera Refs")]
     public PlayerCameraController camControl;
-    public float origHeight;
-    public float zoomedOutHeight;
+    public GameCamera operatingCamera;
+    public GameCamera lastCamera;
 
     //is the player currently operating the mill controls?
     [Header("Operating Vars")]
@@ -69,6 +71,7 @@ public class CircleMillControls : MonoBehaviour {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        camManager = FindObjectOfType<CameraManager>();
         //audio
         controlsAudio = GetComponent<AudioSource>();
         tempoIndicator = GetComponent<TempoIndication>();
@@ -155,15 +158,15 @@ public class CircleMillControls : MonoBehaviour {
     void OperateControls()
     {
         playerOperating = true;
-        origHeight = camControl.heightFromPlayer;
-        camControl.heightMax = zoomedOutHeight;
-        camControl.heightFromPlayer = zoomedOutHeight;
-        camControl.zoomSpeed = 0;
         tpc.playerCanMove = false;
         tpc.transform.position = operatingPos;
         tpc.myInventory.gameObject.SetActive(false);
         tpc.playerSource.PlayOneShot(beginOperating);
         timeUntilLeaving = 0;
+
+        //transition camera
+        lastCamera = camManager.currentCamera;
+        camManager.Set(operatingCamera);
 
         //play sound if not already playing anything
         if (!controlsAudio.isPlaying)
@@ -176,8 +179,7 @@ public class CircleMillControls : MonoBehaviour {
         //cursor on
         Cursor.lockState = CursorLockMode.None;
         cursor.SetActive(true);
-
-
+        
         ShowInteractPrompt(leaveMessage);
     }
 
@@ -185,12 +187,12 @@ public class CircleMillControls : MonoBehaviour {
     void LeaveControls()
     {
         playerOperating = false;
-        camControl.heightMax = 20f;
-        camControl.heightFromPlayer = origHeight;
-        camControl.zoomSpeed = 500f;
         tpc.playerCanMove = true;
         tpc.transform.position = exitPos;
         tpc.myInventory.gameObject.SetActive(true);
+
+        //transition camera
+        camManager.Set(lastCamera);
 
         //menu off
         operatingMenu.SetActive(false);
