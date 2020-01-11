@@ -65,8 +65,6 @@ public class PlayerBounding : MonoBehaviour
         {
             transform.position = CheckY(teleportPos);
         }
-
-        mainCam.transform.position = transform.position + new Vector3(0, pcc.heightFromPlayer, pcc.distanceFromPlayer);
     }
 
     //adjusts y pos of object with raycast to ground 

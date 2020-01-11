@@ -55,5 +55,42 @@ public abstract class AudioHandler : MonoBehaviour
         float randomPitch = Random.Range(min, max);
         myAudioSource.pitch = randomPitch;
     }
+
+    [Header("Multi voice set up")]
+    public int voiceCounter;
+    public AudioSource[] voices;
+    //called to play sounds 
+    public void PlaySoundMultipleAudioSources(AudioClip[] soundArray)
+    {
+        int randomSound = Random.Range(0, soundArray.Length);
+
+        voiceCounter = CountUpArray(voiceCounter, voices.Length - 1);
+
+        voices[voiceCounter].PlayOneShot(soundArray[randomSound]);
+    }
+
+    public int currentSound = 0;
+    //counts up through sound array, in order 
+    public void PlaySoundUp(AudioClip[] soundArray)
+    {
+        currentSound = CountUpArray(currentSound, soundArray.Length - 1);
+
+        voices[voiceCounter].PlayOneShot(soundArray[currentSound]);
+    }
+
+    //for counting up arrays
+    public int CountUpArray(int counter, int total)
+    {
+        if (counter < total)
+        {
+            counter++;
+        }
+        else
+        {
+            counter = 0;
+        }
+
+        return counter;
+    }
 }
 
