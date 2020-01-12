@@ -43,7 +43,8 @@ public class CircleMillControls : MonoBehaviour {
     public Slider windCountSlider;
     public Image windHandle;
     public int windCount = 0;
-    public CircleWind[] allCircleWinds, currentCircleWinds, zeroCircleWinds, singleCircleWind, doubleCircleWind, tripleCircleWind, quadCircleWind;
+    public CircleWind[] allCircleWinds, currentCircleWinds, zeroCircleWinds, singleCircleWind,
+        doubleCircleWind, tripleCircleWind, quadCircleWind;
     public float windSpeedMin;
 
     //rhythm vars
@@ -62,6 +63,7 @@ public class CircleMillControls : MonoBehaviour {
 
     //ui refs for pickup prompt
     [Header("Interact Prompts")]
+    public float interactDist;
     public Text interactText;
     public string useMessage, leaveMessage;
     public FadeUI[] interactPrompts;
@@ -110,7 +112,7 @@ public class CircleMillControls : MonoBehaviour {
             //dist from player
             float dist = Vector3.Distance(transform.position, player.transform.position);
             //if player is close
-            if (dist < 12f)
+            if (dist < interactDist)
             {
                 playerWasNear = true;
 
@@ -125,7 +127,7 @@ public class CircleMillControls : MonoBehaviour {
                 }
             }
             //player has left
-            else if (dist > 15f)
+            else if (dist > (interactDist + 1))
             {
                 //fade out prompts
                 if (playerWasNear)

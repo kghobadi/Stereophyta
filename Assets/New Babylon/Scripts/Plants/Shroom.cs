@@ -106,12 +106,12 @@ public class Shroom : RhythmProducer
         shroomSpores = transform.GetChild(1).GetComponent<ParticleSystem>();
         sporeScript = shroomSpores.GetComponent<ShroomSpores>();
         tempoIndicator = GetComponent<TempoIndication>();
-        
+
+        myZone = tpc.currentZone;
         //tgs refs
-        if (tgs == null)
+        if (tgs != null)
         {
             tgs = tpc.currentTGS;
-            myZone = tpc.currentZone;
             gridMan = tgs.transform.parent.GetComponent<GridManager>();
         }
     }
@@ -129,10 +129,11 @@ public class Shroom : RhythmProducer
         if (!myZone.shrooms.Contains(gameObject))
             myZone.shrooms.Add(gameObject);
         transform.SetParent(myZone.shroomParent);
+        if(gridMan)
+            groundTexture = gridMan.groundTexture;
 
         //player and environment 
         inventoryScript = tpc.myInventory;
-        groundTexture = gridMan.groundTexture;
         myShroomShader = shroomMR.material;
         FindPoolers();
 

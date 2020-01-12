@@ -93,7 +93,10 @@ public class ShroomSeed : MonoBehaviour {
                     //check if this spot is on the TGS
                     //grabs Cell tile and index
                     tgs = tpc.currentTGS;
-                    currentCell = tgs.CellGetAtPosition(hit.point, true);
+                    if (tgs)
+                        currentCell = tgs.CellGetAtPosition(hit.point, true);
+                    else
+                        currentCell = null;
 
                     //we have a grid cell
                     if (currentCell != null)

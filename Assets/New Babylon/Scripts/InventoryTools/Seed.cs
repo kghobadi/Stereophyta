@@ -236,8 +236,12 @@ public class Seed : MonoBehaviour {
                     tgs = tpc.currentTGS;
                     gridMan = tpc.currentGridMan;
                 }
-               
-                currentCell = tgs.CellGetAtPosition(hit.point, true);
+
+                //check for tgs current cell
+                if (tgs)
+                    currentCell = tgs.CellGetAtPosition(hit.point, true);
+                else
+                    currentCell = null;
 
                 //we have a grid cell
                 if (currentCell != null)
