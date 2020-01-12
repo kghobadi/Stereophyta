@@ -65,7 +65,8 @@ public class ShroomSeed : MonoBehaviour {
 
         //tgs refs 
         tgs = tpc.currentTGS;
-        gridMan = tgs.transform.parent.GetComponent<GridManager>();
+        if(tgs)
+            gridMan = tgs.transform.parent.GetComponent<GridManager>();
 
         //audio
         shroomBody = GetComponent<Rigidbody>();
@@ -76,8 +77,11 @@ public class ShroomSeed : MonoBehaviour {
     void Start ()
     {
         originalPos = transform.localPosition;
-        groundTexture = gridMan.groundTexture;
-        canClickTexture = gridMan.canPlantTexture;
+        if (gridMan)
+        {
+            groundTexture = gridMan.groundTexture;
+            canClickTexture = gridMan.canPlantTexture;
+        }
     }
 	
 	void Update () {
