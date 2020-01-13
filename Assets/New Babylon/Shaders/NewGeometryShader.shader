@@ -12,13 +12,13 @@
 		Pass
 	{
 		CGPROGRAM
-#pragma vertex vert
-#pragma geometry geom
-#pragma fragment frag
+	#pragma vertex vert
+	#pragma geometry geom
+	#pragma fragment frag
 		// make fog work
-#pragma multi_compile_fog
+	#pragma multi_compile_fog
 
-#include "UnityCG.cginc"
+	#include "UnityCG.cginc"
 
 		struct appdata
 	{
