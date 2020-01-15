@@ -81,8 +81,11 @@ public class Seed : MonoBehaviour {
         //set tgs stuff
         if (!plantOnStart)
         {
-            tgs = tpc.currentTGS;
-            gridMan = tgs.transform.parent.GetComponent<GridManager>();
+            if (tgs)
+            {
+                tgs = tpc.currentTGS;
+                gridMan = tgs.transform.parent.GetComponent<GridManager>();
+            }
         }
 
         //seed start vars
@@ -236,8 +239,12 @@ public class Seed : MonoBehaviour {
                     tgs = tpc.currentTGS;
                     gridMan = tpc.currentGridMan;
                 }
-               
-                currentCell = tgs.CellGetAtPosition(hit.point, true);
+
+                //check for tgs current cell
+                if (tgs)
+                    currentCell = tgs.CellGetAtPosition(hit.point, true);
+                else
+                    currentCell = null;
 
                 //we have a grid cell
                 if (currentCell != null)

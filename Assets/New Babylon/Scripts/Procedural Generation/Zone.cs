@@ -14,6 +14,11 @@ public class Zone : MonoBehaviour {
     public string zoneName;
     public bool playerInZone;
     public bool playerHasVisited;
+    public TerrainType terrainType;
+    public enum TerrainType
+    {
+        TERRAIN, MODEL,
+    }
     public TerrainGridSystem zoneTGS;
     public GridManager zoneGridMan;
     public Spawner[] zoneSpawners;
@@ -38,7 +43,8 @@ public class Zone : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        zoneGridMan = transform.parent.GetComponent<GridManager>();
+        if(terrainType == TerrainType.TERRAIN)
+            zoneGridMan = transform.parent.GetComponent<GridManager>();
         //zone saver...
         zoneSaver = GetComponent<ZoneSaver>();
         if(zoneSaver == null)
@@ -72,9 +78,20 @@ public class Zone : MonoBehaviour {
             {
                 playerInZone = true;
                 tpc.currentZone = this;
-                tpc.currentTGS = zoneTGS;
                 tpc.currentZoneName = zoneName;
-                tpc.currentGridMan = zoneGridMan;
+                //has tgs
+                if(terrainType == TerrainType.TERRAIN)
+                {
+                    tpc.currentTGS = zoneTGS;
+                    tpc.currentGridMan = zoneGridMan;
+                }
+                //nothing, no tgs
+                if(terrainType == TerrainType.MODEL)
+                {
+                    tpc.currentTGS = null;
+                    tpc.currentGridMan = null;
+                }
+               
                 zoneSnapshot.TransitionTo(3f);
                 //Debug.Log("Player entered zone: " + zoneName);
 

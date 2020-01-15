@@ -22,7 +22,7 @@ public class ThirdPersonController : MonoBehaviour
     [HideInInspector]
     public PlayerCameraController playerCameraController;
     Transform cameraTransform;
-    public Transform characterBody, waterCaster;
+    public Transform characterBody;
     public Animator samita;
     BoxCollider playerRunCollider;
     public Cloth playerCloak;
@@ -99,6 +99,9 @@ public class ThirdPersonController : MonoBehaviour
     int swimJumpCounter;
     public float swimJumpForce = 50f;
     public bool swimJump;
+    public float swimHeight = 3f;
+    public Transform waterCaster;
+    public LayerMask waterMask;
     public BoatPlayer boatScript;
 
     //inventory ref
@@ -474,11 +477,12 @@ public class ThirdPersonController : MonoBehaviour
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(waterCaster.position, Vector3.down, out hit, 35f))
+        if (Physics.Raycast(waterCaster.position, Vector3.down, out hit, 35f, waterMask))
         {
             if (hit.transform.gameObject.tag == "Water")
             {
-                transform.position = hit.point - new Vector3(0, 2f, 0);
+                Vector3 desiredHeight = hit.point - new Vector3(0, swimHeight, 0); ;
+                transform.position = Vector3.MoveTowards(transform.position, desiredHeight, Time.deltaTime * 3);
             }
         }
     }

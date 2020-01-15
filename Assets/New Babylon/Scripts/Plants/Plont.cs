@@ -94,12 +94,12 @@ public class Plont : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
 
         //tgs refs
-        if (tgs == null)
+        if (tgs != null)
         {
             tgs = tpc.currentTGS;
             gridMan = tgs.transform.parent.GetComponent<GridManager>();
-            myZone = tpc.currentZone;
         }
+        myZone = tpc.currentZone;
 
         //colliders and rigibodys
         plantBody = GetComponent<Rigidbody>();
@@ -159,9 +159,12 @@ public class Plont : MonoBehaviour {
         transform.SetParent(myZone.plantParent);
 
         //set tgs textures 
-        groundTexture = gridMan.groundTexture;
-        wateredTexture = gridMan.wateredTexture;
-        plantedTexture = gridMan.plantedTexture;
+        if (gridMan)
+        {
+            groundTexture = gridMan.groundTexture;
+            wateredTexture = gridMan.wateredTexture;
+            plantedTexture = gridMan.plantedTexture;
+        }
 
         //add data to save script
         myZone.zoneSaver.AddPlant(this);
@@ -471,7 +474,8 @@ public class Plont : MonoBehaviour {
     public void WaterPlant()
     {
         GrowPlant(true, true);
-        tgs.CellToggleRegionSurface(cellIndex, true, wateredTexture);
+        if(tgs)
+            tgs.CellToggleRegionSurface(cellIndex, true, wateredTexture);
         hasBeenWatered = true;
     }
 
