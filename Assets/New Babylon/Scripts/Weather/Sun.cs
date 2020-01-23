@@ -61,9 +61,6 @@ public class Sun : MonoBehaviour
     ParticleSystem starParticles;
     //waters 
     public GameObject waterDay, waterNight;
-    //ocean audio
-    public AudioSource oceanSource;
-    public AudioClip[] oceanSounds;
 
     //save ref 
     [Header("Saving")]
@@ -219,7 +216,6 @@ public class Sun : MonoBehaviour
         SetClockBPM();
         RandomizeSkybox();
         RandomizeWinds();
-        RandomizeOcean();
 
         //subtract from player's days to sleep
         if (tpc.sleeping)
@@ -279,15 +275,6 @@ public class Sun : MonoBehaviour
                 windDirections[windCounter].transform.GetChild(i).GetComponent<WindGen>().SwitchTimeScale();
             }
         }
-    }
-
-    void RandomizeOcean()
-    {
-        //set ocean source
-        AudioClip randomOceanSound = oceanSounds[Random.Range(0, oceanSounds.Length)];
-        oceanSource.Stop();
-        oceanSource.clip = randomOceanSound;
-        oceanSource.Play();
     }
 
     //sets wind direction active globally 

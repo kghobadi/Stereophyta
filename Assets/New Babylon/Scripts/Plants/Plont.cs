@@ -152,7 +152,10 @@ public class Plont : MonoBehaviour {
     void Start () {
         //randomness
         Random.InitState(System.DateTime.Now.Millisecond);
+
+        //SUN EVENT LISTENER
         sun.newDay.AddListener(DayPass);
+
         //add to zone list 
         if (!myZone.plants.Contains(gameObject))
             myZone.plants.Add(gameObject);
