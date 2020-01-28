@@ -4,26 +4,35 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Cameras;
+using Cinemachine;
 
 public class MonologueText : MonoBehaviour
 {
     //player refs
     GameObject player;
+    ThirdPersonController tpc;
+    PlayerCameraController playerCam;
+    CameraManager camManager;
     [Tooltip("Character or creature who speaks this monologue")]
     public GameObject hostObj;
-    [Tooltip("UI panel which holds this monologue")]
-    public FadeUI textPanel; // I often parent all of a character's monologues to a single Panel 
+    [Tooltip("Camera to use for Monologue")]
+    public GameCamera speakerCam;
     [Tooltip("Check this to start at start")]
     public bool enableAtStart;
     [Tooltip("Check this to lock your player's movement")]
     public bool lockPlayer;
+    [Tooltip("Automatically sets player to this spot")]
+    public Transform playerSpot;
     //Audio
     SpeakerSound speakerAudio;
     //animator
     SpeakerAnimations speakerAnimator;
 
     //text component and string array of its lines
-    TMP_Text theText;
+    Text theText;
+    TMP_Text the_Text;
+    bool usesTMP;
     [Header("Text lines")]
     [Tooltip("No need to fill this in, that will happen automatically")]
     public string[] textLines;
@@ -32,9 +41,15 @@ public class MonologueText : MonoBehaviour
     public int currentLine;
     public int endAtLine;
     public bool hasFinished;
+    public bool disablesAtFinish;
+    public bool canSkip = true;
+    public bool enablesCinematic;
+    public TimelinePlaybackManager cinematic;
 
     //typing vars
+    public bool inMonologue;
     private bool isTyping = false;
+    IEnumerator currentTypingLine;
 
     [Header("Text Timing")]
     public float timeBetweenLetters;
@@ -43,21 +58,37 @@ public class MonologueText : MonoBehaviour
     public bool waitToStart;
     public float timeUntilStart;
     //wait between lines
-    public float waitTime;
+    public float timeBetweenLines;
     [Tooltip("Check this and fill in array below so that each line of text can be assigned a different wait")]
     public bool conversational;
     public float[] waitTimes;
+    bool waiting;
 
     [Header("Monologues To Enable")]
     public MonologueText[] monologuesToEnable;
+    MonologueTrigger mTrigger;
 
     void Awake()
     {
         //grab refs
         player = GameObject.FindGameObjectWithTag("Player");
-        theText = GetComponent<TMP_Text>();
+        if (player)
+        {
+            tpc = player.GetComponent<ThirdPersonController>();
+            playerCam = Camera.main.GetComponent<PlayerCameraController>();
+        }
+       
+        camManager = FindObjectOfType<CameraManager>();
+        theText = GetComponent<Text>();
+
+        if(theText == null)
+        {
+            usesTMP = true;
+            the_Text = GetComponent<TMP_Text>();
+        }
         speakerAnimator = hostObj.GetComponentInChildren<SpeakerAnimations>();
         speakerAudio = hostObj.GetComponent<SpeakerSound>();
+        mTrigger = GetComponent<MonologueTrigger>();
     }
 
     void Start()
@@ -66,7 +97,10 @@ public class MonologueText : MonoBehaviour
        
         if (!enableAtStart)
         {
-            theText.enabled = false;
+            if (usesTMP)
+                the_Text.enabled = false;
+            else
+                theText.enabled = false;
         }
         else
         {
@@ -77,9 +111,11 @@ public class MonologueText : MonoBehaviour
     //reset trigger if you swim away during Monologue
     void Update()
     {
+        //speaker is typing out message
         if (isTyping)
         {
-            if(player != null)
+            //check for player
+            if (player != null)
             {
                 //reeset if too far from Monologue
                 if (Vector3.Distance(transform.position, player.transform.position) > resetDistance)
@@ -87,50 +123,95 @@ public class MonologueText : MonoBehaviour
                     ResetMonologue();
                 }
             }
-           
-        }
-        else
-        {
+
+            //player skips to the end of the line
+            if (Input.GetKeyDown(KeyCode.Space) && canSkip)
+            {
+                if (currentTypingLine != null)
+                {
+                    StopCoroutine(currentTypingLine);
+                }
+
+                //set to full line
+                CompleteTextLine(textLines[currentLine]);
+
+                StartCoroutine(WaitToProgressLine());
+            }
 
         }
+        //player is waiting for next message
+        if (waiting)
+        {
+            //player skips to next line
+            if (Input.GetKeyDown(KeyCode.Space) && canSkip)
+            {
+                ProgressLine();
+            }
+        }
+        
     }
 
     void ProgressLine()
     {
         currentLine += 1;
+        waiting = false;
 
+        //reached the  end, reset
         if (currentLine >= endAtLine)
         {
             hasFinished = true;
-            DisableMonologue();
+            ResetMonologue();
         }
         else
         {
             //this debug helps find the wait times for the current line of Monologue
             //Debug.Log(hostObj.name + " is on line " + currentLine + " which reads: " + textLines[currentLine] + " -- " + hostObj.name + " will wait " + waitTimes[currentLine].ToString() + "sec before speaking again!");
-            StartCoroutine(TextScroll(textLines[currentLine]));
+            if(currentTypingLine != null)
+            {
+                StopCoroutine(currentTypingLine);
+            }
+            currentTypingLine = TextScroll(textLines[currentLine]);
+
+            StartCoroutine(currentTypingLine);
+
         }
     }
 
     //Coroutine that types out each letter individually
     private IEnumerator TextScroll(string lineOfText) 
     {
+        // set first letter
         int letter = 0;
-        theText.text = "";
+        if (usesTMP)
+            the_Text.text = "";
+        else
+            theText.text = "";
+
         isTyping = true;
-        speakerAnimator.RandomTalkingAnim();
+        //set talking anim
+        if(speakerAnimator.talkingAnimations > 0)
+            speakerAnimator.RandomTalkingAnim();
+
         while (isTyping && (letter < lineOfText.Length - 1))
         {
             //add this letter to our text
-            theText.text += lineOfText[letter];
+            if (usesTMP)
+                the_Text.text += lineOfText[letter];
+            else
+                theText.text += lineOfText[letter];
+            
             //check what audio to play 
             speakerAudio.AudioCheck(lineOfText, letter);
             //next letter
             letter += 1;
             yield return new WaitForSeconds(timeBetweenLetters);
         }
-        theText.text = lineOfText;
-        isTyping = false;
+
+        //player waited to read full line
+        if(isTyping)
+            CompleteTextLine(lineOfText);
+
+        waiting = true;
 
         //if conversational, use the array of wait Timers set publicly
         if (conversational)
@@ -139,17 +220,51 @@ public class MonologueText : MonoBehaviour
         }
         else
         {
-            yield return new WaitForSeconds(waitTime);
+            yield return new WaitForSeconds(timeBetweenLines);
         }
+        
 
         ProgressLine();
 
     }
 
+    //start wait for next line after spacebar skip
+    IEnumerator WaitToProgressLine()
+    {
+        yield return new WaitForEndOfFrame();
+
+        waiting = true;
+
+        //if conversational, use the array of wait Timers set publicly
+        if (conversational)
+        {
+            yield return new WaitForSeconds(waitTimes[currentLine]);
+        }
+        else
+        {
+            yield return new WaitForSeconds(timeBetweenLines);
+        }
+        
+        ProgressLine();
+    }
+
+    //completes current line of text
+    void CompleteTextLine(string lineOfText)
+    {
+        if (usesTMP)
+            the_Text.text = lineOfText;
+        else
+            theText.text = lineOfText;
+        isTyping = false;
+    }
+
     public void ResetStringText()
     {
-        textLines = (theText.text.Split('\n'));
-
+        if (usesTMP)
+            textLines = (the_Text.text.Split('\n'));
+        else
+            textLines = (theText.text.Split('\n'));
+        
         endAtLine = textLines.Length;
     }
 
@@ -157,15 +272,17 @@ public class MonologueText : MonoBehaviour
     {
         if (waitToStart)
         {
-            theText.enabled = false;
+            if (usesTMP)
+                the_Text.enabled = false;
+            else
+                theText.enabled = false;
+
             StartCoroutine(WaitToStart());
         }
-
+        //starts now
         else
         {
-            theText.enabled = true;
-            textPanel.FadeIn();
-            StartCoroutine(TextScroll(textLines[currentLine]));
+            StartMonologue();
         }
     }
 
@@ -173,29 +290,79 @@ public class MonologueText : MonoBehaviour
     {
         yield return new WaitForSeconds(timeUntilStart);
 
-        theText.enabled = true;
-
-        StartCoroutine(TextScroll(textLines[currentLine]));
-        
+        StartMonologue();
     }
 
+    //actually starts
+    void StartMonologue()
+    {
+        if (usesTMP)
+            the_Text.enabled = true;
+        else
+            theText.enabled = true;
+
+        //enable speaker cam, disable cam controller
+        camManager.Set(speakerCam);
+        if(playerCam)
+            playerCam.enabled = false;
+        //lock player movement
+        if (lockPlayer)
+        {
+            tpc.playerCanMove = false;
+        }
+
+        //set player pos
+        if (playerSpot)
+        {
+            tpc.transform.position = playerSpot.position;
+        }
+
+        //set player to idle anim
+        if(tpc)
+            tpc.samita.SetAnimator("idle");
+        inMonologue = true;
+        StartCoroutine(TextScroll(textLines[currentLine]));
+    }
+    
     public void ResetMonologue()
     {
-        StopAllCoroutines();
         DisableMonologue();
-        GetComponent<MonologueTrigger>().hasActivated = false;
-        currentLine = 0;
+
+        if (!disablesAtFinish)
+        {
+            mTrigger.WaitToReset(3f);
+            currentLine = 0;
+        }
     }
 
     public void DisableMonologue()
     {
-        theText.enabled = false;
-        textPanel.FadeOut();
+        StopAllCoroutines();
+
+        if (usesTMP)
+            the_Text.enabled = false;
+        else
+            theText.enabled = false;
+        
         speakerAnimator.SetAnimator("idle");
-        //start new monologues 
-        for(int i = 0; i < monologuesToEnable.Length; i++)
+        inMonologue = false;
+        //disable speaker cam, enable cam controller
+        if (enablesCinematic)
         {
-            monologuesToEnable[i].EnableMonologue();
+            cinematic.PlayTimeline();
+        }
+
+        //reenable player cam
+        if (playerCam)
+        {
+            camManager.Set(camManager.defaultCamera);
+            playerCam.enabled = true;
+        }
+           
+        //unlock player
+        if (lockPlayer)
+        {
+            tpc.playerCanMove = true;
         }
     }
 }

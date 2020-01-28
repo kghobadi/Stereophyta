@@ -23,11 +23,10 @@ public class ThirdPersonController : MonoBehaviour
     public PlayerCameraController playerCameraController;
     Transform cameraTransform;
     public Transform characterBody;
-    public Animator samita;
+    public SamitaAnimation samita;
     BoxCollider playerRunCollider;
     public Cloth playerCloak;
    
-
     //set publicly to tell this script what raycasts can and can't go thru
     [Header("Layer Masks & Zoning")]
     public LayerMask mask;
@@ -61,10 +60,13 @@ public class ThirdPersonController : MonoBehaviour
 
     //mouse feel vars
     public float rotateSpeedMouse;
+    //for calc of sliding
+    public Transform physicsRaycaster;
 
     //jump variables
     [Header("Jump Vars")]
     public TempoIndication playerTempo;
+    public bool canJump = true;
     public float jumpSpeed = 20;
     public float smallJump, midJump, bigJump;
     public float jumpCharger, midJCharge, bigJCharge, jumpChargerMax;
@@ -74,7 +76,8 @@ public class ThirdPersonController : MonoBehaviour
     public float grav = 9.8f;
     float moveSmoothUse;
     float rotationV;
-    float verticalSpeed;
+    [HideInInspector]
+    public float verticalSpeed;
     [HideInInspector]
     public Vector3 currentMovementV;
 
@@ -107,12 +110,10 @@ public class ThirdPersonController : MonoBehaviour
     //inventory ref
     public Inventory myInventory;
 
-    //for calc of sliding
-    public Transform physicsRaycaster;
-
     //all my audio stuff
     AudioSource audioSource;
     AudioSource cameraAudSource;
+    ResetNearbyAudioSources sourceReset;
     [Header("Audio")]
     public AudioSource playerSource;
     public AudioSource seedSource;
@@ -121,9 +122,7 @@ public class ThirdPersonController : MonoBehaviour
     public float walkStepTotal = 1f, runStepTotal = 0.5f;
     float footStepTimer = 0;
     public int currentStep = 0;
-    //footstep objects & efx
-    public ObjectPooler footstepPooler;
-    public bool leftOrRightFoot;
+    Footsteps footsteps;
 
     //world manager reference
     WorldManager wm;
@@ -150,17 +149,6 @@ public class ThirdPersonController : MonoBehaviour
     public AudioClip[] snores, yawns;
     public ParticleSystem sleepParticles;
 
-    //dictionary to sort nearby audio sources by distance 
-    [SerializeField]
-    public Dictionary<AudioSource, float> soundCreators = new Dictionary<AudioSource, float>();
-    //to shorten if statement
-    [Header("Audio Listening Range")]
-    public List<GameObject> audioObjects = new List<GameObject>();
-    //listener range
-    public float listeningRadius;
-    //to shorten if statement
-    public List<string> audioTags = new List<string>();
-
     void Awake()
     {
         //grab sun refs
@@ -184,15 +172,14 @@ public class ThirdPersonController : MonoBehaviour
         cameraTransform = Camera.main.transform;
         audioSource = GetComponent<AudioSource>();
         playerCameraController.enabled = true;
+        sourceReset = GetComponent<ResetNearbyAudioSources>();
 
         //set animator state to idle
-        if(samita.GetBool("idle") != true)
-        {
-            SetAnimator("idle");
-        }
-        samita.speed = 1f;
+        samita.SetAnimator("idle");
+        samita.Speed = 1f;
         characterBody = samita.transform;
         currentFootsteps = grassSteps;
+        footsteps = GetComponent<Footsteps>();
 
         //set loose particles
         splashScript = dustSplash.GetComponent<DustSplash>();
@@ -303,7 +290,8 @@ public class ThirdPersonController : MonoBehaviour
         {
             RunWalk();
             JumpCheck();
-            JumpInputs();
+            if(canJump)
+                JumpInputs();
             currentMovement.y = verticalSpeed;
 
             //turn off all the swim fx 
@@ -326,7 +314,7 @@ public class ThirdPersonController : MonoBehaviour
         
         controller.Move(currentMovement * Time.deltaTime);
         
-        ResetNearbyAudioSources();
+        sourceReset.ResetNearbyAudio();
     }
 
     //finds the targetMovementTotal (where the player is moving) 
@@ -395,7 +383,7 @@ public class ThirdPersonController : MonoBehaviour
         var inputDevice = InputManager.ActiveDevice;
         //need to figure out how to reset the cloth to what it's like at start / before swimming 
         characterBody.transform.localPosition = new Vector3(0, -0.956f, 0);
-        samita.speed = 1f;
+        samita.Speed = 1f;
 
         //too sleepy to run, show zzzs
         if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2) && daysWithoutSleep >= noSleepMax)
@@ -411,9 +399,9 @@ public class ThirdPersonController : MonoBehaviour
             if (targetMovementTotal.magnitude > 0)
             {
                 //set run
-                if (samita.GetBool("running") != true)
+                if (samita.Animator.GetBool("running") != true)
                 {
-                    SetAnimator("running");
+                    samita.SetAnimator("running");
                     playerRunCollider.enabled = true;
                     running = true;
                     runParticles.Play();
@@ -427,9 +415,9 @@ public class ThirdPersonController : MonoBehaviour
                 movespeed = walkSpeed;
                 runParticles.Stop();
                 //idling
-                if (samita.GetBool("idle") != true)
+                if (samita.Animator.GetBool("idle") != true)
                 {
-                    SetAnimator("idle");
+                    samita.SetAnimator("idle");
                 }
             }
         }
@@ -450,9 +438,9 @@ public class ThirdPersonController : MonoBehaviour
             if (targetMovementTotal.magnitude > 0)
             {
                 //set walk
-                if (samita.GetBool("walking") != true)
+                if (samita.Animator.GetBool("walking") != true)
                 {
-                    SetAnimator("walking");
+                    samita.SetAnimator("walking");
                     playerRunCollider.enabled = false;
                     running = false;
                     runParticles.Stop();
@@ -465,9 +453,9 @@ public class ThirdPersonController : MonoBehaviour
                 moveTimer = 0;
                 movespeed = walkSpeed;
                 //idling
-                if (samita.GetBool("idle") != true)
+                if (samita.Animator.GetBool("idle") != true)
                 {
-                    SetAnimator("idle");
+                    samita.SetAnimator("idle");
                 }
             }
         }
@@ -551,7 +539,7 @@ public class ThirdPersonController : MonoBehaviour
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 swimSpeed = movespeed;
-                samita.speed = 2f;
+                samita.Speed = 2f;
 
                 //alter splash fx
                 splashMainL.startLifetime = 0.5f;
@@ -562,7 +550,7 @@ public class ThirdPersonController : MonoBehaviour
             else
             {
                 swimSpeed = movespeed / 2f;
-                samita.speed = 1f;
+                samita.Speed = 1f;
 
                 //alter splash fx
                 splashMainL.startLifetime = 1f;
@@ -576,9 +564,9 @@ public class ThirdPersonController : MonoBehaviour
             swimSplashL.Play();
             swimSplashR.Play();
             //always swimmin
-            if (samita.GetBool("swimming") != true)
+            if (samita.Animator.GetBool("swimming") != true)
             {
-                SetAnimator("swimming");
+                samita.SetAnimator("swimming");
             }
         }
         //treading water idle
@@ -588,9 +576,9 @@ public class ThirdPersonController : MonoBehaviour
             swimSplashR.Stop();
             
             //always swimmin
-            if (samita.GetBool("swimIdle") != true)
+            if (samita.Animator.GetBool("swimIdle") != true)
             {
-                SetAnimator("swimIdle");
+                samita.SetAnimator("swimIdle");
             }
         }
     }
@@ -627,7 +615,7 @@ public class ThirdPersonController : MonoBehaviour
         if(Vector3.Distance(transform.position, bedPos.position) > 250f)
         {
             //sleep where player is standing
-            SetAnimator("sleeping");
+            samita.SetAnimator("sleeping");
             sleepParticles.Play();
             playerCloak.gameObject.SetActive(false);
         }
@@ -644,7 +632,7 @@ public class ThirdPersonController : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         //set animator
-        SetAnimator("sleeping");
+        samita.SetAnimator("sleeping");
 
         sleepCover.FadeIn();
 
@@ -690,7 +678,7 @@ public class ThirdPersonController : MonoBehaviour
         sunScript.rotationSpeed = sunScript.normalRotation;
 
         //set animator
-        SetAnimator("idle");
+        samita.SetAnimator("idle");
 
         StartCoroutine(WaitToActivateCloak(1.5f));
         StartCoroutine(WaitToEnablePlayer(1.5f));
@@ -772,79 +760,14 @@ public class ThirdPersonController : MonoBehaviour
 
         //spawn footprints on land
         if(!swimming && !indoors)
-            SpawnFootprint();
-    }
-
-    //leave footprints behind as you walk around
-    void SpawnFootprint()
-    {
-        //set footprint obj
-        GameObject footprint = null;
-        footprint = footstepPooler.GrabObject();
-        footprint.GetComponent<FadeSprite>().FadeIn();
-
-        //set spawn point
-        Vector3 spawnPos = new Vector3(transform.position.x, transform.position.y - controller.height / 2 + 0.1f, transform.position.z);
-
-        //set pos 
-        footprint.transform.position = spawnPos;
-        
-        //mess with rotation 
-        footprint.transform.SetParent(characterBody.transform);
-        if (leftOrRightFoot)
-        {
-            //edit spawn point and tell sprite to flip
-            spawnPos += new Vector3(0.3f, 0, 0);
-        }
-        else
-        {
-            //edit spawn point and tell sprite to flip
-            spawnPos += new Vector3(-0.3f, 0, 0);
-
-        }
-        footprint.transform.localEulerAngles = new Vector3(90, 0, 0);
-        footprint.transform.SetParent(null);
-
-        //wait 1 sec to fade out footprint
-        footprint.GetComponent<FadeSprite>().StartCoroutine(footprint.GetComponent<FadeSprite>().WaitToFadeOut());
-
-        //play little dirt particle effect 
-        //running fx
-        if (running)
-        {
-            footprint.transform.GetChild(1).GetComponent<ParticleSystem>().Play();
-        }
-        //walking fx
-        else
-        {
-            footprint.transform.GetChild(0).GetComponent<ParticleSystem>().Play();
-        }
-      
-
-        leftOrRightFoot = !leftOrRightFoot;
+            footsteps.SpawnFootprint();
     }
     
-    public void SetAnimator(string newState)
-    {
-        //turn off all states
-        samita.SetBool("idle", false);
-        samita.SetBool("walking", false);
-        samita.SetBool("running", false);
-        samita.SetBool("jumping", false);
-        samita.SetBool("sleeping", false);
-        samita.SetBool("swimming", false);
-        samita.SetBool("swimIdle", false);
-
-        //set new state
-        samita.SetBool(newState, true);
-    }
-
-
     //jump logics
     void JumpCheck()
     {
         //on the ground
-        if (controller.isGrounded)
+        if (controller.isGrounded )
         {
             if (jumping)
             {
@@ -870,9 +793,9 @@ public class ThirdPersonController : MonoBehaviour
             moveSmoothUse = movespeedSmooth;
 
             //if animator still jumping, set back to idle
-            if (samita.GetBool("jumping") == true)
+            if (samita.Animator.GetBool("jumping") == true)
             {
-                SetAnimator("idle");
+                 samita.SetAnimator("idle");
             }
         }
 
@@ -889,7 +812,7 @@ public class ThirdPersonController : MonoBehaviour
     { 
         //get input device 
         var inputDevice = InputManager.ActiveDevice;
-
+    
         //reset show rhythm on jump press 
         if (Input.GetButtonDown("Jump") || inputDevice.Action1.WasPressed)
         {
@@ -977,7 +900,7 @@ public class ThirdPersonController : MonoBehaviour
                 jumpTrail.GetComponent<TrailRenderer>().material = bigJMat;
                 break;
         }
-        SetAnimator("jumping");
+        samita.SetAnimator("jumping");
         jumping = true;
         jumpTrail.GetComponent<TrailRenderer>().enabled = true;
         jumpWaitTimer = jumpWaitTime;
@@ -990,101 +913,6 @@ public class ThirdPersonController : MonoBehaviour
     {
         int randomJump = Random.Range(0, jumpSounds.Length);
         audioSource.PlayOneShot(jumpSounds[randomJump]);
-    }
-
-    //we want to see if we are on terrain that should make us slide downward
-    //only gets called while Player is considered to be grounded
-    void SlideCheck()
-    {
-        //store hit and point
-        RaycastHit hit;
-        Vector3 point;
-
-        bool sliding = false;
-
-        for(int i = 0; i < 30; i++)
-        {
-            //raycast forward to see if we hit terrain 
-            if (Physics.Raycast(physicsRaycaster.transform.position, physicsRaycaster.transform.forward, out hit, 3, groundedCheck))
-            {
-                point = hit.point;
-
-                //hit down
-                RaycastHit hitD;
-                Vector3 dPoint;
-
-                //raycast down to see if we hit the terrain;
-                if (Physics.Raycast(transform.position, -transform.up, out hitD, 10, groundedCheck))
-                {
-                    dPoint = hitD.point;
-
-                    //compare the heights of these points. 
-                    //if down point is lower height, we should fall down slowly
-                    if (dPoint.y < (point.y - 1.5f))
-                    {
-                        verticalSpeed = -jumpSpeed * 2;
-                        float zForce = -physicsRaycaster.transform.forward.z * 5;
-                        //i think we need to somehow reorient the player before applying this force. 
-                        transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, physicsRaycaster.transform.localEulerAngles.y, transform.localEulerAngles.z);
-                        currentMovement.z = zForce;
-                        sliding = true;
-
-                        //should make an animation for this, dust particles, sound?
-
-                        Debug.Log("sliding backward");
-                    }
-                }
-            }
-
-            //spin physics raycaster 1/30th of the way around y axis to shoot ray again
-            physicsRaycaster.transform.Rotate(0, 12, 0);
-        }
-
-        if (!sliding)
-        {
-            verticalSpeed = 0;
-        }
-    }
-
-
-    //this function shifts all audio source priorities dynamically
-    void ResetNearbyAudioSources()
-    {
-        //empty dictionary and audioObjects
-        soundCreators.Clear();
-        audioObjects.Clear();
-        //overlap sphere to find nearby sound creators
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, listeningRadius);
-        int i = 0;
-        while (i < hitColliders.Length)
-        {
-            GameObject audioObj = hitColliders[i].gameObject;
-
-            //check to see if obj has desired tag
-            //that the object is both active and not already part of our audioObjects list
-            //and that the object has an audio source
-            if (audioTags.Contains(audioObj.tag) &&
-                    audioObj.activeSelf && !audioObjects.Contains(audioObj) &&
-                    audioObj.GetComponent<AudioSource>() != null)
-            {
-                //check distance and add to list
-                float distanceAway = Vector3.Distance(hitColliders[i].transform.position, transform.position);
-                //add to audiosource and distance to dictionary
-                soundCreators.Add(audioObj.GetComponent<AudioSource>(), distanceAway);
-                //add to list of objects
-                audioObjects.Add(audioObj);
-            }
-            i++;
-        }
-
-        int priority = 0;
-        //sort the dictionary by order of ascending distance away
-        foreach (KeyValuePair<AudioSource, float> item in soundCreators.OrderBy(key => key.Value))
-        {
-            // do something with item.Key and item.Value
-            item.Key.priority = priority;
-            priority++;
-        }
     }
 
     //plays the dirt planting effect

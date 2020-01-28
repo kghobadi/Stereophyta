@@ -122,7 +122,7 @@ public class UseBoat : PickUp {
             }
 
             //turn off player movment
-            tpc.SetAnimator("idle");
+            tpc.samita.SetAnimator("idle");
             tpc.playerCanMove = false;
             tpc.runParticles.Stop();
             tpc.characterBody.localEulerAngles = new Vector3(0, 0, 0);
