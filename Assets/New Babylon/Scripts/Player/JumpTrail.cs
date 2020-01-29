@@ -15,6 +15,7 @@ public class JumpTrail : MonoBehaviour {
     {
         yield return new WaitForSeconds(myTrail.time);
 
+        myTrail.Clear();
         _pooledObj.ReturnToPool();
     }
 }

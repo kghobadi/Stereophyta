@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using NPC;
 
 public class MonologueTrigger : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class MonologueTrigger : MonoBehaviour
     public GameObject interactDisplay;
     //monologues
     public MonologueText[] myMonologues;
+    public Movement npcMovement;
 
     private void Awake()
     {
@@ -27,7 +29,8 @@ public class MonologueTrigger : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            PlayerEnteredZone();
+            if(!hasActivated)
+                PlayerEnteredZone();
         }
     }
 
@@ -69,6 +72,7 @@ public class MonologueTrigger : MonoBehaviour
     {
         playerInZone = true;
         tpc.canJump = false;
+        npcMovement.waitingToGiveMonologue = true;
         ToggleInteractUI(playerInZone);
     }
 
@@ -78,7 +82,6 @@ public class MonologueTrigger : MonoBehaviour
         playerInZone = false;
         tpc.canJump = true;
         ToggleInteractUI(playerInZone);
-
     }
 
 

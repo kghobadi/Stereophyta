@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using TMPro;
 using Cameras;
 using Cinemachine;
+using NPC;
 
 public class MonologueText : MonoBehaviour
 {
@@ -27,7 +28,8 @@ public class MonologueText : MonoBehaviour
     //Audio
     SpeakerSound speakerAudio;
     //animator
-    SpeakerAnimations speakerAnimator;
+    public SpeakerAnimations speakerAnimator;
+    public Movement npcMovement;
 
     //text component and string array of its lines
     Text theText;
@@ -86,7 +88,7 @@ public class MonologueText : MonoBehaviour
             usesTMP = true;
             the_Text = GetComponent<TMP_Text>();
         }
-        speakerAnimator = hostObj.GetComponentInChildren<SpeakerAnimations>();
+
         speakerAudio = hostObj.GetComponent<SpeakerSound>();
         mTrigger = GetComponent<MonologueTrigger>();
     }
@@ -189,8 +191,11 @@ public class MonologueText : MonoBehaviour
 
         isTyping = true;
         //set talking anim
-        if(speakerAnimator.talkingAnimations > 0)
-            speakerAnimator.RandomTalkingAnim();
+        if (speakerAnimator)
+        {
+            if (speakerAnimator.talkingAnimations > 0)
+                speakerAnimator.RandomTalkingAnim();
+        }
 
         while (isTyping && (letter < lineOfText.Length - 1))
         {
@@ -314,7 +319,21 @@ public class MonologueText : MonoBehaviour
         //set player pos
         if (playerSpot)
         {
-            tpc.transform.position = playerSpot.position;
+            RaycastHit hit;
+
+            Vector3 targetPosition;
+            // Does the ray intersect any objects excluding the player layer
+            if (Physics.Raycast(playerSpot.position, Vector3.down, out hit, Mathf.Infinity, npcMovement.grounded))
+            {
+                targetPosition = hit.point + new Vector3(0, tpc.controller.height / 2, 0);
+
+                tpc.transform.position = targetPosition;
+            }
+
+            //player look at npc 
+            Vector3 lookAtPos = new Vector3(hostObj.transform.position.x, player.transform.position.y, hostObj.transform.position.z);
+            tpc.transform.LookAt(lookAtPos);
+            tpc.transform.Rotate(0f, 180f, 0f);
         }
 
         //set player to idle anim
@@ -344,7 +363,16 @@ public class MonologueText : MonoBehaviour
         else
             theText.enabled = false;
         
-        speakerAnimator.SetAnimator("idle");
+        //set speaker to idle 
+        if(speakerAnimator)
+            speakerAnimator.SetAnimator("idle");
+
+        //stop that waiting!
+        if (npcMovement)
+        {
+            npcMovement.waitingToGiveMonologue = false;
+        }
+
         inMonologue = false;
         //disable speaker cam, enable cam controller
         if (enablesCinematic)

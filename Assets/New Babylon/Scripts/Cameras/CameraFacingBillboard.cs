@@ -29,7 +29,7 @@ public class CameraFacingBillboard : MonoBehaviour
 	}
 
 	void Update(){
-        transform.LookAt(playerCam.transform.position);
+        transform.LookAt(playerCam.transform.position, Vector3.up);
 	}
 
 

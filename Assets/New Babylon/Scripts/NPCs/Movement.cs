@@ -26,8 +26,10 @@ namespace NPC
         public float stateTimer;
         public float idleTime, actionTime;
         public float interactDistance;
+        public bool waves;
         public bool waving, hasWaved;
         public float waveTimer, waveWaitTime;
+        public bool waitingToGiveMonologue;
 
         //interaction menu
         public float interactMenuTimer, interactMenuTimeTotal = 3f;
@@ -36,7 +38,7 @@ namespace NPC
         public NPCMovementTypes npcType;
         public enum NPCMovementTypes
         {
-            WAYPOINT, RANDOM, IDLE, FOLLOWER,
+            WAYPOINT, RANDOM, IDLE, PATHFINDER,
         }
 
         [Header("Wanderer Settings")]
@@ -67,14 +69,17 @@ namespace NPC
             //check dist against talking
             if (distFromPlayer < interactDistance)
             {
-                //triggers wave if has not waved and not talking / following 
-                if (!hasWaved 
-                    && controller.npcState != Controller.NPCStates.TALKING 
-                    )
+                //character will wave at player periodically 
+                if (waves)
                 {
-                    StartCoroutine(WaveAtPlayer());
+                    //triggers wave if has not waved and not talking / following 
+                    if (!hasWaved
+                        && controller.npcState != Controller.NPCStates.TALKING
+                        )
+                    {
+                        StartCoroutine(WaveAtPlayer());
+                    }
                 }
-                
             }
             //player is far away 
             else
@@ -86,7 +91,7 @@ namespace NPC
             if (controller.npcState == Controller.NPCStates.IDLE)
             {
                 //if we are not IDLE npc, idle state has a countdown until movement 
-                if (npcType != NPCMovementTypes.IDLE && npcType != NPCMovementTypes.FOLLOWER && !waving)
+                if (npcType != NPCMovementTypes.IDLE && !waving)
                 {
                     stateTimer -= Time.deltaTime;
 
@@ -103,6 +108,24 @@ namespace NPC
                             //Debug.Log("calling waypoints");
                             SetWaypoint();
                         }
+                    }
+                }
+
+                //waits until player is near then walks to next point 
+                if(npcType == NPCMovementTypes.PATHFINDER)
+                {
+                    if (!waitingToGiveMonologue)
+                    {
+                        if (distFromPlayer < interactDistance && waypointCounter < waypoints.Length - 1)
+                        {
+                            SetWaypoint();
+                        }
+                    }
+                    //look at player
+                    else
+                    {
+                        Vector3 lookAtPos = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
+                        transform.LookAt(lookAtPos);
                     }
                 }
             }
@@ -126,7 +149,7 @@ namespace NPC
                 }
             }
 
-            //resets wave with timer 
+            //resets wave with timer
             if (hasWaved && !waving)
             {
                 waveTimer -= Time.deltaTime;
