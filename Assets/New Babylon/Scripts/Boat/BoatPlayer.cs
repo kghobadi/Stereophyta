@@ -123,9 +123,9 @@ public class BoatPlayer : MonoBehaviour
         if (inBoat)
         {
             //if player anim not idle
-            if(tpc.samita.GetNextAnimatorStateInfo(0).IsName("idle") != true)
+            if(tpc.samita.Animator.GetNextAnimatorStateInfo(0).IsName("idle") != true)
             {
-                tpc.SetAnimator("idle");
+                tpc.samita.SetAnimator("idle");
             }
 
             //for checking angle

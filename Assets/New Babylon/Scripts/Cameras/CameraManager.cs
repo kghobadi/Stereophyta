@@ -34,13 +34,13 @@ using UnityEngine;
             }
         }
 
-        void Enable(GameCamera camera)
+        public void Enable(GameCamera camera)
         {
             camera.gameObject.SetActive(true);
             currentCamera = camera;
         }
 
-        void Disable(GameCamera camera)
+        public void Disable(GameCamera camera)
         {
             camera.gameObject.SetActive(false);
             currentCamera = null;
