@@ -46,7 +46,7 @@ public class MonologueTrigger : MonoBehaviour
     {
         if (playerInZone)
         {
-            if(Input.GetKeyDown(KeyCode.Space) && !hasActivated)
+            if(Input.GetKeyUp(KeyCode.Space) && !hasActivated)
             {
                 ActivateMonologue();
             }
