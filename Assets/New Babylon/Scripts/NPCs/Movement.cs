@@ -90,11 +90,11 @@ namespace NPC
             //IDLE
             if (controller.npcState == Controller.NPCStates.IDLE)
             {
+                stateTimer -= Time.deltaTime;
+
                 //if we are not IDLE npc, idle state has a countdown until movement 
                 if (npcType != NPCMovementTypes.IDLE && !waving)
                 {
-                    stateTimer -= Time.deltaTime;
-
                     if (stateTimer < 0)
                     {
                         //Set destination based on npc type 
@@ -116,7 +116,8 @@ namespace NPC
                 {
                     if (!waitingToGiveMonologue)
                     {
-                        if (distFromPlayer < interactDistance && waypointCounter < waypoints.Length - 1)
+                        //goes to next point if timer reaches 0 or player is near 
+                        if ((distFromPlayer < interactDistance || stateTimer < 0) && waypointCounter < waypoints.Length - 1)
                         {
                             SetWaypoint();
                         }

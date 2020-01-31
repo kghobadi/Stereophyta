@@ -75,7 +75,7 @@ public class SpeakerSound : AudioHandler
         else
         {
             PlayRandomSound(spokenSounds, 1f);
-            Debug.Log("gibberish");
+            //Debug.Log("gibberish");
         }
 
     }
