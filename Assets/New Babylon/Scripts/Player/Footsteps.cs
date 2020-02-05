@@ -5,6 +5,7 @@ using UnityEngine;
 public class Footsteps : MonoBehaviour {
     ThirdPersonController tpc;
     public ObjectPooler footstepPooler;
+    public float heightAdjust = 0.05f;
     bool leftOrRightFoot;
 
 	// Use this for initialization
@@ -22,7 +23,7 @@ public class Footsteps : MonoBehaviour {
         footprint.GetComponent<FadeSprite>().FadeIn();
 
         //set spawn point
-        Vector3 spawnPos = new Vector3(transform.position.x, transform.position.y - tpc.controller.height / 2 + 0.1f, transform.position.z);
+        Vector3 spawnPos = new Vector3(transform.position.x, transform.position.y - tpc.controller.height / 2 + heightAdjust, transform.position.z);
 
         //set pos 
         footprint.transform.position = spawnPos;

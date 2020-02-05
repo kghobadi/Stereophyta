@@ -53,7 +53,6 @@ public class ThirdPersonController : MonoBehaviour
     public Vector3 horizontalInput;
     public Vector3 forwardInput;
     public float movespeed = 5, walkSpeed = 5, runSpeed, swimSpeed;
-    float moveTimer, timeToRun = 3f;
     public float movespeedSmooth = 0.3f;
     public float rotateSpeed = 10;
     public float rotateSpeedSmooth = 0.3f;
@@ -382,7 +381,7 @@ public class ThirdPersonController : MonoBehaviour
         //get input device 
         var inputDevice = InputManager.ActiveDevice;
         //need to figure out how to reset the cloth to what it's like at start / before swimming 
-        characterBody.transform.localPosition = new Vector3(0, -0.956f, 0);
+        characterBody.transform.localPosition = new Vector3(0, -1f, 0);
         samita.Speed = 1f;
 
         //too sleepy to run, show zzzs
@@ -392,7 +391,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //run if pressing shift keys OR move timer is great enough
-        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2 || moveTimer > timeToRun ) && daysWithoutSleep < noSleepMax && !indoors)
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2) && daysWithoutSleep < noSleepMax && !indoors)
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
 
@@ -411,7 +410,6 @@ public class ThirdPersonController : MonoBehaviour
             else
             {
                 //reset walk speed 
-                moveTimer = 0;
                 movespeed = walkSpeed;
                 runParticles.Stop();
                 //idling
@@ -425,14 +423,6 @@ public class ThirdPersonController : MonoBehaviour
         else
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * movespeed, ref currentMovementV, moveSmoothUse);
-
-            //only run if not sleepy 
-            if (daysWithoutSleep < noSleepMax && !indoors)
-            {
-                //inc move speed & timer 
-                movespeed += 5 * Time.deltaTime;
-                moveTimer += Time.deltaTime;
-            }
 
             //movin
             if (targetMovementTotal.magnitude > 0)
@@ -450,7 +440,6 @@ public class ThirdPersonController : MonoBehaviour
             else
             {
                 //reset walk speed 
-                moveTimer = 0;
                 movespeed = walkSpeed;
                 //idling
                 if (samita.Animator.GetBool("idle") != true)

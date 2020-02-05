@@ -38,6 +38,8 @@ public class MonologueText : MonoBehaviour
     [Header("Text lines")]
     [Tooltip("No need to fill this in, that will happen automatically")]
     public string[] textLines;
+    [Tooltip("Fill this with all the individual monologues the character will give")]
+    public List<TextAsset> allMyMonologues = new List<TextAsset>();
 
     //current and last lines
     public int currentLine;
@@ -95,7 +97,8 @@ public class MonologueText : MonoBehaviour
 
     void Start()
     {
-        ResetStringText();
+        //set text to first string in my list of monologues 
+        ResetStringText(0);
        
         if (!enableAtStart)
         {
@@ -263,13 +266,10 @@ public class MonologueText : MonoBehaviour
         isTyping = false;
     }
 
-    public void ResetStringText()
+    public void ResetStringText(int stringInList)
     {
-        if (usesTMP)
-            textLines = (the_Text.text.Split('\n'));
-        else
-            textLines = (theText.text.Split('\n'));
-        
+        textLines = (allMyMonologues[stringInList].text.Split('\n'));
+
         endAtLine = textLines.Length;
     }
 
@@ -319,6 +319,8 @@ public class MonologueText : MonoBehaviour
         //set player pos
         if (playerSpot)
         {
+            tpc.playerCloak.enabled = false;
+
             RaycastHit hit;
 
             Vector3 targetPosition;
@@ -334,6 +336,8 @@ public class MonologueText : MonoBehaviour
             Vector3 lookAtPos = new Vector3(hostObj.transform.position.x, player.transform.position.y, hostObj.transform.position.z);
             tpc.transform.LookAt(lookAtPos);
             tpc.transform.Rotate(0f, 180f, 0f);
+
+            tpc.playerCloak.enabled = true;
         }
 
         //set player to idle anim

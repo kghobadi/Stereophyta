@@ -17,6 +17,7 @@ public class MonologueTrigger : MonoBehaviour
     public GameObject interactDisplay;
     //monologues
     public MonologueText[] myMonologues;
+    public int[] monoNumbers;
     public Movement npcMovement;
 
     private void Awake()
@@ -46,7 +47,7 @@ public class MonologueTrigger : MonoBehaviour
     {
         if (playerInZone)
         {
-            if(Input.GetKeyDown(KeyCode.Space) && !hasActivated)
+            if(Input.GetKeyUp(KeyCode.Space) && !hasActivated)
             {
                 ActivateMonologue();
             }
@@ -60,6 +61,7 @@ public class MonologueTrigger : MonoBehaviour
         {
             for (int i = 0; i < myMonologues.Length; i++)
             {
+                myMonologues[i].ResetStringText(monoNumbers[i]);
                 myMonologues[i].EnableMonologue();
             }
 
@@ -90,17 +92,6 @@ public class MonologueTrigger : MonoBehaviour
         if (displayUI)
         {
             interactDisplay.SetActive(newState);
-        }
-    }
-
-    void OnDisable()
-    {
-        if (hasActivated)
-        {
-            for (int i = 0; i < myMonologues.Length; i++)
-            {
-                myMonologues[i].DisableMonologue();
-            }
         }
     }
 
