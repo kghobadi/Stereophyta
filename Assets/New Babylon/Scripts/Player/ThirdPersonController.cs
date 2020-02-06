@@ -274,6 +274,9 @@ public class ThirdPersonController : MonoBehaviour
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+
+        //set grass shader to my pos 
+        Shader.SetGlobalVector("playerPos", transform.position);
     }
 
     //same sort of logic for jump and other stuff, different core movement from ps4 controllers

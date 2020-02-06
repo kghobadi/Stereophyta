@@ -39,7 +39,7 @@ public class Spawner : MonoBehaviour {
     public int gridSizeY;
     public float distBetweenX, distBetweenY;
 
-    void Start () {
+    void Awake () {
         zoneParent = transform.parent.GetComponent<Zone>();
         Random.InitState(System.DateTime.Now.Millisecond);
         generatedObjs = new GameObject[generationAmount];
@@ -70,9 +70,14 @@ public class Spawner : MonoBehaviour {
                 //assign random age 
                 int randomAge = Random.Range(ageMin, ageMax);
                 genObject.GetComponent<Plont>().Age(randomAge, 0.1f);
-                genObject.GetComponent<Plont>().gridMan = zoneParent.zoneGridMan;
-                genObject.GetComponent<Plont>().tgs = zoneParent.zoneTGS;
                 genObject.GetComponent<Plont>().myZone = zoneParent;
+                //if has tgs 
+                if (zoneParent.zoneTGS)
+                {
+                    genObject.GetComponent<Plont>().gridMan = zoneParent.zoneGridMan;
+                    genObject.GetComponent<Plont>().tgs = zoneParent.zoneTGS;
+                }
+              
                 //adjust height 
                 AdjustHeight(genObject);
                 break;

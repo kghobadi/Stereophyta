@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
-public class TreeAudio : MonoBehaviour {
+public class TreeAudio : AudioHandler {
     //player ref
     GameObject player;
-    //aud source ref
-    [HideInInspector]
-    public AudioSource treeAudio;
 
     [Header("Stored Audio")]
     public AudioClip[] treeSounds;
     public AudioMixerGroup treeMixerGroup;
+    public bool randomPitch;
 
     [Header("Audio Frequency")]
     public float treeNoteTimer;
@@ -27,31 +25,33 @@ public class TreeAudio : MonoBehaviour {
         SPRITE, GARANGULA, STALNIK, PALM,
     }
 
-	void Awake () {
+	public override void Awake () {
+        base.Awake();
         player = GameObject.FindGameObjectWithTag("Player");
-        treeAudio = GetComponent<AudioSource>();
-      
 	}
 
     void Start()
     {
         int randomSound = Random.Range(0, treeSounds.Length);
-        treeAudio.clip = treeSounds[randomSound];
-        treeAudio.outputAudioMixerGroup = treeMixerGroup;
+        myAudioSource.clip = treeSounds[randomSound];
+        myAudioSource.outputAudioMixerGroup = treeMixerGroup;
         treeNoteTimer = Random.Range(0.5f, randomTimeMax);
     }
 
     void Update () {
         //check distance from player
-		if(Vector3.Distance(transform.position, player.transform.position) < (treeAudio.maxDistance))
+		if(Vector3.Distance(transform.position, player.transform.position) < (myAudioSource.maxDistance))
         {
             treeNoteTimer -= Time.deltaTime;
 
             //time to make a sound -- also not already playing 
-            if (treeNoteTimer < 0 && !treeAudio.isPlaying)
+            if (treeNoteTimer < 0 && !myAudioSource.isPlaying)
             {
                 //play sound
-                PlayRandomSound();
+                if(randomPitch)
+                    PlayRandomSoundRandomPitch(treeSounds, myAudioSource.volume);
+                else
+                    PlayRandomSound(treeSounds, myAudioSource.volume);
 
                 //reset sound timer 
                 treeNoteTimer = treeNoteTimerTotal + Random.Range(randomTimeMin, randomTimeMax);
@@ -60,8 +60,8 @@ public class TreeAudio : MonoBehaviour {
         //stop audio when out of range
         else
         {
-            if (treeAudio.isPlaying)
-                treeAudio.Stop();
+            if (myAudioSource.isPlaying)
+                myAudioSource.Stop();
         }
 
         CheckRibbons();
@@ -71,7 +71,7 @@ public class TreeAudio : MonoBehaviour {
     void CheckRibbons()
     {
         //tree particles
-        if (treeAudio.isPlaying)
+        if (myAudioSource.isPlaying)
         {
             if (ribbons.Length > 0)
             {
@@ -96,11 +96,5 @@ public class TreeAudio : MonoBehaviour {
             }
         }
     }
-
-    public void PlayRandomSound()
-    {
-        //select random sound 
-        int randomNote = Random.Range(0, treeSounds.Length);
-        treeAudio.PlayOneShot(treeSounds[randomNote]);
-    }
+    
 }

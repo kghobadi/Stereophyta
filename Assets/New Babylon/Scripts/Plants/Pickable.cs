@@ -11,8 +11,8 @@ public abstract class Pickable : MonoBehaviour {
 	protected virtual void Awake () {
 		
 	}
-	
-	public virtual void Pick()
+
+    public virtual void Pick()
     {
 
     }
