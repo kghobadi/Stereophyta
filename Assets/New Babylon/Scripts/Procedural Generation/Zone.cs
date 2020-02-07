@@ -13,6 +13,8 @@ public class Zone : MonoBehaviour {
     [Header("Zone info")]
     public string zoneName;
     public bool playerInZone;
+    public bool startingZone;
+    public Transform startingSpot;
     public bool playerHasVisited;
     public TerrainType terrainType;
     public enum TerrainType
@@ -56,6 +58,16 @@ public class Zone : MonoBehaviour {
         SetZoneSpawners();
     }
 
+    void Start()
+    {
+        //set player to this as starting zone 
+        if (startingZone)
+        {
+            ActivateZone();
+            tpc.transform.position = startingSpot.position;
+        }
+    }
+
     void SetZoneSpawners()
     {
         //Set zone spawners 
@@ -76,66 +88,75 @@ public class Zone : MonoBehaviour {
         {
             if (!playerInZone)
             {
-                playerInZone = true;
-                tpc.currentZone = this;
-                tpc.currentZoneName = zoneName;
-                //has tgs
-                if(terrainType == TerrainType.TERRAIN)
-                {
-                    tpc.currentTGS = zoneTGS;
-                    tpc.currentGridMan = zoneGridMan;
-                }
-                //nothing, no tgs
-                if(terrainType == TerrainType.MODEL)
-                {
-                    tpc.currentTGS = null;
-                    tpc.currentGridMan = null;
-                }
-               
-                zoneSnapshot.TransitionTo(3f);
-                //Debug.Log("Player entered zone: " + zoneName);
+                ActivateZone();
+            }
+        }
+    }
 
-                //this means we have set been here before, so we have saved before
-                if (PlayerPrefs.GetInt(zoneName + "Visits") > 0 && tpc.savingAndLoadingEnabled)
-                {
-                    //only for this session
-                    if (!playerHasVisited)
-                    {
-                        //first load
-                        zoneSaver.LoadGameData();
-                        //will not load again this session 
-                        playerHasVisited = true;
-                    }
+    public void ActivateZone()
+    {
+        playerInZone = true;
+        tpc.currentZone = this;
+        tpc.currentZoneName = zoneName;
+        //has tgs
+        if (terrainType == TerrainType.TERRAIN)
+        {
+            tpc.currentTGS = zoneTGS;
+            tpc.currentGridMan = zoneGridMan;
+        }
+        //nothing, no tgs
+        if (terrainType == TerrainType.MODEL)
+        {
+            tpc.currentTGS = null;
+            tpc.currentGridMan = null;
+        }
 
-                    //wait then regen check 
-                    StartCoroutine(WaitToRegen());
-                }
-                //never been to zone, so just generate
-                else
+        zoneSnapshot.TransitionTo(3f);
+        //Debug.Log("Player entered zone: " + zoneName);
+
+        CheckZoneGeneration();
+    }
+
+    public void CheckZoneGeneration()
+    {
+        //this means we have set been here before, so we have saved before
+        if (PlayerPrefs.GetInt(zoneName + "Visits") > 0 && tpc.savingAndLoadingEnabled)
+        {
+            //only for this session
+            if (!playerHasVisited)
+            {
+                //first load
+                zoneSaver.LoadGameData();
+                //will not load again this session 
+                playerHasVisited = true;
+            }
+
+            //wait then regen check 
+            StartCoroutine(WaitToRegen());
+        }
+        //never been to zone, so just generate
+        else
+        {
+            //only for this session
+            if (!playerHasVisited)
+            {
+                //first time
+                for (int i = 0; i < zoneSpawners.Length; i++)
                 {
-                    //only for this session
-                    if (!playerHasVisited)
-                    {
-                        //first time
-                        for (int i = 0; i < zoneSpawners.Length; i++)
-                        {
-                            zoneSpawners[i].GenerateObjects();
-                        }
-                        //will not load again this session 
-                        playerHasVisited = true;
-                    }
-                    else
-                    {
-                        //then handle any regeneration
-                        for (int i = 0; i < zoneSpawners.Length; i++)
-                        {
-                            zoneSpawners[i].RegenerateObjects();
-                        }
-                    }
+                    zoneSpawners[i].GenerateObjects();
+                }
+                //will not load again this session 
+                playerHasVisited = true;
+            }
+            else
+            {
+                //then handle any regeneration
+                for (int i = 0; i < zoneSpawners.Length; i++)
+                {
+                    zoneSpawners[i].RegenerateObjects();
                 }
             }
         }
-        
     }
 
     IEnumerator WaitToRegen()
@@ -155,15 +176,20 @@ public class Zone : MonoBehaviour {
         {
             if (playerInZone)
             {
-                playerInZone = false;
-                tpc.currentZone = null;
-                tpc.currentZoneName = "Ocean";
-                Ocean.TransitionTo(3f);
-               
-                //save what's in the zone
-                zoneSaver.SaveGameData();
-                //Debug.Log("Player left zone: " + zoneName);
+                DeactivateZone();
             }
         }
+    }
+
+    public void DeactivateZone()
+    {
+        playerInZone = false;
+        tpc.currentZone = null;
+        tpc.currentZoneName = "Ocean";
+        Ocean.TransitionTo(3f);
+
+        //save what's in the zone
+        zoneSaver.SaveGameData();
+        //Debug.Log("Player left zone: " + zoneName);
     }
 }

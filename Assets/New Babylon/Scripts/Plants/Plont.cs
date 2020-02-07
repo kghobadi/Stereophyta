@@ -109,6 +109,20 @@ public class Plont : MonoBehaviour {
             plantAnimator = GetComponent<Animator>();
         }
 
+        FetchRenderers();
+
+        //grab audio sources
+        plantSource = GetComponent<AudioSource>();
+        extraVoice = transform.GetChild(1).GetComponent<AudioSource>();
+        soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
+
+        //get the obj poolers
+        FindObjPoolers();
+    }
+
+    //finds all the renderers in the plant and adds them to pRenderers list 
+    void FetchRenderers()
+    {
         //renderer & mats
         for (int i = 2; i < transform.childCount; i++)
         {
@@ -121,7 +135,7 @@ public class Plont : MonoBehaviour {
                 pRenderers.Add(child.GetComponent<MeshRenderer>());
             }
             //child has children
-            if(child.childCount > 0)
+            if (child.childCount > 0)
             {
                 //grab all renderers from child & below
                 MeshRenderer[] allChildRenderers = child.GetComponentsInChildren<MeshRenderer>();
@@ -135,24 +149,19 @@ public class Plont : MonoBehaviour {
         }
         //set mats array to same size as pRenderers and set mats 
         origMats = new Material[pRenderers.Count];
-        for(int i = 0; i < pRenderers.Count; i++)
+        for (int i = 0; i < pRenderers.Count; i++)
         {
             origMats[i] = pRenderers[i].material;
         }
-
-        //grab audio sources
-        plantSource = GetComponent<AudioSource>();
-        extraVoice = transform.GetChild(1).GetComponent<AudioSource>();
-        soundPlaying = transform.GetChild(0).GetComponent<ParticleSystem>();
-
-        //get the obj poolers
-        FindObjPoolers();
     }
 
     void Start () {
         //randomness
         Random.InitState(System.DateTime.Now.Millisecond);
+
+        //SUN EVENT LISTENER
         sun.newDay.AddListener(DayPass);
+
         //add to zone list 
         if (!myZone.plants.Contains(gameObject))
             myZone.plants.Add(gameObject);
