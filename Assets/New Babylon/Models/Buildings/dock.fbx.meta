@@ -1,14 +1,46 @@
 fileFormatVersion: 2
-guid: d994123e7b3637b4ba8b3bf6f07a972c
+guid: 4a9c81a3126c99a44ab7e7c5cf778206
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
-    100000: //RootNode
-    400000: //RootNode
+    100000: beam1
+    100002: beam2
+    100004: beam3
+    100006: beam4
+    100008: beam5
+    100010: beam6
+    100012: //RootNode
+    100014: platform
+    400000: beam1
+    400002: beam2
+    400004: beam3
+    400006: beam4
+    400008: beam5
+    400010: beam6
+    400012: //RootNode
+    400014: platform
     2100000: lambert2
-    2300000: //RootNode
-    3300000: //RootNode
-    4300000: fence
+    2300000: beam1
+    2300002: beam2
+    2300004: beam3
+    2300006: beam4
+    2300008: beam5
+    2300010: beam6
+    2300012: platform
+    3300000: beam1
+    3300002: beam2
+    3300004: beam3
+    3300006: beam4
+    3300008: beam5
+    3300010: beam6
+    3300012: platform
+    4300000: beam6
+    4300002: beam5
+    4300004: beam4
+    4300006: beam3
+    4300008: beam2
+    4300010: beam1
+    4300012: platform
     9500000: //RootNode
   externalObjects: {}
   materials:
@@ -81,7 +113,7 @@ ModelImporter:
     rootMotionBoneName: 
     rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
-    hasExtraRoot: 0
+    hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 0
