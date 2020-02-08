@@ -45,7 +45,6 @@ public class MusicFader : MonoBehaviour {
         }
     }
 
-
     public void SetSound(AudioClip track)
     {
         musicSource.Stop();

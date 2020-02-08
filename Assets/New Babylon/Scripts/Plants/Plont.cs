@@ -50,6 +50,8 @@ public class Plont : MonoBehaviour {
     public int myAge;
     public int currentStage;
     public int nextStage;
+    public bool ageAtStart;
+    public int ageMin, ageMax;
     public bool hasBeenWatered;
     public GrowthStages[] myGrowthStages;
     public GameObject[] cropBundles;
@@ -163,6 +165,8 @@ public class Plont : MonoBehaviour {
         sun.newDay.AddListener(DayPass);
 
         //add to zone list 
+        if(myZone == null)
+            myZone = tpc.currentZone;
         if (!myZone.plants.Contains(gameObject))
             myZone.plants.Add(gameObject);
         transform.SetParent(myZone.plantParent);
@@ -206,8 +210,17 @@ public class Plont : MonoBehaviour {
             }
         }
 
-        //call funcs
-        GrowPlant(true, true);
+        //randomly age at start 
+        if (ageAtStart)
+        {
+            int randomAge = Random.Range(ageMin, ageMax);
+            AgeAtStart(randomAge, 0.1f);
+        }
+        else
+        {
+            //call funcs
+            GrowPlant(true, true);
+        }
     }
     
     //use to reset plant 
