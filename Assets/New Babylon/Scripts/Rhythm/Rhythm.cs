@@ -30,9 +30,9 @@ public class Rhythm : MonoBehaviour {
         {
             TreeAudio treeAud = other.gameObject.GetComponent<TreeAudio>();
             //only play if it is not already playing 
-            if (!treeAud.treeAudio.isPlaying)
+            if (!treeAud.myAudioSource.isPlaying)
             {
-                treeAud.PlayRandomSound();
+                treeAud.PlayRandomSound(treeAud.treeSounds, 1f);
             }
         }
     }
