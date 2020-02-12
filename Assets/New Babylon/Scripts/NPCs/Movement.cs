@@ -13,6 +13,7 @@ namespace NPC
         Animations npcAnimations;
         Sounds npcSounds;
         Camera mainCam;
+        Footsteps footsteps;
 
         [Header("AI Movement Settings")]
         public LayerMask grounded;
@@ -47,10 +48,11 @@ namespace NPC
 
         [Header("Random Settings")]
         public float movementRadius;
-        
+
         void Start()
         {
             controller = GetComponent<Controller>();
+            footsteps = GetComponent<Footsteps>();
             player = controller.tpc;
             npcAnimations = controller.Animation;
             npcSounds = controller.Sounds;
@@ -91,6 +93,10 @@ namespace NPC
             if (controller.npcState == Controller.NPCStates.IDLE)
             {
                 stateTimer -= Time.deltaTime;
+
+                //set footstep timer to 0 since we arent moving 
+                if (footsteps)
+                    footsteps.footstepTimer = 0;
 
                 //if we are not IDLE npc, idle state has a countdown until movement 
                 if (npcType != NPCMovementTypes.IDLE && !waving)
@@ -141,6 +147,12 @@ namespace NPC
                 if (!waving)
                 {
                     transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z));
+                }
+
+                //footsteps 
+                if (footsteps)
+                {
+                    footsteps.FootstepCountdown(footsteps.walkStepTotal);
                 }
 
                 //stop running after we are close to position

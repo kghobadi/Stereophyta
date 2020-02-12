@@ -117,11 +117,8 @@ public class ThirdPersonController : MonoBehaviour
     public AudioSource playerSource;
     public AudioSource seedSource;
     public AudioClip[] jumpSounds, swimJumps;
-    public AudioClip[] currentFootsteps, grassSteps, woodSteps, swimSteps,  noNo;
-    public float walkStepTotal = 1f, runStepTotal = 0.5f;
-    float footStepTimer = 0;
-    public int currentStep = 0;
-    Footsteps footsteps;
+    public AudioClip[] noNo;
+    [HideInInspector] public Footsteps footsteps;
 
     //world manager reference
     WorldManager wm;
@@ -177,7 +174,6 @@ public class ThirdPersonController : MonoBehaviour
         samita.SetAnimator("idle");
         samita.Speed = 1f;
         characterBody = samita.transform;
-        currentFootsteps = grassSteps;
         footsteps = GetComponent<Footsteps>();
 
         //set loose particles
@@ -706,53 +702,22 @@ public class ThirdPersonController : MonoBehaviour
         {
             if (!jumping)
             {
-                footStepTimer += Time.deltaTime;
-
                 //play footstep sound
                 if (running)
                 {
-                    if (footStepTimer > runStepTotal)
-                    {
-                        IncrementFootsteps();
-                        playerSource.PlayOneShot(currentFootsteps[currentStep]);
-                        
-                    }
+                    footsteps.FootstepCountdown(footsteps.runStepTotal);
                 }
                 //walking
                 else
                 {
-                    if (footStepTimer > walkStepTotal)
-                    {
-                        IncrementFootsteps();
-                        playerSource.PlayOneShot(currentFootsteps[currentStep]);
-                      
-                    }
+                    footsteps.FootstepCountdown(footsteps.walkStepTotal);
                 }
             }
         }
         else
         {
-            footStepTimer = 0;
+            footsteps.footstepTimer = 0;
         }
-    }
-
-    //count thru footstep sounds 
-    void IncrementFootsteps()
-    {
-        if (currentStep < (currentFootsteps.Length - 1))
-        {
-            currentStep += Random.Range(0, (currentFootsteps.Length - currentStep));
-        }
-        else
-        {
-            currentStep = 0;
-        }
-
-        footStepTimer = 0;
-
-        //spawn footprints on land
-        if(!swimming && !indoors)
-            footsteps.SpawnFootprint();
     }
     
     //jump logics

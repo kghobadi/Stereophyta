@@ -10,6 +10,9 @@ public class MonologueTrigger : MonoBehaviour
     ThirdPersonController tpc;
 
     //general
+    [Tooltip("Only need this if the Trigger first becomes active when an NPC moves into it")]
+    public GameObject speakerHost;
+    public bool canActivate = true;
     public bool hasActivated;
     public bool playerInZone;
     public bool displayUI;
@@ -30,8 +33,15 @@ public class MonologueTrigger : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            if(!hasActivated)
+            if(!hasActivated && canActivate)
                 PlayerEnteredZone();
+        }
+
+        //can activate true when speaker arrives 
+        if(other.gameObject == speakerHost)
+        {
+            Debug.Log("can activate!");
+            canActivate = true;
         }
     }
 

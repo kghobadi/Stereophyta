@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class InteractPrompt : MonoBehaviour {
+    public Canvas myWorldCanvas;
     public Text pickUpText;
     public string pickUpMessage;
     public FadeUI[] interactPrompts;

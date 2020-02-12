@@ -71,11 +71,11 @@ public abstract class AudioHandler : MonoBehaviour
 
     public int currentSound = 0;
     //counts up through sound array, in order 
-    public void PlaySoundUp(AudioClip[] soundArray)
+    public void PlaySoundUp(AudioClip[] soundArray, float vol)
     {
         currentSound = CountUpArray(currentSound, soundArray.Length - 1);
 
-        voices[voiceCounter].PlayOneShot(soundArray[currentSound]);
+        myAudioSource.PlayOneShot(soundArray[currentSound], vol);
     }
 
     //for counting up arrays

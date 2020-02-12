@@ -47,7 +47,10 @@ public class Picker : MonoBehaviour {
                 interactPrompt.pickUpMessage = closestPickableObj.pickUpText;
                 interactPrompt.ShowPickupPrompt();
             }
-         
+
+            //move interact prompt
+            interactPrompt.myWorldCanvas.transform.position = closestPickableObj.transform.position + new Vector3(0, closestPickableObj.promptOffset, 0);
+
         }
         //no pickable obj 
         else
