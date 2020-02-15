@@ -180,8 +180,6 @@ namespace NPC
             //state check
             if (controller.npcState == Controller.NPCStates.MOVING)
             {
-                
-
                 //looks at targetPos when not waving 
                 if (!waving)
                 {
@@ -232,7 +230,7 @@ namespace NPC
                 //find direction from me to obj
                 direction = pos - transform.position;
             }
-           
+
             //find target look
             Quaternion targetLook = Quaternion.LookRotation(direction);
             //actually rotate the character 
