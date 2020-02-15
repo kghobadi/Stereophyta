@@ -41,7 +41,7 @@ public class MonologueTrigger : MonoBehaviour
         //can activate true when speaker arrives 
         if(other.gameObject == speakerHost)
         {
-            Debug.Log("can activate!");
+            //Debug.Log("can activate!");
             canActivate = true;
         }
     }
@@ -70,6 +70,7 @@ public class MonologueTrigger : MonoBehaviour
     {
         if (!hasActivated)
         {
+            //sets monologues 
             for (int i = 0; i < myMonologues.Length; i++)
             {
                 myMonologues[i].ResetStringText(monoNumbers[i]);
@@ -88,17 +89,23 @@ public class MonologueTrigger : MonoBehaviour
         if(npcMovement.waitingToGiveMonologue == false)
         {
             //tell npc to go to monologue point 
-            if(monologuePoint)
-                npcMovement.NavigateToPoint(monologuePoint.position);
+            if (monologuePoint)
+            {
+                npcMovement.SetIdle();
+                npcMovement.NavigateToPoint(monologuePoint.position, true);
+            }
             //wait to give monologue when you arrive 
-            npcMovement.waitingToGiveMonologue = true;
+            else
+            {
+                npcMovement.SetIdle();
+                npcMovement.waitingToGiveMonologue = true;
+            }
         }
         ToggleInteractUI(playerInZone);
     }
 
     public void PlayerExitedZone()
     {
-
         playerInZone = false;
         tpc.canJump = true;
         ToggleInteractUI(playerInZone);
