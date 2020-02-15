@@ -461,6 +461,26 @@ public class Inventory : MonoBehaviour {
         return toolGroup;
     }
 
+
+    //looks in inventory Items to see if there is a Tool of this type
+    public Item CheckForMiscItem(Item.MiscType misc)
+    {
+        Item miscGroup = null;
+
+        for (int i = 0; i < myItems.Count; i++)
+        {
+            //return first miscgroup that matches the misc type 
+            if (myItems[i].GetComponent<Item>().miscType == misc)
+            {
+                miscGroup = myItems[i].GetComponent<Item>();
+                return miscGroup;
+            }
+        }
+
+        //returns null if we never find that misc type 
+        return miscGroup;
+    }
+
     //add item to an already acquired item type (for tools)
     public void AddItemToGroup(Item itemGroup, GameObject itemToAdd)
     {

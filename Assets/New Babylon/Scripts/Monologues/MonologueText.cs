@@ -54,6 +54,7 @@ public class MonologueText : MonoBehaviour
     public bool inMonologue;
     private bool isTyping = false;
     IEnumerator currentTypingLine;
+    IEnumerator waitForNextLine;
 
     [Header("Text Timing")]
     public float timeBetweenLetters;
@@ -119,16 +120,6 @@ public class MonologueText : MonoBehaviour
         //speaker is typing out message
         if (isTyping)
         {
-            //check for player
-            if (player != null)
-            {
-                //reeset if too far from Monologue
-                if (Vector3.Distance(transform.position, player.transform.position) > resetDistance)
-                {
-                    ResetMonologue();
-                }
-            }
-
             //player skips to the end of the line
             if (Input.GetKeyDown(KeyCode.Space) && canSkip)
             {
@@ -138,9 +129,10 @@ public class MonologueText : MonoBehaviour
                 }
 
                 //set to full line
-                CompleteTextLine(textLines[currentLine]);
+                if (isTyping)
+                    CompleteTextLine(textLines[currentLine]);
 
-                StartCoroutine(WaitToProgressLine());
+                SetWaitForNextLine();
             }
 
         }
@@ -150,10 +142,16 @@ public class MonologueText : MonoBehaviour
             //player skips to next line
             if (Input.GetKeyDown(KeyCode.Space) && canSkip)
             {
+                if (waitForNextLine != null)
+                {
+                    StopCoroutine(waitForNextLine);
+                }
+
                 ProgressLine();
             }
         }
-        
+
+
     }
 
     void ProgressLine()
@@ -167,20 +165,25 @@ public class MonologueText : MonoBehaviour
             hasFinished = true;
             ResetMonologue();
         }
+        //set next typing line 
         else
         {
-            //this debug helps find the wait times for the current line of Monologue
-            //Debug.Log(hostObj.name + " is on line " + currentLine + " which reads: " + textLines[currentLine] + " -- " + hostObj.name + " will wait " + waitTimes[currentLine].ToString() + "sec before speaking again!");
-            if(currentTypingLine != null)
-            {
-                StopCoroutine(currentTypingLine);
-            }
-            currentTypingLine = TextScroll(textLines[currentLine]);
-
-            StartCoroutine(currentTypingLine);
-
+            SetTypingLine();
         }
     }
+
+    //calls text scroll coroutine 
+    void SetTypingLine()
+    {
+        if (currentTypingLine != null)
+        {
+            StopCoroutine(currentTypingLine);
+        }
+        currentTypingLine = TextScroll(textLines[currentLine]);
+
+        StartCoroutine(currentTypingLine);
+    }
+
 
     //Coroutine that types out each letter individually
     private IEnumerator TextScroll(string lineOfText) 
@@ -216,44 +219,10 @@ public class MonologueText : MonoBehaviour
         }
 
         //player waited to read full line
-        if(isTyping)
+        if (isTyping)
             CompleteTextLine(lineOfText);
 
-        waiting = true;
-
-        //if conversational, use the array of wait Timers set publicly
-        if (conversational)
-        {
-            yield return new WaitForSeconds(waitTimes[currentLine]);
-        }
-        else
-        {
-            yield return new WaitForSeconds(timeBetweenLines);
-        }
-        
-
-        ProgressLine();
-
-    }
-
-    //start wait for next line after spacebar skip
-    IEnumerator WaitToProgressLine()
-    {
-        yield return new WaitForEndOfFrame();
-
-        waiting = true;
-
-        //if conversational, use the array of wait Timers set publicly
-        if (conversational)
-        {
-            yield return new WaitForSeconds(waitTimes[currentLine]);
-        }
-        else
-        {
-            yield return new WaitForSeconds(timeBetweenLines);
-        }
-        
-        ProgressLine();
+        SetWaitForNextLine();
     }
 
     //completes current line of text
@@ -264,6 +233,40 @@ public class MonologueText : MonoBehaviour
         else
             theText.text = lineOfText;
         isTyping = false;
+    }
+
+    //calls wait for next line coroutine 
+    void SetWaitForNextLine()
+    {
+        //start waiting coroutine 
+        if (waitForNextLine != null)
+        {
+            StopCoroutine(waitForNextLine);
+        }
+
+        //check what the wait time for this line should be 
+        if (conversational)
+        {
+            waitForNextLine = WaitToProgressLine(waitTimes[currentLine]);
+        }
+        else
+        {
+            waitForNextLine = WaitToProgressLine(timeBetweenLines);
+        }
+
+        StartCoroutine(waitForNextLine);
+    }
+
+    //start wait for next line after spacebar skip
+    IEnumerator WaitToProgressLine(float time)
+    {
+        yield return new WaitForEndOfFrame();
+
+        waiting = true;
+
+        yield return new WaitForSeconds(time);
+
+        ProgressLine();
     }
 
     public void ResetStringText(int stringInList)

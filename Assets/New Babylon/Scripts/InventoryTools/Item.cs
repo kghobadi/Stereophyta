@@ -7,6 +7,7 @@ public class Item : MonoBehaviour {
     //types
     public ItemType itemType;
     public ToolType toolType;
+    public MiscType miscType;
     // only used if this is a multiple tool group, and it is the first picked up
     public List<GameObject> toolGroup;
     public SeedType seedType;
@@ -15,12 +16,17 @@ public class Item : MonoBehaviour {
 
     public enum ItemType
     {
-        TOOL, SEED,
+        TOOL, SEED, MISC,
     }
 
     public enum ToolType
     {
         AX, WATER, SICKLE, WINDSTAFF, PICKAX,
+    }
+
+    public enum MiscType
+    {
+        MEDINETTLES, CRABS,
     }
 
     public enum SeedType
