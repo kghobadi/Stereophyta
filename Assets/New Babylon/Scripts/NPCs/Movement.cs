@@ -138,6 +138,7 @@ namespace NPC
                     }
 
                 }
+                //looping waypoints npc 
                 else if (npcType == NPCMovementTypes.WAYPOINT)
                 {
                     if (stateTimer < 0 && !waving)
@@ -162,7 +163,10 @@ namespace NPC
                     {
                         if (distFromPlayer < interactDistance || stateTimer < 0)
                         {
-                            SetWaypoint(false);
+                            if (waypointCounter < waypoints.Length - 1)
+                            {
+                                SetWaypoint(false);
+                            }
                         }
                     }
                     //waiting to give monologue -- look at player 
@@ -180,8 +184,6 @@ namespace NPC
             //state check
             if (controller.npcState == Controller.NPCStates.MOVING)
             {
-                
-
                 //looks at targetPos when not waving 
                 if (!waving)
                 {
@@ -248,7 +250,6 @@ namespace NPC
             controller.npcState = Controller.NPCStates.IDLE;
         }
         
-
         //resets state timer to float time + random range 
         void ResetStateTimer(float time)
         {
@@ -286,7 +287,7 @@ namespace NPC
             //set point to cast from 
             Vector3 castPoint = waypoints[waypointCounter].position;
 
-            NavigateToPoint(castPoint);
+            NavigateToPoint(castPoint, false);
         }
 
         //this function sets a random point as the nav mesh destination
@@ -298,11 +299,11 @@ namespace NPC
 
             Vector3 castPoint = new Vector3(xz.x + origPosition.x, transform.position.y + 10, xz.y + origPosition.z);
 
-            NavigateToPoint(castPoint);
+            NavigateToPoint(castPoint, false);
         }
 
         //base function for actually navigating to a point 
-        public virtual void NavigateToPoint(Vector3 castPoint)
+        public virtual void NavigateToPoint(Vector3 castPoint, bool hasMono)
         {
             RaycastHit hit;
             // Does the ray intersect any objects excluding the player layer
@@ -318,6 +319,10 @@ namespace NPC
             //set moving 
             controller.npcState = Controller.NPCStates.MOVING;
             npcAnimations.SetAnimator("walking");
+
+            //character will wait when it arrives at point 
+            if (hasMono)
+                waitingToGiveMonologue = true;
         }
 
         //public call for wave

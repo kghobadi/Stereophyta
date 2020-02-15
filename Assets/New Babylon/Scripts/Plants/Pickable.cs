@@ -63,7 +63,7 @@ public class Pickable : AudioHandler {
             //play pick up sound 
             PlayRandomSoundRandomPitch(pickUps, myAudioSource.volume);
 
-            Debug.Log(gameObject.name + " was picked!");
+            //Debug.Log(gameObject.name + " was picked!");
         }
         
     }
