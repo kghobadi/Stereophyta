@@ -49,7 +49,7 @@ public class PlayerBounding : MonoBehaviour
         //zMax boundary
         if (transform.position.z > zMax)
         {
-            Vector3 teleportPos = new Vector3(transform.position.x, transform.position.y + 50f, zMin + teleportOffset );
+            Vector3 teleportPos = new Vector3(transform.position.x, transform.position.y + 50f, zMin + teleportOffset);
 
             SetPositions(teleportPos);
         }
