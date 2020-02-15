@@ -57,17 +57,17 @@ public class Zone : MonoBehaviour {
 
         SetZoneSpawners();
 
+       
+    }
+
+    void Start()
+    {
         //set player to this as starting zone 
         if (startingZone)
         {
             ActivateZone();
             tpc.transform.position = startingSpot.position;
         }
-    }
-
-    void Start()
-    {
-       
     }
 
     void SetZoneSpawners()

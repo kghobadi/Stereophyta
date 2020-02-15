@@ -5,39 +5,40 @@ using UnityEngine;
 public class FootstepTrigger : MonoBehaviour
 {
     ThirdPersonController tpc;
-    public bool playerTriggered = false;
+    public bool triggered = false;
     public AudioClip[] desiredFootsteps, lastFootsteps;
 
     private void Awake()
     {
         tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
-        //take this line out when we need new footstep triggers 
-        desiredFootsteps = tpc.woodSteps;
     }
 
     //player enters trigger, switch to desiredFootsteps
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "Player")
+        if(other.gameObject.tag == "Player" || other.gameObject.tag == "NPC")
         {
-            lastFootsteps = tpc.currentFootsteps;
-            tpc.currentFootsteps = desiredFootsteps;
-            tpc.currentStep = 0;
-           
-            playerTriggered = true;
+            Footsteps footsteps = other.gameObject.GetComponent<Footsteps>();
+
+            lastFootsteps = footsteps.currentFootsteps;
+            footsteps.currentFootsteps = desiredFootsteps;
+            footsteps.currentSound = 0;
+
+            triggered = true;
         }
     }
 
     //player exits trigger, switch back
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "Player")
+        if (other.gameObject.tag == "Player" || other.gameObject.tag == "NPC")
         {
-            //need to change this if i need more footstep triggers 
-            tpc.currentFootsteps = tpc.grassSteps;
-            tpc.currentStep = 0;
+            Footsteps footsteps = other.gameObject.GetComponent<Footsteps>();
 
-            playerTriggered = false;
+            footsteps.currentFootsteps = lastFootsteps;
+            footsteps.currentSound = 0;
+
+            triggered = false;
         }
     }
 }

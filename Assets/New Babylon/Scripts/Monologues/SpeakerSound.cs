@@ -34,7 +34,7 @@ public class SpeakerSound : AudioHandler
             {
                 if (!voices[voiceCounter].isPlaying)
                 {
-                    PlaySoundUp(spokenSounds);
+                    PlaySoundUp(spokenSounds, 1f);
                 }
             }
         }

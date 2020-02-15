@@ -41,8 +41,8 @@ public class Farmhouse : MonoBehaviour {
                 camManager.Set(houseCamera);
 
                 playerInventory.SetActive(false);
-                lastFootsteps = tpc.currentFootsteps;
-                tpc.currentFootsteps = tpc.woodSteps;
+                lastFootsteps = tpc.footsteps.currentFootsteps;
+                tpc.footsteps.currentFootsteps = tpc.footsteps.woodSteps;
                
                 occupied = true;
 
@@ -110,7 +110,7 @@ public class Farmhouse : MonoBehaviour {
                 camManager.Set(playerCamera);
 
                 playerInventory.SetActive(true);
-                tpc.currentFootsteps = lastFootsteps;
+                tpc.footsteps.currentFootsteps = lastFootsteps;
                 tpc.indoors = false;
                 tpc.transform.localEulerAngles = new Vector3(0, 105f, 0);
                 occupied = false;

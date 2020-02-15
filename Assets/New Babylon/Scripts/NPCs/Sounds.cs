@@ -9,7 +9,8 @@ namespace NPC
         [Header("Audio Clips")]
         public AudioClip greeting;
         public AudioClip goodbye, react, action;
-       
+        public AudioClip[] idleSounds;
+        public AudioClip[] walkingSounds;
     }
 }
 
