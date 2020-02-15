@@ -150,8 +150,6 @@ public class MonologueText : MonoBehaviour
                 ProgressLine();
             }
         }
-
-
     }
 
     void ProgressLine()
@@ -183,8 +181,7 @@ public class MonologueText : MonoBehaviour
 
         StartCoroutine(currentTypingLine);
     }
-
-
+    
     //Coroutine that types out each letter individually
     private IEnumerator TextScroll(string lineOfText) 
     {
@@ -272,7 +269,7 @@ public class MonologueText : MonoBehaviour
     public void ResetStringText(int stringInList)
     {
         textLines = (allMyMonologues[stringInList].text.Split('\n'));
-
+        currentLine = 0;
         endAtLine = textLines.Length;
     }
 

@@ -55,12 +55,14 @@ public class Footsteps : AudioHandler {
             RandomizePitch(pitchRange.x, pitchRange.y);
             PlaySoundUp(currentFootsteps, volume);
             footstepTimer = footstepTotal;
+            Debug.Log("footstep time!");
         }
     }
 	
     //leave footprints behind as you walk around
     public void SpawnFootprint()
     {
+        Debug.Log("spawned footprint");
         //set footprint obj
         GameObject footprint = null;
         footprint = footstepPooler.GrabObject();
