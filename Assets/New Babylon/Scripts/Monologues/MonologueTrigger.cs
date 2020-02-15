@@ -22,6 +22,7 @@ public class MonologueTrigger : MonoBehaviour
     public MonologueText[] myMonologues;
     public int[] monoNumbers;
     public Movement npcMovement;
+    public Transform monologuePoint;
 
     private void Awake()
     {
@@ -84,7 +85,14 @@ public class MonologueTrigger : MonoBehaviour
     {
         playerInZone = true;
         tpc.canJump = false;
-        npcMovement.waitingToGiveMonologue = true;
+        if(npcMovement.waitingToGiveMonologue == false)
+        {
+            //tell npc to go to monologue point 
+            if(monologuePoint)
+                npcMovement.NavigateToPoint(monologuePoint.position);
+            //wait to give monologue when you arrive 
+            npcMovement.waitingToGiveMonologue = true;
+        }
         ToggleInteractUI(playerInZone);
     }
 

@@ -15,7 +15,7 @@ namespace NPC
 
         //npc state manager
         public NPCStates npcState;
-        public enum NPCStates { IDLE, MOVING, TALKING, ACTING, TRADING }
+        public enum NPCStates { IDLE, MOVING, TALKING, WAVING, ACTING, TRADING }
 
         public LayerMask npcLayer;
 

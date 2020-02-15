@@ -21,19 +21,20 @@ namespace NPC
         public NavMeshAgent myNavMesh;
         Vector3 origPosition;
         public Vector3 targetPosition;
+        float distFromPlayer;
 
         //state timers 
         public float normalSpeed = 8f;
         public float stateTimer;
         public float idleTime, actionTime;
         public float interactDistance;
+        public float lookSmooth = 5f;
+
+        [Header("Waving")]
         public bool waves;
         public bool waving, hasWaved;
         public float waveTimer, waveWaitTime;
         public bool waitingToGiveMonologue;
-
-        //interaction menu
-        public float interactMenuTimer, interactMenuTimeTotal = 3f;
         
         //chosen in editor 
         public NPCMovementTypes npcType;
@@ -65,8 +66,25 @@ namespace NPC
 
         void Update()
         {
+            //set moveSpeed in animator
+            npcAnimations.characterAnimator.SetFloat("MoveSpeed", myNavMesh.velocity.magnitude);
+            //dist from player 
+            DistanceCheck();
+            //idle state
+            Idle();
+            //moving state
+            Moving();
+            //talking state
+            Talking();
+            //reset wave timer
+            WaveReset();
+        }
+
+        //checks distance from player && runs corresponding behaviors
+        void DistanceCheck()
+        {
             //distance from player calc
-            float distFromPlayer = Vector3.Distance(transform.position, player.transform.position);
+            distFromPlayer = Vector3.Distance(transform.position, player.transform.position);
 
             //check dist against talking
             if (distFromPlayer < interactDistance)
@@ -86,10 +104,13 @@ namespace NPC
             //player is far away 
             else
             {
-              
-            }
 
-            //IDLE
+            }
+        }
+
+        //NPC idle state 
+        void Idle()
+        {
             if (controller.npcState == Controller.NPCStates.IDLE)
             {
                 stateTimer -= Time.deltaTime;
@@ -99,54 +120,72 @@ namespace NPC
                     footsteps.footstepTimer = 0;
 
                 //if we are not IDLE npc, idle state has a countdown until movement 
-                if (npcType != NPCMovementTypes.IDLE && !waving)
+                if (npcType == NPCMovementTypes.IDLE)
                 {
-                    if (stateTimer < 0)
+                    //play a sound
+                    if (stateTimer < 0 && !waving)
                     {
-                        //Set destination based on npc type 
-                        if (npcType == NPCMovementTypes.RANDOM)
-                        {
-                            //Debug.Log("calling radials");
-                            SetRandomDestination();
-                        }
-                        else if (npcType == NPCMovementTypes.WAYPOINT)
-                        {
-                            //Debug.Log("calling waypoints");
-                            SetWaypoint();
-                        }
+                        npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
                     }
                 }
-
-                //waits until player is near then walks to next point 
-                if(npcType == NPCMovementTypes.PATHFINDER)
+                //Set destination based on npc type 
+                else if (npcType == NPCMovementTypes.RANDOM)
                 {
+                    if (stateTimer < 0 && !waving)
+                    {
+                        //Debug.Log("calling radials");
+                        SetRandomDestination();
+                    }
+
+                }
+                else if (npcType == NPCMovementTypes.WAYPOINT)
+                {
+                    if (stateTimer < 0 && !waving)
+                    {
+                        //Debug.Log("calling waypoints");
+                        SetWaypoint(true);
+                    }
+                }
+                //waits until player is near then walks to next point 
+                else if (npcType == NPCMovementTypes.PATHFINDER)
+                {
+                    //play sounds 
+                    if(npcSounds.myAudioSource.isPlaying == false)
+                    {
+                        if(npcSounds.idleSounds.Length > 0)
+                            npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
+                    }
+
+                    //goes to next point if timer reaches 0 or player is near 
+                    //Only does this if there are currenltly points in my list 
                     if (!waitingToGiveMonologue)
                     {
-                        //goes to next point if timer reaches 0 or player is near 
-                        if ((distFromPlayer < interactDistance || stateTimer < 0) && waypointCounter < waypoints.Length - 1)
+                        if (distFromPlayer < interactDistance || stateTimer < 0)
                         {
-                            SetWaypoint();
+                            SetWaypoint(false);
                         }
                     }
-                    //look at player
+                    //waiting to give monologue -- look at player 
                     else
                     {
-                        Vector3 lookAtPos = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
-                        transform.LookAt(lookAtPos);
+                        LookAtObject(player.transform.position, true);
                     }
                 }
             }
+        }
 
-            //set moveSpeed in animator
-            npcAnimations.characterAnimator.SetFloat("MoveSpeed", myNavMesh.velocity.magnitude);
-
-            //MOVING 
+        //MOVING state
+        void Moving()
+        {
+            //state check
             if (controller.npcState == Controller.NPCStates.MOVING)
             {
+                
+
                 //looks at targetPos when not waving 
                 if (!waving)
                 {
-                    transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z));
+                    LookAtObject(targetPosition, false);
                 }
 
                 //footsteps 
@@ -161,17 +200,43 @@ namespace NPC
                     SetIdle();
                 }
             }
+        }
 
-            //resets wave with timer
-            if (hasWaved && !waving)
+        //Talking state --
+        // can move to targetPosition, then ready to deliver monologue until player is near 
+        void Talking()
+        {
+            //state check 
+            if(controller.npcState == Controller.NPCStates.TALKING)
             {
-                waveTimer -= Time.deltaTime;
-                if (waveTimer < 0)
-                {
-                    hasWaved = false;
-                }
-            }
 
+            }
+        }
+
+        //looks at object
+        void LookAtObject(Vector3 pos, bool useMyY)
+        {
+            //empty Vector 3
+            Vector3 direction;
+
+            //use my y Pos in Look pos
+            if (useMyY)
+            {
+                //find direction from me to obj
+                Vector3 posWithMyY = new Vector3(pos.x, transform.position.y, pos.z);
+                direction = posWithMyY - transform.position;
+            }
+            //use obj y pos in Look pos
+            else
+            {
+                //find direction from me to obj
+                direction = pos - transform.position;
+            }
+           
+            //find target look
+            Quaternion targetLook = Quaternion.LookRotation(direction);
+            //actually rotate the character 
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetLook, lookSmooth * Time.deltaTime);
         }
 
         //stops movement
@@ -182,6 +247,7 @@ namespace NPC
             npcAnimations.SetAnimator("idle");
             controller.npcState = Controller.NPCStates.IDLE;
         }
+        
 
         //resets state timer to float time + random range 
         void ResetStateTimer(float time)
@@ -192,16 +258,29 @@ namespace NPC
         //this function sets a random point as the nav mesh destination
         //checks if the NPC can walk there before setting it
         //sets animator correctly
-        public virtual void SetWaypoint()
+        public virtual void SetWaypoint(bool looping)
         {
-            //increment waypoint counter
-            if (waypointCounter < waypoints.Length - 1)
+            //when it reaches final point in list, it will reset counter to 0
+            if (looping)
             {
-                waypointCounter++;
+                //increment waypoint counter
+                if (waypointCounter < waypoints.Length - 1)
+                {
+                    waypointCounter++;
+                }
+                else
+                {
+                    waypointCounter = 0;
+                }
             }
+            //just goes until last point then stops
             else
             {
-                waypointCounter = 0;
+                //increment waypoint counter
+                if (waypointCounter < waypoints.Length - 1)
+                {
+                    waypointCounter++;
+                }
             }
 
             //set point to cast from 
@@ -281,7 +360,19 @@ namespace NPC
             waving = false;
         }
 
-       
+        //resets wave action
+        void WaveReset()
+        {
+            //resets wave with timer
+            if (hasWaved && !waving)
+            {
+                waveTimer -= Time.deltaTime;
+                if (waveTimer < 0)
+                {
+                    hasWaved = false;
+                }
+            }
+        }
         
     }
 }
