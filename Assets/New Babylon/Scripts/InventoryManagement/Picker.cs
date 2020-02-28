@@ -112,8 +112,8 @@ public class Picker : MonoBehaviour {
                     }
                        
                     //look at plant
-                    Vector3 lookAtPos = new Vector3(closestPickableObj.transform.position.x, transform.position.y, closestPickableObj.transform.position.z);
-                    transform.LookAt(lookAtPos);
+                    Vector3 lookAtPos = new Vector3(closestPickableObj.transform.position.x, myAnimator.transform.position.y, closestPickableObj.transform.position.z);
+                    myAnimator.transform.LookAt(lookAtPos);
                        
                     //pick anim
                     myAnimator.SetTrigger("pick");

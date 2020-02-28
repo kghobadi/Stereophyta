@@ -333,9 +333,8 @@ public class MonologueText : MonoBehaviour
             }
 
             //player look at npc 
-            Vector3 lookAtPos = new Vector3(hostObj.transform.position.x, player.transform.position.y, hostObj.transform.position.z);
-            tpc.transform.LookAt(lookAtPos);
-            tpc.transform.Rotate(0f, 180f, 0f);
+            Vector3 lookAtPos = new Vector3(hostObj.transform.position.x, tpc.samita.transform.position.y, hostObj.transform.position.z);
+            tpc.samita.transform.LookAt(lookAtPos);
 
             tpc.playerCloak.enabled = true;
         }
