@@ -5,6 +5,10 @@ using UnityEngine;
 using InControl;
 
 public class Picker : MonoBehaviour {
+    //ref to inventory 
+    Inventory inventory;
+    Vector3 currentPos, lastPos;
+    InteractPrompt interactPrompt;
 
     //dictionary to sort nearby audio sources by distance 
     [SerializeField]
@@ -14,23 +18,36 @@ public class Picker : MonoBehaviour {
     //closest
     public Pickable closestPickableObj;
 
-    //ref to inventory 
-    Inventory inventory;
-    Vector3 currentPos, lastPos;
-    InteractPrompt interactPrompt;
+    public Animator myAnimator;
+    //for player cloak.
+    public bool player;
+    ThirdPersonController tpc;
 
+    //pick reset 
+    public bool canPick = true;
+    public float resetTime = 0.75f;
+    float resetTimer = 0f;
+    
     void Awake()
     {
         inventory = FindObjectOfType<Inventory>();
         interactPrompt = GetComponent<InteractPrompt>();
+        if (player)
+            tpc = GetComponent<ThirdPersonController>();
     }
 
     void Update()
     {
-        currentPos = transform.position;
+        SetPickablePrompt();
 
-        //get input device 
-        var inputDevice = InputManager.ActiveDevice;
+        PickInput();
+
+        PickReset();
+    }
+
+    void SetPickablePrompt()
+    {
+        currentPos = transform.position;
 
         //find pickable objects if i have moved 
         if (lastPos != currentPos)
@@ -45,6 +62,7 @@ public class Picker : MonoBehaviour {
             {
                 //show 
                 interactPrompt.pickUpMessage = closestPickableObj.pickUpText;
+                interactPrompt.pickUpSprite = closestPickableObj.pickableSprite;
                 interactPrompt.ShowPickupPrompt();
             }
 
@@ -62,15 +80,69 @@ public class Picker : MonoBehaviour {
             }
         }
 
-        //pick item 
-        if ((inputDevice.DPadRight.WasPressed || Input.GetKeyDown(KeyCode.E)))
-        {
-            if (closestPickableObj != null)
-                closestPickableObj.Pick();
-        }
-
         lastPos = transform.position;
-        
+    }
+
+    void PickInput()
+    {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
+        //pick item 
+        if ((inputDevice.DPadRight.WasPressed || Input.GetKeyDown(KeyCode.E)) && canPick)
+        {
+            //check if we can pick something 
+            if (closestPickableObj != null)
+            {
+                if (closestPickableObj.pickableObjects.Count > 0)
+                {
+                    //pick function
+                    closestPickableObj.Pick();
+
+                    //deal with player cloak & movement
+                    if (player)
+                    {
+                        tpc.playerCloak.enabled = false;
+                        tpc.playerCanMove = false;
+
+                        tpc.EnableCloak(0.25f);
+                        tpc.EnablePlayer(0.75f);
+
+                        inventory.ShowInventory();
+                    }
+                       
+                    //look at plant
+                    Vector3 lookAtPos = new Vector3(closestPickableObj.transform.position.x, transform.position.y, closestPickableObj.transform.position.z);
+                    transform.LookAt(lookAtPos);
+                       
+                    //pick anim
+                    myAnimator.SetTrigger("pick");
+
+                    //set reset 
+                    canPick = false;
+                    resetTimer = 0;
+                }
+                else
+                {
+                    //play nothing left sounds
+                    closestPickableObj.PlayRandomSoundRandomPitch(closestPickableObj.nothingLeft, closestPickableObj.myAudioSource.volume);
+                }
+            }
+        }
+    }
+
+    //resets pick ability 
+    void PickReset()
+    {
+        if(canPick == false)
+        {
+            resetTimer += Time.deltaTime;
+
+            if(resetTimer > resetTime)
+            {
+                canPick = true;
+            }
+        }
     }
 
     //this function shifts all audio source priorities dynamically
@@ -109,7 +181,6 @@ public class Picker : MonoBehaviour {
                 lowestDist = item.Value;
                 obj = item.Key;
             }
-               
         }
 
         //assign pickable to obj

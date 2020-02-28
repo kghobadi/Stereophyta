@@ -5,15 +5,19 @@ using UnityEngine;
 //abstract class for things that can be picked from plants
 // i.e. fruits, seeds, etc. 
 public class Pickable : AudioHandler {
+    [Header("Sounds")]
+    public AudioClip[] pickUps;
+    public AudioClip[] nothingLeft;
+
     Inventory playerInventory;
+    [Header("Pickable logic")]
     public List<Item> pickableObjects = new List<Item>();
     public string pickUpText;
+    public Sprite pickableSprite;
     public bool available = true;
-    public AudioClip[] pickUps;
-
     public float promptOffset = 3;
-    public int pickMin =3, pickMax = 6;
-
+    public int pickMin = 3, pickMax = 6;
+    
     public override void Awake ()
     {
         base.Awake();
@@ -64,6 +68,11 @@ public class Pickable : AudioHandler {
             PlayRandomSoundRandomPitch(pickUps, myAudioSource.volume);
 
             //Debug.Log(gameObject.name + " was picked!");
+        }
+        else
+        {
+            //play pick up sound 
+            PlayRandomSoundRandomPitch(nothingLeft, myAudioSource.volume);
         }
         
     }

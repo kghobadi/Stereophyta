@@ -559,6 +559,16 @@ public class Inventory : MonoBehaviour {
         }
     }
 
+    //fades in inventory 
+    public void ShowInventory()
+    {
+        //Items vis
+        if (fadeItems != null)
+            StopCoroutine(fadeItems);
+        fadeItems = FadeOutItemsVis();
+        StartCoroutine(fadeItems);
+    }
+
     //fade in and out Items inv
     IEnumerator FadeOutItemsVis()
     {
