@@ -67,7 +67,7 @@ public class Picker : MonoBehaviour {
             }
 
             //move interact prompt
-            interactPrompt.myWorldCanvas.transform.position = closestPickableObj.transform.position + new Vector3(0, closestPickableObj.promptOffset, 0);
+            interactPrompt.myWorldCanvas.transform.position = closestPickableObj.transform.position + closestPickableObj.promptOffset;
 
         }
         //no pickable obj 
@@ -94,7 +94,7 @@ public class Picker : MonoBehaviour {
             //check if we can pick something 
             if (closestPickableObj != null)
             {
-                if (closestPickableObj.pickableObjects.Count > 0)
+                if (closestPickableObj.activeItems> 0)
                 {
                     //pick function
                     closestPickableObj.Pick();

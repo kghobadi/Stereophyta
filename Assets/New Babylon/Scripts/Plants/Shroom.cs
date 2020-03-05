@@ -445,7 +445,7 @@ public class Shroom : RhythmProducer
     }
 
     //called when vortexing reaches player
-    void CollectShroom()
+    public void CollectShroom()
     {
         //check for my item's crop type 
         Item seedGroup = inventoryScript.CheckForShroomType(shroomType);

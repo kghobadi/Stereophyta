@@ -398,6 +398,8 @@ public class Inventory : MonoBehaviour {
         //set item count to 1 
         Item itemScript = item.GetComponent<Item>();
         itemScript.itemCount = 1;
+        //call item sprite 
+        SetItemSprite();
     }
 
     //looks in inventory Items to see if there is a Tool of this type
@@ -460,8 +462,7 @@ public class Inventory : MonoBehaviour {
         //returns null if we never find that tool type 
         return toolGroup;
     }
-
-
+    
     //looks in inventory Items to see if there is a Tool of this type
     public Item CheckForMiscItem(Item.MiscType misc)
     {
