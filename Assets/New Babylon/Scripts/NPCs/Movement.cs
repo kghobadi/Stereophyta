@@ -50,7 +50,7 @@ namespace NPC
         [Header("Random Settings")]
         public float movementRadius;
 
-        void Start()
+        void Awake()
         {
             controller = GetComponent<Controller>();
             footsteps = GetComponent<Footsteps>();
@@ -58,8 +58,11 @@ namespace NPC
             npcAnimations = controller.Animation;
             npcSounds = controller.Sounds;
             mainCam = Camera.main;
-
             myNavMesh = GetComponent<NavMeshAgent>();
+        }
+
+        void Start()
+        {
             origPosition = transform.position;
             SetIdle();
         }
