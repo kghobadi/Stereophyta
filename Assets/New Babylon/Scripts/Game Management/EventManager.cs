@@ -9,7 +9,8 @@ public class EventManager : MonoBehaviour {
 
     public UnityEvent monologues;
 
-	void Awake () {
+	void Awake ()
+    {
         sun = FindObjectOfType<Sun>();
 	}
 	

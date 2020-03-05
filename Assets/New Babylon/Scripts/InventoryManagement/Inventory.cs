@@ -481,6 +481,36 @@ public class Inventory : MonoBehaviour {
         return miscGroup;
     }
 
+    public Item FindItemGroup(Item item)
+    {
+        Item itemGroup = null;
+
+        //check for a group for this item 
+        if (item.itemType == Item.ItemType.MISC)
+            itemGroup = CheckForMiscItem(item.miscType);
+        //check for seed group
+        else if (item.itemType == Item.ItemType.SEED)
+        {
+            //crop seeds
+            if (item.seedType == Item.SeedType.CROP)
+            {
+                itemGroup = CheckForCropType(item.cropType);
+            }
+            //shroom tymme
+            else if (item.seedType == Item.SeedType.SHROOM)
+            {
+                itemGroup = CheckForShroomType(item.shroomType);
+            }
+        }
+        //check for tool type 
+        else if (item.itemType == Item.ItemType.TOOL)
+        {
+            itemGroup = CheckForToolType(item.toolType);
+        }
+
+        return itemGroup;
+    }
+
     //add item to an already acquired item type (for tools)
     public void AddItemToGroup(Item itemGroup, GameObject itemToAdd)
     {

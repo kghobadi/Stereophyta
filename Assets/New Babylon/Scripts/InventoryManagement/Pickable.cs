@@ -39,8 +39,8 @@ public class Pickable : AudioHandler {
                 {
                     if (pickableObjects[i] != null)
                     {
-                        //check for a group for this item 
-                        Item itemGroup = playerInventory.CheckForMiscItem(pickableObjects[i].miscType);
+                        //item group starts as null
+                        Item itemGroup = playerInventory.FindItemGroup(pickableObjects[i]);
 
                         //group is found    
                         if (itemGroup != null)
