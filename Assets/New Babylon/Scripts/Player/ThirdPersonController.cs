@@ -671,29 +671,7 @@ public class ThirdPersonController : MonoBehaviour
         StartCoroutine(WaitToActivateCloak(1.5f));
         StartCoroutine(WaitToEnablePlayer(1.5f));
     }
-
-    //public call for waitToactivate    
-    public void ActivateCloak(float time)
-    {
-        StartCoroutine(WaitToActivateCloak(time));
-    }
-
-    IEnumerator WaitToActivateCloak(float time)
-    {
-        yield return new WaitForSeconds(time);
-
-        playerCloak.gameObject.SetActive(true);
-    }
-
-    IEnumerator WaitToEnablePlayer(float time)
-    {
-        yield return new WaitForSeconds(time);
-
-        playerCanMove = true;
-        playerCameraController.enabled = true;
-    }
-  
-
+    
     //checking if and how we are moving to set vis effects and anims
     void SetPlayerAnimsFootsteps(Vector3 inputToCheck)
     {
@@ -893,10 +871,52 @@ public class ThirdPersonController : MonoBehaviour
         StartCoroutine(ResetSeedPitch());
     }
 
+    //USEFUL COROUTINE CALLS 
+
     IEnumerator ResetSeedPitch()
     {
         yield return new WaitForSeconds(seedAudio.clip.length);
         seedAudio.pitch = 1f;
+    }
+
+    //public call for waitToactivate    
+    public void ActivateCloak(float time)
+    {
+        StartCoroutine(WaitToActivateCloak(time));
+    }
+
+    IEnumerator WaitToActivateCloak(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        playerCloak.gameObject.SetActive(true);
+    }
+
+    //public call for wait to enable cloak component 
+    public void EnableCloak(float time)
+    {
+        StartCoroutine(WaitToEnableCloak(time));
+    }
+
+    IEnumerator WaitToEnableCloak(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        playerCloak.enabled = true;
+    }
+
+    //public call for wait to enable for player movmeent 
+    public void EnablePlayer(float time)
+    {
+        StartCoroutine(WaitToEnablePlayer(time));
+    }
+
+    IEnumerator WaitToEnablePlayer(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        playerCanMove = true;
+        playerCameraController.enabled = true;
     }
 
 }
