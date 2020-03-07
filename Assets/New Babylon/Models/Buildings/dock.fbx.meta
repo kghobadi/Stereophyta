@@ -11,6 +11,13 @@ ModelImporter:
     100010: beam6
     100012: //RootNode
     100014: platform
+    100016: dock_beam1
+    100018: dock_beam2
+    100020: dock_beam3
+    100022: dock_beam4
+    100024: dock_beam5
+    100026: dock_beam6
+    100028: dock_platform
     400000: beam1
     400002: beam2
     400004: beam3
@@ -19,6 +26,13 @@ ModelImporter:
     400010: beam6
     400012: //RootNode
     400014: platform
+    400016: dock_beam1
+    400018: dock_beam2
+    400020: dock_beam3
+    400022: dock_beam4
+    400024: dock_beam5
+    400026: dock_beam6
+    400028: dock_platform
     2100000: lambert2
     2300000: beam1
     2300002: beam2
@@ -27,6 +41,13 @@ ModelImporter:
     2300008: beam5
     2300010: beam6
     2300012: platform
+    2300014: dock_beam1
+    2300016: dock_beam2
+    2300018: dock_beam3
+    2300020: dock_beam4
+    2300022: dock_beam5
+    2300024: dock_beam6
+    2300026: dock_platform
     3300000: beam1
     3300002: beam2
     3300004: beam3
@@ -34,6 +55,13 @@ ModelImporter:
     3300008: beam5
     3300010: beam6
     3300012: platform
+    3300014: dock_beam1
+    3300016: dock_beam2
+    3300018: dock_beam3
+    3300020: dock_beam4
+    3300022: dock_beam5
+    3300024: dock_beam6
+    3300026: dock_platform
     4300000: beam6
     4300002: beam5
     4300004: beam4
@@ -41,6 +69,13 @@ ModelImporter:
     4300008: beam2
     4300010: beam1
     4300012: platform
+    4300014: dock_beam6
+    4300016: dock_beam5
+    4300018: dock_beam4
+    4300020: dock_beam3
+    4300022: dock_beam2
+    4300024: dock_beam1
+    4300026: dock_platform
     9500000: //RootNode
   externalObjects: {}
   materials:
