@@ -30,6 +30,7 @@ public class MusicFader : MonoBehaviour {
                 {
                     SetSound(musicTrack);
                     FadeIn(fadeInAmount);
+                    switchingSound = false;
                 }
             }
         }
@@ -56,6 +57,7 @@ public class MusicFader : MonoBehaviour {
     public void FadeTo(AudioClip nextTrack)
     {
         musicTrack = nextTrack;
+        switchingSound = true;
         FadeIn(fadeInAmount);
     }
 
