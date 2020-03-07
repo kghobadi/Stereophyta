@@ -1,25 +1,81 @@
 fileFormatVersion: 2
-guid: dff6a2b1c6003b24380e55abe601226a
+guid: fffd2fac94be4c04b87b9218330c57b2
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
+    100002: MC_maya:_UNKNOWN_REF_NODE_fosterParent1
+    100004: MC_maya:imagePlane1
+    100006: MC_maya:joint1
+    100008: MC_maya:joint10
+    100010: MC_maya:joint11
+    100012: MC_maya:joint12
+    100014: MC_maya:joint13
+    100016: MC_maya:joint14
+    100018: MC_maya:joint15
+    100020: MC_maya:joint2
+    100022: MC_maya:joint20
+    100024: MC_maya:joint21
+    100026: MC_maya:joint22
+    100028: MC_maya:joint23
+    100030: MC_maya:joint24
+    100032: MC_maya:joint25
+    100034: MC_maya:joint26
+    100036: MC_maya:joint27
+    100038: MC_maya:joint28
+    100040: MC_maya:joint29
+    100042: MC_maya:joint3
+    100044: MC_maya:joint30
+    100046: MC_maya:joint31
+    100048: MC_maya:joint4
+    100050: MC_maya:joint5
+    100052: MC_maya:joint6
+    100054: MC_maya:joint7
+    100056: MC_maya:joint8
+    100058: MC_maya:joint9
+    100060: MC_maya:pSphere2
     400000: //RootNode
-    2300000: //RootNode
-    3300000: //RootNode
-    4300000: pCube1
+    400002: MC_maya:_UNKNOWN_REF_NODE_fosterParent1
+    400004: MC_maya:imagePlane1
+    400006: MC_maya:joint1
+    400008: MC_maya:joint10
+    400010: MC_maya:joint11
+    400012: MC_maya:joint12
+    400014: MC_maya:joint13
+    400016: MC_maya:joint14
+    400018: MC_maya:joint15
+    400020: MC_maya:joint2
+    400022: MC_maya:joint20
+    400024: MC_maya:joint21
+    400026: MC_maya:joint22
+    400028: MC_maya:joint23
+    400030: MC_maya:joint24
+    400032: MC_maya:joint25
+    400034: MC_maya:joint26
+    400036: MC_maya:joint27
+    400038: MC_maya:joint28
+    400040: MC_maya:joint29
+    400042: MC_maya:joint3
+    400044: MC_maya:joint30
+    400046: MC_maya:joint31
+    400048: MC_maya:joint4
+    400050: MC_maya:joint5
+    400052: MC_maya:joint6
+    400054: MC_maya:joint7
+    400056: MC_maya:joint8
+    400058: MC_maya:joint9
+    400060: MC_maya:pSphere2
+    2100000: MC_maya_SkinMat_New
+    4300000: MC_maya:pSphere2
+    7400000: Take 001
     9500000: //RootNode
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: lambert1
-    second: {fileID: 2100000, guid: fbde9dfebbfdda646918457ba82c1bd5, type: 2}
+    13700000: MC_maya:pSphere2
+  externalObjects: {}
   materials:
     importMaterials: 1
     materialName: 0
     materialSearch: 1
-    materialLocation: 0
+    materialLocation: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
@@ -44,7 +100,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 50
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importVisibility: 1
@@ -69,7 +125,7 @@ ModelImporter:
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
-  importAnimation: 0
+  importAnimation: 1
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2

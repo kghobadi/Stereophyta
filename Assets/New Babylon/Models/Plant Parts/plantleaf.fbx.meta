@@ -1,17 +1,14 @@
 fileFormatVersion: 2
-guid: 3e30593285b3040bf9c0612b02279974
-timeCreated: 1523820561
-licenseType: Free
+guid: 5d85b0b093bdd4a4fb762f5d117aa4c0
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
     400000: //RootNode
-    2100000: lambert1
-    2100002: lambert2
+    2100000: plant_leaf_lambert2
     2300000: //RootNode
     3300000: //RootNode
-    4300000: pCylinder1
+    4300000: plantleaf
     7400000: Take 001
     9500000: //RootNode
   externalObjects: {}
