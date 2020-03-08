@@ -103,6 +103,10 @@ public class Pickable : AudioHandler {
                                     //adds item to inventory 
                                     playerInventory.AddItemToInventory(pickableObjects[i].gameObject, pickableObjects[i].itemSprite);
 
+                                    //set parent, local pos
+                                    pickableObjects[i].transform.SetParent(playerInventory.transform);
+                                    pickableObjects[i].transform.localPosition = playerInventory.localSeedSpot;
+
                                     //disable pickable obj 
                                     pickableObjects[i].gameObject.SetActive(false);
                                 }
@@ -129,12 +133,6 @@ public class Pickable : AudioHandler {
 
             //Debug.Log(gameObject.name + " was picked!");
         }
-        else
-        {
-            //play pick up sound 
-            PlayRandomSoundRandomPitch(nothingLeft, myAudioSource.volume);
-        }
-        
     }
 
     //adds pickable obj

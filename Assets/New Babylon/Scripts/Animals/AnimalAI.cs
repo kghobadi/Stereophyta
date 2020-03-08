@@ -52,6 +52,7 @@ public abstract class AnimalAI : AudioHandler {
     //for color lerping animal's materials
     [Header("Material Settings")]
     public SkinnedMeshRenderer myMR;
+    public Material desiredMat;
     public Color idleSilent, idleAudible, walkingSilent, walkingAudible, runningSilent, runningAudible, sleepingSilent, sleepingAudible;
     //lerps colors
     public float lerpSpeed;
@@ -66,8 +67,14 @@ public abstract class AnimalAI : AudioHandler {
 
         //get our various components
         animator = GetComponent<Animator>();
+        if(animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
         myNavMesh = GetComponent<NavMeshAgent>();
         myMR = GetComponentInChildren<SkinnedMeshRenderer>();
+        if(desiredMat)
+            myMR.materials[0] = desiredMat;
     }
 
     public virtual void Start()

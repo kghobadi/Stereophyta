@@ -57,13 +57,26 @@ public class Picker : MonoBehaviour {
         //we have a pickable obj!
         if (closestPickableObj != null)
         {
-            //interact prompt not showing 
-            if (interactPrompt.pickUpText.color.a < 1)
+            //has active items
+            if(closestPickableObj.activeItems > 0)
             {
-                //show 
-                interactPrompt.pickUpMessage = closestPickableObj.pickUpText;
-                interactPrompt.pickUpSprite = closestPickableObj.pickableSprite;
-                interactPrompt.ShowPickupPrompt();
+                //interact prompt not showing 
+                if (interactPrompt.pickUpText.color.a < 1)
+                {
+                    //show 
+                    interactPrompt.pickUpMessage = closestPickableObj.pickUpText;
+                    interactPrompt.pickUpSprite = closestPickableObj.pickableSprite;
+                    interactPrompt.ShowPickupPrompt();
+                }
+            }
+            //no active items 
+            else
+            {
+                //turn off prompt 
+                if (interactPrompt.pickUpText.color.a > 0)
+                {
+                    interactPrompt.DeactivatePrompt();
+                }
             }
 
             //move interact prompt
@@ -121,11 +134,6 @@ public class Picker : MonoBehaviour {
                     //set reset 
                     canPick = false;
                     resetTimer = 0;
-                }
-                else
-                {
-                    //play nothing left sounds
-                    closestPickableObj.PlayRandomSoundRandomPitch(closestPickableObj.nothingLeft, closestPickableObj.myAudioSource.volume);
                 }
             }
         }

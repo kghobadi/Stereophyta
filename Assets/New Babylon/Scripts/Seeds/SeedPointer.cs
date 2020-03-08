@@ -8,15 +8,17 @@ public class SeedPointer : MonoBehaviour
     public MeshRenderer arrow, ring;
     int lastSeed;
 
-
-    void Start()
+    void Awake()
     {
         //inventory ref
-        inventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
+        inventory = FindObjectOfType<Inventory>();
         //mesh renderer refs
         arrow = transform.GetChild(0).GetComponent<MeshRenderer>();
         ring = transform.GetChild(1).GetComponent<MeshRenderer>();
+    }
 
+    void Start()
+    {
         //currently has a seed active
         if (inventory.currentItemObj != null)
         {

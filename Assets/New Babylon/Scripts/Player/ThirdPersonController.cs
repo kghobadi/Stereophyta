@@ -726,12 +726,6 @@ public class ThirdPersonController : MonoBehaviour
 
             jumpWaitTimer -= Time.deltaTime;
             moveSmoothUse = movespeedSmooth;
-
-            //if animator still jumping, set back to idle
-            if (samita.Animator.GetBool("jumping") == true)
-            {
-                 samita.SetAnimator("idle");
-            }
         }
 
         //not grounded
@@ -835,7 +829,7 @@ public class ThirdPersonController : MonoBehaviour
                 jumpTrail.GetComponent<TrailRenderer>().material = bigJMat;
                 break;
         }
-        samita.SetAnimator("jumping");
+        samita.Animator.SetTrigger("jump");
         jumping = true;
         jumpTrail.GetComponent<TrailRenderer>().enabled = true;
         jumpWaitTimer = jumpWaitTime;
