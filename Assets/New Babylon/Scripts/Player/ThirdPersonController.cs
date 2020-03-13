@@ -322,21 +322,22 @@ public class ThirdPersonController : MonoBehaviour
     {
         //get input device 
         var inputDevice = InputManager.ActiveDevice;
-        //mouse
-        if (playerCameraController.mouseControls)
-        {
-            //z axis
-            forwardInput = new Vector3(0, 0, Input.GetAxis("Vertical"));
-            //x axis
-            horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
-        }
-        //controller
-        else
+        
+        //controller 
+        if (inputDevice.DeviceClass == InputDeviceClass.Controller)
         {
             //left stick y
             forwardInput = new Vector3(0, 0, inputDevice.LeftStickY);
             //left stick x
             horizontalInput = new Vector3(inputDevice.LeftStickX, 0, 0);
+        }
+        //mouse
+        else
+        {
+            //z axis
+            forwardInput = new Vector3(0, 0, Input.GetAxis("Vertical"));
+            //x axis
+            horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
         }
 
         //forward movement calculations

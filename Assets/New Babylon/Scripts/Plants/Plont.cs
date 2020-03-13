@@ -347,7 +347,8 @@ public class Plont : MonoBehaviour {
             if (cropBundles[currentStage] != null)
             {
                 cropBundles[currentStage].SetActive(true);
-                pickable.AddPickableObj(cropBundles[currentStage].GetComponent<Item>());
+                if(pickable)
+                    pickable.AddPickableObj(cropBundles[currentStage].GetComponent<Item>());
             }
                 
             currentStage++;
