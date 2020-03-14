@@ -1,18 +1,19 @@
 fileFormatVersion: 2
-guid: 34b409c501fc7414782b1ad9d8e07901
+guid: 9ad85c1dddbc86d498568302f85ab2e4
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
     400000: //RootNode
-    2100000: lambert2
+    2100000: axe_lambert3
+    2100002: lambert1
     2300000: //RootNode
     3300000: //RootNode
-    4300000: pianoseed
+    4300000: tool_axe
     9500000: //RootNode
   externalObjects: {}
   materials:
-    importMaterials: 0
+    importMaterials: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -84,7 +85,7 @@ ModelImporter:
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   additionalBone: 0
   userData: 

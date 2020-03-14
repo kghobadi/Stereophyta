@@ -1,7 +1,5 @@
 fileFormatVersion: 2
 guid: 71aab991e3dd60e4793e272348cc48a8
-timeCreated: 1549406449
-licenseType: Free
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
@@ -266,7 +264,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: lambert3
-    second: {fileID: 2100000, guid: d0cca693921ffed4a84d0c29575a7162, type: 2}
+    second: {fileID: 2100000, guid: bea5faf7df8726c4b868328aa0341491, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
@@ -309,6 +307,8 @@ ModelImporter:
     optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
