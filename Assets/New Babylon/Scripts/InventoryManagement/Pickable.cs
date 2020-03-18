@@ -65,12 +65,36 @@ public class Pickable : AudioHandler {
                             //group is found    
                             if (itemGroup != null)
                             {
-                                //add pickable obj to item group 
-                                playerInventory.AddItemToGroup(itemGroup, pickableObjects[i].gameObject);
+                                //seed 
+                                if (pickableObjects[i].itemType == Item.ItemType.SEED)
+                                {
+                                    //we want to just deactivate the shroom... (return to pool)
+                                    if (pickableObjects[i].seedType == Item.SeedType.SHROOM)
+                                    {
+                                        Shroom shroomScript = GetComponent<Shroom>();
 
-                                //disable pickable obj
-                                pickableObjects[i].gameObject.SetActive(false);
+                                        shroomScript.CollectShroom();
+                                    }
+                                    else
+                                    {
+                                        //add pickable obj to item group 
+                                        playerInventory.AddItemToGroup(itemGroup, pickableObjects[i].gameObject);
 
+                                        //disable pickable obj
+                                        if (pickableObjects[i].gameObject.activeSelf)
+                                            pickableObjects[i].gameObject.SetActive(false);
+                                    }
+                                }
+                                else
+                                {
+                                    //add pickable obj to item group 
+                                    playerInventory.AddItemToGroup(itemGroup, pickableObjects[i].gameObject);
+
+                                    //disable pickable obj
+                                    if (pickableObjects[i].gameObject.activeSelf)
+                                        pickableObjects[i].gameObject.SetActive(false);
+                                }
+                               
                                 activeItems--;
                             }
                             //none in inventory, add to inventory

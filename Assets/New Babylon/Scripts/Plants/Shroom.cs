@@ -323,8 +323,9 @@ public class Shroom : RhythmProducer
         {
             randomScale = 0.5f + (increment * mushroomSize);
         }
-        
+
         //set scale
+        transform.localScale = inherentScale;
         transform.localScale *= randomScale;
         originalSize = transform.localScale;
         largeSize = originalSize * 2;
@@ -496,8 +497,7 @@ public class Shroom : RhythmProducer
         hasReleasedSpores = false;
         transform.localScale = inherentScale;
         vortexSpeed = vortexOrig;
-        plantingState = PlantingState.PLANTED;
-     
+
         //the return...
         myZone.zoneSaver.RemoveShroom(this);
         shroomPooler.ReturnObject(gameObject);

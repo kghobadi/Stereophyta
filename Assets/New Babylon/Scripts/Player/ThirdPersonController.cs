@@ -711,7 +711,7 @@ public class ThirdPersonController : MonoBehaviour
 
                 //start jump trail deactivation
                 jumpTrail.transform.SetParent(null);
-                jumpTrail.GetComponent<JumpTrail>().StartCoroutine(jumpTrail.GetComponent<JumpTrail>().Deactivate());
+                jumpTrail.GetComponent<JumpTrail>().ClearTrail();
                 //dust fall rhythm
                 //hit down
                 RaycastHit hitD;
@@ -812,6 +812,7 @@ public class ThirdPersonController : MonoBehaviour
         //PlayJumpSound();
         //jump trail activation
         jumpTrail = jumpTrailPool.GrabObject();
+        TrailRenderer actualTrail = jumpTrail.GetComponent<TrailRenderer>();
         jumpTrail.transform.SetParent(characterBody);
         jumpTrail.transform.localPosition = Vector3.zero;
         //set various jump speeds
@@ -819,20 +820,21 @@ public class ThirdPersonController : MonoBehaviour
         {
             case 0:
                 verticalSpeed = smallJump;
-                jumpTrail.GetComponent<TrailRenderer>().material = smallJMat;
+                actualTrail.material = smallJMat;
                 break;
             case 1:
                 verticalSpeed = midJump;
-                jumpTrail.GetComponent<TrailRenderer>().material = midJMat;
+                actualTrail.material = midJMat;
                 break;
             case 2:
                 verticalSpeed = bigJump;
-                jumpTrail.GetComponent<TrailRenderer>().material = bigJMat;
+                actualTrail.material = bigJMat;
                 break;
         }
         samita.Animator.SetTrigger("jump");
         jumping = true;
-        jumpTrail.GetComponent<TrailRenderer>().enabled = true;
+        actualTrail.enabled = true;
+        actualTrail.Clear();
         jumpWaitTimer = jumpWaitTime;
         jumpCharger = 0;
         lastJumpType = jumpType;

@@ -36,7 +36,7 @@ public class SwimmableWater : MonoBehaviour {
                 {
                     tpc.jumping = false;
                     tpc.jumpTrail.transform.SetParent(null);
-                    tpc.jumpTrail.GetComponent<JumpTrail>().StartCoroutine(tpc.jumpTrail.GetComponent<JumpTrail>().Deactivate());
+                    tpc.jumpTrail.GetComponent<JumpTrail>().ClearTrail();
 
                     //bring down move speed 
                     tpc.currentMovement /= 3;
