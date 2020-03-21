@@ -1,85 +1,32 @@
 fileFormatVersion: 2
-guid: 4a9c81a3126c99a44ab7e7c5cf778206
+guid: 7972f29ba8446bc4ba9937d6dd2a26de
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
-    100000: beam1
-    100002: beam2
-    100004: beam3
-    100006: beam4
-    100008: beam5
-    100010: beam6
-    100012: //RootNode
-    100014: platform
-    100016: dock_beam1
-    100018: dock_beam2
-    100020: dock_beam3
-    100022: dock_beam4
-    100024: dock_beam5
-    100026: dock_beam6
-    100028: dock_platform
-    400000: beam1
-    400002: beam2
-    400004: beam3
-    400006: beam4
-    400008: beam5
-    400010: beam6
-    400012: //RootNode
-    400014: platform
-    400016: dock_beam1
-    400018: dock_beam2
-    400020: dock_beam3
-    400022: dock_beam4
-    400024: dock_beam5
-    400026: dock_beam6
-    400028: dock_platform
-    2100000: lambert2
-    2300000: beam1
-    2300002: beam2
-    2300004: beam3
-    2300006: beam4
-    2300008: beam5
-    2300010: beam6
-    2300012: platform
-    2300014: dock_beam1
-    2300016: dock_beam2
-    2300018: dock_beam3
-    2300020: dock_beam4
-    2300022: dock_beam5
-    2300024: dock_beam6
-    2300026: dock_platform
-    3300000: beam1
-    3300002: beam2
-    3300004: beam3
-    3300006: beam4
-    3300008: beam5
-    3300010: beam6
-    3300012: platform
-    3300014: dock_beam1
-    3300016: dock_beam2
-    3300018: dock_beam3
-    3300020: dock_beam4
-    3300022: dock_beam5
-    3300024: dock_beam6
-    3300026: dock_platform
-    4300000: beam6
-    4300002: beam5
-    4300004: beam4
-    4300006: beam3
-    4300008: beam2
-    4300010: beam1
-    4300012: platform
-    4300014: dock_beam6
-    4300016: dock_beam5
-    4300018: dock_beam4
-    4300020: dock_beam3
-    4300022: dock_beam2
-    4300024: dock_beam1
-    4300026: dock_platform
+    100000: //RootNode
+    100002: smallpetal:group1
+    100004: smallpetal:polySurface1
+    100006: smallpetal:smallseed:polySurface2
+    100008: smallpetal_center
+    100010: smallpetal_petal
+    400000: //RootNode
+    400002: smallpetal:group1
+    400004: smallpetal:polySurface1
+    400006: smallpetal:smallseed:polySurface2
+    400008: smallpetal_center
+    400010: smallpetal_petal
+    2100000: lambert1
+    2300000: smallpetal:polySurface1
+    2300002: smallpetal:smallseed:polySurface2
+    3300000: smallpetal:polySurface1
+    3300002: smallpetal:smallseed:polySurface2
+    4300000: smallpetal:polySurface1
+    4300002: smallpetal:smallseed:polySurface2
+    7400000: Take 001
     9500000: //RootNode
   externalObjects: {}
   materials:
-    importMaterials: 0
+    importMaterials: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -107,7 +54,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 250
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importVisibility: 1
@@ -132,7 +79,7 @@ ModelImporter:
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
-  importAnimation: 0
+  importAnimation: 1
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2
@@ -148,10 +95,10 @@ ModelImporter:
     rootMotionBoneName: 
     rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
-    hasExtraRoot: 1
+    hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
