@@ -8,6 +8,7 @@ public class Inventory : MonoBehaviour {
     //player control ref
     GameObject player;
     ThirdPersonController tpc;
+    Picker playerPicker;
 
     //Items inv
     [Header("Items Inv")]
@@ -48,6 +49,7 @@ public class Inventory : MonoBehaviour {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        playerPicker = player.GetComponent<Picker>();
         inventoryAudio = GetComponent<AudioSource>();
         tempoIndicator = tpc.GetComponent<TempoIndication>();
     }
@@ -94,16 +96,24 @@ public class Inventory : MonoBehaviour {
             //switch current item +
             if ((inputDevice.DPadRight || Input.GetKey(KeyCode.E)) && canSwitchItems && myItems.Count > 1)
             {
-                if(currentItemScript.itemType == Item.ItemType.SEED)
+                //only change if no pickable objs nearby 
+                if(playerPicker.closestPickableObj == null)
                 {
-                    if (currentItemScript.CheckSeedPlanting())
+                    if (currentItemScript.itemType == Item.ItemType.SEED)
+                    {
+                        if (currentItemScript.CheckSeedPlanting())
+                        {
+                            SwitchItem(true, true);
+                        }
+                    }
+                    else if (currentItemScript.itemType == Item.ItemType.TOOL)
                     {
                         SwitchItem(true, true);
                     }
-                }
-                else if (currentItemScript.itemType == Item.ItemType.TOOL)
-                {
-                    SwitchItem(true, true);
+                    else if (currentItemScript.itemType == Item.ItemType.MISC)
+                    {
+                        SwitchItem(true, true);
+                    }
                 }
             }
 
@@ -118,6 +128,10 @@ public class Inventory : MonoBehaviour {
                     }
                 }
                 else if (currentItemScript.itemType == Item.ItemType.TOOL)
+                {
+                    SwitchItem(false, true);
+                }
+                else if (currentItemScript.itemType == Item.ItemType.MISC)
                 {
                     SwitchItem(false, true);
                 }
@@ -252,7 +266,7 @@ public class Inventory : MonoBehaviour {
                 
         } 
         //set seed selected 
-        if(currentItemScript.itemType == Item.ItemType.SEED)
+        else if(currentItemScript.itemType == Item.ItemType.SEED)
         {
             currentItemScript.SelectSeed();
             if (currentItemScript.itemCount > 0)
@@ -271,7 +285,17 @@ public class Inventory : MonoBehaviour {
                 }
             }
         }
-            
+
+        //if its a misc
+        if (currentItemScript.itemType == Item.ItemType.MISC)
+        {
+            SetItemSprite();
+            if (audio)
+            {
+                inventoryAudio.PlayOneShot(switchItems);
+            }
+        }
+
         //reset timer so not infinite switch
         inputTimer = 0.25f;
         canSwitchItems = false;
@@ -398,6 +422,8 @@ public class Inventory : MonoBehaviour {
         //set item count to 1 
         Item itemScript = item.GetComponent<Item>();
         itemScript.itemCount = 1;
+        //call item sprite 
+        SetItemSprite();
     }
 
     //looks in inventory Items to see if there is a Tool of this type
@@ -407,12 +433,14 @@ public class Inventory : MonoBehaviour {
 
         for (int i = 0; i < myItems.Count; i++)
         {
+            Item item = myItems[i].GetComponent<Item>();
+
             //return first crop type that matches the crop type 
-            if (myItems[i].GetComponent<Item>().itemType == Item.ItemType.SEED
-                && myItems[i].GetComponent<Item>().seedType == Item.SeedType.CROP
-                && myItems[i].GetComponent<Item>().cropType == cropSeed)
+            if (item.itemType == Item.ItemType.SEED
+                && item.seedType == Item.SeedType.CROP
+                && item.cropType == cropSeed)
             {
-                seedGroup = myItems[i].GetComponent<Item>();
+                seedGroup = item;
                 return seedGroup;
             }
         }
@@ -428,12 +456,14 @@ public class Inventory : MonoBehaviour {
 
         for (int i = 0; i < myItems.Count; i++)
         {
+            Item item = myItems[i].GetComponent<Item>();
+
             //return first shroom type that matches the shroom 
-            if (myItems[i].GetComponent<Item>().itemType == Item.ItemType.SEED
-                && myItems[i].GetComponent<Item>().seedType == Item.SeedType.SHROOM
-                && myItems[i].GetComponent<Item>().shroomType == shroom)
+            if (item.itemType == Item.ItemType.SEED
+                && item.seedType == Item.SeedType.SHROOM
+                && item.shroomType == shroom)
             {
-                seedGroup = myItems[i].GetComponent<Item>();
+                seedGroup = item;
                 return seedGroup;
             }
         }
@@ -449,10 +479,13 @@ public class Inventory : MonoBehaviour {
 
         for(int i = 0; i < myItems.Count; i++)
         {
+            Item item = myItems[i].GetComponent<Item>();
+
             //return first toolgroup that matches the tool type 
-            if(myItems[i].GetComponent<Item>().toolType == tool)
+            if (item.itemType == Item.ItemType.TOOL &&
+                item.toolType == tool)
             {
-                toolGroup = myItems[i].GetComponent<Item>();
+                toolGroup = item;
                 return toolGroup;
             }
         }
@@ -460,8 +493,7 @@ public class Inventory : MonoBehaviour {
         //returns null if we never find that tool type 
         return toolGroup;
     }
-
-
+    
     //looks in inventory Items to see if there is a Tool of this type
     public Item CheckForMiscItem(Item.MiscType misc)
     {
@@ -469,8 +501,11 @@ public class Inventory : MonoBehaviour {
 
         for (int i = 0; i < myItems.Count; i++)
         {
+            Item item = myItems[i].GetComponent<Item>();
+
             //return first miscgroup that matches the misc type 
-            if (myItems[i].GetComponent<Item>().miscType == misc)
+            if (item.itemType == Item.ItemType.MISC &&
+                item.miscType == misc)
             {
                 miscGroup = myItems[i].GetComponent<Item>();
                 return miscGroup;
@@ -516,6 +551,9 @@ public class Inventory : MonoBehaviour {
     {
         itemGroup.itemCount++;
         itemGroup.toolGroup.Add(itemToAdd);
+
+        //call item sprite 
+        SetItemSprite();
     }
 
     //switches to gameObject item

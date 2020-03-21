@@ -88,6 +88,9 @@ public class Plont : MonoBehaviour {
         PIANO, BLISTERPIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR, TRUMPET
     }
 
+    //pickable stuff
+    Pickable pickable;
+
     void Awake()
     {
         //hail the sun
@@ -110,6 +113,7 @@ public class Plont : MonoBehaviour {
         {
             plantAnimator = GetComponent<Animator>();
         }
+        pickable = GetComponent<Pickable>();
 
         FetchRenderers();
 
@@ -341,8 +345,12 @@ public class Plont : MonoBehaviour {
         {
             //set active next crop bundle
             if (cropBundles[currentStage] != null)
+            {
                 cropBundles[currentStage].SetActive(true);
-
+                if(pickable)
+                    pickable.AddPickableObj(cropBundles[currentStage].GetComponent<Item>());
+            }
+                
             currentStage++;
 
             //if older than 1
@@ -353,7 +361,7 @@ public class Plont : MonoBehaviour {
 
                 if (randomSpawn < seedSpawnChance && spawnsSeeds)
                 {
-                    SpawnSeed();
+                    SpawnSeed(cropBundles[currentStage - 1].transform);
                 }
             }
 
@@ -371,7 +379,7 @@ public class Plont : MonoBehaviour {
             //spawn a bunch of seeds and die
             for (int i = 0; i < randomDrop; i++)
             {
-                SpawnSeed();
+                SpawnSeed(cropBundles[currentStage - 1].transform);
             }
 
             //from old age
@@ -485,11 +493,15 @@ public class Plont : MonoBehaviour {
         if (randomChance > 50 || currentStage == 1)
         {
             //SPAWN SEED HERE
-            SpawnSeed();
+            SpawnSeed(cropBundles[currentStage - 1].transform);
         }
 
+        //deactivate crop bundle 
         if (cropBundles[currentStage - 1] != null)
+        {
             cropBundles[currentStage - 1].SetActive(false);
+            pickable.RemovePickableObj(cropBundles[currentStage - 1].GetComponent<Item>());
+        }
     }
 
     //called by water or rains
@@ -546,9 +558,9 @@ public class Plont : MonoBehaviour {
     }
 
     //spawn seed from object pooler script 
-    void SpawnSeed()
+    public void SpawnSeed(Transform objPos)
     {
-        Vector3 spawnPos = cropBundles[currentStage - 1].transform.position + Random.insideUnitSphere * 1 + new Vector3(0, 1, 0);
+        Vector3 spawnPos = objPos.position + Random.insideUnitSphere * 1 + new Vector3(0, 1, 0);
         GameObject newSeed = seedPooler.GrabObject();
         newSeed.transform.position = spawnPos;
         newSeed.GetComponent<Seed>().plontPooler = plontPooler;
@@ -569,7 +581,7 @@ public class Plont : MonoBehaviour {
 
                 if (randomChanceToDropSeed < 1f)
                 {
-                    SpawnSeed();
+                    SpawnSeed(cropBundles[currentStage - 1].transform);
                 }
             }
             //walking

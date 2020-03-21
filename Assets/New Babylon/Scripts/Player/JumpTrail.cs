@@ -10,8 +10,13 @@ public class JumpTrail : MonoBehaviour {
         _pooledObj = GetComponent<PooledObject>();
         myTrail = GetComponent<TrailRenderer>();
 	}
+
+    public void ClearTrail()
+    {
+        StartCoroutine(Deactivate());
+    }
 	
-    public IEnumerator Deactivate()
+    IEnumerator Deactivate()
     {
         yield return new WaitForSeconds(myTrail.time);
 

@@ -57,17 +57,30 @@ public class Picker : MonoBehaviour {
         //we have a pickable obj!
         if (closestPickableObj != null)
         {
-            //interact prompt not showing 
-            if (interactPrompt.pickUpText.color.a < 1)
+            //has active items
+            if(closestPickableObj.activeItems > 0)
             {
-                //show 
-                interactPrompt.pickUpMessage = closestPickableObj.pickUpText;
-                interactPrompt.pickUpSprite = closestPickableObj.pickableSprite;
-                interactPrompt.ShowPickupPrompt();
+                //interact prompt not showing 
+                if (interactPrompt.pickUpText.color.a < 1)
+                {
+                    //show 
+                    interactPrompt.pickUpMessage = closestPickableObj.pickUpText;
+                    interactPrompt.pickUpSprite = closestPickableObj.pickableSprite;
+                    interactPrompt.ShowPickupPrompt();
+                }
+            }
+            //no active items 
+            else
+            {
+                //turn off prompt 
+                if (interactPrompt.pickUpText.color.a > 0)
+                {
+                    interactPrompt.DeactivatePrompt();
+                }
             }
 
             //move interact prompt
-            interactPrompt.myWorldCanvas.transform.position = closestPickableObj.transform.position + new Vector3(0, closestPickableObj.promptOffset, 0);
+            interactPrompt.myWorldCanvas.transform.position = closestPickableObj.transform.position + closestPickableObj.promptOffset;
 
         }
         //no pickable obj 
@@ -94,7 +107,7 @@ public class Picker : MonoBehaviour {
             //check if we can pick something 
             if (closestPickableObj != null)
             {
-                if (closestPickableObj.pickableObjects.Count > 0)
+                if (closestPickableObj.activeItems> 0)
                 {
                     //pick function
                     closestPickableObj.Pick();
@@ -121,11 +134,6 @@ public class Picker : MonoBehaviour {
                     //set reset 
                     canPick = false;
                     resetTimer = 0;
-                }
-                else
-                {
-                    //play nothing left sounds
-                    closestPickableObj.PlayRandomSoundRandomPitch(closestPickableObj.nothingLeft, closestPickableObj.myAudioSource.volume);
                 }
             }
         }

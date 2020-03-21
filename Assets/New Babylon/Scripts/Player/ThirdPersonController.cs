@@ -322,21 +322,22 @@ public class ThirdPersonController : MonoBehaviour
     {
         //get input device 
         var inputDevice = InputManager.ActiveDevice;
-        //mouse
-        if (playerCameraController.mouseControls)
-        {
-            //z axis
-            forwardInput = new Vector3(0, 0, Input.GetAxis("Vertical"));
-            //x axis
-            horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
-        }
-        //controller
-        else
+        
+        //controller 
+        if (inputDevice.DeviceClass == InputDeviceClass.Controller)
         {
             //left stick y
             forwardInput = new Vector3(0, 0, inputDevice.LeftStickY);
             //left stick x
             horizontalInput = new Vector3(inputDevice.LeftStickX, 0, 0);
+        }
+        //mouse
+        else
+        {
+            //z axis
+            forwardInput = new Vector3(0, 0, Input.GetAxis("Vertical"));
+            //x axis
+            horizontalInput = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
         }
 
         //forward movement calculations
@@ -710,7 +711,7 @@ public class ThirdPersonController : MonoBehaviour
 
                 //start jump trail deactivation
                 jumpTrail.transform.SetParent(null);
-                jumpTrail.GetComponent<JumpTrail>().StartCoroutine(jumpTrail.GetComponent<JumpTrail>().Deactivate());
+                jumpTrail.GetComponent<JumpTrail>().ClearTrail();
                 //dust fall rhythm
                 //hit down
                 RaycastHit hitD;
@@ -726,12 +727,6 @@ public class ThirdPersonController : MonoBehaviour
 
             jumpWaitTimer -= Time.deltaTime;
             moveSmoothUse = movespeedSmooth;
-
-            //if animator still jumping, set back to idle
-            if (samita.Animator.GetBool("jumping") == true)
-            {
-                 samita.SetAnimator("idle");
-            }
         }
 
         //not grounded
@@ -817,6 +812,7 @@ public class ThirdPersonController : MonoBehaviour
         //PlayJumpSound();
         //jump trail activation
         jumpTrail = jumpTrailPool.GrabObject();
+        TrailRenderer actualTrail = jumpTrail.GetComponent<TrailRenderer>();
         jumpTrail.transform.SetParent(characterBody);
         jumpTrail.transform.localPosition = Vector3.zero;
         //set various jump speeds
@@ -824,20 +820,21 @@ public class ThirdPersonController : MonoBehaviour
         {
             case 0:
                 verticalSpeed = smallJump;
-                jumpTrail.GetComponent<TrailRenderer>().material = smallJMat;
+                actualTrail.material = smallJMat;
                 break;
             case 1:
                 verticalSpeed = midJump;
-                jumpTrail.GetComponent<TrailRenderer>().material = midJMat;
+                actualTrail.material = midJMat;
                 break;
             case 2:
                 verticalSpeed = bigJump;
-                jumpTrail.GetComponent<TrailRenderer>().material = bigJMat;
+                actualTrail.material = bigJMat;
                 break;
         }
-        samita.SetAnimator("jumping");
+        samita.Animator.SetTrigger("jump");
         jumping = true;
-        jumpTrail.GetComponent<TrailRenderer>().enabled = true;
+        actualTrail.enabled = true;
+        actualTrail.Clear();
         jumpWaitTimer = jumpWaitTime;
         jumpCharger = 0;
         lastJumpType = jumpType;

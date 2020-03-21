@@ -303,15 +303,16 @@ public class ShroomSeed : MonoBehaviour {
         //generate clone and set Plont script values
         shroomClone = shroomPooler.GrabObject();
         shroomClone.transform.position = plantSpawnPos;
+        //check for active
+        if (shroomClone.activeSelf == false)
+            shroomClone.SetActive(true);
+        //script ref 
         Shroom shroomScript = shroomClone.GetComponent<Shroom>();
+        //poolers
         shroomScript.shroomPrefab = shroomPrefab;
         shroomScript.shroomPooler = shroomPooler;
-
         //set that shroom
-        if (shroomScript.plantingState != Shroom.PlantingState.PLANTED)
-        {
-            shroomScript.SetShroom();
-        }
+        shroomScript.SetShroom();
 
         //add info to Plont if on Grid 
         if (plantingOnGrid)

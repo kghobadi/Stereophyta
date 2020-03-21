@@ -19,7 +19,9 @@ public class Shroom : RhythmProducer
 
     //for inv
     Inventory inventoryScript;
-   
+    //picking
+    Pickable pickable;
+
     //tgs logic
     [HideInInspector] public TerrainGridSystem tgs;
     [HideInInspector] public Zone myZone;
@@ -100,6 +102,7 @@ public class Shroom : RhythmProducer
         shroomAnimator = GetComponent<Animator>();
         shroomMR = GetComponent<MeshRenderer>();
         shroomSource = GetComponent<AudioSource>();
+        pickable = GetComponent<Pickable>();
         
         //particles
         beatParticles = transform.GetChild(2).GetComponent<ParticleSystem>();
@@ -320,8 +323,9 @@ public class Shroom : RhythmProducer
         {
             randomScale = 0.5f + (increment * mushroomSize);
         }
-        
+
         //set scale
+        transform.localScale = inherentScale;
         transform.localScale *= randomScale;
         originalSize = transform.localScale;
         largeSize = originalSize * 2;
@@ -345,6 +349,8 @@ public class Shroom : RhythmProducer
         shroomAnimator.SetBool("planted", true);
         blowing = false;
         BreatheIn();
+        //set pickable
+        pickable.activeItems = pickable.pickableObjects.Count;
     }
 
     //called when other rhythm sources influence shroom
@@ -445,7 +451,7 @@ public class Shroom : RhythmProducer
     }
 
     //called when vortexing reaches player
-    void CollectShroom()
+    public void CollectShroom()
     {
         //check for my item's crop type 
         Item seedGroup = inventoryScript.CheckForShroomType(shroomType);
@@ -454,7 +460,6 @@ public class Shroom : RhythmProducer
         if (seedGroup != null)
         {
             seedGroup.itemCount++;
-            ResetShroom();
         }
         //not in inventory, so instantiate shroomSeed & add it. 
         else
@@ -468,7 +473,9 @@ public class Shroom : RhythmProducer
             shroomSeed.GetComponent<ShroomSeed>().shroomPooler = shroomPooler;
             shroomSeed.SetActive(false);
         }
-        
+
+        //send this shroom packing!
+        ResetShroom();
         tpc.SeedCollect();
     }
 
@@ -490,6 +497,7 @@ public class Shroom : RhythmProducer
         hasReleasedSpores = false;
         transform.localScale = inherentScale;
         vortexSpeed = vortexOrig;
+
         //the return...
         myZone.zoneSaver.RemoveShroom(this);
         shroomPooler.ReturnObject(gameObject);

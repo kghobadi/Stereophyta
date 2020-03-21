@@ -105,7 +105,7 @@ public class UseBoat : PickUp {
             {
                 tpc.jumping = false;
                 tpc.jumpTrail.transform.SetParent(null);
-                tpc.jumpTrail.GetComponent<JumpTrail>().StartCoroutine(tpc.jumpTrail.GetComponent<JumpTrail>().Deactivate());
+                tpc.jumpTrail.GetComponent<JumpTrail>().ClearTrail();
             }
 
             //check for swimming
