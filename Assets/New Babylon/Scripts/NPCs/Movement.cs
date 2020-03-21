@@ -35,6 +35,7 @@ namespace NPC
         public bool waving, hasWaved;
         public float waveTimer, waveWaitTime;
         public bool waitingToGiveMonologue;
+        public float monologueWaitTimer = 0f, monoWaitTime = 30f;
         
         //chosen in editor 
         public NPCMovementTypes npcType;
@@ -176,6 +177,15 @@ namespace NPC
                     else
                     {
                         LookAtObject(player.transform.position, true);
+
+                        monologueWaitTimer += Time.deltaTime;
+
+                        if(monologueWaitTimer > monoWaitTime)
+                        {
+                            waitingToGiveMonologue = false;
+
+                            monologueWaitTimer = 0;
+                        }
                     }
                 }
             }
@@ -325,7 +335,9 @@ namespace NPC
 
             //character will wait when it arrives at point 
             if (hasMono)
+            {
                 waitingToGiveMonologue = true;
+            }
         }
 
         //public call for wave

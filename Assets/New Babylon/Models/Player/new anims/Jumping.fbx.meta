@@ -1,7 +1,5 @@
 fileFormatVersion: 2
 guid: 3b43f54506e89394d958e633d4bc16c5
-timeCreated: 1564088519
-licenseType: Free
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
@@ -183,8 +181,8 @@ ModelImporter:
     - serializedVersion: 16
       name: jumper
       takeName: mixamo.com
-      firstFrame: 0
-      lastFrame: 66
+      firstFrame: 6
+      lastFrame: 46
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -224,6 +222,8 @@ ModelImporter:
     optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88

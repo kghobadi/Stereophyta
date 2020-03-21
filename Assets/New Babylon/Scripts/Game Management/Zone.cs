@@ -65,8 +65,9 @@ public class Zone : MonoBehaviour {
         //set player to this as starting zone 
         if (startingZone)
         {
-            ActivateZone();
             tpc.transform.position = startingSpot.position;
+
+            StartCoroutine(WaitToActivate(0.1f));
         }
     }
 
@@ -93,6 +94,13 @@ public class Zone : MonoBehaviour {
                 ActivateZone();
             }
         }
+    }
+
+    IEnumerator WaitToActivate(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        ActivateZone();
     }
 
     public void ActivateZone()
@@ -186,10 +194,14 @@ public class Zone : MonoBehaviour {
     public void DeactivateZone()
     {
         playerInZone = false;
-        tpc.currentZone = null;
-        tpc.currentZoneName = "Ocean";
-        Ocean.TransitionTo(3f);
-
+        //check that we are just leaving this zone and Not teleported directly to a new one 
+        if(tpc.currentZone == this)
+        {
+            tpc.currentZone = null;
+            tpc.currentZoneName = "Ocean";
+            Ocean.TransitionTo(3f);
+        }
+        
         //save what's in the zone
         zoneSaver.SaveGameData();
         //Debug.Log("Player left zone: " + zoneName);

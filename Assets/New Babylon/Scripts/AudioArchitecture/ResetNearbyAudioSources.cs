@@ -47,7 +47,7 @@ public class ResetNearbyAudioSources : MonoBehaviour {
             i++;
         }
 
-        int priority = 0;
+        int priority = 10;
         //sort the dictionary by order of ascending distance away
         foreach (KeyValuePair<AudioSource, float> item in soundCreators.OrderBy(key => key.Value))
         {
