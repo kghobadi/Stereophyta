@@ -1,31 +1,24 @@
 fileFormatVersion: 2
-guid: 06d91cfa19755384aa601d315ece3821
+guid: 1632f9b8a2fc51244b54c731f195dfe7
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
-    100002: windmill_base
-    100004: windmill_railing
-    100006: windmill_top
+    100002: coolBed_unknown_purpose:pCube3
+    100004: coolBed_unknown_purpose:pCube4
     400000: //RootNode
-    400002: windmill_base
-    400004: windmill_railing
-    400006: windmill_top
-    2100000: lambert2
-    2100002: lambert3
-    2300000: windmill_base
-    2300002: windmill_railing
-    2300004: windmill_top
-    3300000: windmill_base
-    3300002: windmill_railing
-    3300004: windmill_top
-    4300000: windmill_top
-    4300002: windmill_railing
-    4300004: windmill_base
+    400002: coolBed_unknown_purpose:pCube3
+    400004: coolBed_unknown_purpose:pCube4
+    2100000: coolBed_unknown_purpose_bedFrame
+    2100002: coolBed_unknown_purpose_mattress1
+    2100004: coolBed_unknown_purpose_pillow
+    2300000: coolBed_unknown_purpose:pCube4
+    3300000: coolBed_unknown_purpose:pCube4
+    4300000: coolBed_unknown_purpose:pCube4
     9500000: //RootNode
   externalObjects: {}
   materials:
-    importMaterials: 0
+    importMaterials: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -53,7 +46,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 50
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importVisibility: 1
@@ -78,7 +71,7 @@ ModelImporter:
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
-  importAnimation: 0
+  importAnimation: 1
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2
@@ -94,10 +87,10 @@ ModelImporter:
     rootMotionBoneName: 
     rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
-    hasExtraRoot: 1
+    hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
