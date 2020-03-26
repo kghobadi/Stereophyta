@@ -1,20 +1,17 @@
 fileFormatVersion: 2
-guid: a61a7bf074555864ab26b1dd8fae7444
+guid: 4ca451339ca28d44191c877ed9b76c83
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
     400000: //RootNode
+    2100000: lambert1
     2300000: //RootNode
     3300000: //RootNode
-    4300000: polySurface9
+    4300000: rockface
+    4300002: rockmedium
     9500000: //RootNode
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: lambert2
-    second: {fileID: 2100000, guid: c9ef7bd8402b00e46b2580c13e665a45, type: 2}
+  externalObjects: {}
   materials:
     importMaterials: 0
     materialName: 0
@@ -44,7 +41,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 100
+    globalScale: 50
     meshCompression: 0
     addColliders: 0
     importVisibility: 1
@@ -88,7 +85,7 @@ ModelImporter:
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
