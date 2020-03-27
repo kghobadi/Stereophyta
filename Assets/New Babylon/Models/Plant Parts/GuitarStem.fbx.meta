@@ -1,19 +1,18 @@
 fileFormatVersion: 2
-guid: 3e2b3110f876a0649b3414c6f9bfefcc
+guid: 391f289df71c63d45b5967e7ae32234e
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
     400000: //RootNode
-    2100000: lambert1
+    2100000: plant_stem_lambert2
     2300000: //RootNode
     3300000: //RootNode
-    4300000: guitarplantpetal
-    7400000: Take 001
+    4300000: plantstem
     9500000: //RootNode
   externalObjects: {}
   materials:
-    importMaterials: 1
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -41,7 +40,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 150
+    globalScale: 17
     meshCompression: 0
     addColliders: 0
     importVisibility: 1
@@ -85,7 +84,7 @@ ModelImporter:
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
