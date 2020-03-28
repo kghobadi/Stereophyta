@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ec7cafdf20528ef48809847265c8ba9b
+guid: 83320fd5bf76f8e49b6f722abc3a7980
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
@@ -8,7 +8,7 @@ ModelImporter:
     2100000: lambert2
     2300000: //RootNode
     3300000: //RootNode
-    4300000: canoe
+    4300000: axewind
     9500000: //RootNode
   externalObjects: {}
   materials:

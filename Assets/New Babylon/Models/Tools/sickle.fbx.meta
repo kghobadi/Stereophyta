@@ -1,14 +1,15 @@
 fileFormatVersion: 2
-guid: ec7cafdf20528ef48809847265c8ba9b
+guid: f30ffc8f58a327c41b7f2bec3b1cb115
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
     400000: //RootNode
-    2100000: lambert2
+    2100000: color1
+    2100002: lambert1
     2300000: //RootNode
     3300000: //RootNode
-    4300000: canoe
+    4300000: sickle
     9500000: //RootNode
   externalObjects: {}
   materials:

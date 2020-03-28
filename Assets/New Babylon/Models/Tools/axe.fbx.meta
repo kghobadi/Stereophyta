@@ -1,14 +1,17 @@
 fileFormatVersion: 2
-guid: ec7cafdf20528ef48809847265c8ba9b
+guid: 133d1b6e34acc8b44b7ece25941d449e
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
     400000: //RootNode
-    2100000: lambert2
+    2100000: axe_lambert3
+    2100002: lambert2
+    2100004: lambert3
     2300000: //RootNode
     3300000: //RootNode
-    4300000: canoe
+    4300000: axe1
+    4300002: axe
     9500000: //RootNode
   externalObjects: {}
   materials:
@@ -65,7 +68,7 @@ ModelImporter:
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
-  importAnimation: 1
+  importAnimation: 0
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2
