@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using InControl;
+using Cameras;
 
 public class Inventory : MonoBehaviour {
     //player control ref
@@ -44,6 +45,12 @@ public class Inventory : MonoBehaviour {
     //tempo indicator
     TempoIndication tempoIndicator;
 
+    [Header("Inventory Overview")]
+    public bool inventoryOverviewEnabled;
+    CameraManager camManager;
+    public GameCamera inventoryCamera;
+    GameCamera lastCamera;
+
     void Awake()
     { 
         //player refs
@@ -52,6 +59,7 @@ public class Inventory : MonoBehaviour {
         playerPicker = player.GetComponent<Picker>();
         inventoryAudio = GetComponent<AudioSource>();
         tempoIndicator = tpc.GetComponent<TempoIndication>();
+        camManager = FindObjectOfType<CameraManager>();
     }
 
     void Start () {
@@ -80,7 +88,8 @@ public class Inventory : MonoBehaviour {
         fadeItems = FadeOutItemsVis();
     }
 	
-	void Update () {
+	void Update ()
+    {
         //timer for switching Items
         inputTimer -= Time.deltaTime;
         if(inputTimer < 0)
@@ -89,68 +98,19 @@ public class Inventory : MonoBehaviour {
         }
         
         if (!tpc.menuOpen && !tpc.jumping)
-        { 
-            //get input device 
-            var inputDevice = InputManager.ActiveDevice;
+        {
+            SwitchItemInputs();
 
-            //switch current item +
-            if ((inputDevice.DPadRight || Input.GetKey(KeyCode.E)) && canSwitchItems && myItems.Count > 1)
+            //inventory overview 
+            if (Input.GetKeyDown(KeyCode.I) && canSwitchItems)
             {
-                //only change if no pickable objs nearby 
-                if(playerPicker.closestPickableObj == null)
+                if (inventoryOverviewEnabled)
                 {
-                    if (currentItemScript.itemType == Item.ItemType.SEED)
-                    {
-                        if (currentItemScript.CheckSeedPlanting())
-                        {
-                            SwitchItem(true, true);
-                        }
-                    }
-                    else if (currentItemScript.itemType == Item.ItemType.TOOL)
-                    {
-                        SwitchItem(true, true);
-                    }
-                    else if (currentItemScript.itemType == Item.ItemType.MISC)
-                    {
-                        SwitchItem(true, true);
-                    }
+                    DisableInventoryOverview();
                 }
-            }
-
-            //switch current item -
-            if ((inputDevice.DPadLeft || Input.GetKey(KeyCode.Q)) && canSwitchItems && myItems.Count > 1)
-            {
-                if (currentItemScript.itemType == Item.ItemType.SEED)
+                else
                 {
-                    if (currentItemScript.CheckSeedPlanting())
-                    {
-                        SwitchItem(false, true);
-                    }
-                }
-                else if (currentItemScript.itemType == Item.ItemType.TOOL)
-                {
-                    SwitchItem(false, true);
-                }
-                else if (currentItemScript.itemType == Item.ItemType.MISC)
-                {
-                    SwitchItem(false, true);
-                }
-            }
-
-            if(currentItemScript != null)
-            {
-                //auto switch to next seed with a count if you run out of item
-                if (currentItemScript.itemCount == 0 && myItems.Count > 1 && currentItemScript.CheckSeedPlanting())
-                {
-                    SwitchItem(lastSwitch, false);
-                }
-            }
-            else
-            {
-                //switch to first & only item 
-                if(myItems.Count == 1)
-                {
-                    SwitchToItem(myItems[0]);
+                    EnableInventoryOverview();
                 }
             }
         }
@@ -168,6 +128,101 @@ public class Inventory : MonoBehaviour {
         }
 
         SetItemText();
+    }
+
+    void EnableInventoryOverview()
+    {
+        lastCamera = camManager.currentCamera;
+        camManager.Set(inventoryCamera);
+
+        tpc.playerCanMove = false;
+
+        //reset timer so not infinite switch
+        inputTimer = 0.25f;
+        canSwitchItems = false;
+
+        inventoryOverviewEnabled = true;
+    }
+
+    void DisableInventoryOverview()
+    {
+        camManager.Set(lastCamera);
+        tpc.playerCanMove = true;
+
+        //reset timer so not infinite switch
+        inputTimer = 0.25f;
+        canSwitchItems = false;
+
+        inventoryOverviewEnabled = false;
+    }
+
+    void SwitchItemInputs()
+    {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
+        //switch current item +
+        if ((inputDevice.DPadRight || Input.GetKey(KeyCode.E)) && canSwitchItems && myItems.Count > 1)
+        {
+            //only change if no pickable objs nearby 
+            if (playerPicker.closestPickableObj == null)
+            {
+                if (currentItemScript.itemType == Item.ItemType.SEED)
+                {
+                    if (currentItemScript.CheckSeedPlanting())
+                    {
+                        SwitchItem(true, true);
+                    }
+                }
+                else if (currentItemScript.itemType == Item.ItemType.TOOL)
+                {
+                    SwitchItem(true, true);
+                }
+                else if (currentItemScript.itemType == Item.ItemType.MISC)
+                {
+                    SwitchItem(true, true);
+                }
+            }
+        }
+
+        //switch current item -
+        if ((inputDevice.DPadLeft || Input.GetKey(KeyCode.Q)) && canSwitchItems && myItems.Count > 1)
+        {
+            if (currentItemScript.itemType == Item.ItemType.SEED)
+            {
+                if (currentItemScript.CheckSeedPlanting())
+                {
+                    SwitchItem(false, true);
+                }
+            }
+            else if (currentItemScript.itemType == Item.ItemType.TOOL)
+            {
+                SwitchItem(false, true);
+            }
+            else if (currentItemScript.itemType == Item.ItemType.MISC)
+            {
+                SwitchItem(false, true);
+            }
+        }
+
+
+        //auto switch
+        if (currentItemScript != null)
+        {
+            //auto switch to next seed with a count if you run out of item
+            if (currentItemScript.itemCount == 0 && myItems.Count > 1 && currentItemScript.CheckSeedPlanting())
+            {
+                SwitchItem(lastSwitch, false);
+            }
+        }
+        else
+        {
+            //switch to first & only item 
+            if (myItems.Count == 1)
+            {
+                SwitchToItem(myItems[0]);
+            }
+        }
     }
 
     //alter count of current seed

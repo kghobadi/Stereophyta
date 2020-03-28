@@ -163,7 +163,7 @@ public class Picker : MonoBehaviour {
         int i = 0;
         while (i < hitColliders.Length)
         {
-            Debug.Log("found something");
+            //Debug.Log("found something");
             GameObject pickableObj = hitColliders[i].gameObject;
 
             //check to see if obj is pickable 
