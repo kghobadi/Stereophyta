@@ -1,14 +1,21 @@
 fileFormatVersion: 2
-guid: ec7cafdf20528ef48809847265c8ba9b
+guid: d69f17b8781daaf439c2102a9ce60502
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
+    100002: pickaxe_handle
+    100004: pickaxe_top
     400000: //RootNode
+    400002: pickaxe_handle
+    400004: pickaxe_top
     2100000: lambert2
-    2300000: //RootNode
-    3300000: //RootNode
-    4300000: canoe
+    2300000: pickaxe_handle
+    2300002: pickaxe_top
+    3300000: pickaxe_handle
+    3300002: pickaxe_top
+    4300000: pickaxe_handle
+    4300002: pickaxe_top
     9500000: //RootNode
   externalObjects: {}
   materials:
@@ -81,7 +88,7 @@ ModelImporter:
     rootMotionBoneName: 
     rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
-    hasExtraRoot: 0
+    hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 0
