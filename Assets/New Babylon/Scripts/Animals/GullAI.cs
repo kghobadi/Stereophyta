@@ -1,0 +1,240 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class GullAI : RhythmProducer
+{
+    GullAnimation gullAnim;
+    MoveTowards mover;
+
+    [Header("Gull AI Settings")]
+    public GullStates gullStates;
+    public enum GullStates
+    {
+        IDLE, FLYING, DIVING, ASCENDING,
+    }
+
+    //move states 
+    public float flightSpeed, diveSpeed, glideSpeed;
+    float origGlideSpeed;
+    public Transform[] idlePoints, divePoints, ascentPoints;
+    Vector3 lookPoint;
+
+    //IDLE 
+    Vector3 glidePoint, hoverPoint;
+    public bool gliding;
+    public float maxDistFromGlidePoint = 3f;
+
+    [Header("Dive Values")]
+    public float diveChance = 25f;
+    bool canDive = true;
+    public float diveReset = 0.5f;
+    float diveTimer = 0f;
+
+    public  override void Awake()
+    {
+        base.Awake();
+        gullAnim = GetComponent<GullAnimation>();
+        mover = GetComponent<MoveTowards>();
+        origGlideSpeed = glideSpeed;
+    }
+
+    void Start()
+    {
+        SetTimeScale();
+
+        //select point from array 
+        int index = Random.Range(0, idlePoints.Length);
+        Vector3 point = idlePoints[index].position;
+
+        transform.position = point;
+        SetIdle(point);
+    }
+
+    void Update()
+    {
+        //IDLE
+        if(gullStates == GullStates.IDLE)
+        {
+            //dist from glide point 
+            float dist = Vector3.Distance(transform.position, glidePoint);
+
+            //glide 
+            if (gliding)
+            {
+                Glide(dist);
+            }
+            //adjust
+            else
+            {
+                Adjust(dist);
+            }
+              
+            //dive on space for now (will be triggered by Aud spectrum)
+            if (showRhythm)
+            {
+                DiveCheck();
+            }
+
+            DiveReset();
+        }
+
+        //DIVE
+        if(gullStates == GullStates.DIVING)
+        {
+            transform.LookAt(lookPoint);
+
+            //stopped moving, ascend
+            if (mover.moving == false)
+            {
+                Ascend();
+            }
+        }
+
+        //ASCEND
+        if (gullStates == GullStates.ASCENDING)
+        {
+            transform.LookAt(lookPoint);
+
+            //stopped moving, fly to idle 
+            if (mover.moving == false)
+            {
+                FlyToIdle();
+            }
+        }
+
+        //FLYING 
+        if (gullStates == GullStates.FLYING)
+        {
+            transform.LookAt(lookPoint);
+
+            //stopped moving, fly to idle 
+            if (mover.moving == false)
+            {
+                SetIdle(mover.destination);
+            }
+        }
+    }
+
+    //called while idling to 'glide' in wind 
+    void Glide(float dist)
+    {
+        //move towards hover point 
+        if (dist < maxDistFromGlidePoint)
+            transform.position = Vector3.MoveTowards(transform.position, hoverPoint, glideSpeed * Time.deltaTime);
+        else
+        {
+            //fly
+            gullAnim.SetAnimator("flying");
+            gliding = false;
+        }
+    }
+
+    //moves gull towards glide point 
+    void Adjust(float dist)
+    {
+        //move towards glid point origin 
+        if (dist > 0.5f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, glidePoint, glideSpeed * Time.deltaTime);
+        }
+        //sets glide 
+        else
+        {
+            hoverPoint = glidePoint + (Random.insideUnitSphere * (maxDistFromGlidePoint * 5));
+            gullAnim.SetAnimator("idle");
+            glideSpeed = origGlideSpeed + Random.Range(-5f, 5f);
+            gliding = true;
+        }
+    }
+
+    //return to idling state
+    void SetIdle(Vector3 point)
+    {
+        //set glide & hover
+        glidePoint = point;
+        hoverPoint = glidePoint + (Random.insideUnitSphere * maxDistFromGlidePoint * 5);
+      
+        //set anim & state 
+        gullAnim.SetAnimator("idle");
+        gliding = true;
+        gullStates = GullStates.IDLE;
+        canDive = true;
+    }
+
+    //check if the seagull should dive 
+    void DiveCheck()
+    {
+        //random chance to dive 
+        if (canDive)
+        {
+            float dive = Random.Range(0f, 100f);
+
+            if (dive < diveChance)
+            {
+                Dive();
+            }
+
+            diveTimer = 0;
+            canDive = false;
+        }
+    }
+
+    //dive ability Reset 
+    void DiveReset()
+    {
+        if(!canDive)
+        {
+            diveTimer += Time.deltaTime;
+            if (diveTimer > diveReset)
+            {
+                canDive = true;
+            }
+        }
+    }
+
+    //seagull dives towards a dive point 
+    void Dive()
+    {
+        SetMove(divePoints, diveSpeed);
+        gullStates = GullStates.DIVING;
+        gullAnim.SetAnimator("diving");
+    }
+
+    //called once gull reaches dive point 
+    void Ascend()
+    {
+        SetMove(ascentPoints, diveSpeed);
+        gullStates = GullStates.ASCENDING;
+        gullAnim.SetAnimator("flying");
+    }
+
+    //fly from ascent point back to idle point 
+    void FlyToIdle()
+    {
+        SetMove(idlePoints, flightSpeed);
+        gullStates = GullStates.FLYING;
+        gullAnim.SetAnimator("flying");
+    }
+
+    //move gull towards a point or transform at speed 
+    void SetMove(Transform[] points, float speed)
+    {
+        //select point from array 
+        int index = Random.Range(0, points.Length);
+        Vector3 point = points[index].position;
+        //randomize speed
+        float newSpeed = speed + Random.Range(-50f, 50f);
+        //set move towards 
+        mover.MoveTo(point, newSpeed);
+        lookPoint = point;
+    }
+
+    //set seagull time scale
+    public void SetTimeScale()
+    {
+        timeScale = Random.Range(0, 5);
+
+        //should affect the speeds of my behaviors depending on what time scale right??
+    }
+}
