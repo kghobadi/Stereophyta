@@ -19,6 +19,7 @@ public class GullAI : RhythmProducer
     float origGlideSpeed;
     public Transform[] idlePoints, divePoints, ascentPoints;
     Vector3 lookPoint;
+    public float idleSoundTimer;
 
     //IDLE 
     Vector3 glidePoint, hoverPoint;
@@ -30,6 +31,11 @@ public class GullAI : RhythmProducer
     bool canDive = true;
     public float diveReset = 0.5f;
     float diveTimer = 0f;
+
+    [Header("Sounds")]
+    public AudioClip[] idles;
+    public AudioClip[] dives;
+    public AudioClip[] ascends;
 
     public  override void Awake()
     {
@@ -75,6 +81,8 @@ public class GullAI : RhythmProducer
             {
                 DiveCheck();
             }
+
+            SoundCountdown(idles, idleSoundTimer);
 
             DiveReset();
         }
@@ -199,6 +207,7 @@ public class GullAI : RhythmProducer
         SetMove(divePoints, diveSpeed);
         gullStates = GullStates.DIVING;
         gullAnim.SetAnimator("diving");
+        showRhythm = false;
     }
 
     //called once gull reaches dive point 

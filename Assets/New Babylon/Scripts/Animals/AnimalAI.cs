@@ -32,7 +32,7 @@ public abstract class AnimalAI : AudioHandler {
     public AudioClip[] walking, running, sleeping;
     public AudioClip interruptSound;
     //frequency timers for all the various sounds to play out
-    public float nextNoteIn = 0.25f, soundTimerTotal = 0.25f, walkTimerTotal = 0.5f, runTimerTotal = 0.15f, sleepTimerTotal = 0.5f;
+    public float idleTimerTotal = 0.25f, walkTimerTotal = 0.5f, runTimerTotal = 0.15f, sleepTimerTotal = 0.5f;
 
     
     //radius within which crab can move, and movement speeds
@@ -112,7 +112,7 @@ public abstract class AnimalAI : AudioHandler {
                 moveTimer = moveTimerTotal ;
             }
 
-            SoundCountdown(idle);
+            SoundCountdown(idle, idleTimerTotal);
             SetLerpColor(idleAudible, idleSilent);
         }
 
@@ -124,7 +124,7 @@ public abstract class AnimalAI : AudioHandler {
             //How would we make it dynamically look forward rather than always face its final destination?
             transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z));
             SetLerpColor(walkingAudible, walkingSilent);
-            SoundCountdown(walking);
+            SoundCountdown(walking, walkTimerTotal);
 
             //stop running after we are close to position
             if(Vector3.Distance(transform.position, targetPosition) < SetIdleDistance)
@@ -139,7 +139,7 @@ public abstract class AnimalAI : AudioHandler {
             //animal looks at the point it will be running to
             transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z));
             SetLerpColor(runningAudible, runningSilent);
-            SoundCountdown(running);
+            SoundCountdown(running, runTimerTotal);
 
             //stop running after we are close to position
             if (Vector3.Distance(transform.position, targetPosition) < SetIdleDistance)
@@ -159,14 +159,13 @@ public abstract class AnimalAI : AudioHandler {
         if (sunScript.timeState == Sun.TimeState.NIGHT && animalState != AnimalAIStates.SLEEPING)
         {
             animalState = AnimalAIStates.SLEEPING;
-            soundTimerTotal = sleepTimerTotal;
             SetAnimator("sleeping");
         }
 
         //what the animal does while sleeping
         if(animalState == AnimalAIStates.SLEEPING)
         {
-            SoundCountdown(sleeping);
+            SoundCountdown(sleeping, sleepTimerTotal);
             SetLerpColor(sleepingAudible, sleepingSilent);
 
             //once it's morning, return to idle
@@ -184,20 +183,7 @@ public abstract class AnimalAI : AudioHandler {
         }
 
     }
-
-    //countsdown for next sound to play, uses sound array to play it 
-    public virtual void SoundCountdown(AudioClip[] sounds)
-    {
-        nextNoteIn -= Time.deltaTime;
-
-        if (nextNoteIn < 0)
-        {
-            PlayRandomSound(sounds, 1f);
-
-            nextNoteIn = soundTimerTotal;
-        }
-    }
-
+    
     //lerps the animals colors 
     public virtual void SetLerpColor(Color audible, Color silent)
     {
@@ -214,7 +200,6 @@ public abstract class AnimalAI : AudioHandler {
     //called to set running away from player state
     public virtual void RunAway()
     {
-        soundTimerTotal = runTimerTotal;
         myNavMesh.speed = runSpeed;
         returnPos = transform.position;
         SetDestination(false);
@@ -225,7 +210,6 @@ public abstract class AnimalAI : AudioHandler {
     {
         myNavMesh.speed = walkSpeed;
         myNavMesh.isStopped = true;
-        soundTimerTotal = walkTimerTotal;
         SetAnimator("idle");
         animalState = AnimalAIStates.IDLE;
     }
