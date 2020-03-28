@@ -1,15 +1,22 @@
 fileFormatVersion: 2
-guid: ad2c35bcff23f8a4185aabc7af626a33
+guid: 532677b9eadfbe44081eb6694661d5e9
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
+    100002: windfan_base
+    100004: windfan_blade
     400000: //RootNode
-    2100000: DRUM_ROCK_BASE_old_lambert4
-    2300000: //RootNode
-    3300000: //RootNode
-    4300000: drumrockbase
-    7400000: Flatten
+    400002: windfan_base
+    400004: windfan_blade
+    2100000: lambert1
+    2300000: windfan_base
+    2300002: windfan_blade
+    3300000: windfan_base
+    3300002: windfan_blade
+    4300000: windfan_blade
+    4300002: windfan_base
+    7400000: Rotate
     9500000: //RootNode
   externalObjects: {}
   materials:
@@ -30,7 +37,7 @@ ModelImporter:
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
-    animationCompression: 3
+    animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -39,10 +46,10 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Flatten
+      name: Rotate
       takeName: Take 001
       firstFrame: 1
-      lastFrame: 25
+      lastFrame: 60
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -69,7 +76,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 50
     meshCompression: 0
     addColliders: 0
     importVisibility: 1

@@ -1,15 +1,21 @@
 fileFormatVersion: 2
-guid: ad2c35bcff23f8a4185aabc7af626a33
+guid: d69f17b8781daaf439c2102a9ce60502
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
+    100002: pickaxe_handle
+    100004: pickaxe_top
     400000: //RootNode
-    2100000: DRUM_ROCK_BASE_old_lambert4
-    2300000: //RootNode
-    3300000: //RootNode
-    4300000: drumrockbase
-    7400000: Flatten
+    400002: pickaxe_handle
+    400004: pickaxe_top
+    2100000: lambert2
+    2300000: pickaxe_handle
+    2300002: pickaxe_top
+    3300000: pickaxe_handle
+    3300002: pickaxe_top
+    4300000: pickaxe_handle
+    4300002: pickaxe_top
     9500000: //RootNode
   externalObjects: {}
   materials:
@@ -30,42 +36,14 @@ ModelImporter:
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
-    animationCompression: 3
+    animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations:
-    - serializedVersion: 16
-      name: Flatten
-      takeName: Take 001
-      firstFrame: 1
-      lastFrame: 25
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+    clipAnimations: []
     isReadable: 1
   meshes:
     lODScreenPercentages: []
@@ -110,10 +88,10 @@ ModelImporter:
     rootMotionBoneName: 
     rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
-    hasExtraRoot: 0
+    hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
