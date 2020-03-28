@@ -11,6 +11,8 @@ public abstract class AudioHandler : MonoBehaviour
     // pitch range
     public Vector2 pitchRange = new Vector2(0.9f, 1.1f);
 
+    protected float nextNoteIn;
+
     public virtual void Awake()
     {
         myAudioSource = GetComponent<AudioSource>();
@@ -91,6 +93,19 @@ public abstract class AudioHandler : MonoBehaviour
         }
 
         return counter;
+    }
+
+    //countsdown for next sound to play, uses sound array to play it 
+    public virtual void SoundCountdown(AudioClip[] sounds, float soundTimerTotal)
+    {
+        nextNoteIn -= Time.deltaTime;
+
+        if (nextNoteIn < 0)
+        {
+            PlayRandomSound(sounds, 1f);
+
+            nextNoteIn = soundTimerTotal;
+        }
     }
 }
 
