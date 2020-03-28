@@ -1,0 +1,194 @@
+fileFormatVersion: 2
+guid: d52a6252d4255aa4491d0f50ce1035fb
+ModelImporter:
+  serializedVersion: 22
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: farmhouse_beams1
+    100004: farmhouse_beams2
+    100006: farmhouse_beams3
+    100008: farmhouse_beams4
+    100010: farmhouse_chimney
+    100012: farmhouse_corner1
+    100014: farmhouse_corner2
+    100016: farmhouse_corner3
+    100018: farmhouse_corner4
+    100020: farmhouse_door
+    100022: farmhouse_doorhandle
+    100024: farmhouse_floor
+    100026: farmhouse_roof
+    100028: farmhouse_stonebase1
+    100030: farmhouse_stonebase2
+    100032: farmhouse_stonebase3
+    100034: farmhouse_stonebase4
+    100036: farmhouse_wall1
+    100038: farmhouse_wall2
+    100040: farmhouse_wall3
+    100042: farmhouse_wall4
+    400000: //RootNode
+    400002: farmhouse_beams1
+    400004: farmhouse_beams2
+    400006: farmhouse_beams3
+    400008: farmhouse_beams4
+    400010: farmhouse_chimney
+    400012: farmhouse_corner1
+    400014: farmhouse_corner2
+    400016: farmhouse_corner3
+    400018: farmhouse_corner4
+    400020: farmhouse_door
+    400022: farmhouse_doorhandle
+    400024: farmhouse_floor
+    400026: farmhouse_roof
+    400028: farmhouse_stonebase1
+    400030: farmhouse_stonebase2
+    400032: farmhouse_stonebase3
+    400034: farmhouse_stonebase4
+    400036: farmhouse_wall1
+    400038: farmhouse_wall2
+    400040: farmhouse_wall3
+    400042: farmhouse_wall4
+    2100000: lambert2
+    2300000: farmhouse_beams1
+    2300002: farmhouse_beams2
+    2300004: farmhouse_beams3
+    2300006: farmhouse_beams4
+    2300008: farmhouse_chimney
+    2300010: farmhouse_corner1
+    2300012: farmhouse_corner2
+    2300014: farmhouse_corner3
+    2300016: farmhouse_corner4
+    2300018: farmhouse_door
+    2300020: farmhouse_doorhandle
+    2300022: farmhouse_floor
+    2300024: farmhouse_roof
+    2300026: farmhouse_stonebase1
+    2300028: farmhouse_stonebase2
+    2300030: farmhouse_stonebase3
+    2300032: farmhouse_stonebase4
+    2300034: farmhouse_wall1
+    2300036: farmhouse_wall2
+    2300038: farmhouse_wall3
+    2300040: farmhouse_wall4
+    3300000: farmhouse_beams1
+    3300002: farmhouse_beams2
+    3300004: farmhouse_beams3
+    3300006: farmhouse_beams4
+    3300008: farmhouse_chimney
+    3300010: farmhouse_corner1
+    3300012: farmhouse_corner2
+    3300014: farmhouse_corner3
+    3300016: farmhouse_corner4
+    3300018: farmhouse_door
+    3300020: farmhouse_doorhandle
+    3300022: farmhouse_floor
+    3300024: farmhouse_roof
+    3300026: farmhouse_stonebase1
+    3300028: farmhouse_stonebase2
+    3300030: farmhouse_stonebase3
+    3300032: farmhouse_stonebase4
+    3300034: farmhouse_wall1
+    3300036: farmhouse_wall2
+    3300038: farmhouse_wall3
+    3300040: farmhouse_wall4
+    4300000: farmhouse_floor
+    4300002: farmhouse_roof
+    4300004: farmhouse_stonebase1
+    4300006: farmhouse_stonebase2
+    4300008: farmhouse_stonebase3
+    4300010: farmhouse_stonebase4
+    4300012: farmhouse_wall1
+    4300014: farmhouse_wall2
+    4300016: farmhouse_wall3
+    4300018: farmhouse_wall4
+    4300020: farmhouse_chimney
+    4300022: farmhouse_doorhandle
+    4300024: farmhouse_door
+    4300026: farmhouse_corner1
+    4300028: farmhouse_corner2
+    4300030: farmhouse_corner3
+    4300032: farmhouse_corner4
+    4300034: farmhouse_beams1
+    4300036: farmhouse_beams2
+    4300038: farmhouse_beams3
+    4300040: farmhouse_beams4
+    9500000: //RootNode
+  externalObjects: {}
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 0
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 1
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

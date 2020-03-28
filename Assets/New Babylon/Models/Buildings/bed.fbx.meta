@@ -1,27 +1,31 @@
 fileFormatVersion: 2
-guid: 06d91cfa19755384aa601d315ece3821
+guid: 0647f2037a868c94a856883042442dc2
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
-    100002: windmill_base
-    100004: windmill_railing
-    100006: windmill_top
+    100002: bed_frame
+    100004: bed_mattress
+    100006: bed_pillow
+    100008: bed_sheet
     400000: //RootNode
-    400002: windmill_base
-    400004: windmill_railing
-    400006: windmill_top
+    400002: bed_frame
+    400004: bed_mattress
+    400006: bed_pillow
+    400008: bed_sheet
     2100000: lambert2
-    2100002: lambert3
-    2300000: windmill_base
-    2300002: windmill_railing
-    2300004: windmill_top
-    3300000: windmill_base
-    3300002: windmill_railing
-    3300004: windmill_top
-    4300000: windmill_top
-    4300002: windmill_railing
-    4300004: windmill_base
+    2300000: bed_frame
+    2300002: bed_mattress
+    2300004: bed_pillow
+    2300006: bed_sheet
+    3300000: bed_frame
+    3300002: bed_mattress
+    3300004: bed_pillow
+    3300006: bed_sheet
+    4300000: bed_frame
+    4300002: bed_mattress
+    4300004: bed_pillow
+    4300006: bed_sheet
     9500000: //RootNode
   externalObjects: {}
   materials:
@@ -53,7 +57,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 50
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importVisibility: 1
@@ -78,7 +82,7 @@ ModelImporter:
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
-  importAnimation: 0
+  importAnimation: 1
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2
