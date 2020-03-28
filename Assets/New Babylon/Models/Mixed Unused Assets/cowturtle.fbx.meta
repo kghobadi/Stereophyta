@@ -1,0 +1,180 @@
+fileFormatVersion: 2
+guid: 2a835f8e70011c44d94db650ffd92355
+ModelImporter:
+  serializedVersion: 22
+  fileIDToRecycleName:
+    100000: back
+    100002: backleftfoot
+    100004: backleftknee
+    100006: backleftleg
+    100008: backrightfoot
+    100010: backrightknee
+    100012: backrightleg
+    100014: //RootNode
+    100016: cowturtle
+    100018: cowturtlerig
+    100020: frontleftfoot
+    100022: frontleftknee
+    100024: frontleftleg
+    100026: frontrightfoot
+    100028: frontrightknee
+    100030: frontrightleg
+    100032: head
+    100034: leftspikes
+    100036: nose
+    100038: rightspikes
+    100040: tail
+    100042: lefthorns
+    100044: righthorns
+    100046: cow_turtle_maya:head
+    100048: cow_turtle_maya:joint1
+    100050: cow_turtle_maya:joint10
+    100052: cow_turtle_maya:joint11
+    100054: cow_turtle_maya:joint16
+    100056: cow_turtle_maya:joint18
+    100058: cow_turtle_maya:joint19
+    100060: cow_turtle_maya:joint20
+    100062: cow_turtle_maya:joint22
+    100064: cow_turtle_maya:joint23
+    100066: cow_turtle_maya:joint3
+    100068: cow_turtle_maya:joint4
+    100070: cow_turtle_maya:joint6
+    100072: cow_turtle_maya:joint8
+    100074: cow_turtle_maya:leftbackleg
+    100076: cow_turtle_maya:leftfrontleg
+    100078: cow_turtle_maya:pSphere2
+    100080: cow_turtle_maya:rightbackleg
+    100082: cow_turtle_maya:rightfrontleg
+    100084: cow_turtle_maya:tail
+    400000: back
+    400002: backleftfoot
+    400004: backleftknee
+    400006: backleftleg
+    400008: backrightfoot
+    400010: backrightknee
+    400012: backrightleg
+    400014: //RootNode
+    400016: cowturtle
+    400018: cowturtlerig
+    400020: frontleftfoot
+    400022: frontleftknee
+    400024: frontleftleg
+    400026: frontrightfoot
+    400028: frontrightknee
+    400030: frontrightleg
+    400032: head
+    400034: leftspikes
+    400036: nose
+    400038: rightspikes
+    400040: tail
+    400042: lefthorns
+    400044: righthorns
+    400046: cow_turtle_maya:head
+    400048: cow_turtle_maya:joint1
+    400050: cow_turtle_maya:joint10
+    400052: cow_turtle_maya:joint11
+    400054: cow_turtle_maya:joint16
+    400056: cow_turtle_maya:joint18
+    400058: cow_turtle_maya:joint19
+    400060: cow_turtle_maya:joint20
+    400062: cow_turtle_maya:joint22
+    400064: cow_turtle_maya:joint23
+    400066: cow_turtle_maya:joint3
+    400068: cow_turtle_maya:joint4
+    400070: cow_turtle_maya:joint6
+    400072: cow_turtle_maya:joint8
+    400074: cow_turtle_maya:leftbackleg
+    400076: cow_turtle_maya:leftfrontleg
+    400078: cow_turtle_maya:pSphere2
+    400080: cow_turtle_maya:rightbackleg
+    400082: cow_turtle_maya:rightfrontleg
+    400084: cow_turtle_maya:tail
+    2100000: lambert1
+    2300000: cowturtle
+    2300002: cow_turtle_maya:pSphere2
+    3300000: cowturtle
+    3300002: cow_turtle_maya:pSphere2
+    4300000: cowturtle
+    4300002: cow_turtle_maya:pSphere2
+    7400000: Take 001
+    9500000: //RootNode
+  externalObjects: {}
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
