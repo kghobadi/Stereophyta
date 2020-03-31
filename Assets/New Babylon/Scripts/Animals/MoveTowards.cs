@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MoveTowards : MonoBehaviour {
+public class MoveTowards : MonoBehaviour
+{
     public float moveSpeed;
-    public float origSpeed;
+    [HideInInspector] public float origSpeed;
 
     public bool moving;
     public Vector3 destination;
@@ -15,7 +16,8 @@ public class MoveTowards : MonoBehaviour {
         origSpeed = moveSpeed;
     }
 
-    void Update () {
+    void Update ()
+    {
         if (moving)
         {
             transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);

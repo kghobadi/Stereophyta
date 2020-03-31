@@ -26,11 +26,11 @@ public class FishJumper : RhythmProducer
         //IDLE
         if (fishAnim.characterAnimator.GetBool("idle"))
         {
-            Debug.Log("idle!");
+            //Debug.Log("idle!");
             //jump on space for now (will be triggered by Aud spectrum)
             if (showRhythm)
             {
-                Debug.Log("show rhythm!");
+                //Debug.Log("show rhythm!");
                 Jump();
             }
         }
@@ -59,7 +59,7 @@ public class FishJumper : RhythmProducer
 
         PlayRandomSound(jumps, myAudioSource.volume);
         showRhythm = false;
-        Debug.Log("jumped!");
+        //Debug.Log("jumped!");
     }
 
     //set seagull time scale

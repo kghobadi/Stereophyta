@@ -21,8 +21,8 @@ namespace NPC
         public Item.ToolType toolType; 
         public int desiredItemCount;
 
-        //GOTO
-        public Transform placeToGo;
+        //GOTO 
+        public string islandName;
     }
 }
 

@@ -12,6 +12,8 @@ namespace NPC
         public ThirdPersonController tpc;
         [HideInInspector]
         public CameraManager camManager;
+        [HideInInspector]
+        public NPCMovementManager moveManager;
 
         //npc state manager
         public NPCStates npcState;
@@ -28,16 +30,24 @@ namespace NPC
         Sounds npcSounds;
         public Sounds Sounds { get { return npcSounds; } }
 
-        //Dialogues npcDialogues;
-        //public Dialogues Dialogues { get { return npcDialogues; } }
+        MonologueManager npcMonologues;
+        public MonologueManager Monologues { get { return npcMonologues; } }
+
+        TaskManager npcTasks;
+        public TaskManager Tasks { get { return npcTasks; } }
 
         private void Awake()
         {
+            moveManager = FindObjectOfType<NPCMovementManager>();
             //npc component refs 
             npcAnimations = GetComponent<Animations>();
             npcMovement = GetComponent<Movement>();
             npcSounds = GetComponent<Sounds>();
-            //npcDialogues = GetComponent<Dialogues>();
+            //prob need to fetch monologue text from children 
+            npcMonologues = GetComponent<MonologueManager>();
+            if (npcMonologues == null)
+                npcMonologues = GetComponentInChildren<MonologueManager>();
+            npcTasks = GetComponent<TaskManager>();
 
             //player refs
             tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();

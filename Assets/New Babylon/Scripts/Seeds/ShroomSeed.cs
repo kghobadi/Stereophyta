@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TGS;
 using InControl;
+using Player;
 
 public class ShroomSeed : MonoBehaviour {
     //player and sun ref

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Player;
 
 public abstract class PickUpMaterial : MonoBehaviour {
     //player vars

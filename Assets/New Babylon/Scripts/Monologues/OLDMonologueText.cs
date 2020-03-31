@@ -8,7 +8,7 @@ using Cameras;
 using Cinemachine;
 using NPC;
 
-public class MonologueText : MonoBehaviour
+public class OLDMonologueText : MonoBehaviour
 {
     //player refs
     GameObject player;
@@ -28,8 +28,7 @@ public class MonologueText : MonoBehaviour
     //Audio
     SpeakerSound speakerAudio;
     //animator
-    public SpeakerAnimations speakerAnimator;
-    public Movement npcMovement;
+    public Controller npcController;
 
     //text component and string array of its lines
     Text theText;
@@ -38,8 +37,11 @@ public class MonologueText : MonoBehaviour
     [Header("Text lines")]
     [Tooltip("No need to fill this in, that will happen automatically")]
     public string[] textLines;
+    public int currentMonologue;
     [Tooltip("Fill this with all the individual monologues the character will give")]
     public List<TextAsset> allMyMonologues = new List<TextAsset>();
+    [Tooltip("This list will correspond to all my monologues in count, but may be null")]
+    public List<Task> tasksToAssign = new List<Task>();
 
     //current and last lines
     public int currentLine;
@@ -58,7 +60,6 @@ public class MonologueText : MonoBehaviour
 
     [Header("Text Timing")]
     public float timeBetweenLetters;
-    public float resetDistance = 25f;
     //check this to have wait time from trigger to enable Monologue
     public bool waitToStart;
     public float timeUntilStart;
@@ -70,7 +71,7 @@ public class MonologueText : MonoBehaviour
     bool waiting;
 
     [Header("Monologues To Enable")]
-    public MonologueText[] monologuesToEnable;
+    public OLDMonologueText[] monologuesToEnable;
     MonologueTrigger mTrigger;
 
     void Awake()
@@ -194,10 +195,10 @@ public class MonologueText : MonoBehaviour
 
         isTyping = true;
         //set talking anim
-        if (speakerAnimator)
+        if (npcController.Animation)
         {
-            if (speakerAnimator.talkingAnimations > 0)
-                speakerAnimator.RandomTalkingAnim();
+            if (npcController.Animation.talkingAnimations > 0)
+                npcController.Animation.RandomTalkingAnim();
         }
 
         while (isTyping && (letter < lineOfText.Length - 1))
@@ -268,6 +269,7 @@ public class MonologueText : MonoBehaviour
 
     public void ResetStringText(int stringInList)
     {
+        currentMonologue = stringInList;
         textLines = (allMyMonologues[stringInList].text.Split('\n'));
         currentLine = 0;
         endAtLine = textLines.Length;
@@ -325,7 +327,7 @@ public class MonologueText : MonoBehaviour
 
             Vector3 targetPosition;
             // Does the ray intersect any objects excluding the player layer
-            if (Physics.Raycast(playerSpot.position, Vector3.down, out hit, Mathf.Infinity, npcMovement.grounded))
+            if (Physics.Raycast(playerSpot.position, Vector3.down, out hit, Mathf.Infinity, npcController.Movement.grounded))
             {
                 targetPosition = hit.point + new Vector3(0, tpc.controller.height / 2, 0);
 
@@ -367,13 +369,13 @@ public class MonologueText : MonoBehaviour
             theText.enabled = false;
         
         //set speaker to idle 
-        if(speakerAnimator)
-            speakerAnimator.SetAnimator("idle");
+        if(npcController.Animation)
+            npcController.Animation.SetAnimator("idle");
 
         //stop that waiting!
-        if (npcMovement)
+        if (npcController.Movement)
         {
-            npcMovement.waitingToGiveMonologue = false;
+            npcController.Movement.waitingToGiveMonologue = false;
         }
 
         inMonologue = false;
@@ -381,6 +383,12 @@ public class MonologueText : MonoBehaviour
         if (enablesCinematic)
         {
             cinematic.PlayTimeline();
+        }
+
+        //npc assigns player a task
+        if (tasksToAssign[currentMonologue] != null)
+        {
+            npcController.Tasks.AssignTask(tasksToAssign[currentMonologue]);
         }
 
         //reenable player cam

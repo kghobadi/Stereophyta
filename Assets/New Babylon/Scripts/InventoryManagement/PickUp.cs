@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using InControl;
+using Player;
 
 public abstract class PickUp : MonoBehaviour {
     //player vars
