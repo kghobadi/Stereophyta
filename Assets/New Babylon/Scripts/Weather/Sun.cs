@@ -34,6 +34,35 @@ public class Sun : MonoBehaviour
     {
         MORNING, MIDDAY, DUSK, NIGHT,
     }
+
+
+	public delegate void OnUpdateDay(int day);
+	public static event OnUpdateDay UpdatedDay;
+
+    void UpdateDay(bool events = true){
+        if(events && UpdatedDay != null)
+            UpdatedDay(dayCounter);
+    }
+
+	public delegate void OnUpdateTimeState(TimeState state);
+	public static event OnUpdateTimeState UpdatedTimeState;
+
+	void UpdateTimeState(TimeState state, bool events = true){
+		if (state == TimeState.MORNING && timeState != TimeState.MORNING) {
+			//resets day bools and sleep stuff every morning
+			//when its morning increase dayCounter && not in start view
+			if (dayCounter == yesterday && !startViewer.startView)
+				NewDay();
+
+			//turn off stars
+			stars.SetActive(false);
+		}
+
+		if (events && UpdatedTimeState != null)
+			UpdatedTimeState (timeState);
+	}
+
+
     //intervals are set publicly based on info obtained from angleInDegrees
     public float rotationDiameter, morningInterval, middayInterval, duskInterval, nightInterval;
 
@@ -93,12 +122,13 @@ public class Sun : MonoBehaviour
         //find the total diameter of the suns rotation path
         rotationDiameter = Mathf.Abs(transform.position.x * 2);
         
-        timeState = TimeState.MORNING;
+		UpdateTimeState (TimeState.MORNING);
 
         //set dayCounter to saved player pref
         if (PlayerPrefs.GetInt("dayCounter") > 0)
         {
             dayCounter = PlayerPrefs.GetInt("dayCounter");
+            UpdateDay();
         }
 
         //if we are in start view, set to quicker rotation
@@ -139,20 +169,9 @@ public class Sun : MonoBehaviour
         //is Morning 
         if (angleInDegrees > morningInterval || angleInDegrees < middayInterval)
         {
-            if(timeState != TimeState.MORNING)
-            {
-                //time bool
-                timeState = TimeState.MORNING;
-                //resets day bools and sleep stuff every morning
-                //when its morning increase dayCounter && not in start view
-                if (dayCounter == yesterday && !startViewer.startView)
-                {
-                    NewDay();
-                }
-                //turn off stars
-                stars.SetActive(false);
-            }
-           
+			//time bool
+			UpdateTimeState (TimeState.MORNING);
+
             //lighting
             LerpLighting(morn, ambientMorn, skyDay);
            
@@ -163,23 +182,26 @@ public class Sun : MonoBehaviour
             //lighting
             LerpLighting(mid, ambientMid, skyDay);
             //time bool
-            timeState = TimeState.MIDDAY;
+
+			UpdateTimeState(TimeState.MIDDAY);
         }
         //is Dusk
         else if (angleInDegrees > duskInterval && angleInDegrees < nightInterval)
         {
+			//time bool
+			UpdateTimeState(TimeState.DUSK);
+
             //lighting
             LerpLighting(dusk, ambientDusk, skyDay);
-            //time bool
-            timeState = TimeState.DUSK;
         }
         //is Night
         else if (angleInDegrees > nightInterval && angleInDegrees < morningInterval)
         {
+			//time bool
+			UpdateTimeState(TimeState.NIGHT);
+
             //lighting
             LerpLighting(night, ambientNight, skyNight);
-            //time bool
-            timeState = TimeState.NIGHT;
 
             //when its night, yesterday catches up to dayCounter
             yesterday = dayCounter;
@@ -208,7 +230,9 @@ public class Sun : MonoBehaviour
     void NewDay()
     {
         newDay.Invoke();
-        dayCounter++;
+        ++dayCounter;
+
+        UpdateDay();
         //set day counter player pref
         PlayerPrefs.SetInt("dayCounter", dayCounter);
 
