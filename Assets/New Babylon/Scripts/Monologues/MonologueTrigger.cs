@@ -19,7 +19,7 @@ public class MonologueTrigger : MonoBehaviour
 
     public GameObject interactDisplay;
     //monologues
-    public MonologueText[] myMonologues;
+    public MonologueManager[] myMonologues;
     public int[] monoNumbers;
     public Movement npcMovement;
     public Transform monologuePoint;
@@ -65,28 +65,12 @@ public class MonologueTrigger : MonoBehaviour
         }
     }
 
-    //activates monologues
-    void ActivateMonologue()
-    {
-        if (!hasActivated)
-        {
-            //sets monologues 
-            for (int i = 0; i < myMonologues.Length; i++)
-            {
-                myMonologues[i].ResetStringText(monoNumbers[i]);
-                myMonologues[i].EnableMonologue();
-            }
-
-            hasActivated = true;
-            ToggleInteractUI(false);
-        }
-    }
-
+    //called in OnTriggerEnter()
     public void PlayerEnteredZone()
     {
         playerInZone = true;
         tpc.canJump = false;
-        if(npcMovement.waitingToGiveMonologue == false)
+        if (npcMovement.waitingToGiveMonologue == false)
         {
             //tell npc to go to monologue point 
             if (monologuePoint)
@@ -104,14 +88,32 @@ public class MonologueTrigger : MonoBehaviour
         ToggleInteractUI(playerInZone);
     }
 
+    //activates monologues
+    void ActivateMonologue()
+    {
+        if (!hasActivated)
+        {
+            //sets monologues 
+            for (int i = 0; i < myMonologues.Length; i++)
+            {
+                myMonologues[i].mTrigger = this;
+                myMonologues[i].SetMonologueSystem(monoNumbers[i]);
+                myMonologues[i].EnableMonologue();
+            }
+
+            hasActivated = true;
+            ToggleInteractUI(false);
+        }
+    }
+    
+    //called in OnTriggerExit()
     public void PlayerExitedZone()
     {
         playerInZone = false;
         tpc.canJump = true;
         ToggleInteractUI(playerInZone);
     }
-
-
+    
     void ToggleInteractUI(bool newState)
     {
         if (displayUI)

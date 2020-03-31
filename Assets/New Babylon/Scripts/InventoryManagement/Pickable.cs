@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Player;
 
 //abstract class for things that can be picked from plants
 // i.e. fruits, seeds, etc. 

@@ -14,6 +14,7 @@ namespace NPC
         Sounds npcSounds;
         Camera mainCam;
         Footsteps footsteps;
+        NPCMovementManager movementManager;
 
         [Header("AI Movement Settings")]
         public LayerMask grounded;
@@ -60,6 +61,7 @@ namespace NPC
             npcSounds = controller.Sounds;
             mainCam = Camera.main;
             myNavMesh = GetComponent<NavMeshAgent>();
+            movementManager = FindObjectOfType<NPCMovementManager>();
         }
 
         void Start()
@@ -188,6 +190,22 @@ namespace NPC
                         }
                     }
                 }
+            }
+        }
+
+        //resets the AI's movement type / path 
+        public void ResetMovement(MovementPath newMove)
+        {
+            npcType = movementManager.movementPaths[newMove.pathIndex].moveType;
+
+            if(npcType == NPCMovementTypes.RANDOM)
+            {
+                movementRadius = movementManager.movementPaths[newMove.pathIndex].moveRadius;
+            }
+            else
+            {
+                waypoints = movementManager.movementPaths[newMove.pathIndex].movementPoints;
+                waypointCounter = 0;
             }
         }
 

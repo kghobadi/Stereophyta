@@ -6,15 +6,12 @@ namespace NPC
 {
     public class Animations : AnimationHandler
     {
-        public override void SetAnimator(string anim)
+        public int talkingAnimations;
+        //select random talking anim to play
+        public void RandomTalkingAnim()
         {
-            if (anim == "walking")
-            {
-                if (AnimationIsActive(anim.ToUppercase(false)))
-                    return;
-            }
-
-            base.SetAnimator(anim);
+            int randomTalk = Random.Range(0, talkingAnimations);
+            Animator.SetTrigger("talking" + randomTalk.ToString());
         }
     }
 }

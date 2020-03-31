@@ -12,6 +12,11 @@ public class SplashTrigger : MonoBehaviour
     {
         fishJumper = transform.parent.GetComponent<FishJumper>();
         gullAI = GetComponent<GullAI>();
+        //find splash pool 
+        if(splashPool == null)
+        {
+            splashPool = GameObject.Find("WaterSplashPool").GetComponent<ObjectPooler>();
+        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -22,8 +27,10 @@ public class SplashTrigger : MonoBehaviour
             if (splashPool)
             {
                 GameObject splash = splashPool.GrabObject();
-
-                splash.transform.position = transform.position;
+                //tp to my pos 
+                splash.transform.position = transform.position + new Vector3(0f, 1f, 0f);
+                //play particles
+                splash.GetComponent<ParticleSystem>().Play();
             }
 
             //play splash sound 

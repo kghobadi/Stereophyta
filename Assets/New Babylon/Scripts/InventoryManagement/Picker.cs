@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using InControl;
+using Player;
 
 public class Picker : MonoBehaviour {
     //ref to inventory 

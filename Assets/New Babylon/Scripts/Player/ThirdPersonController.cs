@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TGS;
 using InControl;
+using Player;
 
 public class ThirdPersonController : MonoBehaviour
 {
