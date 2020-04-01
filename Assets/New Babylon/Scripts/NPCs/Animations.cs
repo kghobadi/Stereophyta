@@ -11,7 +11,8 @@ namespace NPC
         public void RandomTalkingAnim()
         {
             int randomTalk = Random.Range(0, talkingAnimations);
-            Animator.SetTrigger("talking" + randomTalk.ToString());
+            Animator.SetInteger("talking", randomTalk);
+            Animator.SetTrigger("talk");
         }
     }
 }

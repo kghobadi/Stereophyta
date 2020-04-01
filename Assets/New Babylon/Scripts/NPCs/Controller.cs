@@ -11,10 +11,14 @@ namespace NPC
         [HideInInspector]
         public ThirdPersonController tpc;
         [HideInInspector]
+        public Player.Inventory playerInventory;
+        [HideInInspector]
+        public Player.TaskManager pTaskManager;
+        [HideInInspector]
         public CameraManager camManager;
         [HideInInspector]
         public NPCMovementManager moveManager;
-
+      
         //npc state manager
         public NPCStates npcState;
         public enum NPCStates { IDLE, MOVING, TALKING, WAVING, ACTING, TRADING }
@@ -36,6 +40,9 @@ namespace NPC
         TaskManager npcTasks;
         public TaskManager Tasks { get { return npcTasks; } }
 
+        Inventory npcInventory;
+        public Inventory Inventory { get { return npcInventory; } }
+
         private void Awake()
         {
             moveManager = FindObjectOfType<NPCMovementManager>();
@@ -45,12 +52,16 @@ namespace NPC
             npcSounds = GetComponent<Sounds>();
             //prob need to fetch monologue text from children 
             npcMonologues = GetComponent<MonologueManager>();
+            npcMonologues.npcController = this;
             if (npcMonologues == null)
                 npcMonologues = GetComponentInChildren<MonologueManager>();
             npcTasks = GetComponent<TaskManager>();
+            npcInventory = GetComponent<Inventory>();
 
             //player refs
             tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
+            playerInventory = FindObjectOfType<Player.Inventory>();
+            pTaskManager = FindObjectOfType<Player.TaskManager>();
             camManager = FindObjectOfType<CameraManager>();
         }
   
