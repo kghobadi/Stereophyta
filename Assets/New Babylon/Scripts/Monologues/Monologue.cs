@@ -18,6 +18,8 @@ public class Monologue : ScriptableObject
     public bool lockPlayer = true;
     [Tooltip("This list will correspond to all my monologues in count, but may be null")]
     public Task[] tasksToAssign;
+    [Tooltip("This NPC will take item from player during conversation using these tasks")]
+    public Task[] tasksToComplete; 
     [Tooltip("The Monologue Manager will repeat this monologue until further notice")]
     public bool repeatsAtFinish;
     [Tooltip("After this Monologue finishes, the manager will enable a cinematic")]

@@ -45,10 +45,18 @@ public class MonologueReader : MonoBehaviour {
             usesTMP = true;
             the_Text = GetComponent<TMP_Text>();
         }
-
-        speakerAudio = hostObj.GetComponent<SpeakerSound>();
     }
-    
+
+    void Start()
+    {
+        speakerAudio = hostObj.GetComponent<SpeakerSound>();
+
+        if (usesTMP)
+            the_Text.enabled = false;
+        else
+            theText.enabled = false;
+    }
+
     void Update ()
     {
         //speaker is typing out message

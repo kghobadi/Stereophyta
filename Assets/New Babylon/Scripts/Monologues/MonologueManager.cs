@@ -15,6 +15,8 @@ public class MonologueManager : MonoBehaviour
     ThirdPersonController tpc;
     PlayerCameraController playerCam;
     //npc management refs 
+    [HideInInspector]
+    public WorldMonologueManager wmManager;
     CameraManager camManager;
     [HideInInspector]
     public Controller npcController;
@@ -44,9 +46,11 @@ public class MonologueManager : MonoBehaviour
             playerCam = Camera.main.GetComponent<PlayerCameraController>();
         }
 
+        wmManager = FindObjectOfType<WorldMonologueManager>();
         camManager = FindObjectOfType<CameraManager>();
         monoReader = GetComponentInChildren<MonologueReader>();
         monoReader.hostObj = gameObject;
+        monoReader.monoManager = this;
     }
 
     void Start()
@@ -177,19 +181,24 @@ public class MonologueManager : MonoBehaviour
         if (npcController.Animation)
             npcController.Animation.SetAnimator("idle");
 
-        //stop that waiting!
-        if (npcController.Movement)
-        {
-            npcController.Movement.waitingToGiveMonologue = false;
-        }
-
-        inMonologue = false;
-
         //reenable player cam
         if (playerCam)
         {
             camManager.Set(camManager.defaultCamera);
             playerCam.enabled = true;
+        }
+
+        StartCoroutine(WaitForCameraTransition());
+    }
+
+    IEnumerator WaitForCameraTransition()
+    {
+        yield return new WaitForSeconds(1f);
+
+        //stop that waiting!
+        if (npcController.Movement)
+        {
+            npcController.Movement.waitingToGiveMonologue = false;
         }
 
         //unlock player
@@ -207,9 +216,22 @@ public class MonologueManager : MonoBehaviour
         //npc assigns player task(s)
         if (allMyMonologues[currentMonologue].tasksToAssign.Length > 0)
         {
-            for(int i = 0; i < allMyMonologues[currentMonologue].tasksToAssign.Length; i++)
+            //loop through all tasks to assign 
+            for (int i = 0; i < allMyMonologues[currentMonologue].tasksToAssign.Length; i++)
             {
                 npcController.Tasks.AssignTask(allMyMonologues[currentMonologue].tasksToAssign[i]);
+            }
+        }
+
+        //tasks to complete ?
+        if (allMyMonologues[currentMonologue].tasksToComplete.Length > 0)
+        {
+            //loop thru all tasks to complete 
+            for (int i = 0; i < allMyMonologues[currentMonologue].tasksToComplete.Length; i++)
+            {
+                Task task = allMyMonologues[currentMonologue].tasksToComplete[i];
+
+                npcController.Tasks.FulfillTask(task);
             }
         }
 
@@ -218,6 +240,8 @@ public class MonologueManager : MonoBehaviour
         {
             npcController.Movement.ResetMovement(allMyMonologues[currentMonologue].newMovement);
         }
+
+        inMonologue = false;
     }
 }
 

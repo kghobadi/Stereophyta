@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using InControl;
 using Cameras;
+using UnityEngine.Events;
 
 namespace Player
 {
@@ -22,6 +23,11 @@ namespace Player
         public List<GameObject> myItems = new List<GameObject>();
         public Vector3 localSeedSpot;
         bool lastSwitch;
+        //item events 
+        [Header("Unity Events")]
+        public UnityEvent addedNewItem;
+        public UnityEvent addedItemToGroup;
+        public UnityEvent removedItem;
 
         //UI
         [Header("Items UI")]
@@ -252,8 +258,7 @@ namespace Player
                     }
                 }
             }
-
-
+            
             //set text size  
             switch (itemCounter.text.Length)
             {
@@ -481,9 +486,12 @@ namespace Player
             //set item count to 1 
             Item itemScript = item.GetComponent<Item>();
             itemScript.itemCount = 1;
+            //event call 
+            addedNewItem.Invoke();
             //call item sprite 
             SetItemSprite();
         }
+
 
         //looks in inventory Items to see if there is a Tool of this type
         public Item CheckForCropType(Plont.PlantType cropSeed)
@@ -610,6 +618,7 @@ namespace Player
         {
             itemGroup.itemCount++;
             itemGroup.toolGroup.Add(itemToAdd);
+            addedItemToGroup.Invoke();
 
             //call item sprite 
             SetItemSprite();
@@ -642,6 +651,8 @@ namespace Player
             //remove from lists
             myItems.RemoveAt(index);
             ItemSprites.RemoveAt(index);
+            //event call
+            removedItem.Invoke();
         }
 
         //remove seed type from inv
@@ -651,6 +662,8 @@ namespace Player
             //remove from lists
             myItems.RemoveAt(index);
             ItemSprites.RemoveAt(index);
+            //event call
+            removedItem.Invoke();
             //causes issue if there's no items 
             if (myItems.Count > 0)
             {

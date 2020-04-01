@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Events;
 using TGS;
 using InControl;
 using Player;
@@ -37,6 +38,7 @@ public class ThirdPersonController : MonoBehaviour
     public bool savingAndLoadingEnabled;
     public TerrainGridSystem currentTGS;
     public GridManager currentGridMan;
+    public UnityEvent enteredZone;
 
     //PS4 move variables
     //move states

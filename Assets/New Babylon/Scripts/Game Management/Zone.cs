@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Audio;
 using TGS;
 
@@ -108,6 +109,8 @@ public class Zone : MonoBehaviour {
         playerInZone = true;
         tpc.currentZone = this;
         tpc.currentZoneName = zoneName;
+        tpc.enteredZone.Invoke();
+
         //has tgs
         if (terrainType == TerrainType.TERRAIN)
         {
