@@ -22,9 +22,12 @@ public class Monologue : ScriptableObject
     public Task[] tasksToComplete; 
     [Tooltip("The Monologue Manager will repeat this monologue until further notice")]
     public bool repeatsAtFinish;
-    [Tooltip("After this Monologue finishes, the manager will enable a cinematic")]
-    public bool enablesCinematic;
-    public TimelinePlaybackManager cinematic;
+    [Tooltip("After this Monologue finishes, the manager will play a cinematic")]
+    public bool playsCinematic;
+    public Cinematic cinematic;
+    [Tooltip("After this Monologue finishes, the manager will enable a cinematic triggers somewhere in the game")]
+    public bool enablesCinematicTriggers;
+    public Cinematic [] cTriggers;
     [Tooltip("After this Monologue finishes, the manager will set NPC movement using this")]
     public MovementPath newMovement;
 

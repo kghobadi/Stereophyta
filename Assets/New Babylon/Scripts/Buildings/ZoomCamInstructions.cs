@@ -40,21 +40,21 @@ public class ZoomCamInstructions : MonoBehaviour {
   
     public void FadeInstructions()
     {
-        //mouse
-        if (mouseOrPs4)
-        {
-            txtFader.FadeIn();
-            textBackFader.FadeIn();
-            animFader.FadeIn();
-            animator.active = true;
-        }
-        //ps4
-        else
-        {
-            zTxtFader.FadeIn();
-            zTextBackFader.FadeIn();
-            zAnimFader.FadeIn();
-            zAnimator.active = true;
-        }
+        ////mouse
+        //if (mouseOrPs4)
+        //{
+        //    txtFader.FadeIn();
+        //    textBackFader.FadeIn();
+        //    animFader.FadeIn();
+        //    animator.active = true;
+        //}
+        ////ps4
+        //else
+        //{
+        //    zTxtFader.FadeIn();
+        //    zTextBackFader.FadeIn();
+        //    zAnimFader.FadeIn();
+        //    zAnimator.active = true;
+        //}
     }
 }

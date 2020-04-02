@@ -18,7 +18,9 @@ namespace NPC
         public CameraManager camManager;
         [HideInInspector]
         public NPCMovementManager moveManager;
-      
+        [HideInInspector]
+        public CinematicsManager cineManager;
+
         //npc state manager
         public NPCStates npcState;
         public enum NPCStates { IDLE, MOVING, TALKING, WAVING, ACTING, TRADING }
@@ -63,6 +65,7 @@ namespace NPC
             playerInventory = FindObjectOfType<Player.Inventory>();
             pTaskManager = FindObjectOfType<Player.TaskManager>();
             camManager = FindObjectOfType<CameraManager>();
+            cineManager = FindObjectOfType<CinematicsManager>();
         }
   
     }

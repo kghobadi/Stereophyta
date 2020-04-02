@@ -124,10 +124,13 @@ namespace NPC
         public void Complete(Task task)
         {
             //check Task outcomes and trigger them 
-            if (task.triggersMonologue)
+            if (task.triggersMonologues)
             {
-                //activate monologue trigger 
-                npcController.Monologues.wmManager.allMonologues[task.monologueIndex].mTrigger.gameObject.SetActive(true);
+                //activate monologue triggers
+                for(int i = 0; i < task.monologueIndeces.Length; i++)
+                {
+                    npcController.Monologues.wmManager.allMonologues[task.monologueIndeces[i]].mTrigger.gameObject.SetActive(true);
+                }
             }
 
             //move to completed list
