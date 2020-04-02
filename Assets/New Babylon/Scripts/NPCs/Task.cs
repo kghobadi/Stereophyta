@@ -35,8 +35,8 @@ namespace NPC
         public string zoneName;
 
         [Header("Outcomes")] // what happens when this task is complete?
-        public bool triggersMonologue;
-        public int monologueIndex;
+        public bool triggersMonologues;
+        public int [] monologueIndeces;
 
         //rewards?
     }

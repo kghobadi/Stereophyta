@@ -208,9 +208,17 @@ public class MonologueManager : MonoBehaviour
         }
 
         //check for cinematic to enable 
-        if (allMyMonologues[currentMonologue].enablesCinematic)
+        if (allMyMonologues[currentMonologue].playsCinematic)
         {
-            allMyMonologues[currentMonologue].cinematic.PlayTimeline();
+            npcController.cineManager.allCinematics[allMyMonologues[currentMonologue].cinematic.cIndex].cPlaybackManager.PlayTimeline();
+        }
+        //cinematic triggers to enable
+        if (allMyMonologues[currentMonologue].enablesCinematicTriggers)
+        {
+            for (int i = 0; i < allMyMonologues[currentMonologue].cTriggers.Length; i++)
+            {
+                npcController.cineManager.allCinematics[allMyMonologues[currentMonologue].cTriggers[i].cIndex].cTrigger.gameObject.SetActive(true);
+            }
         }
 
         //npc assigns player task(s)
