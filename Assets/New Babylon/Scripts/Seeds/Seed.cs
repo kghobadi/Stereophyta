@@ -341,7 +341,8 @@ public class Seed : MonoBehaviour {
             else
             {
                 Debug.Log("nono");
-                seedSource.PlayOneShot(noNO);
+                if(!seedSource.isPlaying)
+                    seedSource.PlayOneShot(noNO);
                 //player source play NoNo sound
             }
         }

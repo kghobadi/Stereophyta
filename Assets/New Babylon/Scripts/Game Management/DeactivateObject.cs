@@ -21,20 +21,31 @@ public class DeactivateObject : MonoBehaviour
             activationDist = wm.activationDistance;
     }
 
+    void Start()
+    {
+        Deactivate();
+    }
+
     void Update()
     {
         //if player is moving 
         if (tpc.currentMovement.magnitude > 0)
         {
             //Debug.Log(wm);
-            //deactivate object when it's far enough away from player 
-            if (Vector3.Distance(_player.transform.position, transform.position) > (activationDist + 10f))
-            {
-                //first add to list
-                wm.allInactiveObjects.Add(gameObject);
-                //then deactivate 
-                gameObject.SetActive(false);
-            }
+            Deactivate();
         }
+    }
+
+    void Deactivate()
+    {
+        //deactivate object when it's far enough away from player 
+        if (Vector3.Distance(_player.transform.position, transform.position) > (activationDist + 10f))
+        {
+            //first add to list
+            wm.allInactiveObjects.Add(gameObject);
+            //then deactivate 
+            gameObject.SetActive(false);
+        }
+       
     }
 }

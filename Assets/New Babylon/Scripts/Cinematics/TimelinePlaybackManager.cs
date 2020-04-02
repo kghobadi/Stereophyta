@@ -194,11 +194,6 @@ public class TimelinePlaybackManager : MonoBehaviour {
     //called when cinematic begins 
     void SetCharacterPosition(int index)
     {
-        if (parentCharacters[index])
-            characterTransforms[index].SetParent(newCharacterPositions[index]);
-        characterTransforms[index].position = newCharacterPositions[index].position;
-        characterTransforms[index].localRotation = newCharacterPositions[index].rotation;
-
         //disable npc movement 
         NPC.Movement mover = characterTransforms[index].GetComponent<NPC.Movement>();
         if (mover)
@@ -206,11 +201,31 @@ public class TimelinePlaybackManager : MonoBehaviour {
             characterTransforms[index].GetComponent<NPC.Movement>().enabled = false;
             characterTransforms[index].GetComponent<NavMeshAgent>().enabled = false;
         }
+
+        //check for cloth component
+        Cloth cloth = characterTransforms[index].GetComponentInChildren<Cloth>();
+        if (cloth)
+            cloth.enabled = false;
+
+        if (parentCharacters[index])
+            characterTransforms[index].SetParent(newCharacterPositions[index]);
+        characterTransforms[index].position = newCharacterPositions[index].position;
+        characterTransforms[index].localRotation = newCharacterPositions[index].rotation;
+
+        //reset cloth after move 
+        if (cloth)
+            cloth.enabled = true;
     }
 
     //called when cinematic ends 
     void ResetCharacters(int index)
     {
+        //disable the boats animator...
+        if(characterTransforms[index].gameObject.name == "canoe")
+        {
+            characterTransforms[index].GetComponent<Animator>().enabled = false;
+        }
+
         if (parentCharacters[index])
             characterTransforms[index].SetParent(null);
         characterTransforms[index].position = exitPositions[index].position;
