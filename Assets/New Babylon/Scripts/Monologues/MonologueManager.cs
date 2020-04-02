@@ -146,6 +146,12 @@ public class MonologueManager : MonoBehaviour
             tpc.playerCloak.enabled = true;
         }
 
+        //set talking anim
+        if (npcController.Animation)
+        {
+            npcController.Animation.SetAnimator("talking");
+        }
+
         //set player to idle anim
         if (tpc)
             tpc.samita.SetAnimator("idle");
