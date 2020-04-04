@@ -29,7 +29,7 @@ public class BookPage : MonoBehaviour {
         pageNotifAudio = bookFader.GetComponent<AudioSource>();
         firstPageTextBack = bookFader.transform.GetChild(0).GetComponent<FadeUItmp>();
         firstPageText = bookFader.transform.GetChild(1).GetComponent<FadeUItmp>();
-        startViewer = GameObject.FindGameObjectWithTag("StartView").GetComponent<StartView>();
+        startViewer = FindObjectOfType<StartView>();
         if (page)
         {
             pageName = page.name;

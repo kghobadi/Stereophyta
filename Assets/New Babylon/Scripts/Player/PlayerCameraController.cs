@@ -12,7 +12,7 @@ public class PlayerCameraController : MonoBehaviour
     ThirdPersonController tpc;
     Camera actualCam;
     CameraManager camManager;
-    public bool mouseControls;
+    StartView startViewer;
 
     [Header("Free Look Cam Rig Settings")]
     public bool canSwitchCams;
@@ -43,6 +43,7 @@ public class PlayerCameraController : MonoBehaviour
         //set cameras
         actualCam = Camera.main;
         camManager = FindObjectOfType<CameraManager>();
+        startViewer = FindObjectOfType<StartView>();
         //get free looks
         zInfreeLookCam = zInCam.GetComponent<CinemachineFreeLook>();
         zOutfreeLookCam = zOutCam.GetComponent<CinemachineFreeLook>();
@@ -92,24 +93,31 @@ public class PlayerCameraController : MonoBehaviour
         //get input device 
         var inputDevice = InputManager.ActiveDevice;
      
-        //grab input from scroll wheel axis
-        if (mouseControls)
+        //only take switch input if not in start view 
+        if(startViewer.startView == false)
         {
-            zoomInput = Input.GetAxis("Mouse ScrollWheel");
-        }
-        //zoom with left and right triggers 
-        else
-        {
-            if (inputDevice.LeftTrigger.IsPressed)
+            //controller
+            if (inputDevice.DeviceClass == InputDeviceClass.Controller)
             {
-                zoomInput = Mathf.Clamp(-inputDevice.LeftTrigger.Value, -1f, 0f);
-            }
-            if (inputDevice.RightTrigger.IsPressed)
-            {
-                zoomInput = Mathf.Clamp(inputDevice.RightTrigger.Value, 0f, 1f);
-            }
-        }
+                //zoom with left and right triggers 
+                if (inputDevice.LeftTrigger.IsPressed)
+                {
+                    zoomInput = Mathf.Clamp(-inputDevice.LeftTrigger.Value, -1f, 0f);
+                }
+                if (inputDevice.RightTrigger.IsPressed)
+                {
+                    zoomInput = Mathf.Clamp(inputDevice.RightTrigger.Value, 0f, 1f);
+                }
 
+            }
+            //keyboard + mouse 
+            //grab input from scroll wheel axis
+            else if (inputDevice.DeviceClass == InputDeviceClass.Keyboard || inputDevice.DeviceClass == InputDeviceClass.Mouse)
+            {
+                zoomInput = Input.GetAxis("Mouse ScrollWheel");
+            }
+        }
+        
         //can switch 
         if (canSwitchCams)
         {

@@ -5,16 +5,14 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Events;
 using TGS;
 using InControl;
+using Player;
 
 public class ThirdPersonController : MonoBehaviour
 {
-    //start viewer ref
-    [Header("Starting View")]
-    public StartView startViewer;
-    //alternate start Pos based on if you have played before
-    public Vector3 firstTimeStartPos, returningStartPos;
+    StartView startViewer;
 
     //player controller and cam controller ref
     [Header("Component Refs")]
@@ -36,6 +34,7 @@ public class ThirdPersonController : MonoBehaviour
     public bool savingAndLoadingEnabled;
     public TerrainGridSystem currentTGS;
     public GridManager currentGridMan;
+    public UnityEvent enteredZone;
 
     //PS4 move variables
     //move states
@@ -86,6 +85,7 @@ public class ThirdPersonController : MonoBehaviour
     public Material smallJMat, midJMat, bigJMat;
     [HideInInspector]
     public GameObject jumpTrail;
+    float origAnimSpeed;
 
     //dust splash
     public GameObject dustSplash;
@@ -143,7 +143,7 @@ public class ThirdPersonController : MonoBehaviour
     public float timeToSleep = 5f;
     public AudioSource sleepSource;
     public AudioClip[] snores, yawns;
-    public ParticleSystem sleepParticles;
+    public ParticleSystem sleepParticles, zStopperParticles;
 
     void Awake()
     {
@@ -151,18 +151,19 @@ public class ThirdPersonController : MonoBehaviour
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
         playerTempo = GetComponent<TempoIndication>();
+        startViewer = FindObjectOfType<StartView>();
 
         //cam refs
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
 
-        //wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        wm = FindObjectOfType<WorldManager>();
         if(myInventory == null)
             myInventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
         playerRunCollider = GetComponent<BoxCollider>();
         playerRunCollider.enabled = false;
 
-        //for ps4 Move
+        //component refs
         moveSmoothUse = movespeedSmooth;
         controller = GetComponent<CharacterController>();
         cameraTransform = Camera.main.transform;
@@ -173,6 +174,7 @@ public class ThirdPersonController : MonoBehaviour
         //set animator state to idle
         samita.SetAnimator("idle");
         samita.Speed = 1f;
+        origAnimSpeed = samita.Speed;
         characterBody = samita.transform;
         footsteps = GetComponent<Footsteps>();
 
@@ -186,19 +188,6 @@ public class ThirdPersonController : MonoBehaviour
         swimSplashR.Stop();
         splashMainL = swimSplashL.main;
         splashMainR = swimSplashR.main;
-
-        //returning start pos
-        //if (PlayerPrefs.GetString("hasBook") == "yes")
-        //{
-        //    transform.position = returningStartPos;
-        //    transform.localEulerAngles = new Vector3(0, -90f, 0);
-        //}
-        ////initial start pos
-        //else
-        //{
-        //    transform.position = firstTimeStartPos;
-        //    transform.localEulerAngles = new Vector3(0, 0, 0);
-        //}
 
         //accounts for start view
         if (startViewer.startView)
@@ -387,7 +376,8 @@ public class ThirdPersonController : MonoBehaviour
         //too sleepy to run, show zzzs
         if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2) && daysWithoutSleep >= noSleepMax)
         {
-            sleepParticles.Emit(1);
+            if(!zStopperParticles.isPlaying)
+                zStopperParticles.Play();
         }
 
         //run if pressing shift keys OR move timer is great enough
@@ -505,7 +495,7 @@ public class ThirdPersonController : MonoBehaviour
         //too sleepy to swimjump
         if ((Input.GetButton("Jump") || inputDevice.Action1) && daysWithoutSleep >= noSleepMax)
         {
-            sleepParticles.Emit(5);
+            sleepParticles.Emit(2);
         }
 
         //actual force applied 
@@ -712,10 +702,12 @@ public class ThirdPersonController : MonoBehaviour
                 //start jump trail deactivation
                 jumpTrail.transform.SetParent(null);
                 jumpTrail.GetComponent<JumpTrail>().ClearTrail();
+                //reset animator speed 
+                samita.SetSpeed(origAnimSpeed);
                 //dust fall rhythm
                 //hit down
                 RaycastHit hitD;
-
+                
                 //raycast down to see if we hit the terrain;
                 if (Physics.Raycast(transform.position, -transform.up, out hitD, 10, groundedCheck))
                 {
@@ -815,20 +807,24 @@ public class ThirdPersonController : MonoBehaviour
         TrailRenderer actualTrail = jumpTrail.GetComponent<TrailRenderer>();
         jumpTrail.transform.SetParent(characterBody);
         jumpTrail.transform.localPosition = Vector3.zero;
+       
         //set various jump speeds
         switch (jumpType)
         {
             case 0:
                 verticalSpeed = smallJump;
                 actualTrail.material = smallJMat;
+                samita.Animator.SetInteger("jumpType", 0);
                 break;
             case 1:
                 verticalSpeed = midJump;
                 actualTrail.material = midJMat;
+                samita.Animator.SetInteger("jumpType", 1);
                 break;
             case 2:
                 verticalSpeed = bigJump;
                 actualTrail.material = bigJMat;
+                samita.Animator.SetInteger("jumpType", 2);
                 break;
         }
         samita.Animator.SetTrigger("jump");

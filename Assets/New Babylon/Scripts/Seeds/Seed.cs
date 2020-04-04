@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TGS;
 using InControl;
+using Player;
 
 public class Seed : MonoBehaviour {
     //tgs logic
@@ -340,7 +341,8 @@ public class Seed : MonoBehaviour {
             else
             {
                 Debug.Log("nono");
-                seedSource.PlayOneShot(noNO);
+                if(!seedSource.isPlaying)
+                    seedSource.PlayOneShot(noNO);
                 //player source play NoNo sound
             }
         }

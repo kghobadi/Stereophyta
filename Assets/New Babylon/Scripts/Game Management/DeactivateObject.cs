@@ -8,11 +8,22 @@ public class DeactivateObject : MonoBehaviour
     ThirdPersonController tpc;
     WorldManager wm;
 
+    public float activationDist = 0; 
+
     void Awake()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
         tpc = _player.GetComponent<ThirdPersonController>();
         wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+
+        //set to wm dist if it remains at 0
+        if (activationDist == 0)
+            activationDist = wm.activationDistance;
+    }
+
+    void Start()
+    {
+        Deactivate();
     }
 
     void Update()
@@ -21,14 +32,20 @@ public class DeactivateObject : MonoBehaviour
         if (tpc.currentMovement.magnitude > 0)
         {
             //Debug.Log(wm);
-            //deactivate object when it's far enough away from player 
-            if (Vector3.Distance(_player.transform.position, transform.position) > (wm.activationDistance + 10f))
-            {
-                //first add to list
-                wm.allInactiveObjects.Add(gameObject);
-                //then deactivate 
-                gameObject.SetActive(false);
-            }
+            Deactivate();
         }
+    }
+
+    void Deactivate()
+    {
+        //deactivate object when it's far enough away from player 
+        if (Vector3.Distance(_player.transform.position, transform.position) > (activationDist + 10f))
+        {
+            //first add to list
+            wm.allInactiveObjects.Add(gameObject);
+            //then deactivate 
+            gameObject.SetActive(false);
+        }
+       
     }
 }

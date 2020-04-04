@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using InControl;
+using Player;
 
 public class Picker : MonoBehaviour {
     //ref to inventory 
@@ -173,7 +174,7 @@ public class Picker : MonoBehaviour {
                 float distanceAway = Vector3.Distance(hitColliders[i].transform.position, transform.position);
                 //add to audiosource and distance to dictionary
                 pickableObjects.Add(pickableObj.GetComponent<Pickable>(), distanceAway);
-                Debug.Log("added " + pickableObj.name);
+                //Debug.Log("added " + pickableObj.name);
             }
             i++;
         }

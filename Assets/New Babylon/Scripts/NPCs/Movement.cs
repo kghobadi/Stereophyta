@@ -14,6 +14,8 @@ namespace NPC
         Sounds npcSounds;
         Camera mainCam;
         Footsteps footsteps;
+        NPCMovementManager movementManager;
+        StartView startViewer;
 
         [Header("AI Movement Settings")]
         public LayerMask grounded;
@@ -60,6 +62,8 @@ namespace NPC
             npcSounds = controller.Sounds;
             mainCam = Camera.main;
             myNavMesh = GetComponent<NavMeshAgent>();
+            movementManager = FindObjectOfType<NPCMovementManager>();
+            startViewer = FindObjectOfType<StartView>();
         }
 
         void Start()
@@ -127,9 +131,14 @@ namespace NPC
                 if (npcType == NPCMovementTypes.IDLE)
                 {
                     //play a sound
-                    if (stateTimer < 0 && !waving)
+                    if (stateTimer < 0 && !waving && !controller.Monologues.inMonologue)
                     {
-                        npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
+                        if(npcSounds.idleSounds.Length > 0)
+                            npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
+
+                        npcAnimations.Animator.SetTrigger("action1");
+
+                        stateTimer = idleTime;
                     }
                 }
                 //Set destination based on npc type 
@@ -154,11 +163,20 @@ namespace NPC
                 //waits until player is near then walks to next point 
                 else if (npcType == NPCMovementTypes.PATHFINDER)
                 {
-                    //play sounds 
-                    if(npcSounds.myAudioSource.isPlaying == false)
+                    //play a sound (cough)
+                    if (stateTimer < 1 && !waving && !controller.Monologues.inMonologue)
                     {
-                        if(npcSounds.idleSounds.Length > 0)
-                            npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
+                        if(npcSounds.myAudioSource.isPlaying == false)
+                        {
+                            if (npcSounds.idleSounds.Length > 0)
+                                npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
+
+                            npcAnimations.Animator.SetTrigger("action1");
+
+                            //only reset timer if waiting to give monologue
+                            if (waitingToGiveMonologue)
+                                stateTimer = idleTime;
+                        }
                     }
 
                     //goes to next point if timer reaches 0 or player is near 
@@ -178,9 +196,12 @@ namespace NPC
                     {
                         LookAtObject(player.transform.position, true);
 
-                        monologueWaitTimer += Time.deltaTime;
+                        //dont want this to count until start view is inactive 
+                        if(startViewer.active == false)
+                            monologueWaitTimer += Time.deltaTime;
 
-                        if(monologueWaitTimer > monoWaitTime)
+                        //stop waiting for monologue IF not in monologue 
+                        if(monologueWaitTimer > monoWaitTime && !controller.Monologues.inMonologue)
                         {
                             waitingToGiveMonologue = false;
 
@@ -188,6 +209,24 @@ namespace NPC
                         }
                     }
                 }
+            }
+        }
+
+        //resets the AI's movement type / path 
+        public void ResetMovement(MovementPath newMove)
+        {
+            npcType = movementManager.movementPaths[newMove.pathIndex].moveType;
+
+            //random npc move type 
+            if(npcType == NPCMovementTypes.RANDOM)
+            {
+                movementRadius = movementManager.movementPaths[newMove.pathIndex].moveRadius;
+            }
+            //pathfinder or waypoint looper 
+            else if(npcType == NPCMovementTypes.PATHFINDER || npcType == NPCMovementTypes.WAYPOINT)
+            {
+                waypoints = movementManager.movementPaths[newMove.pathIndex].movementPoints;
+                waypointCounter = 0;
             }
         }
 
@@ -210,7 +249,7 @@ namespace NPC
                 }
 
                 //stop running after we are close to position
-                if (Vector3.Distance(transform.position, targetPosition) < myNavMesh.stoppingDistance)
+                if (Vector3.Distance(transform.position, targetPosition) < myNavMesh.stoppingDistance + 3f)
                 {
                     SetIdle();
                 }

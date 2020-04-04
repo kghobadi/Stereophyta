@@ -2,27 +2,45 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Can use this scriptable object to create various types of tasks for NPCs to assign the player from their Task Manager
 namespace NPC
 {
-    //Can use this scriptable object to create various types of tasks for NPCs to assign the player from their Task Manager
     [CreateAssetMenu(fileName = "TaskData", menuName = "ScriptableObjects/TaskScriptable", order = 1)]
     public class Task : ScriptableObject
     {
+        [Header("Requirements")]
+        [Tooltip("Who assigns this task?")]
+        public string taskOwner;
+
         public enum TaskType
         {
-            FETCH, GOTO, 
+            FETCH, GOTO,
         }
         public TaskType taskType;
 
         //FETCH 
+        [Header("Fetch")]
         public Item.ItemType itemType;
+        public Item.ToolType toolType;
         public Item.MiscType miscType;
         public Item.SeedType seedType;
-        public Item.ToolType toolType; 
+        //for seeds 
+        public Plont.PlantType cropType;
+        public Shroom.ShroomType shroomType;
+        public string itemName;
         public int desiredItemCount;
 
-        //GOTO
-        public Transform placeToGo;
+        //GOTO 
+        [Header("Go-to")]
+        public string zoneName;
+
+        [Header("Outcomes")] // what happens when this task is complete?
+        public bool triggersMonologues;
+        public int [] monologueIndeces;
+
+        //rewards?
     }
 }
+
+
 

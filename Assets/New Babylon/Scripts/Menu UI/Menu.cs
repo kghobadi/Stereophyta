@@ -63,31 +63,9 @@ public class Menu : MonoBehaviour {
         {
             volumeSliders[i].value = 0;
         }
-        
-        //set controls based on player pref 
-        if (PlayerPrefs.HasKey("mouseOrController"))
-        {
-            if (PlayerPrefs.GetString("mouseOrController") == "mouse")
-            {
-                SetMouseControlsBool(true);
-            }
-            else
-            {
-                SetMouseControlsBool(false);
-            }
-        }
-        else
-        {
-            //set true for auto start to mouse controls 
-            if (mouseOrPs4OnStart)
-            {
-                SetMouseControlsBool(true);
-            }
-            else
-            {
-                SetMouseControlsBool(false);
-            }
-        }
+
+        //set mouse controls 
+        SetMouseControlsBool();
 
         //turn off
         menuObj.SetActive(false);
@@ -208,38 +186,15 @@ public class Menu : MonoBehaviour {
         Application.Quit();
     }
 
-    //toggle bool to opposite in UI 
-    public void ToggleMouseControls()
-    {
-        bool toggle = !camController.mouseControls;
-
-        SetMouseControlsBool(toggle);
-    }
-
     //this toggles mouse v controller option
-    public void SetMouseControlsBool(bool mouseOrController)
-    {
-        camController.mouseControls = mouseOrController;
-
-        //MOUSE enabled
-        if (camController.mouseControls)
-        {
-            
-            bookScript.bookPages[0] = mouseControlsImg;
-            //change prompts
-            dockEprompt.enabled = true;
-            interactEprompt.enabled = true;
-
-            dockPS4prompt.enabled = false;
-            interactPS4prompt.enabled = false;
-
-            zoomInstructions.mouseOrPs4 = true;
-            PlayerPrefs.SetString("mouseOrController", "mouse");
-        }
+    public void SetMouseControlsBool()
+    { 
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+        
         //CONTROLLER enabled
-        else
+        if (inputDevice.DeviceClass == InputDeviceClass.Controller)
         {
-          
             bookScript.bookPages[0] = ps4ControlsImg;
             //change prompts
             dockEprompt.enabled = false;
@@ -252,13 +207,26 @@ public class Menu : MonoBehaviour {
             PlayerPrefs.SetString("mouseOrController", "controller");
         }
 
+        //Mouse + Keyboard enabled
+        else if (inputDevice.DeviceClass == InputDeviceClass.Keyboard || inputDevice.DeviceClass == InputDeviceClass.Mouse)
+        {
+            bookScript.bookPages[0] = mouseControlsImg;
+            //change prompts
+            dockEprompt.enabled = true;
+            interactEprompt.enabled = true;
+
+            dockPS4prompt.enabled = false;
+            interactPS4prompt.enabled = false;
+
+            zoomInstructions.mouseOrPs4 = true;
+            PlayerPrefs.SetString("mouseOrController", "mouse");
+        }
+
         bookScript.UpdateSprites();
     }
 
     IEnumerator WaitToSetControls()
     {
         yield return new WaitUntil(() => menuObj.activeSelf == true);
-
-        
     }
 }

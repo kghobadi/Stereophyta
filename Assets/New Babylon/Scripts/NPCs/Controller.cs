@@ -11,7 +11,15 @@ namespace NPC
         [HideInInspector]
         public ThirdPersonController tpc;
         [HideInInspector]
+        public Player.Inventory playerInventory;
+        [HideInInspector]
+        public Player.TaskManager pTaskManager;
+        [HideInInspector]
         public CameraManager camManager;
+        [HideInInspector]
+        public NPCMovementManager moveManager;
+        [HideInInspector]
+        public CinematicsManager cineManager;
 
         //npc state manager
         public NPCStates npcState;
@@ -28,20 +36,36 @@ namespace NPC
         Sounds npcSounds;
         public Sounds Sounds { get { return npcSounds; } }
 
-        //Dialogues npcDialogues;
-        //public Dialogues Dialogues { get { return npcDialogues; } }
+        MonologueManager npcMonologues;
+        public MonologueManager Monologues { get { return npcMonologues; } }
+
+        TaskManager npcTasks;
+        public TaskManager Tasks { get { return npcTasks; } }
+
+        Inventory npcInventory;
+        public Inventory Inventory { get { return npcInventory; } }
 
         private void Awake()
         {
+            moveManager = FindObjectOfType<NPCMovementManager>();
             //npc component refs 
             npcAnimations = GetComponent<Animations>();
             npcMovement = GetComponent<Movement>();
             npcSounds = GetComponent<Sounds>();
-            //npcDialogues = GetComponent<Dialogues>();
+            //prob need to fetch monologue text from children 
+            npcMonologues = GetComponent<MonologueManager>();
+            npcMonologues.npcController = this;
+            if (npcMonologues == null)
+                npcMonologues = GetComponentInChildren<MonologueManager>();
+            npcTasks = GetComponent<TaskManager>();
+            npcInventory = GetComponent<Inventory>();
 
             //player refs
             tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
+            playerInventory = FindObjectOfType<Player.Inventory>();
+            pTaskManager = FindObjectOfType<Player.TaskManager>();
             camManager = FindObjectOfType<CameraManager>();
+            cineManager = FindObjectOfType<CinematicsManager>();
         }
   
     }

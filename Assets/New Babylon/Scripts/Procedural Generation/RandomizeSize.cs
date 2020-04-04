@@ -13,11 +13,12 @@ public class RandomizeSize : MonoBehaviour {
 	void Start ()
     {
         myAudioSource = GetComponent<AudioSource>();
-
+        //orig volume set 
+        if(myAudioSource)
+            origVolume = myAudioSource.volume;
         //animal's original size
         origScale = transform.localScale;
-        //orig volume set 
-        origVolume = myAudioSource.volume;
+        
 
         if (randomizeOnStart)
             RandomizeScale();

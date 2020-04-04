@@ -5,11 +5,18 @@ using UnityEngine;
 public class SplashTrigger : MonoBehaviour
 {
     FishJumper fishJumper;
+    GullAI gullAI;
     public ObjectPooler splashPool;
 
     void Awake()
     {
         fishJumper = transform.parent.GetComponent<FishJumper>();
+        gullAI = GetComponent<GullAI>();
+        //find splash pool 
+        if(splashPool == null)
+        {
+            splashPool = GameObject.Find("WaterSplashPool").GetComponent<ObjectPooler>();
+        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -20,12 +27,17 @@ public class SplashTrigger : MonoBehaviour
             if (splashPool)
             {
                 GameObject splash = splashPool.GrabObject();
-
-                splash.transform.position = transform.position;
+                //tp to my pos 
+                splash.transform.position = transform.position + new Vector3(0f, 1f, 0f);
+                //play particles
+                splash.GetComponent<ParticleSystem>().Play();
             }
 
             //play splash sound 
-            fishJumper.PlayRandomSound(fishJumper.splashes, fishJumper.myAudioSource.volume);
+            if(fishJumper)
+                fishJumper.PlayRandomSound(fishJumper.splashes, fishJumper.myAudioSource.volume);
+            if (gullAI)
+                gullAI.PlayRandomSound(gullAI.splashes, gullAI.myAudioSource.volume);
         }
     }
 }

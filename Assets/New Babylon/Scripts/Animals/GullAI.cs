@@ -19,7 +19,6 @@ public class GullAI : RhythmProducer
     float origGlideSpeed;
     public Transform[] idlePoints, divePoints, ascentPoints;
     Vector3 lookPoint;
-    public float idleSoundTimer;
 
     //IDLE 
     Vector3 glidePoint, hoverPoint;
@@ -36,8 +35,9 @@ public class GullAI : RhythmProducer
     public AudioClip[] idles;
     public AudioClip[] dives;
     public AudioClip[] ascends;
+    public AudioClip[] splashes;
 
-    public  override void Awake()
+    public override void Awake()
     {
         base.Awake();
         gullAnim = GetComponent<GullAnimation>();
@@ -59,11 +59,15 @@ public class GullAI : RhythmProducer
 
     void Update()
     {
+        
         //IDLE
         if(gullStates == GullStates.IDLE)
         {
             //dist from glide point 
             float dist = Vector3.Distance(transform.position, glidePoint);
+
+            //look at a dive point 
+            transform.LookAt(lookPoint, Vector3.up);
 
             //glide 
             if (gliding)
@@ -82,13 +86,18 @@ public class GullAI : RhythmProducer
                 DiveCheck();
             }
 
-            SoundCountdown(idles, idleSoundTimer);
-
             DiveReset();
         }
 
+        //seagull sound :-)
+        if (showRhythm)
+        {
+            PlayRandomSoundRandomPitch(idles, myAudioSource.volume);
+            showRhythm = false;
+        }
+
         //DIVE
-        if(gullStates == GullStates.DIVING)
+        if (gullStates == GullStates.DIVING)
         {
             transform.LookAt(lookPoint);
 
@@ -128,7 +137,7 @@ public class GullAI : RhythmProducer
     void Glide(float dist)
     {
         //move towards hover point 
-        if (dist < maxDistFromGlidePoint)
+        if (dist <= maxDistFromGlidePoint)
             transform.position = Vector3.MoveTowards(transform.position, hoverPoint, glideSpeed * Time.deltaTime);
         else
         {
@@ -142,7 +151,7 @@ public class GullAI : RhythmProducer
     void Adjust(float dist)
     {
         //move towards glid point origin 
-        if (dist > 0.5f)
+        if (dist >= 0.5f)
         {
             transform.position = Vector3.MoveTowards(transform.position, glidePoint, glideSpeed * Time.deltaTime);
         }
@@ -162,7 +171,11 @@ public class GullAI : RhythmProducer
         //set glide & hover
         glidePoint = point;
         hoverPoint = glidePoint + (Random.insideUnitSphere * maxDistFromGlidePoint * 5);
-      
+
+        //select look point from dives array 
+        int index = Random.Range(0, divePoints.Length);
+        lookPoint = divePoints[index].position;
+
         //set anim & state 
         gullAnim.SetAnimator("idle");
         gliding = true;
@@ -207,6 +220,7 @@ public class GullAI : RhythmProducer
         SetMove(divePoints, diveSpeed);
         gullStates = GullStates.DIVING;
         gullAnim.SetAnimator("diving");
+        //PlayRandomSound(dives, myAudioSource.volume);
         showRhythm = false;
     }
 
@@ -215,6 +229,7 @@ public class GullAI : RhythmProducer
     {
         SetMove(ascentPoints, diveSpeed);
         gullStates = GullStates.ASCENDING;
+        //PlayRandomSound(ascends, myAudioSource.volume);
         gullAnim.SetAnimator("flying");
     }
 
@@ -223,6 +238,7 @@ public class GullAI : RhythmProducer
     {
         SetMove(idlePoints, flightSpeed);
         gullStates = GullStates.FLYING;
+        //PlayRandomSound(idles, myAudioSource.volume);
         gullAnim.SetAnimator("flying");
     }
 
@@ -233,7 +249,7 @@ public class GullAI : RhythmProducer
         int index = Random.Range(0, points.Length);
         Vector3 point = points[index].position;
         //randomize speed
-        float newSpeed = speed + Random.Range(-50f, 50f);
+        float newSpeed = speed + Random.Range(-5f, 15f);
         //set move towards 
         mover.MoveTo(point, newSpeed);
         lookPoint = point;
@@ -243,7 +259,7 @@ public class GullAI : RhythmProducer
     public void SetTimeScale()
     {
         timeScale = Random.Range(0, 5);
-
+        
         //should affect the speeds of my behaviors depending on what time scale right??
     }
 }

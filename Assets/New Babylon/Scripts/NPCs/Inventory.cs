@@ -28,7 +28,7 @@ namespace NPC
             //player refs
             player = GameObject.FindGameObjectWithTag("Player");
             tpc = player.GetComponent<ThirdPersonController>();
-            tempoIndicator = tpc.GetComponent<TempoIndication>();
+            tempoIndicator = GetComponent<TempoIndication>();
         }
 
         void Start()
@@ -183,6 +183,11 @@ namespace NPC
             //set item count to 1 
             Item itemScript = item.GetComponent<Item>();
             itemScript.itemCount = 1;
+            //set parent, local pos
+            item.transform.SetParent(transform);
+            item.transform.localPosition = localSeedSpot;
+            //disable pickable obj 
+            item.SetActive(false);
         }
 
         //looks in inventory Items to see if there is a Tool of this type

@@ -12,7 +12,7 @@ public class Sun : MonoBehaviour
     public int minBPM, maxBPM;
 
     //startView ref
-    public StartView startViewer;
+    StartView startViewer;
 
     //player refs
     PlayerCameraController cammy;
@@ -78,6 +78,7 @@ public class Sun : MonoBehaviour
         tpc = _player.GetComponent<ThirdPersonController>();
         //stars
         starParticles = stars.GetComponent<ParticleSystem>();
+        startViewer = FindObjectOfType<StartView>();
     }
 
     void Start()

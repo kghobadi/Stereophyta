@@ -38,6 +38,12 @@ public abstract class AnimationHandler : MonoBehaviour
         return characterAnimator.GetCurrentAnimatorStateInfo(0).IsName(anim);
     }
 
+    public void SetSpeed(float speed)
+    {
+        Speed = speed;
+        Debug.Log("set speed: " + speed);
+    }
+
     //sets animator speed 
     public float Speed
     {

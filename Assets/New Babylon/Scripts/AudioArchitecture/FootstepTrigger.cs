@@ -7,6 +7,8 @@ public class FootstepTrigger : MonoBehaviour
     ThirdPersonController tpc;
     public bool triggered = false;
     public AudioClip[] desiredFootsteps, lastFootsteps;
+    
+    IEnumerator setFootsteps;
 
     private void Awake()
     {
@@ -18,11 +20,16 @@ public class FootstepTrigger : MonoBehaviour
     {
         if(other.gameObject.tag == "Player" || other.gameObject.tag == "NPC")
         {
-            Footsteps footsteps = other.gameObject.GetComponent<Footsteps>();
+            Footsteps footstepper = other.gameObject.GetComponent<Footsteps>();
 
-            lastFootsteps = footsteps.currentFootsteps;
-            footsteps.currentFootsteps = desiredFootsteps;
-            footsteps.currentSound = 0;
+            lastFootsteps = footstepper.currentFootsteps;
+
+            if (setFootsteps != null)
+                StopCoroutine(setFootsteps);
+
+            setFootsteps = WaitToSetFootsteps(footstepper, desiredFootsteps);
+
+            StartCoroutine(setFootsteps);
 
             triggered = true;
         }
@@ -33,12 +40,24 @@ public class FootstepTrigger : MonoBehaviour
     {
         if (other.gameObject.tag == "Player" || other.gameObject.tag == "NPC")
         {
-            Footsteps footsteps = other.gameObject.GetComponent<Footsteps>();
+            Footsteps footstepper = other.gameObject.GetComponent<Footsteps>();
 
-            footsteps.currentFootsteps = lastFootsteps;
-            footsteps.currentSound = 0;
+            if (setFootsteps != null)
+                StopCoroutine(setFootsteps);
+
+            setFootsteps = WaitToSetFootsteps(footstepper, lastFootsteps);
+
+            StartCoroutine(setFootsteps);
 
             triggered = false;
         }
+    }
+
+    IEnumerator WaitToSetFootsteps(Footsteps footsteps, AudioClip[] newFootsteps)
+    {
+        yield return new WaitForEndOfFrame();
+
+        footsteps.currentFootsteps = newFootsteps;
+        footsteps.currentSound = 0;
     }
 }

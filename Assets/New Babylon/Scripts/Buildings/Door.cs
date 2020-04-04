@@ -28,41 +28,37 @@ public class Door : MonoBehaviour
 
     void Update()
     {
-        //the player has to have picked up the book
-        if (PlayerPrefs.GetString("hasBook") == "yes")
+        //distance check
+        currentDistance = Vector3.Distance(player.transform.position, transform.position);
+
+        //checks whether player is inside or outside the door using z pos
+        if (player.transform.position.x < transform.position.x)
         {
-            //distance check
-            currentDistance = Vector3.Distance(player.transform.position, transform.position);
+            openDistance = openDistanceIn;
+        }
+        else
+        {
+            openDistance = openDistanceOut;
+        }
 
-            //checks whether player is inside or outside the door using z pos
-            if (player.transform.position.x < transform.position.x)
+        //if player is near, set door to open and play a sound
+        if (currentDistance < openDistance)
+        {
+            doorAnimator.SetBool("open", true);
+            if (!open)
             {
-                openDistance = openDistanceIn;
+                open = true;
+                PlaySound(doorOpen);
             }
-            else
+        }
+        //if player has walked away, set door to close and play a sound
+        else if (currentDistance > (openDistance + 1))
+        {
+            doorAnimator.SetBool("open", false);
+            if (open)
             {
-                openDistance = openDistanceOut;
-            }
-
-            //if player is near, set door to open and play a sound
-            if (currentDistance < openDistance)
-            {
-                doorAnimator.SetBool("open", true);
-                if (!open)
-                {
-                    open = true;
-                    PlaySound(doorOpen);
-                }
-            }
-            //if player has walked away, set door to close and play a sound
-            else if (currentDistance > (openDistance + 1))
-            {
-                doorAnimator.SetBool("open", false);
-                if (open)
-                {
-                    open = false;
-                    PlaySound(doorClose);
-                }
+                open = false;
+                PlaySound(doorClose);
             }
         }
     }

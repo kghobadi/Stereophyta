@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class BookPickUp : PickUp {
 
-    public StartView startViewer;
+    StartView startViewer;
     public Menu menuScript;
 
     void Start()
     {
+        startViewer = FindObjectOfType<StartView>();
         //player has already picked up book
         if(PlayerPrefs.GetString("hasBook") == "yes")
         {
