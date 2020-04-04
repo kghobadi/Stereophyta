@@ -133,7 +133,6 @@ public class StartView : MonoBehaviour {
         for (int i = 0; i < menuFades.Length; i++)
         {
             menuFades[i].FadeOut();
-            menuFades[i].fadeOutImmediately = true;
         }
 
         active = false;
