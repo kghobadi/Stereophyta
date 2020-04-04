@@ -37,7 +37,7 @@ public class GullAI : RhythmProducer
     public AudioClip[] ascends;
     public AudioClip[] splashes;
 
-    public  override void Awake()
+    public override void Awake()
     {
         base.Awake();
         gullAnim = GetComponent<GullAnimation>();

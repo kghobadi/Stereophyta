@@ -18,6 +18,7 @@ public class MonologueTrigger : MonoBehaviour
     public bool displayUI;
 
     public GameObject interactDisplay;
+    public FadeUItmp spaceToTalk;
     //monologues
     public MonologueManager[] myMonologues;
     public int[] monoNumbers;
@@ -85,6 +86,11 @@ public class MonologueTrigger : MonoBehaviour
                 npcMovement.waitingToGiveMonologue = true;
             }
         }
+
+        //fade in space to talk 
+        if (spaceToTalk)
+            spaceToTalk.FadeIn();
+
         ToggleInteractUI(playerInZone);
     }
 
@@ -100,6 +106,10 @@ public class MonologueTrigger : MonoBehaviour
                 myMonologues[i].SetMonologueSystem(monoNumbers[i]);
                 myMonologues[i].EnableMonologue();
             }
+
+            //fade out space to talk 
+            if (spaceToTalk)
+                spaceToTalk.FadeOut();
 
             hasActivated = true;
             ToggleInteractUI(false);

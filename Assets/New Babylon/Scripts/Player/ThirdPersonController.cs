@@ -157,13 +157,13 @@ public class ThirdPersonController : MonoBehaviour
         cameraAudSource = Camera.main.GetComponent<AudioSource>();
         playerCameraController = Camera.main.GetComponent<PlayerCameraController>();
 
-        //wm = GameObject.FindGameObjectWithTag("WorldManager").GetComponent<WorldManager>();
+        wm = FindObjectOfType<WorldManager>();
         if(myInventory == null)
             myInventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
         playerRunCollider = GetComponent<BoxCollider>();
         playerRunCollider.enabled = false;
 
-        //for ps4 Move
+        //component refs
         moveSmoothUse = movespeedSmooth;
         controller = GetComponent<CharacterController>();
         cameraTransform = Camera.main.transform;
@@ -188,19 +188,6 @@ public class ThirdPersonController : MonoBehaviour
         swimSplashR.Stop();
         splashMainL = swimSplashL.main;
         splashMainR = swimSplashR.main;
-
-        //returning start pos
-        //if (PlayerPrefs.GetString("hasBook") == "yes")
-        //{
-        //    transform.position = returningStartPos;
-        //    transform.localEulerAngles = new Vector3(0, -90f, 0);
-        //}
-        ////initial start pos
-        //else
-        //{
-        //    transform.position = firstTimeStartPos;
-        //    transform.localEulerAngles = new Vector3(0, 0, 0);
-        //}
 
         //accounts for start view
         if (startViewer.startView)

@@ -18,9 +18,11 @@ public class StartView : MonoBehaviour {
 
     [Header("Cameras")]
     public bool startView;
+    public bool active;
     GameCamera startCamera;
     public GameCamera playerCamera;
     public GameObject playerInventory;
+    public AudioSource introMusic;
     
     //for now, this will be the windmill
     [Header("Values for rotation & movement")]
@@ -82,6 +84,8 @@ public class StartView : MonoBehaviour {
             }
 
             SetAudioListener(false);
+
+            active = true;
         }
         //not start view 
         else
@@ -91,12 +95,14 @@ public class StartView : MonoBehaviour {
             startMenuUI.SetActive(false);
 
             SetAudioListener(true);
+
+            active = false;
         }
     }
 	
 	void Update ()
     {
-        if (startView)
+        if (active)
         {
             //get input device 
             var inputDevice = InputManager.ActiveDevice;
@@ -120,7 +126,7 @@ public class StartView : MonoBehaviour {
         tpc.playerCanMove = true;
         playerInventory.SetActive(true);
         sunScript.rotationSpeed = sunScript.normalRotation;
-
+        clickToStart.SetActive(false);
         SetAudioListener(true);
 
         //fade out menu UI
@@ -130,7 +136,10 @@ public class StartView : MonoBehaviour {
             menuFades[i].fadeOutImmediately = true;
         }
 
-        startView = false;
+        active = false;
+
+        //check session # to decide whether to play this 
+        introMusic.Play();
     }
 
     //true for player listener, false for start listener
