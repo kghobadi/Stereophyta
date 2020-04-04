@@ -15,6 +15,7 @@ namespace NPC
         Camera mainCam;
         Footsteps footsteps;
         NPCMovementManager movementManager;
+        StartView startViewer;
 
         [Header("AI Movement Settings")]
         public LayerMask grounded;
@@ -62,6 +63,7 @@ namespace NPC
             mainCam = Camera.main;
             myNavMesh = GetComponent<NavMeshAgent>();
             movementManager = FindObjectOfType<NPCMovementManager>();
+            startViewer = FindObjectOfType<StartView>();
         }
 
         void Start()
@@ -194,9 +196,12 @@ namespace NPC
                     {
                         LookAtObject(player.transform.position, true);
 
-                        monologueWaitTimer += Time.deltaTime;
+                        //dont want this to count until start view is inactive 
+                        if(startViewer.active == false)
+                            monologueWaitTimer += Time.deltaTime;
 
-                        if(monologueWaitTimer > monoWaitTime)
+                        //stop waiting for monologue IF not in monologue 
+                        if(monologueWaitTimer > monoWaitTime && !controller.Monologues.inMonologue)
                         {
                             waitingToGiveMonologue = false;
 
