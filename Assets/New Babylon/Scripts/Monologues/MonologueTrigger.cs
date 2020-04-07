@@ -124,7 +124,7 @@ public class MonologueTrigger : MonoBehaviour
         ToggleInteractUI(playerInZone);
     }
     
-    void ToggleInteractUI(bool newState)
+    public void ToggleInteractUI(bool newState)
     {
         if (displayUI)
         {

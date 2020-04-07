@@ -26,7 +26,9 @@ public class MonologueManager : MonoBehaviour
     public Transform playerSpot;
     [Tooltip("Npc camera")]
     public GameCamera speakerCam;
-
+    [Tooltip("if there is a background for speaking text")]
+    public FadeUI textBack;
+    AnimateDialogue animateTextback;
     //text component and string array of its lines
     public int currentMonologue;
     [Tooltip("Fill this with all the individual monologues the character will give")]
@@ -45,6 +47,9 @@ public class MonologueManager : MonoBehaviour
             tpc = player.GetComponent<ThirdPersonController>();
             playerCam = Camera.main.GetComponent<PlayerCameraController>();
         }
+
+        if (textBack)
+            animateTextback = textBack.GetComponent<AnimateDialogue>();
 
         wmManager = FindObjectOfType<WorldMonologueManager>();
         camManager = FindObjectOfType<CameraManager>();
@@ -113,6 +118,14 @@ public class MonologueManager : MonoBehaviour
         else
             monoReader.theText.enabled = true;
 
+        //textback
+        if (textBack)
+        {
+            textBack.FadeIn();
+            if (animateTextback)
+                animateTextback.active = true;
+        }
+            
         //enable speaker cam, disable cam controller
         camManager.Set(speakerCam);
         if (playerCam)
@@ -182,6 +195,14 @@ public class MonologueManager : MonoBehaviour
             monoReader.the_Text.enabled = false;
         else
             monoReader.theText.enabled = false;
+
+        //textback
+        if (textBack)
+        {
+            textBack.FadeOut();
+            if(animateTextback)
+                animateTextback.active = false;
+        }
 
         //set speaker to idle 
         if (npcController.Animation)

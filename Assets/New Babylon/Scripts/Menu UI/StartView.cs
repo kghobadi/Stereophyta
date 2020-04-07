@@ -121,8 +121,8 @@ public class StartView : MonoBehaviour {
     //disable start view stuff
     void EndStartView()
     {
-        camManager.Set(playerCamera);
-        camManager.defaultCamera = playerCamera;
+        active = false;
+       
         tpc.playerCanMove = true;
         playerInventory.SetActive(true);
         sunScript.rotationSpeed = sunScript.normalRotation;
@@ -134,11 +134,17 @@ public class StartView : MonoBehaviour {
         {
             menuFades[i].FadeOut();
         }
+        
+        //check if this is the last zone --> set as starting zone 
+        if (PlayerPrefs.HasKey("lastZone") == false)
+        {
+            //check session # to decide whether to play this 
+            introMusic.Play();
+        }
 
-        active = false;
-
-        //check session # to decide whether to play this 
-        introMusic.Play();
+        //camera transition
+        camManager.Set(playerCamera);
+        camManager.defaultCamera = playerCamera;
     }
 
     //true for player listener, false for start listener

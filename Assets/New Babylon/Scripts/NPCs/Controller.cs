@@ -20,6 +20,8 @@ namespace NPC
         public NPCMovementManager moveManager;
         [HideInInspector]
         public CinematicsManager cineManager;
+        [HideInInspector]
+        public WorldMonologueManager wmManager;
 
         //npc state manager
         public NPCStates npcState;
@@ -66,6 +68,7 @@ namespace NPC
             pTaskManager = FindObjectOfType<Player.TaskManager>();
             camManager = FindObjectOfType<CameraManager>();
             cineManager = FindObjectOfType<CinematicsManager>();
+            wmManager = FindObjectOfType<WorldMonologueManager>();
         }
   
     }
