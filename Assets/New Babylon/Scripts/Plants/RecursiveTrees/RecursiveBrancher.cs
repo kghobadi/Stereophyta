@@ -18,11 +18,17 @@ public class RecursiveBrancher : MonoBehaviour {
     public Material normalMat;
     public Material soundPlayingMat;
 
+    SetRandomMaterial randomMat;
     public static RecursiveBrancher initialTreeBase;
 
 	void Start () {
         myAudioSource = GetComponent<AudioSource>();
         mr = transform.GetChild(1).GetComponent<SkinnedMeshRenderer>();
+        //random mat check
+        randomMat = mr.GetComponent<SetRandomMaterial>();
+        if (randomMat)
+            normalMat = randomMat.assignedMat;
+
         recurse -= 1;
         if(initialTreeBase == null)
         {
@@ -34,6 +40,7 @@ public class RecursiveBrancher : MonoBehaviour {
             if (recurse > 0)
             {
                 var copy = Instantiate(gameObject);
+                copy.transform.position = transform.position;
 
                 myBranches.Add(copy);
 
@@ -43,7 +50,6 @@ public class RecursiveBrancher : MonoBehaviour {
                 recursive.RotateBranch(i);
                 recursive.ScaleBranch(i);
             }
-
         }
 
         StartCoroutine(WaitToSetParents());

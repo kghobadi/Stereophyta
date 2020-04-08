@@ -76,13 +76,16 @@ namespace NPC
             if(gameObject.name == "Satil")
             {
                 //check if this is the last zone --> set as starting zone 
-                if (PlayerPrefs.HasKey("lastZone"))
+                if (PlayerPrefs.HasKey("lastZone") )
                 {
-                    //set pos & behavior
-                    myNavMesh.enabled = false;
-                    transform.position = startingPos.position;
-                    ResetMovement(startBehavior);
-                    myNavMesh.enabled = true;
+                    if(PlayerPrefs.GetString("lastZone") != "MountainIsland")
+                    {
+                        //set pos & behavior
+                        myNavMesh.enabled = false;
+                        transform.position = startingPos.position;
+                        ResetMovement(startBehavior);
+                        myNavMesh.enabled = true;
+                    }
                 }
             }
 

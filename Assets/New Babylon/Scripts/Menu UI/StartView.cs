@@ -96,6 +96,12 @@ public class StartView : MonoBehaviour {
 
             SetAudioListener(true);
 
+            //fade out menu UI
+            for (int i = 0; i < menuFades.Length; i++)
+            {
+                menuFades[i].FadeOut();
+            }
+
             active = false;
         }
     }
@@ -136,7 +142,7 @@ public class StartView : MonoBehaviour {
         }
         
         //check if this is the last zone --> set as starting zone 
-        if (PlayerPrefs.HasKey("lastZone") == false)
+        if (PlayerPrefs.GetString("lastZone") == "MountainIsland" || PlayerPrefs.HasKey("lastZone") == false)
         {
             //check session # to decide whether to play this 
             introMusic.Play();

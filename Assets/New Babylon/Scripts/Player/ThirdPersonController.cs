@@ -150,6 +150,7 @@ public class ThirdPersonController : MonoBehaviour
         //grab sun refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
+        sunScript.newDay.AddListener(NewDay);
         playerTempo = GetComponent<TempoIndication>();
         startViewer = FindObjectOfType<StartView>();
 
@@ -252,6 +253,12 @@ public class ThirdPersonController : MonoBehaviour
             {
                 runParticles.Stop();
             }
+
+            //wake up
+            if((Input.GetKeyDown(KeyCode.Z) || inputDevice.Action4.WasPressed) && sleepingTime > 0.5f)
+            {
+                WakeUp();
+            }
         }
 
         //Restart game
@@ -262,6 +269,32 @@ public class ThirdPersonController : MonoBehaviour
 
         //set grass shader to my pos 
         Shader.SetGlobalVector("playerPos", transform.position);
+    }
+
+    //called by sun in the morning 
+    void NewDay()
+    {
+        //subtract from player's days to sleep
+        if (sleeping)
+        {
+            daysToSleep--;
+            //wake player up if they have slept long enough 
+            if (daysToSleep <= 0 && sleepingTime > timeToSleep)
+            {
+                WakeUp();
+            }
+        }
+
+        //add to players days without sleep
+        else
+        {
+            daysWithoutSleep++;
+            //player passes out from exhaustion
+            if (daysWithoutSleep > noSleepMax)
+            {
+                StartCoroutine(WaitForPlayerToPassOut());
+            }
+        }
     }
 
     //same sort of logic for jump and other stuff, different core movement from ps4 controllers
@@ -912,4 +945,13 @@ public class ThirdPersonController : MonoBehaviour
         playerCameraController.enabled = true;
     }
 
+    //jst for sleeping 
+    IEnumerator WaitForPlayerToPassOut()
+    {
+        yield return new WaitUntil(() => controller.isGrounded == true);
+
+        Sleep(false);
+
+        Debug.Log("Sun called sleep");
+    }
 }
