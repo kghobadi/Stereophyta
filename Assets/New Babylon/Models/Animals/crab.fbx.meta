@@ -170,7 +170,7 @@ ModelImporter:
       name: Crab Sleep
       takeName: Take 001
       firstFrame: 44
-      lastFrame: 44
+      lastFrame: 44.25
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
