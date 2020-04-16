@@ -43,7 +43,6 @@ public class ThirdPersonController : MonoBehaviour
     public bool jumping, swimming;
     public bool playerCanMove, menuOpen;
     public bool indoors;
-    public Transform houseCam;
     public ParticleSystem runParticles;
     [HideInInspector]
     public Vector3 currentMovement;
@@ -367,17 +366,9 @@ public class ThirdPersonController : MonoBehaviour
         //horizontal movement calculations
         Vector3 targetHorizontalMovement = horizontalInput;
 
-        //changes cam rotation it draws from 
-        if (indoors)
-        {
-            targetForwardMovement = houseCam.rotation * forwardInput;
-            targetHorizontalMovement = houseCam.rotation * horizontalInput;
-        }
-        else
-        {
-            targetForwardMovement = cameraTransform.rotation * forwardInput;
-            targetHorizontalMovement = cameraTransform.rotation * horizontalInput;
-        }
+        //cross ref with camera rotation 
+        targetForwardMovement = cameraTransform.rotation * forwardInput;
+        targetHorizontalMovement = cameraTransform.rotation * horizontalInput;
         //forward
         targetForwardMovement.y = 0;
         targetForwardMovement.Normalize();
@@ -702,7 +693,8 @@ public class ThirdPersonController : MonoBehaviour
         //need input to set movement anim
         if (inputToCheck.magnitude > 0)
         {
-            if (!jumping)
+            //not while jumping or inside 
+            if (!jumping && !indoors)
             {
                 //play footstep sound
                 if (running)

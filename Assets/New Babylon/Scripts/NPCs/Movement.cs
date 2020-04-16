@@ -61,8 +61,8 @@ namespace NPC
             controller = GetComponent<Controller>();
             footsteps = GetComponent<Footsteps>();
             player = controller.tpc;
-            npcAnimations = controller.Animation;
-            npcSounds = controller.Sounds;
+            npcAnimations = GetComponent<Animations>();
+            npcSounds = GetComponent<Sounds>();
             mainCam = Camera.main;
             myNavMesh = GetComponent<NavMeshAgent>();
             movementManager = FindObjectOfType<NPCMovementManager>();

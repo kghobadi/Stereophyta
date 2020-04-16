@@ -4,13 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 using InControl;
+using TMPro;
 
 public class Menu : MonoBehaviour {
     //sun
     GameObject sun;
     Sun sunScript;
     float lastSunSpeed;
-    public StartView startViewer;
+    StartView startViewer;
     //player
     GameObject player;
     ThirdPersonController tpc;
@@ -22,8 +23,8 @@ public class Menu : MonoBehaviour {
     public bool mouseOrPs4OnStart;
     public Sprite mouseControlsImg;
     public Sprite ps4ControlsImg;
-    public Text dockEprompt, interactEprompt;
-    public Image dockPS4prompt, interactPS4prompt;
+    public TMP_Text interactEprompt;
+    public Image interactPS4prompt;
     public PlayerCameraController camController;
     public ZoomCamInstructions zoomInstructions;
     public Slider mouseSensitivity;
@@ -50,6 +51,7 @@ public class Menu : MonoBehaviour {
         //grab sun refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
+        startViewer = FindObjectOfType<StartView>();
 
         //player
         player = GameObject.FindGameObjectWithTag("Player");
@@ -101,7 +103,6 @@ public class Menu : MonoBehaviour {
         cursor.SetActive(true);
         //turn off interact prompts 
         interactEprompt.transform.parent.gameObject.SetActive(false);
-        dockEprompt.transform.parent.gameObject.SetActive(false);
 
         //menu on
         menuObj.SetActive(true);
@@ -119,7 +120,6 @@ public class Menu : MonoBehaviour {
     {   
         //turn on interact prompts 
         interactEprompt.transform.parent.gameObject.SetActive(true);
-        dockEprompt.transform.parent.gameObject.SetActive(true);
         //menu off
         menuObj.SetActive(false);
         tpc.menuOpen = false;
@@ -197,10 +197,7 @@ public class Menu : MonoBehaviour {
         {
             bookScript.bookPages[0] = ps4ControlsImg;
             //change prompts
-            dockEprompt.enabled = false;
             interactEprompt.enabled = false;
-
-            dockPS4prompt.enabled = true;
             interactPS4prompt.enabled = true;
 
             zoomInstructions.mouseOrPs4 = false;
@@ -212,10 +209,7 @@ public class Menu : MonoBehaviour {
         {
             bookScript.bookPages[0] = mouseControlsImg;
             //change prompts
-            dockEprompt.enabled = true;
             interactEprompt.enabled = true;
-
-            dockPS4prompt.enabled = false;
             interactPS4prompt.enabled = false;
 
             zoomInstructions.mouseOrPs4 = true;

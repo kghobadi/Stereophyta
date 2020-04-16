@@ -121,7 +121,6 @@ public class Farmhouse : MonoBehaviour {
                 }
             }
         }
-       
     }
 
     void FadeOutSleepSymbols()

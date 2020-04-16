@@ -46,6 +46,7 @@ public class Zone : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+
         if(terrainType == TerrainType.TERRAIN)
             zoneGridMan = transform.parent.GetComponent<GridManager>();
         //zone saver...

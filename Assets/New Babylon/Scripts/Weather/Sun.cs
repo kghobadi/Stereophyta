@@ -217,7 +217,6 @@ public class Sun : MonoBehaviour
         SetClockBPM();
         RandomizeSkybox();
         RandomizeWinds();
-
         
         //fade in and out sun saver IF saving enabled 
         if (tpc.savingAndLoadingEnabled)

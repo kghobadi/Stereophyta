@@ -12,7 +12,6 @@ public class IndoorCamera : MonoBehaviour {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
-        tpc.houseCam = transform;
     }
 	
 	void Update () {

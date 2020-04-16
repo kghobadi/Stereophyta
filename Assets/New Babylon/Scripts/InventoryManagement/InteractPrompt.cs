@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class InteractPrompt : MonoBehaviour {
-    public Canvas myWorldCanvas;
-    public Text pickUpText;
+    [Header("All Interact Prompts")]
+    public TMP_Text pickUpText;
     public string pickUpMessage;
-
-    public Image pickUpImage;
-    public Sprite pickUpSprite;
-
     public FadeUI[] interactPrompts;
 
+    [Header("Pickable")]
+    public Canvas myWorldCanvas;
+    public Image pickUpImage;
+    public Sprite pickUpSprite;
+    
     //pick up prompt for when player is near 
     public void ShowPickupPrompt()
     {
@@ -20,7 +22,8 @@ public class InteractPrompt : MonoBehaviour {
         //set text prompt
         pickUpText.text = pickUpMessage;
         //set sprite prompt 
-        pickUpImage.sprite = pickUpSprite;
+        if(pickUpImage)
+            pickUpImage.sprite = pickUpSprite;
         //fade em in
         for (int i = 0; i < interactPrompts.Length; i++)
         {
