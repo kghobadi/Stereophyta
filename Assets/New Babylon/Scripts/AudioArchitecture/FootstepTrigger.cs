@@ -7,6 +7,7 @@ public class FootstepTrigger : MonoBehaviour
     ThirdPersonController tpc;
     public bool triggered = false;
     public AudioClip[] desiredFootsteps, lastFootsteps;
+    public AudioClip[] exitSteps;
     
     IEnumerator setFootsteps;
 
@@ -45,7 +46,10 @@ public class FootstepTrigger : MonoBehaviour
             if (setFootsteps != null)
                 StopCoroutine(setFootsteps);
 
-            setFootsteps = WaitToSetFootsteps(footstepper, lastFootsteps);
+            if(exitSteps.Length > 0)
+                setFootsteps = WaitToSetFootsteps(footstepper, exitSteps);
+            else
+                setFootsteps = WaitToSetFootsteps(footstepper, lastFootsteps);
 
             StartCoroutine(setFootsteps);
 
