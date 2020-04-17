@@ -730,5 +730,15 @@ namespace Player
             }
         }
 
+        public void FadeOut()
+        {
+            StopCoroutine(fadeItems);
+
+            for (int i = 0; i < ItemsUI.Length; i++)
+            {
+                ItemsUI[i].FadeOut();
+            }
+        }
+
     }
 }

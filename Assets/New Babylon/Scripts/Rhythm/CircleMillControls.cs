@@ -165,6 +165,7 @@ public class CircleMillControls : MonoBehaviour {
         playerOperating = true;
         tpc.playerCanMove = false;
         tpc.transform.position = operatingPos;
+        tpc.myInventory.FadeOut();
         tpc.myInventory.gameObject.SetActive(false);
         tpc.playerSource.PlayOneShot(beginOperating);
         timeUntilLeaving = 0;

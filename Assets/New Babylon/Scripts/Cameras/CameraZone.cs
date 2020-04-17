@@ -29,6 +29,14 @@ namespace Cameras
             }
         }
 
+        void OnTriggerStay(Collider other)
+        {
+            if (other.gameObject.tag == "Player" && !active)
+            {
+                Activate();
+            }
+        }
+
         void Activate()
         {
             if (desiredCam)
