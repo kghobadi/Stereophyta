@@ -27,7 +27,7 @@ namespace Items
         //for setting local transform under inventory
         public Vector3 localPos, localRot, localScale;
         //ui refs for pickup prompt
-        InteractPrompt interactPrompt;
+        protected InteractPrompt interactPrompt;
         [Header("Initial Pickup Prompt")]
         public string pickUpMessage;
         public float interactDist = 10f;

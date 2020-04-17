@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GullAI : RhythmProducer
 {
+    Sun sun;
     GullAnimation gullAnim;
     MoveTowards mover;
 
@@ -40,6 +41,7 @@ public class GullAI : RhythmProducer
     public override void Awake()
     {
         base.Awake();
+        sun = FindObjectOfType<Sun>();
         gullAnim = GetComponent<GullAnimation>();
         mover = GetComponent<MoveTowards>();
         origGlideSpeed = glideSpeed;
@@ -47,6 +49,7 @@ public class GullAI : RhythmProducer
 
     void Start()
     {
+        sun.newDay.AddListener(NewDay);
         SetTimeScale();
 
         //select point from array 
@@ -55,6 +58,11 @@ public class GullAI : RhythmProducer
 
         transform.position = point;
         SetIdle(point);
+    }
+
+    void NewDay()
+    {
+        SetTimeScale();
     }
 
     void Update()

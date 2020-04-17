@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 
 public class InteractPrompt : MonoBehaviour {
-    [Header("All Interact Prompts")]
+    [Header("E Interact Prompts")]
     public TMP_Text pickUpText;
     public string pickUpMessage;
     public FadeUI[] interactPrompts;
@@ -14,7 +14,12 @@ public class InteractPrompt : MonoBehaviour {
     public Canvas myWorldCanvas;
     public Image pickUpImage;
     public Sprite pickUpSprite;
-    
+
+    [Header("Click Interact Prompts")]
+    public TMP_Text clickText;
+    public string clickMessage;
+    public FadeUI[] clickPrompts;
+
     //pick up prompt for when player is near 
     public void ShowPickupPrompt()
     {
@@ -39,6 +44,28 @@ public class InteractPrompt : MonoBehaviour {
         for (int i = 0; i < interactPrompts.Length; i++)
         {
             interactPrompts[i].FadeOut();
+        }
+    }
+
+    //shows a click prompt
+    public void ShowClickPrompt()
+    {
+        clickText.text = clickMessage;
+
+        //fade em in
+        for (int i = 0; i < clickPrompts.Length; i++)
+        {
+            clickPrompts[i].FadeIn();
+        }
+    }
+
+    //deactivates click prompt
+    public void DeactivateClickPrompt()
+    {
+        //fade em out
+        for (int i = 0; i < clickPrompts.Length; i++)
+        {
+            clickPrompts[i].FadeOut();
         }
     }
 }

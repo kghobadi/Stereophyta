@@ -7,10 +7,15 @@ public class WaterWell : MonoBehaviour {
     ThirdPersonController tpc;
     public Items.WateringCan waterCan;
 
+    InteractPrompt interactPrompt;
+    [Header("Interaction")]
+    public string interactMessage;
+
     void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        interactPrompt = tpc.myInventory.GetComponent<InteractPrompt>();
     }
 
     //watercan near
@@ -19,6 +24,13 @@ public class WaterWell : MonoBehaviour {
         if(other.gameObject == waterCan.gameObject)
         {
             waterCan.nearWell = true;
+
+            //this means we have watercan
+            if (PlayerPrefs.GetString("hasWaterCan") == "yes" && waterCan.waterAmount < waterCan.waterMax)
+            {
+                interactPrompt.clickMessage = interactMessage;
+                interactPrompt.ShowClickPrompt();
+            }
         }
     }
 
@@ -28,6 +40,12 @@ public class WaterWell : MonoBehaviour {
         if (other.gameObject == waterCan.gameObject)
         {
             waterCan.nearWell = false;
+
+            //this means we have watercan
+            if (PlayerPrefs.GetString("hasWaterCan") == "yes" && waterCan.waterAmount < waterCan.waterMax)
+            {
+                interactPrompt.DeactivateClickPrompt();
+            }
         }
     }
 }

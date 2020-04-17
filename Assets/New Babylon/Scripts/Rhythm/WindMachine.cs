@@ -16,9 +16,9 @@ namespace Items
         //animator
         public Transform fanObj;
         //speed vars 
-        public float windSpeed;
+        public float windSpeed = 5f;
         float origWind;
-        public float rotationSpeed;
+        public float rotationSpeed = 3f;
         float origRotate;
         public float distanceToDestroy;
 
@@ -47,10 +47,11 @@ namespace Items
             tempoIndicator.changeTempoSound = selectLower;
             //rhythm lever state -- timeScale should never exceed timeScaleMax 
             timeScale = 0;
-            rotationSpeed = 3f;
             origRotate = rotationSpeed;
-            windSpeed = 5;
             origWind = windSpeed;
+
+            //set tempo to middle state 
+            SetTempo(2);
 
             //this means we have set it before, so we have saved before
             if (PlayerPrefs.GetString("hasWindStaff" + staffID.ToString()) == "yes")
@@ -212,7 +213,6 @@ namespace Items
         public void PlaceFan(bool grouped)
         {
             //animate to become fan
-            timeScale = tpc.playerTempo.timeScale;
             toolAnimator.SetBool("fan", true);
             toolSource.PlayOneShot(placementSound, 0.1f);
 
@@ -230,6 +230,7 @@ namespace Items
                 RemoveFromInventory();
             }
 
+           
             //activate 
             gameObject.SetActive(true);
             //set rotation 
@@ -244,8 +245,11 @@ namespace Items
             toolAnimator.enabled = false;
 
             fanActive = true;
-
             hasBeenAcquired = false;
+
+            Debug.Log("set windfan");
+            //set tempo
+            SetTempo(tpc.playerTempo.timeScale);
         }
 
 
@@ -274,7 +278,34 @@ namespace Items
                 tempoIndicator.SetVisualTempo(timeScale);
             }
         }
+
+        public void SetTempo(int tempoState)
+        {
+            //set timescale 
+            timeScale = tempoState;
+
+            //zero
+            if(tempoState == 0)
+            {
+                //reset 
+                windSpeed = origWind;
+                rotationSpeed = origRotate;
+            }
+            //make sure this is a doable state 
+            else
+            {
+                windSpeed = origWind + (2 * tempoState);
+                rotationSpeed = origRotate * (Mathf.Pow(2, tempoState));
+            }
+
+            //sets rhythm indicator 
+            if (fanActive)
+            {
+                tempoIndicator.SetVisualTempo(timeScale);
+            }
+        }
     }
+
 
 }
 
