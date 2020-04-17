@@ -46,6 +46,7 @@ public class Zone : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+
         if(terrainType == TerrainType.TERRAIN)
             zoneGridMan = transform.parent.GetComponent<GridManager>();
         //zone saver...
@@ -58,7 +59,18 @@ public class Zone : MonoBehaviour {
 
         SetZoneSpawners();
 
-       
+        //check if this is the last zone-- > set as starting zone
+        //if (PlayerPrefs.HasKey("lastZone"))
+        //{
+        //    if (PlayerPrefs.GetString("lastZone") == zoneName)
+        //    {
+        //        startingZone = true;
+        //    }
+        //    else
+        //    {
+        //        startingZone = false;
+        //    }
+        //}
     }
 
     void Start()
@@ -126,6 +138,8 @@ public class Zone : MonoBehaviour {
 
         zoneSnapshot.TransitionTo(3f);
         //Debug.Log("Player entered zone: " + zoneName);
+        //set last zone 
+        PlayerPrefs.SetString("lastZone", zoneName);
 
         CheckZoneGeneration();
     }

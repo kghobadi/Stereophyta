@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class FishJumper : RhythmProducer
 {
+    Sun sun;
     FishAnimation fishAnim;
     
     [Header("Fish Jump Values")]
@@ -17,10 +18,16 @@ public class FishJumper : RhythmProducer
     public override void Awake()
     {
         base.Awake();
+        sun = FindObjectOfType<Sun>();
+        sun.newDay.AddListener(NewDay);
         fishAnim = GetComponent<FishAnimation>();
     }
 
-    // Update is called once per frame
+    void NewDay()
+    {
+        SetTimeScale();
+    }
+    
     void Update()
     {
         //IDLE

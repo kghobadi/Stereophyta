@@ -7,9 +7,14 @@ public class BookPickUp : PickUp {
     StartView startViewer;
     public Menu menuScript;
 
+    public override void Awake()
+    {
+        base.Awake();
+        startViewer = FindObjectOfType<StartView>();
+    }
+
     void Start()
     {
-        startViewer = FindObjectOfType<StartView>();
         //player has already picked up book
         if(PlayerPrefs.GetString("hasBook") == "yes")
         {
@@ -37,7 +42,7 @@ public class BookPickUp : PickUp {
     public override void Update()
     {
         //only run pickup logic if start view has finished
-        if (!startViewer.startView)
+        if (!startViewer.active)
         {
             base.Update();
         }

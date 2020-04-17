@@ -224,8 +224,10 @@ public class TimelinePlaybackManager : MonoBehaviour {
         if(characterTransforms[index].gameObject.name == "canoe")
         {
             characterTransforms[index].GetComponent<Animator>().enabled = false;
+            characterTransforms[index].GetComponent<Rigidbody>().isKinematic = true;
         }
 
+        //unparent character and set position 
         if (parentCharacters[index])
             characterTransforms[index].SetParent(null);
         characterTransforms[index].position = exitPositions[index].position;

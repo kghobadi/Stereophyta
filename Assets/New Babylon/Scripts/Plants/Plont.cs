@@ -343,19 +343,22 @@ public class Plont : MonoBehaviour {
         //increment current stage based on number of growth stages
         if (currentStage < myGrowthStages.Length - 1)
         {
-            //set active next crop bundle
-            if (cropBundles[currentStage] != null)
-            {
-                cropBundles[currentStage].SetActive(true);
-                if(pickable)
-                    pickable.AddPickableObj(cropBundles[currentStage].GetComponent<Item>());
-            }
-                
             currentStage++;
 
             //if older than 1
             if (currentStage > 1)
             {
+                //set active next crop bundle
+                if(currentStage < cropBundles.Length - 1)
+                {
+                    if (cropBundles[currentStage] != null)
+                    {
+                        cropBundles[currentStage].SetActive(true);
+                        if (pickable)
+                            pickable.AddPickableObj(cropBundles[currentStage].GetComponent<Item>());
+                    }
+                }
+
                 //random chance to spawn a seed each time plant ages
                 float randomSpawn = Random.Range(0, 100);
 

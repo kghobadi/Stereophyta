@@ -217,29 +217,7 @@ public class Sun : MonoBehaviour
         SetClockBPM();
         RandomizeSkybox();
         RandomizeWinds();
-
-        //subtract from player's days to sleep
-        if (tpc.sleeping)
-        {
-            tpc.daysToSleep--;
-            //wake player up if they have slept long enough 
-            if (tpc.daysToSleep <= 0 && tpc.sleepingTime > tpc.timeToSleep)
-            {
-                tpc.WakeUp();
-            }
-        }
-
-        //add to players days without sleep
-        else
-        {
-            tpc.daysWithoutSleep++;
-            //player passes out from exhaustion
-            if (tpc.daysWithoutSleep > tpc.noSleepMax)
-            {
-                StartCoroutine(WaitForPlayerToPassOut());
-            }
-        }
-
+        
         //fade in and out sun saver IF saving enabled 
         if (tpc.savingAndLoadingEnabled)
         {
@@ -400,14 +378,6 @@ public class Sun : MonoBehaviour
         tpc.currentZone.zoneSaver.SaveGameData();
     }
 
-    //jst for sleeping 
-    IEnumerator WaitForPlayerToPassOut()
-    {
-        yield return new WaitUntil(() => tpc.controller.isGrounded == true);
-
-        tpc.Sleep(false);
-
-        Debug.Log("Sun called sleep");
-    }
+  
 }
 

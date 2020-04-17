@@ -8,6 +8,7 @@ public class SetRandomMaterial : MonoBehaviour {
     bool skinOrMeshR;
     MeshRenderer mRender;
     SkinnedMeshRenderer skinMeshR;
+    public Material assignedMat;
 
     void Awake()
     {
@@ -28,22 +29,21 @@ public class SetRandomMaterial : MonoBehaviour {
                 skinMeshR = GetComponentInChildren<SkinnedMeshRenderer>();
             }
         }
-    }
 
-    void Start ()
-    {
         AssignMaterial(materialOptions);
-	}
-	
-	public void AssignMaterial(Material[] mats)
+    }
+    
+    public void AssignMaterial(Material[] mats)
     {
         int randomMat = Random.Range(0, mats.Length);
+        assignedMat = mats[randomMat];
 
         //skin
         if (skinOrMeshR)
-            skinMeshR.material = mats[randomMat];
+            skinMeshR.material = assignedMat;
         //normal mr 
         else
-            mRender.material = mats[randomMat];
+            mRender.material = assignedMat;
+        
     }
 }
