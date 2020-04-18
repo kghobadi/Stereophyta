@@ -94,7 +94,7 @@ public class PlayerCameraController : MonoBehaviour
         var inputDevice = InputManager.ActiveDevice;
      
         //only take switch input if not in start view 
-        if(startViewer.startView == false)
+        if(startViewer.active == false)
         {
             //controller
             if (inputDevice.DeviceClass == InputDeviceClass.Controller)
@@ -112,9 +112,10 @@ public class PlayerCameraController : MonoBehaviour
             }
             //keyboard + mouse 
             //grab input from scroll wheel axis
-            else if (inputDevice.DeviceClass == InputDeviceClass.Keyboard || inputDevice.DeviceClass == InputDeviceClass.Mouse)
+            zoomInput = Input.GetAxis("Mouse ScrollWheel");
+            if (inputDevice.DeviceClass == InputDeviceClass.Keyboard || inputDevice.DeviceClass == InputDeviceClass.Mouse)
             {
-                zoomInput = Input.GetAxis("Mouse ScrollWheel");
+                
             }
         }
         

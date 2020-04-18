@@ -8,12 +8,13 @@ using Player;
 public class Pickable : AudioHandler {
     //sun ref 
     Sun sun;
+    ThirdPersonController tpc;
+    Inventory playerInventory;
 
     [Header("Sounds")]
     public AudioClip[] pickUps;
     public AudioClip[] nothingLeft;
-
-    Inventory playerInventory;
+    
     [Header("Pickable logic")]
     public List<Item> pickableObjects = new List<Item>();
     public int activeItems;
@@ -30,11 +31,13 @@ public class Pickable : AudioHandler {
     {
         base.Awake();
         sun = FindObjectOfType<Sun>();
-        playerInventory = FindObjectOfType<Inventory>();
+        tpc = FindObjectOfType<ThirdPersonController>();
 	}
 
     void Start()
     {
+        //set p inventory
+        playerInventory = tpc.myInventory;
         //set active items to count of pickable objs
         activeItems = pickableObjects.Count;
         //SUN EVENT LISTENER

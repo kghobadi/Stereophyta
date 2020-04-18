@@ -13,6 +13,7 @@ public abstract class PickUp : MonoBehaviour {
     //for adding to inventory
     protected GameObject inventory;
     protected Inventory inventoryScript;
+    protected InteractPrompt interactPrompt;
 
     //is true once player picks it up
     [Header("Pick Up Logic")]
@@ -21,12 +22,9 @@ public abstract class PickUp : MonoBehaviour {
     public AudioClip pickupSound;
     //for setting local transform under inventory
     public float pickUpDist = 10f;
-    public Vector3 localPos, localRot, localScale;
-    //ui refs for pickup prompt
-    [Header("Pickup Prompt")]
-    public Text pickUpText;
     public string pickUpMessage;
-    public FadeUI[] interactPrompts;
+    public Vector3 localPos, localRot, localScale;
+   
 
     public virtual void Awake () {
 
@@ -37,6 +35,7 @@ public abstract class PickUp : MonoBehaviour {
         //inventory ref
         inventory = GameObject.FindGameObjectWithTag("Inventory");
         inventoryScript = inventory.GetComponent<Inventory>();
+        interactPrompt = inventory.GetComponent<InteractPrompt>();
 
         //Debug.Log(inventoryScript.gameObject + " has been found!");
     }
@@ -54,14 +53,13 @@ public abstract class PickUp : MonoBehaviour {
         transform.localEulerAngles = localRot;
         transform.localScale = localScale;
         
-
         if (playSound)
         {
             //play this tools pickup sound
             inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
         }
 
-        DeactivatePrompt();
+        interactPrompt.DeactivatePrompt();
         //book notification??
     }
 
@@ -81,8 +79,11 @@ public abstract class PickUp : MonoBehaviour {
                 playerWasNear = true;
 
                 //fade in those prompts
-                if (pickUpText.color.a < 0.5f)
-                    ShowPickupPrompt();
+                if (interactPrompt.pickUpText.color.a < 0.5f)
+                {
+                    interactPrompt.pickUpMessage = pickUpMessage;
+                    interactPrompt.ShowPickupPrompt();
+                }
 
                 //pick up when player presses E
                 if (Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed)
@@ -96,34 +97,10 @@ public abstract class PickUp : MonoBehaviour {
                 //fade out prompts
                 if (playerWasNear)
                 {
-                    DeactivatePrompt();
+                    interactPrompt.DeactivatePrompt();
                     playerWasNear = false;
                 }
             }
-        }
-    }
-
-    public virtual void ShowPickupPrompt()
-    {
-        //Debug.Log("show pickup prompt");
-        //set text prompt
-        pickUpText.text = pickUpMessage;
-
-        //fade em in
-        for (int i = 0; i < interactPrompts.Length; i++)
-        {
-            interactPrompts[i].FadeIn();
-        }
-    }
-
-    //turn off prompt
-    public virtual void DeactivatePrompt()
-    {
-        //Debug.Log("deactivating prompt");
-        //fade em out
-        for (int i = 0; i < interactPrompts.Length; i++)
-        {
-            interactPrompts[i].FadeOut();
         }
     }
 }

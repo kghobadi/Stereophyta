@@ -4,12 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using InControl;
 using Player;
+using TMPro;
 
 namespace Items
 {
     //abstract class to build tools from
     public abstract class Tool : RhythmProducer
     {
+        BookPage bookPage;
         //audio source reference
         protected AudioSource toolSource;
         [Header("Tool Vars")]
@@ -25,12 +27,9 @@ namespace Items
         //for setting local transform under inventory
         public Vector3 localPos, localRot, localScale;
         //ui refs for pickup prompt
+        protected InteractPrompt interactPrompt;
         [Header("Initial Pickup Prompt")]
-        public Text pickUpText;
         public string pickUpMessage;
-        public FadeUI[] interactPrompts;
-        BookPage bookPage;
-
         public float interactDist = 10f;
         [Header("Item grouping")]
         //my item script
@@ -51,6 +50,7 @@ namespace Items
             //inventory ref
             inventory = GameObject.FindGameObjectWithTag("Inventory");
             inventoryScript = inventory.GetComponent<Inventory>();
+            interactPrompt = inventory.GetComponent<InteractPrompt>();
             itemScript = GetComponent<Item>();
             //my book page
             bookPage = GetComponent<BookPage>();
@@ -110,7 +110,7 @@ namespace Items
                 inventoryScript.inventoryAudio.PlayOneShot(pickupSound);
             }
 
-            DeactivatePrompt();
+            interactPrompt.DeactivatePrompt();
             //book notification??
         }
 
@@ -145,7 +145,10 @@ namespace Items
             int index = inventoryScript.myItems.IndexOf(gameObject);
             inventoryScript.RemoveItemFromInventory(index);
             //set obj active and switch inventory 
-            inventoryScript.SwitchItem(true, true);
+            if (inventoryScript.myItems.Count > 0)
+            {
+                inventoryScript.SwitchItem(true, true);
+            }
         }
 
         public virtual void Update()
@@ -166,8 +169,11 @@ namespace Items
                     inventoryScript.inputTimer = 0.25f;
 
                     //fade in those prompts
-                    if (pickUpText.color.a < 0.5f)
-                        ShowPickupPrompt();
+                    if (interactPrompt.pickUpText.color.a < 0.5f)
+                    {
+                        interactPrompt.pickUpMessage = pickUpMessage;
+                        interactPrompt.ShowPickupPrompt();
+                    }
 
                     //pick up when player presses E
                     if (Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed)
@@ -181,7 +187,7 @@ namespace Items
                     //fade out prompts
                     if (playerWasNear)
                     {
-                        DeactivatePrompt();
+                        interactPrompt.DeactivatePrompt();
                         playerWasNear = false;
                     }
 
@@ -205,33 +211,6 @@ namespace Items
         {
             int randomSound = Random.Range(0, sounds.Length);
             audSource.PlayOneShot(sounds[randomSound]);
-        }
-
-
-        //pick up prompt for when player is near 
-        void ShowPickupPrompt()
-        {
-            //Debug.Log("show pickup prompt");
-            //set text prompt
-            pickUpText.text = pickUpMessage;
-
-            //fade em in
-            for (int i = 0; i < interactPrompts.Length; i++)
-            {
-                interactPrompts[i].FadeIn();
-            }
-        }
-
-        //turn off prompt
-        void DeactivatePrompt()
-        {
-            //Debug.Log("deactivating prompt");
-            //fade em out
-            for (int i = 0; i < interactPrompts.Length; i++)
-            {
-                interactPrompts[i].FadeOut();
-            }
-        }
-    }
+        }    }
 
 }

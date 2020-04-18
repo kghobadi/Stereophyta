@@ -42,7 +42,7 @@ public class DeactivateObject : MonoBehaviour
         if (Vector3.Distance(_player.transform.position, transform.position) > (activationDist + 10f))
         {
             //first add to list
-            wm.allInactiveObjects.Add(gameObject);
+            wm.allInactiveObjects.Add(this);
             //then deactivate 
             gameObject.SetActive(false);
         }

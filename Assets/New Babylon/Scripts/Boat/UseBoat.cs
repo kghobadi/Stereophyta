@@ -144,7 +144,7 @@ public class UseBoat : PickUp {
             boatScript.oarAnimator.SetTrigger("activateBoat");
             boatScript.oarAnimator.SetBool("rightOrLeft", true);
 
-            DeactivatePrompt();
+            interactPrompt.DeactivatePrompt();
         }
         
     }
@@ -184,7 +184,9 @@ public class UseBoat : PickUp {
             boatScript.dockprompts[d].FadeOut();
         }
 
-        ShowPickupPrompt();
+        //activate prompt 
+        interactPrompt.pickUpMessage = pickUpMessage;
+        interactPrompt.ShowPickupPrompt();
 
         //so that player doesn't immediately reenter
         canEnter = false;

@@ -95,6 +95,7 @@ namespace Items
         {
             waterAmount = waterMax;
             PlaySoundRandomPitch(fillUpWater, 1f);
+            interactPrompt.DeactivateClickPrompt();
         }
         
         public override void MainAction()

@@ -16,12 +16,15 @@ namespace NPC
         Footsteps footsteps;
         NPCMovementManager movementManager;
         StartView startViewer;
+        MonologueManager monoManager;
 
         [Header("AI Movement Settings")]
         public LayerMask grounded;
         [HideInInspector]
         public NavMeshAgent myNavMesh;
         Vector3 origPosition;
+        public Transform startingPos;
+        public MovementPath startBehavior;
         public Vector3 targetPosition;
         float distFromPlayer;
 
@@ -58,16 +61,34 @@ namespace NPC
             controller = GetComponent<Controller>();
             footsteps = GetComponent<Footsteps>();
             player = controller.tpc;
-            npcAnimations = controller.Animation;
-            npcSounds = controller.Sounds;
+            npcAnimations = GetComponent<Animations>();
+            npcSounds = GetComponent<Sounds>();
             mainCam = Camera.main;
             myNavMesh = GetComponent<NavMeshAgent>();
             movementManager = FindObjectOfType<NPCMovementManager>();
             startViewer = FindObjectOfType<StartView>();
+            monoManager = controller.Monologues;
         }
 
         void Start()
         {
+            //set satil's home island loop if player starts there 
+            if(gameObject.name == "Satil")
+            {
+                //check if this is the last zone --> set as starting zone 
+                if (PlayerPrefs.HasKey("lastZone") )
+                {
+                    if(PlayerPrefs.GetString("lastZone") != "MountainIsland")
+                    {
+                        //set pos & behavior
+                        myNavMesh.enabled = false;
+                        transform.position = startingPos.position;
+                        ResetMovement(startBehavior);
+                        myNavMesh.enabled = true;
+                    }
+                }
+            }
+
             origPosition = transform.position;
             SetIdle();
         }
@@ -201,11 +222,20 @@ namespace NPC
                             monologueWaitTimer += Time.deltaTime;
 
                         //stop waiting for monologue IF not in monologue 
-                        if(monologueWaitTimer > monoWaitTime && !controller.Monologues.inMonologue)
+                        if(monologueWaitTimer > monoWaitTime && !monoManager.inMonologue)
                         {
                             waitingToGiveMonologue = false;
 
                             monologueWaitTimer = 0;
+
+                            //deactivate monologue trigger if it does not repeat 
+                            if (!monoManager.allMyMonologues[monoManager.currentMonologue].repeatsAtFinish)
+                            {
+                                MonologueTrigger m_Trigger = controller.wmManager.allMonologues[monoManager.allMyMonologues[monoManager.currentMonologue].worldMonoIndex].mTrigger;
+                                if (m_Trigger.displayUI)
+                                    m_Trigger.ToggleInteractUI(false);
+                                m_Trigger.gameObject.SetActive(false);
+                            }
                         }
                     }
                 }

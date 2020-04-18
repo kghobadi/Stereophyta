@@ -64,15 +64,15 @@ public class CircleMillControls : MonoBehaviour {
     //ui refs for pickup prompt
     [Header("Interact Prompts")]
     public float interactDist;
-    public Text interactText;
     public string useMessage, leaveMessage;
-    public FadeUI[] interactPrompts;
+    InteractPrompt interactPrompt;
 
     void Awake()
     {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        interactPrompt = tpc.myInventory.GetComponent<InteractPrompt>();
         camManager = FindObjectOfType<CameraManager>();
         //audio
         controlsAudio = GetComponent<AudioSource>();
@@ -117,8 +117,11 @@ public class CircleMillControls : MonoBehaviour {
                 playerWasNear = true;
 
                 //fade in those prompts
-                if (interactText.color.a < 0.5f)
-                    ShowInteractPrompt(useMessage);
+                if (interactPrompt.pickUpText.color.a < 0.5f)
+                {
+                    interactPrompt.pickUpMessage = useMessage;
+                    interactPrompt.ShowPickupPrompt();
+                }
 
                 //pick up when player presses E
                 if ((Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed) && !tpc.menuOpen)
@@ -132,7 +135,7 @@ public class CircleMillControls : MonoBehaviour {
                 //fade out prompts
                 if (playerWasNear)
                 {
-                    DeactivatePrompt();
+                    interactPrompt.DeactivatePrompt();
                     playerWasNear = false;
                 }
             }
@@ -162,6 +165,7 @@ public class CircleMillControls : MonoBehaviour {
         playerOperating = true;
         tpc.playerCanMove = false;
         tpc.transform.position = operatingPos;
+        tpc.myInventory.FadeOut();
         tpc.myInventory.gameObject.SetActive(false);
         tpc.playerSource.PlayOneShot(beginOperating);
         timeUntilLeaving = 0;
@@ -181,8 +185,10 @@ public class CircleMillControls : MonoBehaviour {
         //cursor on
         Cursor.lockState = CursorLockMode.None;
         cursor.SetActive(true);
-        
-        ShowInteractPrompt(leaveMessage);
+
+        //show interact leave prompt 
+        interactPrompt.pickUpMessage = leaveMessage;
+        interactPrompt.ShowPickupPrompt();
     }
 
     //called when player stops operating
@@ -202,7 +208,7 @@ public class CircleMillControls : MonoBehaviour {
         Cursor.lockState = CursorLockMode.Locked;
         cursor.SetActive(false);
 
-        DeactivatePrompt();
+        interactPrompt.DeactivatePrompt();
     }
     
     //Switch Wind Direction
@@ -322,26 +328,4 @@ public class CircleMillControls : MonoBehaviour {
         }
     }
     
-
-    public void ShowInteractPrompt(string message)
-    {
-        //set text prompt
-        interactText.text = message;
-
-        //fade em in
-        for (int i = 0; i < interactPrompts.Length; i++)
-        {
-            interactPrompts[i].FadeIn();
-        }
-    }
-
-    //turn off prompt
-    public void DeactivatePrompt()
-    {
-        //fade em out
-        for (int i = 0; i < interactPrompts.Length; i++)
-        {
-            interactPrompts[i].FadeOut();
-        }
-    }
 }

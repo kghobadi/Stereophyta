@@ -43,7 +43,6 @@ public class ThirdPersonController : MonoBehaviour
     public bool jumping, swimming;
     public bool playerCanMove, menuOpen;
     public bool indoors;
-    public Transform houseCam;
     public ParticleSystem runParticles;
     [HideInInspector]
     public Vector3 currentMovement;
@@ -150,6 +149,7 @@ public class ThirdPersonController : MonoBehaviour
         //grab sun refs
         sun = GameObject.FindGameObjectWithTag("Sun");
         sunScript = sun.GetComponent<Sun>();
+        sunScript.newDay.AddListener(NewDay);
         playerTempo = GetComponent<TempoIndication>();
         startViewer = FindObjectOfType<StartView>();
 
@@ -252,6 +252,12 @@ public class ThirdPersonController : MonoBehaviour
             {
                 runParticles.Stop();
             }
+
+            //wake up
+            if((Input.GetKeyDown(KeyCode.Z) || inputDevice.Action4.WasPressed) && sleepingTime > 0.5f)
+            {
+                WakeUp();
+            }
         }
 
         //Restart game
@@ -262,6 +268,32 @@ public class ThirdPersonController : MonoBehaviour
 
         //set grass shader to my pos 
         Shader.SetGlobalVector("playerPos", transform.position);
+    }
+
+    //called by sun in the morning 
+    void NewDay()
+    {
+        //subtract from player's days to sleep
+        if (sleeping)
+        {
+            daysToSleep--;
+            //wake player up if they have slept long enough 
+            if (daysToSleep <= 0 && sleepingTime > timeToSleep)
+            {
+                WakeUp();
+            }
+        }
+
+        //add to players days without sleep
+        else
+        {
+            daysWithoutSleep++;
+            //player passes out from exhaustion
+            if (daysWithoutSleep > noSleepMax)
+            {
+                StartCoroutine(WaitForPlayerToPassOut());
+            }
+        }
     }
 
     //same sort of logic for jump and other stuff, different core movement from ps4 controllers
@@ -334,17 +366,9 @@ public class ThirdPersonController : MonoBehaviour
         //horizontal movement calculations
         Vector3 targetHorizontalMovement = horizontalInput;
 
-        //changes cam rotation it draws from 
-        if (indoors)
-        {
-            targetForwardMovement = houseCam.rotation * forwardInput;
-            targetHorizontalMovement = houseCam.rotation * horizontalInput;
-        }
-        else
-        {
-            targetForwardMovement = cameraTransform.rotation * forwardInput;
-            targetHorizontalMovement = cameraTransform.rotation * horizontalInput;
-        }
+        //cross ref with camera rotation 
+        targetForwardMovement = cameraTransform.rotation * forwardInput;
+        targetHorizontalMovement = cameraTransform.rotation * horizontalInput;
         //forward
         targetForwardMovement.y = 0;
         targetForwardMovement.Normalize();
@@ -669,7 +693,8 @@ public class ThirdPersonController : MonoBehaviour
         //need input to set movement anim
         if (inputToCheck.magnitude > 0)
         {
-            if (!jumping)
+            //not while jumping or inside 
+            if (!jumping && !indoors)
             {
                 //play footstep sound
                 if (running)
@@ -912,4 +937,13 @@ public class ThirdPersonController : MonoBehaviour
         playerCameraController.enabled = true;
     }
 
+    //jst for sleeping 
+    IEnumerator WaitForPlayerToPassOut()
+    {
+        yield return new WaitUntil(() => controller.isGrounded == true);
+
+        Sleep(false);
+
+        Debug.Log("Sun called sleep");
+    }
 }

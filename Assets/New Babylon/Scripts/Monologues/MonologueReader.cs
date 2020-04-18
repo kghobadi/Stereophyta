@@ -135,13 +135,14 @@ public class MonologueReader : MonoBehaviour {
             theText.text = "";
 
         isTyping = true;
-        
-        ////set talking anim
-        //if (monoManager.npcController.Animation)
-        //{
-            //if (monoManager.npcController.Animation.talkingAnimations > 0)
-            //    monoManager.npcController.Animation.RandomTalkingAnim();
-        //}
+
+        //set talking anim
+        if (monoManager.npcController.Animation)
+        {
+            //set talking anim if not already talking 
+            if(monoManager.npcController.Animation.characterAnimator.GetBool("talking") == false)
+                monoManager.npcController.Animation.SetAnimator("talking");
+        }
 
         while (isTyping && (letter < lineOfText.Length - 1))
         {

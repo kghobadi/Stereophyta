@@ -13,6 +13,7 @@ public class Monologue : ScriptableObject
     [Tooltip("Check this to wait timeUntilStart from trigger Activation to enable Monologue")]
     public bool waitToStart;
     public float timeUntilStart;
+    public int worldMonoIndex;
 
     [Tooltip("Check this to lock your player's movement")]
     public bool lockPlayer = true;

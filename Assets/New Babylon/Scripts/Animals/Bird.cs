@@ -5,26 +5,21 @@ using UnityEngine;
 //For now birds are not connected to animal script because their movement is different and their audio
 //This might become an abstract type if we want various bird types
 
-public class Bird : MonoBehaviour {
-    public GameObject idle, singing;
-    AudioSource birdAudio;
-
+public class Bird : AudioHandler {
+    ThirdPersonController tpc;
+    BirdAnimation birdAnim;
+    [Header("Sounds")]
     public AudioClip[] birdSounds;
-    GameObject player;
-
-    public float singingDist, singTimer;
-    bool changed;
+    public Transform birdBody;
+    public float singingDist, singTimer, singTimerMin, singTimerMax;
+    public ParticleSystem songParticles;
 
 	void Start () {
-        ChangeAnimationState(idle);
+        tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
+        birdAnim = GetComponent<BirdAnimation>();
 
-        player = GameObject.FindGameObjectWithTag("Player");
-        birdAudio = GetComponent<AudioSource>();
-
-        idle = transform.GetChild(0).gameObject;
-        singing = transform.GetChild(1).gameObject;
-
-        singTimer = Random.Range(1, 5);
+        singingDist = myAudioSource.maxDistance;
+        singTimer = Random.Range(singTimerMin, singTimerMax);
 	}
 	
 	// Update is called once per frame
@@ -32,50 +27,43 @@ public class Bird : MonoBehaviour {
 
         //transform.LookAt(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z));
         //if near player, serenade
-        if (Vector3.Distance(transform.position, player.transform.position) < singingDist)
+        if (Vector3.Distance(transform.position, tpc.transform.position) < singingDist)
         {
             singTimer -= Time.deltaTime;
-            transform.LookAt(player.transform.position);
+            //look at player
+            if(birdBody)
+                birdBody.LookAt(tpc.transform.position, birdBody.up);
+            else
+                transform.LookAt(tpc.transform.position, Vector3.up);
 
-            if (!birdAudio.isPlaying && singTimer < 0)
+            //play sound 
+            if (!myAudioSource.isPlaying && singTimer < 0)
             {
-                Serenade();
-                singTimer = Random.Range(3, 10);
+                PlayRandomSound(birdSounds, myAudioSource.volume);
+                singTimer = Random.Range(singTimerMin, singTimerMax);
             }
         }
 
-        if (birdAudio.isPlaying)
+        //adjust animator based on audio 
+        if (myAudioSource.isPlaying)
         {
-            singing.SetActive(true);
-            idle.SetActive(false);
+            if(songParticles.isPlaying == false)
+            {
+                birdAnim.SetAnimator("singing");
+                songParticles.Play();
+            }
+            
         }
         else
         {
-            singing.SetActive(false);
-            idle.SetActive(true);
+            if (songParticles.isPlaying)
+            {
+                birdAnim.SetAnimator("idle");
+                songParticles.Stop();
+            }
+            
         }
     }
-
-    void ChangeAnimationState(GameObject desiredAnim)
-    {
-        idle.SetActive(false);
-        singing.SetActive(false);
-
-        desiredAnim.SetActive(true);
-    }
-
-    //bird sings a new call out
-    void Serenade()
-    {
-        int randomCall = Random.Range(0, birdSounds.Length);
-        if(birdAudio.clip != birdSounds[randomCall])
-        {
-            birdAudio.PlayOneShot(birdSounds[randomCall]);
-            birdAudio.clip = birdSounds[randomCall];
-        }
-        else
-        {
-            Serenade();
-        }
-    }
+    
+    
 }
