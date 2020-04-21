@@ -111,7 +111,14 @@ public class Seed : MonoBehaviour {
         //plant immediately 
         if (plantOnStart)
         {
-            if (inventoryScript.canSwitchItems)
+            if (UIseed)
+            {
+                if (inventoryScript.canSwitchItems)
+                {
+                    RaycastToGround();
+                }
+            }
+            else
             {
                 RaycastToGround();
             }

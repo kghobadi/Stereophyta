@@ -44,10 +44,14 @@ public class TimelinePlaybackManager : MonoBehaviour {
 	private GameObject playerObject;
 	private PlayerCutsceneSpeedController playerCutsceneSpeedController;
 
-	private bool playerInZone = false;
+    [Header("Fades")]
+    public FadeUI cinematicFade;
+    public bool fadesIn, fadesOut;
+
+    private bool playerInZone = false;
 	private bool timelinePlaying = false;
 	private float timelineDuration;
-
+    
     void Awake()
     {
         playerObject = GameObject.FindWithTag(playerTag);
@@ -80,13 +84,13 @@ public class TimelinePlaybackManager : MonoBehaviour {
 
 			if (interactKey == KeyCode.None)
             {
-				PlayTimeline ();
+				StartTimeline ();
 			}
             else
             {
 				if (activateTimelineInput)
                 {
-					PlayTimeline ();
+                    StartTimeline();
 					ToggleInteractUI (false);
 				}
 			}
@@ -106,7 +110,25 @@ public class TimelinePlaybackManager : MonoBehaviour {
         }
 	}
 
-    //STARTS TIMELINE 
+    public void StartTimeline()
+    {
+        if (fadesIn)
+        {
+            StartCoroutine(WaitForFade());
+        }
+        else
+            PlayTimeline();
+    }
+
+    IEnumerator WaitForFade()
+    {
+        cinematicFade.FadeIn();
+        yield return new WaitForSeconds(1f);
+        cinematicFade.FadeOut();
+        PlayTimeline();
+    }
+    
+    //ACTUALLY PLAYS TIMELINE 
 	public void PlayTimeline(){
 
 		if (playerTimelinePosition)
@@ -139,29 +161,48 @@ public class TimelinePlaybackManager : MonoBehaviour {
 		
 		ToggleInput (false);
 		yield return new WaitForSeconds(timelineDuration);
-		ToggleInput (true);
-        
-		if (!playTimelineOnlyOnce)
+
+        //fade before end
+        if (fadesOut)
         {
-			triggerZoneObject.SetActive (true);
-		}
+            cinematicFade.FadeIn();
+            yield return new WaitForSeconds(1f);
+            cinematicFade.FadeOut();
+            EndTimeline();
+        }
+        //end immediately
+        else
+        {
+            EndTimeline();
+        }
+	}
+
+    //timeline ends 
+    void EndTimeline()
+    {
+        ToggleInput(true);
+
+        if (!playTimelineOnlyOnce)
+        {
+            triggerZoneObject.SetActive(true);
+        }
         else if (playTimelineOnlyOnce)
         {
-			playerInZone = false;
-		}
+            playerInZone = false;
+        }
 
         SetPlayerToTimelinePosition(playerExitPosition, false);
 
         if (characterTransforms.Length > 0)
         {
-            for(int i = 0; i < characterTransforms.Length; i++)
+            for (int i = 0; i < characterTransforms.Length; i++)
             {
                 ResetCharacters(i);
             }
         }
 
         timelinePlaying = false;
-	}
+    }
 		
 	void ToggleInput(bool newState)
     {

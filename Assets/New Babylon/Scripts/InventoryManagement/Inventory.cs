@@ -428,7 +428,8 @@ namespace Player
             if (fadeItems != null)
                 StopCoroutine(fadeItems);
             fadeItems = FadeOutItemsVis();
-            StartCoroutine(fadeItems);
+            if(gameObject.activeSelf)
+                StartCoroutine(fadeItems);
         }
 
         //Count up a list 
