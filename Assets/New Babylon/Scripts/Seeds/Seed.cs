@@ -438,6 +438,8 @@ public class Seed : MonoBehaviour {
         if (plantingOnGrid)
         {
             plontScript.plantedOnGrid = true;
+            plontScript.tgs = tgs;
+            plontScript.gridMan = gridMan;
             plontScript.cellIndex = currentCellIndex;
         }
 
@@ -488,6 +490,11 @@ public class Seed : MonoBehaviour {
                 //remove from pool &/or destroy 
                 Destroy(gameObject);
             }
+            //still more of this seed
+            else
+            {
+                inventoryScript.removedItemFromGroup.Invoke();
+            }
 
             //set this back to false
             plantingOnGrid = false;
@@ -505,6 +512,7 @@ public class Seed : MonoBehaviour {
         if (seedGroup != null)
         {
             seedGroup.itemCount++;
+            inventoryScript.addedItemToGroup.Invoke();
 
             //because of those pesky starting seeds
             if (startingSeed)

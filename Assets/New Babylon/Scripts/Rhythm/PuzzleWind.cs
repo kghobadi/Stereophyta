@@ -6,13 +6,17 @@ public class PuzzleWind : Rhythm
 {
     PooledObject poolObj;
     public Items.WindMachine _windGen;
-    ParticleSystem windParticles;
+    [HideInInspector] public ParticleSystem windParticles;
 
     public LayerMask ground;
 
-    void Start()
+    void Awake()
     {
         windParticles = GetComponent<ParticleSystem>();
+    }
+
+    void Start()
+    {
         poolObj = GetComponent<PooledObject>();
     }
 

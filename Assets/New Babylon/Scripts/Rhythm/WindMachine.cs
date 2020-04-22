@@ -127,10 +127,13 @@ namespace Items
             PuzzleWind tinyWind = windClone.GetComponent<PuzzleWind>();
             tinyWind._windGen = this;
             tinyWind.currentSpeed = windSpeed;
+            tinyWind.windParticles.Clear();
             //set wind transform 
             windClone.transform.SetParent(null);
             windClone.transform.position = transform.position + new Vector3(0, 5, 0);
             windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
+            //play particles
+            tinyWind.windParticles.Play();
            
             showRhythm = false;
         }

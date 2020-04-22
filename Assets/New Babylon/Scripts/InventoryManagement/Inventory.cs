@@ -28,6 +28,7 @@ namespace Player
         public UnityEvent addedNewItem;
         public UnityEvent addedItemToGroup;
         public UnityEvent removedItem;
+        public UnityEvent removedItemFromGroup;
 
         //UI
         [Header("Items UI")]
@@ -664,7 +665,7 @@ namespace Player
             myItems.RemoveAt(index);
             ItemSprites.RemoveAt(index);
             //event call
-            removedItem.Invoke();
+            removedItemFromGroup.Invoke();
             //causes issue if there's no items 
             if (myItems.Count > 0)
             {

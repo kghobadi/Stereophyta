@@ -160,19 +160,20 @@ public class TimelinePlaybackManager : MonoBehaviour {
 		timelineDuration = (float)playableDirector.duration;
 		
 		ToggleInput (false);
-		yield return new WaitForSeconds(timelineDuration);
-
+		
         //fade before end
         if (fadesOut)
         {
+            yield return new WaitForSeconds(timelineDuration - 1f);
             cinematicFade.FadeIn();
             yield return new WaitForSeconds(1f);
             cinematicFade.FadeOut();
             EndTimeline();
         }
-        //end immediately
+        //end immediately after wait 
         else
         {
+            yield return new WaitForSeconds(timelineDuration);
             EndTimeline();
         }
 	}

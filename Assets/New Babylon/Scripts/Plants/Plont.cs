@@ -99,7 +99,7 @@ public class Plont : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
 
         //tgs refs
-        if (tgs != null)
+        if (plantedOnGrid && tgs == null)
         {
             tgs = tpc.currentTGS;
             gridMan = tgs.transform.parent.GetComponent<GridManager>();

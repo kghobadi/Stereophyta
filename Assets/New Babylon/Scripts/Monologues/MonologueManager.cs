@@ -233,6 +233,9 @@ public class MonologueManager : MonoBehaviour
         {
             tpc.playerCanMove = true;
         }
+        //jump 
+        if(!tpc.canJump)
+            tpc.canJump = true;
 
         //check for cinematic to enable 
         if (allMyMonologues[currentMonologue].playsCinematic)
@@ -259,17 +262,17 @@ public class MonologueManager : MonoBehaviour
         }
 
         //tasks to complete ?
-        if (allMyMonologues[currentMonologue].tasksToComplete.Length > 0)
+        if (allMyMonologues[currentMonologue].tasksToFulfill.Length > 0)
         {
             //loop thru all tasks to complete 
-            for (int i = 0; i < allMyMonologues[currentMonologue].tasksToComplete.Length; i++)
+            for (int i = 0; i < allMyMonologues[currentMonologue].tasksToFulfill.Length; i++)
             {
-                Task task = allMyMonologues[currentMonologue].tasksToComplete[i];
+                Task task = allMyMonologues[currentMonologue].tasksToFulfill[i];
 
                 npcController.Tasks.FulfillTask(task);
             }
         }
-
+        
         //new npc movement?
         if (allMyMonologues[currentMonologue].newMovement)
         {
