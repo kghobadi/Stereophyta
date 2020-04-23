@@ -81,8 +81,8 @@ public class Cricket : RhythmProducer {
     //Sitting still, playing my musak 
     void Idle()
     {
-        //when it is morning
-        if (sunScript.timeState == Sun.TimeState.MORNING)
+        //when it is Not Night 
+        if (sunScript.timeState != Sun.TimeState.NIGHT)
         {
             //schleep
             state = States.SLEEPING;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PuzzleWind : Rhythm
+public class FanWind : Rhythm
 {
     PooledObject poolObj;
     public Items.WindMachine _windGen;

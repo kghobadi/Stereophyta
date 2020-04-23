@@ -88,6 +88,10 @@ public class Plont : MonoBehaviour {
         PIANO, BLISTERPIANO, SUCCULENTAR, GUITAR, EGUITAR, NEGUITAR, BELL, TRIANGULAR, TRUMPET
     }
 
+    [Header("Enable/Disable Settings")]
+    public float activationDist = 200f;
+    public bool plantActive;
+
     //pickable stuff
     Pickable pickable;
 
@@ -260,7 +264,9 @@ public class Plont : MonoBehaviour {
     }
 
     void Update() {
-        
+        //checks whether plant should be active or not based on dist from player 
+        CheckPlantActive();
+
         //lerps scale up as plants grow
         if (growing)
         {
@@ -297,6 +303,53 @@ public class Plont : MonoBehaviour {
                 Die();
             }
         }
+    }
+
+    //looks at dist from player and decides whether to activate or deactivate plant 
+    void CheckPlantActive()
+    {
+        //player moving 
+        if(tpc.controller.velocity.magnitude > 0)
+        {
+            float distFromPlayer = Vector3.Distance(transform.position, player.transform.position);
+
+            //close to player -- Enable
+            if(distFromPlayer < activationDist)
+            {
+                if (!plantActive)
+                    EnablePlant();
+            }
+            //far away -- Disable
+            else if(distFromPlayer > activationDist + 10f)
+            {
+                if(plantActive)
+                    DisablePlant();
+            }
+        }
+    }
+
+    void EnablePlant()
+    {
+        //enable renderers 
+        for (int i = 0; i < pRenderers.Count; i++)
+        {
+            pRenderers[i].enabled = true;
+        }
+        plantSource.enabled = true;
+        extraVoice.enabled = true;
+        plantActive = true;
+    }
+
+    void DisablePlant()
+    {
+        //disable renderers 
+        for (int i = 0; i < pRenderers.Count; i++)
+        {
+            pRenderers[i].enabled = false;
+        }
+        plantSource.enabled = false;
+        extraVoice.enabled = false;
+        plantActive = false;
     }
 
     //called when sun invokes NewDay()
@@ -378,7 +431,7 @@ public class Plont : MonoBehaviour {
         else
         {
             //a little less than total # of crop bundles on plant death
-            int randomDrop = Random.Range(cropBundles.Length - 3, cropBundles.Length);
+            int randomDrop = Random.Range(1, (cropBundles.Length - 2));
             //spawn a bunch of seeds and die
             for (int i = 0; i < randomDrop; i++)
             {
@@ -386,7 +439,12 @@ public class Plont : MonoBehaviour {
             }
 
             //from old age
-            SetDeathEffect();
+            //player is near so use death effect
+            if (plantActive)
+                SetDeathEffect();
+            //player is not near, just die.
+            else
+                Die();
         }
     }
 
@@ -482,11 +540,14 @@ public class Plont : MonoBehaviour {
     //plays current audio clip and wobbles plant
     public void PlaySound(float volume)
     {
-        plantSource.PlayOneShot(currentClip);
-        soundPlaying.Play();
-        plantAnimator.SetTrigger("wobble");
-        if(hasExtraAnimator)
-            extraAnimator.SetTrigger("wobble");
+        if (plantActive)
+        {
+            plantSource.PlayOneShot(currentClip);
+            soundPlaying.Play();
+            plantAnimator.SetTrigger("wobble");
+            if (hasExtraAnimator)
+                extraAnimator.SetTrigger("wobble");
+        }
     }
 
     //called when chop and when plant dies

@@ -23,6 +23,7 @@ public class UseBoat : PickUp {
     public Image clickNDragAnim, clickNDragAnimRight;
     FadeUI animFader, animFaderRight;
     AnimateDialogue animator, animatorRight;
+    Animator boatAnimator;
 
     public bool canEnter = true;
     public float justExitedTimer, exitTimerTotal = 0.5f;
@@ -42,6 +43,7 @@ public class UseBoat : PickUp {
         animator = clickNDragAnim.GetComponent<AnimateDialogue>();
         animFaderRight = clickNDragAnimRight.GetComponent<FadeUI>();
         animatorRight = clickNDragAnimRight.GetComponent<AnimateDialogue>();
+        boatAnimator = GetComponent<Animator>();
     }
 
     public override void Update()
@@ -131,15 +133,18 @@ public class UseBoat : PickUp {
             camManager.Set(boatCamera);
 
             //set boat as parent & position
+            tpc.playerCloak.enabled = false;
             tpc.transform.SetParent(transform);
             tpc.transform.localPosition = playerLocalPos;
             tpc.myInventory.gameObject.SetActive(false);
             tpc.transform.localEulerAngles = new Vector3(-90f, 0, 0);
+            tpc.playerCloak.enabled = true;
 
             //set boat vars
             boatScript.inBoat = true;
             boatScript.boatBody.isKinematic = false;
             boatScript.boatCol.enabled = true;
+            boatAnimator.enabled = false;
             //set oar anim
             boatScript.oarAnimator.SetTrigger("activateBoat");
             boatScript.oarAnimator.SetBool("rightOrLeft", true);
@@ -179,10 +184,7 @@ public class UseBoat : PickUp {
         boatScript.oarAnimator.SetTrigger("deactivateBoat");
 
         //fade out dock prompt
-        for (int d = 0; d < boatScript.dockprompts.Length; d++)
-        {
-            boatScript.dockprompts[d].FadeOut();
-        }
+        boatScript.dockPrompt.DeactivatePrompt();
 
         //activate prompt 
         interactPrompt.pickUpMessage = pickUpMessage;

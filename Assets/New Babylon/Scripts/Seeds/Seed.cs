@@ -27,6 +27,7 @@ public class Seed : MonoBehaviour {
     Item itemScript;
     GameObject sun;
     Sun sunScript;
+    ParticleSystem seedLure;
 
     //physics and collision
     [HideInInspector]
@@ -98,6 +99,9 @@ public class Seed : MonoBehaviour {
         seedBody = GetComponent<Rigidbody>();
         seedCollider = GetComponent<SphereCollider>();
         seedSource = GetComponent<AudioSource>();
+
+        if(!UIseed)
+            seedLure = GetComponentInChildren<ParticleSystem>();
     }
 
     void Start () {
@@ -126,7 +130,7 @@ public class Seed : MonoBehaviour {
         //fall to ground --> IDLE state
         else
         {
-            daysBeforePlanting = Random.Range(2, 4);
+            daysBeforePlanting = Random.Range(1, 3);
             SeedFall();
         }
     }
@@ -185,9 +189,20 @@ public class Seed : MonoBehaviour {
         //when player is near and IDLE / BLOWING
         if ((seedState == SeedStates.IDLE || seedState == SeedStates.BLOWING) && !UIseed)
         {
-            if(Vector3.Distance(transform.position, player.transform.position) < 5)
+            float distFromPlayer = Vector3.Distance(transform.position, player.transform.position);
+
+            if (distFromPlayer < 5)
             {
                 seedState = SeedStates.VORTEXING;
+                seedLure.Stop();
+            }
+            else if (distFromPlayer < 10f)
+            {
+                seedLure.Play();
+            }
+            else if(distFromPlayer > 10f)
+            {
+                seedLure.Stop();
             }
         }
 
@@ -231,7 +246,7 @@ public class Seed : MonoBehaviour {
         }
     }
 
-    //raycat logic 
+    //raycast logic 
     public void RaycastToGround()
     {
         RaycastHit hit;
@@ -293,12 +308,11 @@ public class Seed : MonoBehaviour {
             tgs.CellToggleRegionSurface(cellIndex, true, gridMan.canPlantTexture);
 
             //If player clicks, we plant seed and clear up Equip slot
-            if ((Input.GetButton("Plant") || inputDevice.Action3) || plantOnStart)
+            if ((Input.GetButton("Plant") || inputDevice.Action3) || plantOnStart || daysBeforePlanting <= 0)
             {
                 DropSeed();
                 plantingOnGrid = true;
             }
-
         }
         else
         {
@@ -306,6 +320,12 @@ public class Seed : MonoBehaviour {
             if ((Input.GetButton("Plant") || inputDevice.Action3))
             {
                 seedSource.PlayOneShot(noNO);
+            }
+
+            //wild seed - not on usable grid tile -- perishes 
+            if(daysBeforePlanting <= 0 && !UIseed)
+            {
+                SeedPerish();
             }
         }
 
@@ -323,7 +343,7 @@ public class Seed : MonoBehaviour {
         //get input device 
         var inputDevice = InputManager.ActiveDevice;
 
-        if ((Input.GetButton("Plant") || inputDevice.Action3) || plantOnStart)
+        if ((Input.GetButton("Plant") || inputDevice.Action3) || plantOnStart || daysBeforePlanting <= 0)
         {
             //check in radius of planting point if its too close to others
             bool nearOtherPlant = false;
@@ -335,7 +355,7 @@ public class Seed : MonoBehaviour {
                     || hitColliders[i].gameObject.tag == "Building")
                 {
                     nearOtherPlant = true;
-                    Debug.Log("too near something");
+                    //Debug.Log("too near something");
                 }
                 i++;
             }
@@ -347,10 +367,16 @@ public class Seed : MonoBehaviour {
             }
             else
             {
-                Debug.Log("nono");
-                if(!seedSource.isPlaying)
-                    seedSource.PlayOneShot(noNO);
                 //player source play NoNo sound
+                if (!seedSource.isPlaying && UIseed)
+                    seedSource.PlayOneShot(noNO);
+
+                //failed to proglemate because I am too close to other plants!
+                if (!UIseed)
+                {
+                    SeedPerish();
+                }
+                
             }
         }
     }
@@ -456,16 +482,7 @@ public class Seed : MonoBehaviour {
                 plontScript.Age(ageAmount, 0.5f);
             }
 
-            //remove from pool &/or destroy 
-            if(_pooledObj != null)
-            {
-                plantOnStart = false;
-                _pooledObj.m_ObjectPooler.RemoveFromPool(gameObject, true);
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
+            SeedPerish();
         }
         //normal UI seed plant -- returns to inventory 
         else
@@ -560,6 +577,20 @@ public class Seed : MonoBehaviour {
             {
                 transform.position = hit.point + new Vector3(0, 1f, 0);
             }
+        }
+    }
+
+    //remove from pool &/or destroy 
+    void SeedPerish()
+    {
+        if (_pooledObj != null)
+        {
+            plantOnStart = false;
+            _pooledObj.m_ObjectPooler.RemoveFromPool(gameObject, true);
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 }

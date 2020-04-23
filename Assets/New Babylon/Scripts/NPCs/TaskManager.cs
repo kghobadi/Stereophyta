@@ -82,6 +82,18 @@ namespace NPC
                     }
                 }
 
+
+                //PLANT
+                else if (task.taskType == Task.TaskType.CUT)
+                {
+                    //NPC scans around them for plants 
+                    int amount = CheckForPlants(task);
+                    if (amount <= task.desiredItemCount)
+                    {
+                        Complete(task);
+                    }
+                }
+
                 //GOTO
                 else if (task.taskType == Task.TaskType.GOTO)
                 {

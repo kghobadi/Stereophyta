@@ -5,17 +5,23 @@ using UnityEngine.SceneManagement;
 
 //allows you to speed up time scale 
 public class DebugTime : MonoBehaviour {
+    Menu menu;
     public bool debug;
     public float speedUp = 10f;
 
-	void Update () {
+    void Awake()
+    {
+        menu = FindObjectOfType<Menu>();
+    }
+
+    void Update () {
         if (debug)
         {
             if (Input.GetKey(KeyCode.Return))
             {
                 Time.timeScale = speedUp;
             }
-            else
+            else if(Input.GetKeyUp(KeyCode.Return))
             {
                 Time.timeScale = 1f;
             }

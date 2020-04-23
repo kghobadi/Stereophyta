@@ -58,16 +58,21 @@ namespace NPC
 
         void Awake()
         {
+            GetRefs();
+        }
+
+        void GetRefs()
+        {
             controller = GetComponent<Controller>();
             footsteps = GetComponent<Footsteps>();
-            player = controller.tpc;
+            player = FindObjectOfType<ThirdPersonController>();
             npcAnimations = GetComponent<Animations>();
             npcSounds = GetComponent<Sounds>();
             mainCam = Camera.main;
             myNavMesh = GetComponent<NavMeshAgent>();
             movementManager = FindObjectOfType<NPCMovementManager>();
             startViewer = FindObjectOfType<StartView>();
-            monoManager = controller.Monologues;
+            monoManager = GetComponent<MonologueManager>();
         }
 
         void Start()
