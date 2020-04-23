@@ -237,10 +237,11 @@ public class MonologueManager : MonoBehaviour
         if(!tpc.canJump)
             tpc.canJump = true;
 
+
         //check for cinematic to enable 
         if (allMyMonologues[currentMonologue].playsCinematic)
         {
-            npcController.cineManager.allCinematics[allMyMonologues[currentMonologue].cinematic.cIndex].cPlaybackManager.PlayTimeline();
+            npcController.cineManager.allCinematics[allMyMonologues[currentMonologue].cinematic.cIndex].cPlaybackManager.StartTimeline();
         }
         //cinematic triggers to enable
         if (allMyMonologues[currentMonologue].enablesCinematicTriggers)

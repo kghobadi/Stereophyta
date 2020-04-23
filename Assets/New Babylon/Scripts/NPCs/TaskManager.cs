@@ -60,8 +60,7 @@ namespace NPC
                     //found item
                     if (item != null)
                     {
-
-                        Debug.Log("fetch item not null");
+                        //Debug.Log("fetch item not null");
                         //player completed task!
                         if (item.itemCount >= task.desiredItemCount)
                         {

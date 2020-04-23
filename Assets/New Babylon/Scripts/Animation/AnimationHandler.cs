@@ -41,7 +41,7 @@ public abstract class AnimationHandler : MonoBehaviour
     public void SetSpeed(float speed)
     {
         Speed = speed;
-        Debug.Log("set speed: " + speed);
+        //Debug.Log("set speed: " + speed);
     }
 
     //sets animator speed 
