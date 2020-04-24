@@ -696,7 +696,8 @@ namespace Player
             {
                 for (int t = 0; t < item.toolGroup.Count; t++)
                 {
-                    item.toolGroup[t].gameObject.SetActive(false);
+                    if(item.toolGroup[t] != null)
+                        item.toolGroup[t].gameObject.SetActive(false);
                 }
             }
         }

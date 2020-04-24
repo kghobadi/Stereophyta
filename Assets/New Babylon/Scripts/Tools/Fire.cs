@@ -22,6 +22,13 @@ public class Fire : AudioHandler {
 		if(sun.timeState == Sun.TimeState.DUSK && !active)
         {
             //satil should come activate 
+            ActivateFire();
+        }
+
+        //turn off fire in the morning 
+        if(sun.timeState == Sun.TimeState.MORNING && active)
+        {
+            DeactivateFire();
         }
 	}
 

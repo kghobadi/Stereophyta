@@ -38,6 +38,10 @@ public class MonologueManager : MonoBehaviour
     [HideInInspector]
     public MonologueTrigger mTrigger;
 
+    //boat refs
+    UseBoat useBoat;
+    BoatPlayer boatPlayer;
+
     void Awake()
     {
         //grab refs
@@ -56,6 +60,25 @@ public class MonologueManager : MonoBehaviour
         monoReader = GetComponentInChildren<MonologueReader>();
         monoReader.hostObj = gameObject;
         monoReader.monoManager = this;
+
+        useBoat = FindObjectOfType<UseBoat>();
+        boatPlayer = FindObjectOfType<BoatPlayer>();
+
+        //player has used boat before -- activate it 
+        if (PlayerPrefs.GetString("lastZone") != "MountainIsland")
+        {
+            useBoat.enabled = true;
+            useBoat.boatAnimator.enabled = false;
+            useBoat.transform.position = useBoat.dockPos.position;
+            boatPlayer.enabled = true;
+            boatPlayer.SetNewDockPos();
+
+            //disable all mono triggers from intro
+            for(int i = 0; i < 11; i++)
+            {
+                wmManager.allMonologues[i].mTrigger.gameObject.SetActive(false);
+            }
+        }
     }
 
     void Start()
@@ -278,6 +301,16 @@ public class MonologueManager : MonoBehaviour
         if (allMyMonologues[currentMonologue].newMovement)
         {
             npcController.Movement.ResetMovement(allMyMonologues[currentMonologue].newMovement);
+        }
+
+        //turn on the boat for player use
+        if (allMyMonologues[currentMonologue].enablesBoat)
+        {
+            useBoat.enabled = true;
+            useBoat.boatAnimator.enabled = false;
+            useBoat.transform.position = useBoat.dockPos.position;
+            boatPlayer.enabled = true;
+            boatPlayer.SetNewDockPos();
         }
 
         inMonologue = false;

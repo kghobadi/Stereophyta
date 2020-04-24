@@ -23,8 +23,9 @@ public class UseBoat : PickUp {
     public Image clickNDragAnim, clickNDragAnimRight;
     FadeUI animFader, animFaderRight;
     AnimateDialogue animator, animatorRight;
-    Animator boatAnimator;
+    [HideInInspector] public Animator boatAnimator;
 
+    public Transform dockPos;
     public bool canEnter = true;
     public float justExitedTimer, exitTimerTotal = 0.5f;
 
@@ -140,6 +141,8 @@ public class UseBoat : PickUp {
             tpc.transform.localEulerAngles = new Vector3(-90f, 0, 0);
             tpc.playerCloak.enabled = true;
 
+            Quaternion rot = transform.rotation;
+
             //set boat vars
             boatScript.inBoat = true;
             boatScript.boatBody.isKinematic = false;
@@ -148,6 +151,12 @@ public class UseBoat : PickUp {
             //set oar anim
             boatScript.oarAnimator.SetTrigger("activateBoat");
             boatScript.oarAnimator.SetBool("rightOrLeft", true);
+
+            //player hasnt used boat before, set angle 
+            if (PlayerPrefs.GetString("hasUsedBoat") != "yes")
+            {
+                transform.rotation = rot;
+            }
 
             interactPrompt.DeactivatePrompt();
         }

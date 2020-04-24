@@ -99,14 +99,18 @@ public class BoatPlayer : MonoBehaviour
 
     void Start()
     {
+        //starting state is idle 
+        boatState = BoatStates.IDLE;
+    }
+
+    public void SetNewDockPos()
+    {
         //set body & start angle
         boatBody.isKinematic = false;
+        boatCol.isTrigger = false;
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
         origDockPos = transform.position;
-
-        //starting state is idle 
-        boatState = BoatStates.IDLE;
     }
 
     //called when player sleeps in bed 

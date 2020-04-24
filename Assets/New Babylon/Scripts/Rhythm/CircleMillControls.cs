@@ -315,7 +315,8 @@ public class CircleMillControls : MonoBehaviour {
         }
 
         //play sound corresponding to number 
-        controlsAudio.PlayOneShot(selectionSounds[windCount], 1f);
+        if(playerOperating)
+            controlsAudio.PlayOneShot(selectionSounds[windCount], 1f);
 
         //if we aren't at 0
         if (currentCircleWinds.Length > 0)

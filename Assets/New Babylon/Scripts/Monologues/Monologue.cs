@@ -31,6 +31,8 @@ public class Monologue : ScriptableObject
     public Cinematic [] cTriggers;
     [Tooltip("After this Monologue finishes, the manager will set NPC movement using this")]
     public MovementPath newMovement;
+    [Tooltip("After this Monologue finishes, the Boat will be enabled!")]
+    public bool enablesBoat;
 
     [Header("Info for Monologue Reader")]
     public float timeBetweenLetters = 0.1f;
