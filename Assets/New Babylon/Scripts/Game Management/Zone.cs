@@ -60,17 +60,17 @@ public class Zone : MonoBehaviour {
         SetZoneSpawners();
 
         //check if this is the last zone-- > set as starting zone
-        //if (PlayerPrefs.HasKey("lastZone"))
-        //{
-        //    if (PlayerPrefs.GetString("lastZone") == zoneName)
-        //    {
-        //        startingZone = true;
-        //    }
-        //    else
-        //    {
-        //        startingZone = false;
-        //    }
-        //}
+        if (PlayerPrefs.HasKey("lastZone"))
+        {
+            if (PlayerPrefs.GetString("lastZone") == zoneName)
+            {
+                startingZone = true;
+            }
+            else
+            {
+                startingZone = false;
+            }
+        }
     }
 
     void Start()

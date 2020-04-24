@@ -28,6 +28,7 @@ namespace Player
         public UnityEvent addedNewItem;
         public UnityEvent addedItemToGroup;
         public UnityEvent removedItem;
+        public UnityEvent removedItemFromGroup;
 
         //UI
         [Header("Items UI")]
@@ -428,7 +429,8 @@ namespace Player
             if (fadeItems != null)
                 StopCoroutine(fadeItems);
             fadeItems = FadeOutItemsVis();
-            StartCoroutine(fadeItems);
+            if(gameObject.activeSelf)
+                StartCoroutine(fadeItems);
         }
 
         //Count up a list 
@@ -663,7 +665,7 @@ namespace Player
             myItems.RemoveAt(index);
             ItemSprites.RemoveAt(index);
             //event call
-            removedItem.Invoke();
+            removedItemFromGroup.Invoke();
             //causes issue if there's no items 
             if (myItems.Count > 0)
             {
@@ -694,7 +696,8 @@ namespace Player
             {
                 for (int t = 0; t < item.toolGroup.Count; t++)
                 {
-                    item.toolGroup[t].gameObject.SetActive(false);
+                    if(item.toolGroup[t] != null)
+                        item.toolGroup[t].gameObject.SetActive(false);
                 }
             }
         }

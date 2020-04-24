@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class CircleWind : Rhythm {
 
-    GameObject windMill;
+    public GameObject windMill;
     public float windSpeed;
     public ParticleSystem windParticles;
 
     BoxCollider windTrigger;
 
 	void Awake () {
-        windMill = transform.parent.parent.gameObject;
         windParticles = GetComponent<ParticleSystem>();
         windTrigger = GetComponent<BoxCollider>();
 	}

@@ -28,9 +28,17 @@ public class AudioGeneration : MonoBehaviour
             Vector3 genPos = new Vector3(terrain.terrainData.treeInstances[i].position.x * terrain.terrainData.size.x + terrain.transform.position.x,
                 terrain.terrainData.treeInstances[i].position.y * terrain.terrainData.size.y + terrain.transform.position.y,
                 terrain.terrainData.treeInstances[i].position.z * terrain.terrainData.size.z + terrain.transform.position.z);
+            //generatre
+            GameObject treeClone = Instantiate(audioSourcePrefab, genPos, Quaternion.identity, treeAudioParent.transform);
+            //grab scale adjustments from terrain
+            float heighScale = terrain.terrainData.treeInstances[i].heightScale;
+            float widthScale = terrain.terrainData.treeInstances[i].widthScale;
+            //set clone scale
+            treeClone.transform.localScale = new Vector3(treeClone.transform.localScale.x * widthScale, 
+                treeClone.transform.localScale.y * heighScale, treeClone.transform.localScale.z * widthScale);
 
             //add to list 
-            treeAudioSources.Add(Instantiate(audioSourcePrefab, genPos, Quaternion.identity, treeAudioParent.transform));
+            treeAudioSources.Add(treeClone);
         }
     }
 

@@ -36,8 +36,10 @@ public class Menu : MonoBehaviour {
     public float omSmoothLookOrig, omSmoothMoveOrig;
     //settings volume slider
     [Header("Audio Settings")]
+    public AudioMixer audMixer;
     public AudioMixerGroup[] mixerGroups;
     public Slider[] volumeSliders;
+    public string[] volGroupNames;
     //menu audio
     public AudioSource menuAudio;
     public AudioClip openBook, closeBook;
@@ -61,14 +63,11 @@ public class Menu : MonoBehaviour {
     void Start()
     {
         //set initial values
-        for (int i = 0; i < volumeSliders.Length; i++)
-        {
-            volumeSliders[i].value = 0;
-        }
+        CheckVolumes();
 
         //set mouse controls 
         SetMouseControlsBool();
-
+        
         //turn off
         menuObj.SetActive(false);
         cursor.SetActive(false);
@@ -146,29 +145,23 @@ public class Menu : MonoBehaviour {
         }
     }
 
+    //assigns Slider values to actual Mixer volumes 
+    void CheckVolumes()
+    {
+        for (int i = 0; i < volGroupNames.Length;i++)
+        {
+            float val;
+            audMixer.GetFloat(volGroupNames[i], out val );
+            volumeSliders[i].value = val;
+        }
+    }
+
     //functions to adjust master volumes with a sliders
     public void ChangeVolume(int mixer)
     {
         string volumeVar = "";
 
-        switch (mixer)
-        {
-            case 0:
-                volumeVar = "masterVol";
-                break;
-            case 1:
-                volumeVar = "plantVol";
-                break;
-            case 2:
-                volumeVar = "toolVol";
-                break;
-            case 3:
-                volumeVar = "characterVol";
-                break;
-            case 4:
-                volumeVar = "weatherVol";
-                break;
-        }
+        volumeVar = volGroupNames[mixer];
 
         mixerGroups[mixer].audioMixer.SetFloat(volumeVar, volumeSliders[mixer].value);
     }

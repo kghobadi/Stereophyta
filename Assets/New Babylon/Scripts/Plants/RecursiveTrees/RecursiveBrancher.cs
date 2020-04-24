@@ -2,44 +2,70 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RecursiveBrancher : MonoBehaviour {
-    [Header("Recursion")]
-    public int recurse = 5;
-    public int splitNumber = 2;
-
-    public List<GameObject> myBranches = new List<GameObject>();
-
-    AudioSource myAudioSource;
-    [Header ("Audio")]
-    public AudioClip[] treeSounds;
-    public float soundWaiter;
-    public bool canRecurse = true;
+public class RecursiveBrancher : AudioHandler {
     SkinnedMeshRenderer mr;
+    SetRandomMaterial randomMat;
+    Rigidbody rBody;
+    BoxCollider bTrigger;
+    [Header("Materials")]
     public Material normalMat;
     public Material soundPlayingMat;
 
-    SetRandomMaterial randomMat;
+    [Header("Recursion")]
+    public GameObject branchPrefab;
+    public int recurse = 5;
+    public int splitNumber = 2;
     public static RecursiveBrancher initialTreeBase;
+    public List<GameObject> myBranches = new List<GameObject>();
+    public bool canRecurse = true;
 
-	void Start () {
-        myAudioSource = GetComponent<AudioSource>();
+    [Header("Sounds")]
+    public GameObject audioPrefab;
+    public AudioClip[] treeSounds;
+    public float spreadChance = 50f;
+    public float soundWaiter;
+
+    public override void Awake()
+    {
         mr = transform.GetChild(1).GetComponent<SkinnedMeshRenderer>();
         //random mat check
         randomMat = mr.GetComponent<SetRandomMaterial>();
+        
+        recurse -= 1;
+        if (initialTreeBase == null )
+        {
+            initialTreeBase = this;
+            //add voices 
+            for (int i = 0; i < 4; i++)
+            {
+                GameObject voice = Instantiate(audioPrefab, transform);
+                voice.transform.localPosition = Vector3.zero;
+            }
+            voices = GetComponentsInChildren<AudioSource>();
+            //add rigidbody 
+            rBody = gameObject.AddComponent<Rigidbody>();
+            rBody.isKinematic = true;
+            //add box trigger 
+            bTrigger = gameObject.AddComponent<BoxCollider>();
+            bTrigger.isTrigger = true;
+        }
+        //no initial 
+        else
+        {
+            voices = initialTreeBase.voices;
+        }
+    }
+
+    void Start ()
+    {
         if (randomMat)
             normalMat = randomMat.assignedMat;
 
-        recurse -= 1;
-        if(initialTreeBase == null)
-        {
-            initialTreeBase = this;
-        }
-
-        for(int i = 0; i < splitNumber; i++)
+        for (int i = 0; i < splitNumber; i++)
         {
             if (recurse > 0)
             {
-                var copy = Instantiate(gameObject);
+                var copy = Instantiate(branchPrefab);
                 copy.transform.position = transform.position;
 
                 myBranches.Add(copy);
@@ -53,18 +79,6 @@ public class RecursiveBrancher : MonoBehaviour {
         }
 
         StartCoroutine(WaitToSetParents());
-    }
-
-    void Update()
-    {
-        if (myAudioSource.isPlaying)
-        {
-            mr.material = soundPlayingMat;
-        }
-        else
-        {
-            mr.material = normalMat;
-        }
     }
 
     //child the branches to their originator
@@ -92,13 +106,15 @@ public class RecursiveBrancher : MonoBehaviour {
     {
         canRecurse = false;
 
-        PlayRandomSound();
+        initialTreeBase.PlaySoundMultipleAudioSources(treeSounds);
 
-        for(int i = 0; i < myBranches.Count; i++)
+        mr.material = soundPlayingMat;
+
+        for (int i = 0; i < myBranches.Count; i++)
         {
             float chanceToSpread = Random.Range(0f, 100f);
 
-            if(chanceToSpread < 30)
+            if(chanceToSpread < spreadChance)
             {
                 myBranches[i].GetComponent<RecursiveBrancher>().PlaySounds();
             }
@@ -106,24 +122,17 @@ public class RecursiveBrancher : MonoBehaviour {
             yield return new WaitForSeconds(soundWaiter);
         }
 
+        mr.material = normalMat;
+
         canRecurse = true;
     }
-
-    //plays random sound from tree sounds 
-    void PlayRandomSound()
-    {
-        AudioClip sound = treeSounds[Random.Range(0, treeSounds.Length)];
-
-        myAudioSource.PlayOneShot(sound);
-    }
-
+    
     //Grow branch 
     public void GrowBranch(int index)
     {
         transform.position += transform.up * transform.localScale.y * 3;
     }
-
-
+    
     //Rotate Branch
     [Header("Rotations")]
     public float angle = 30f;
