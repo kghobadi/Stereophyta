@@ -7,6 +7,7 @@ public class ObjectTrigger : MonoBehaviour {
     public GameObject objectToActivate;
     public Transform activationSpot;
     public string playerPref;
+    public bool hasActivated;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -20,7 +21,7 @@ public class ObjectTrigger : MonoBehaviour {
                 //activate
                 objectToActivate.SetActive(true);
 
-                Debug.Log("activated " + objectToActivate.name);
+                //Debug.Log("activated " + objectToActivate.name);
             }
         }
     }

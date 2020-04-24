@@ -30,7 +30,7 @@ namespace NPC
 
         //state timers 
         public float normalSpeed = 8f;
-        public float stateTimer;
+        public float stateTimer, actionTimer;
         public float idleTime, actionTime;
         public float interactDistance;
         public float lookSmooth = 5f;
@@ -58,16 +58,21 @@ namespace NPC
 
         void Awake()
         {
+            GetRefs();
+        }
+
+        void GetRefs()
+        {
             controller = GetComponent<Controller>();
             footsteps = GetComponent<Footsteps>();
-            player = controller.tpc;
+            player = FindObjectOfType<ThirdPersonController>();
             npcAnimations = GetComponent<Animations>();
             npcSounds = GetComponent<Sounds>();
             mainCam = Camera.main;
             myNavMesh = GetComponent<NavMeshAgent>();
             movementManager = FindObjectOfType<NPCMovementManager>();
             startViewer = FindObjectOfType<StartView>();
-            monoManager = controller.Monologues;
+            monoManager = GetComponent<MonologueManager>();
         }
 
         void Start()
@@ -184,8 +189,10 @@ namespace NPC
                 //waits until player is near then walks to next point 
                 else if (npcType == NPCMovementTypes.PATHFINDER)
                 {
+                    actionTimer -= Time.deltaTime;
+
                     //play a sound (cough)
-                    if (stateTimer < 1 && !waving && !controller.Monologues.inMonologue)
+                    if (actionTimer < 0 && !waving && !controller.Monologues.inMonologue)
                     {
                         if(npcSounds.myAudioSource.isPlaying == false)
                         {
@@ -193,10 +200,8 @@ namespace NPC
                                 npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
 
                             npcAnimations.Animator.SetTrigger("action1");
-
-                            //only reset timer if waiting to give monologue
-                            if (waitingToGiveMonologue)
-                                stateTimer = idleTime;
+                            
+                            actionTimer = actionTime;
                         }
                     }
 
@@ -257,6 +262,8 @@ namespace NPC
             {
                 waypoints = movementManager.movementPaths[newMove.pathIndex].movementPoints;
                 waypointCounter = 0;
+
+                waitingToGiveMonologue = false;
             }
         }
 

@@ -14,6 +14,9 @@ namespace Cameras
         public bool active;
         public GameCamera desiredCam, lastCam;
 
+        [Tooltip("Player cannot sprint")]
+        public bool limitPlayerMovement;
+
         void Awake()
         {
             camManager = FindObjectOfType<CameraManager>();
@@ -44,6 +47,7 @@ namespace Cameras
                 lastCam = camManager.currentCamera;
                 camManager.Set(desiredCam);
                 pcc.canSwitchCams = false;
+
                 active = true;
             }
         }

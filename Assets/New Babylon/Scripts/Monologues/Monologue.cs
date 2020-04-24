@@ -20,7 +20,7 @@ public class Monologue : ScriptableObject
     [Tooltip("This list will correspond to all my monologues in count, but may be null")]
     public Task[] tasksToAssign;
     [Tooltip("This NPC will take item from player during conversation using these tasks")]
-    public Task[] tasksToComplete; 
+    public Task[] tasksToFulfill; 
     [Tooltip("The Monologue Manager will repeat this monologue until further notice")]
     public bool repeatsAtFinish;
     [Tooltip("After this Monologue finishes, the manager will play a cinematic")]
@@ -31,6 +31,8 @@ public class Monologue : ScriptableObject
     public Cinematic [] cTriggers;
     [Tooltip("After this Monologue finishes, the manager will set NPC movement using this")]
     public MovementPath newMovement;
+    [Tooltip("After this Monologue finishes, the Boat will be enabled!")]
+    public bool enablesBoat;
 
     [Header("Info for Monologue Reader")]
     public float timeBetweenLetters = 0.1f;

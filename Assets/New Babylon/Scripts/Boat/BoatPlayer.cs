@@ -74,13 +74,15 @@ public class BoatPlayer : MonoBehaviour
     public float exitSphereRadius = 3f;
     public float dockDistance = 15f;
     public Vector3 exitSpot;
-    public FadeUI[] dockprompts;  //dock boat prompt
+
+    [HideInInspector] public InteractPrompt dockPrompt;
 
     void Awake()
     {
         //player refs
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        dockPrompt = tpc.myInventory.GetComponent<InteractPrompt>();
 
         //audio
         boatSource = GetComponent<AudioSource>();
@@ -97,14 +99,18 @@ public class BoatPlayer : MonoBehaviour
 
     void Start()
     {
+        //starting state is idle 
+        boatState = BoatStates.IDLE;
+    }
+
+    public void SetNewDockPos()
+    {
         //set body & start angle
         boatBody.isKinematic = false;
+        boatCol.isTrigger = false;
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
         origDockPos = transform.position;
-
-        //starting state is idle 
-        boatState = BoatStates.IDLE;
     }
 
     //called when player sleeps in bed 
@@ -408,18 +414,13 @@ public class BoatPlayer : MonoBehaviour
         if (nearGround)
         {
             //fade in dock prompt
-            for (int d = 0; d < dockprompts.Length; d++)
-            {
-                dockprompts[d].FadeIn();
-            }
+            dockPrompt.pickUpMessage = "Dock Boat";
+            dockPrompt.ShowPickupPrompt();
         }
         else
         {
             //fade out dock prompt
-            for (int d = 0; d < dockprompts.Length; d++)
-            {
-                dockprompts[d].FadeOut();
-            }
+            dockPrompt.DeactivatePrompt();
         }
 
         return nearGround;

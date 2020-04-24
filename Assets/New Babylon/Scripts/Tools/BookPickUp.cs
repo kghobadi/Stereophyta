@@ -6,6 +6,7 @@ public class BookPickUp : PickUp {
 
     StartView startViewer;
     public Menu menuScript;
+    public MonologueTrigger startingMonoHasBook, startingMonoNoBook;
 
     public override void Awake()
     {
@@ -18,7 +19,15 @@ public class BookPickUp : PickUp {
         //player has already picked up book
         if(PlayerPrefs.GetString("hasBook") == "yes")
         {
+            startingMonoHasBook.gameObject.SetActive(true);
+            startingMonoNoBook.gameObject.SetActive(false);
             gameObject.SetActive(false);
+        }
+        //no book 
+        else
+        {
+            startingMonoHasBook.gameObject.SetActive(false);
+            startingMonoNoBook.gameObject.SetActive(true);
         }
     }
 
@@ -26,7 +35,10 @@ public class BookPickUp : PickUp {
     {
         base.PickUpTool(playSound);
 
-        gameObject.SetActive(false);
+        //switch out start monologues 
+        startingMonoHasBook.gameObject.SetActive(true);
+        startingMonoNoBook.gameObject.SetActive(false);
+        
         //this is the one we need
         PlayerPrefs.SetString("hasBook", "yes");
 
@@ -37,6 +49,8 @@ public class BookPickUp : PickUp {
         {
             menuScript.escNotices[i].FadeIn();
         }
+
+        gameObject.SetActive(false);
     }
 
     public override void Update()

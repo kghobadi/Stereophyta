@@ -13,6 +13,7 @@ public class MonologueTrigger : MonoBehaviour
     [Tooltip("Only need this if the Trigger first becomes active when an NPC moves into it")]
     public GameObject speakerHost;
     public bool canActivate = true;
+    public bool autoActivate;
     public bool hasActivated;
     public bool playerInZone;
     public bool displayUI;
@@ -20,7 +21,9 @@ public class MonologueTrigger : MonoBehaviour
     public GameObject interactDisplay;
     public FadeUItmp spaceToTalk;
     //monologues
+    [Tooltip("Monologue Managers of the NPCs whose monologues should be activated")]
     public MonologueManager[] myMonologues;
+    [Tooltip("Indeces of above Mono Managers to set")]
     public int[] monoNumbers;
     public Movement npcMovement;
     public Transform monologuePoint;
@@ -59,7 +62,7 @@ public class MonologueTrigger : MonoBehaviour
     {
         if (playerInZone)
         {
-            if(Input.GetKeyUp(KeyCode.Space) && !hasActivated)
+            if((Input.GetKeyUp(KeyCode.Space) || autoActivate) && !hasActivated)
             {
                 ActivateMonologue();
             }

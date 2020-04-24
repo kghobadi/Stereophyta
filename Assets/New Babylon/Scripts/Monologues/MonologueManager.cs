@@ -38,6 +38,10 @@ public class MonologueManager : MonoBehaviour
     [HideInInspector]
     public MonologueTrigger mTrigger;
 
+    //boat refs
+    UseBoat useBoat;
+    BoatPlayer boatPlayer;
+
     void Awake()
     {
         //grab refs
@@ -56,6 +60,25 @@ public class MonologueManager : MonoBehaviour
         monoReader = GetComponentInChildren<MonologueReader>();
         monoReader.hostObj = gameObject;
         monoReader.monoManager = this;
+
+        useBoat = FindObjectOfType<UseBoat>();
+        boatPlayer = FindObjectOfType<BoatPlayer>();
+
+        //player has used boat before -- activate it 
+        if (PlayerPrefs.GetString("lastZone") != "MountainIsland")
+        {
+            useBoat.enabled = true;
+            useBoat.boatAnimator.enabled = false;
+            useBoat.transform.position = useBoat.dockPos.position;
+            boatPlayer.enabled = true;
+            boatPlayer.SetNewDockPos();
+
+            //disable all mono triggers from intro
+            for(int i = 0; i < 11; i++)
+            {
+                wmManager.allMonologues[i].mTrigger.gameObject.SetActive(false);
+            }
+        }
     }
 
     void Start()
@@ -233,11 +256,15 @@ public class MonologueManager : MonoBehaviour
         {
             tpc.playerCanMove = true;
         }
+        //jump 
+        if(!tpc.canJump)
+            tpc.canJump = true;
+
 
         //check for cinematic to enable 
         if (allMyMonologues[currentMonologue].playsCinematic)
         {
-            npcController.cineManager.allCinematics[allMyMonologues[currentMonologue].cinematic.cIndex].cPlaybackManager.PlayTimeline();
+            npcController.cineManager.allCinematics[allMyMonologues[currentMonologue].cinematic.cIndex].cPlaybackManager.StartTimeline();
         }
         //cinematic triggers to enable
         if (allMyMonologues[currentMonologue].enablesCinematicTriggers)
@@ -259,21 +286,31 @@ public class MonologueManager : MonoBehaviour
         }
 
         //tasks to complete ?
-        if (allMyMonologues[currentMonologue].tasksToComplete.Length > 0)
+        if (allMyMonologues[currentMonologue].tasksToFulfill.Length > 0)
         {
             //loop thru all tasks to complete 
-            for (int i = 0; i < allMyMonologues[currentMonologue].tasksToComplete.Length; i++)
+            for (int i = 0; i < allMyMonologues[currentMonologue].tasksToFulfill.Length; i++)
             {
-                Task task = allMyMonologues[currentMonologue].tasksToComplete[i];
+                Task task = allMyMonologues[currentMonologue].tasksToFulfill[i];
 
                 npcController.Tasks.FulfillTask(task);
             }
         }
-
+        
         //new npc movement?
         if (allMyMonologues[currentMonologue].newMovement)
         {
             npcController.Movement.ResetMovement(allMyMonologues[currentMonologue].newMovement);
+        }
+
+        //turn on the boat for player use
+        if (allMyMonologues[currentMonologue].enablesBoat)
+        {
+            useBoat.enabled = true;
+            useBoat.boatAnimator.enabled = false;
+            useBoat.transform.position = useBoat.dockPos.position;
+            boatPlayer.enabled = true;
+            boatPlayer.SetNewDockPos();
         }
 
         inMonologue = false;

@@ -124,13 +124,16 @@ namespace Items
             //grab wind from pool, set pos, rotation, ref to this
             windClone = fanWindPooler.GrabObject();
             //set wind script
-            PuzzleWind tinyWind = windClone.GetComponent<PuzzleWind>();
-            tinyWind._windGen = this;
-            tinyWind.currentSpeed = windSpeed;
+            FanWind fanWind = windClone.GetComponent<FanWind>();
+            fanWind._windGen = this;
+            fanWind.currentSpeed = windSpeed;
+            fanWind.windParticles.Clear();
             //set wind transform 
             windClone.transform.SetParent(null);
             windClone.transform.position = transform.position + new Vector3(0, 5, 0);
             windClone.transform.rotation = Quaternion.Euler(transform.eulerAngles - new Vector3(0, 90, 0));
+            //play particles
+            fanWind.windParticles.Play();
            
             showRhythm = false;
         }

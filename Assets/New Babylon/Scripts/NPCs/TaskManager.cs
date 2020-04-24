@@ -15,6 +15,8 @@ namespace NPC
         //list of active & complete tasks 
         public List<Task> activeTasks = new List<Task>();
         public List<Task> completedTasks = new List<Task>();
+        [Tooltip("How far NPC looks to check for Planted items")]
+        public float visionRadius = 75f;
 
         void Awake()
         {
@@ -25,7 +27,10 @@ namespace NPC
             pTaskManager = FindObjectOfType<Player.TaskManager>();
 
             //add listeners
+            playerInventory.addedNewItem.AddListener(CheckTaskCompletion);
             playerInventory.addedItemToGroup.AddListener(CheckTaskCompletion);
+            playerInventory.removedItem.AddListener(CheckTaskCompletion);
+            playerInventory.removedItemFromGroup.AddListener(CheckTaskCompletion);
             tpc.enteredZone.AddListener(CheckTaskCompletion);
         }
         
@@ -50,19 +55,46 @@ namespace NPC
                     //check player's items 
                     Item item = CheckForItem(task, true);
 
+                    //Debug.Log("checking fetch task");
+
                     //found item
-                    if(item != null)
+                    if (item != null)
                     {
+                        //Debug.Log("fetch item not null");
                         //player completed task!
                         if (item.itemCount >= task.desiredItemCount)
                         {
+                            //Debug.Log("completed fetch ");
                             Complete(task);
                         }
                     }
                 }
 
+                //PLANT
+                else if (task.taskType == Task.TaskType.PLANT)
+                {
+                    //NPC scans around them for plants 
+                    int amount = CheckForPlants(task);
+                    if (amount >= task.desiredItemCount)
+                    {
+                        Complete(task);
+                    }
+                }
+
+
+                //PLANT
+                else if (task.taskType == Task.TaskType.CUT)
+                {
+                    //NPC scans around them for plants 
+                    int amount = CheckForPlants(task);
+                    if (amount <= task.desiredItemCount)
+                    {
+                        Complete(task);
+                    }
+                }
+
                 //GOTO
-                if (task.taskType == Task.TaskType.FETCH)
+                else if (task.taskType == Task.TaskType.GOTO)
                 {
                     //complete!
                     if(tpc.currentZone.zoneName == task.zoneName)
@@ -71,8 +103,10 @@ namespace NPC
                     }
                 }
             }
-        }
 
+            //Debug.Log("checking tasks");
+        }
+        
         //check for item in player inventory 
         //TRUE for player, FALSE for NPC 
         public Item CheckForItem(Task task, bool playerOrNPC)
@@ -119,7 +153,53 @@ namespace NPC
 
             return item;
         }
-        
+
+        //check for plants in a spot 
+        public int CheckForPlants(Task task)
+        {
+            //0 plant amount 
+            int plantAmount = 0;
+            //overlap sphere 
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, visionRadius);
+           
+            //loop through colliders 
+            for (int i = 0;  i < hitColliders.Length; i ++)
+            {
+                //crop check 
+                if (hitColliders[i].GetComponent<Plont>())
+                {
+                    Plont crop = hitColliders[i].GetComponent<Plont>();
+                    if (crop.myPlantType == task.cropType)
+                    {
+                        plantAmount++;
+                        Debug.Log(gameObject.name + " sees a crop!");
+                    }
+                    
+                }
+                //shroom check 
+                else if (hitColliders[i].GetComponent<Shroom>())
+                {
+                    Shroom shroom = hitColliders[i].GetComponent<Shroom>();
+                    if (shroom.shroomType == task.shroomType)
+                    {
+                        plantAmount++;
+                        Debug.Log(gameObject.name + " sees a shroom!");
+                    }
+                }
+                //item
+                else if (hitColliders[i].GetComponent<Item>())
+                {
+                    Item item = hitColliders[i].GetComponent<Item>();
+
+                    
+                }
+                i++;
+            }
+
+            //return int 
+            return plantAmount;
+        }
+
         //called CheckTaskCompletion finds a complete task
         public void Complete(Task task)
         {

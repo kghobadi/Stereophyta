@@ -18,6 +18,7 @@ public class TreeAudio : AudioHandler {
 
     //just an effect to show sound is playing
     public ParticleSystem [] ribbons;
+  
 
     public TreeType treeSpecie;
     public enum TreeType
@@ -25,7 +26,13 @@ public class TreeAudio : AudioHandler {
         SPRITE, GARANGULA, STALNIK, PALM,
     }
 
-	public override void Awake () {
+    //for birds 
+    [Header("Birds")]
+    public Transform[] birdSpots;
+    public GameObject birdSpecie;
+    public float birdGenChance = 15f;
+
+    public override void Awake () {
         base.Awake();
         player = GameObject.FindGameObjectWithTag("Player");
 	}
@@ -36,6 +43,8 @@ public class TreeAudio : AudioHandler {
         myAudioSource.clip = treeSounds[randomSound];
         myAudioSource.outputAudioMixerGroup = treeMixerGroup;
         treeNoteTimer = Random.Range(0.5f, randomTimeMax);
+
+        GenerateBirds();
     }
 
     void Update () {
@@ -92,6 +101,31 @@ public class TreeAudio : AudioHandler {
                 {
                     for (int i = 0; i < ribbons.Length; i++)
                         ribbons[i].Stop();
+                }
+            }
+        }
+    }
+
+    //add some birds to the tree!
+    void GenerateBirds()
+    {
+        if (birdSpots.Length > 0)
+        {
+            for (int i = 0; i < birdSpots.Length; i++)
+            {
+                float chance = Random.Range(0f, 100f);
+
+                if(chance < birdGenChance)
+                {
+                    float randomRotate = Random.Range(0f, 360f);
+
+                    GameObject birdClone = Instantiate(birdSpecie, birdSpots[i].position, Quaternion.Euler(0f, randomRotate, 0f), transform);
+
+                    //scale down bird to orig size & offset y pos 
+                    float scaleFactor = 1f / transform.localScale.x;
+                    float yOffset = transform.localScale.y / 3;
+                    birdClone.transform.localScale *= scaleFactor;
+                    birdClone.transform.position -= new Vector3(0, yOffset, 0);
                 }
             }
         }

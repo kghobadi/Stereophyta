@@ -14,12 +14,11 @@ namespace NPC
 
         public enum TaskType
         {
-            FETCH, GOTO,
+            FETCH, GOTO, PLANT, PLACEITEM, CUT
         }
         public TaskType taskType;
-
-        //FETCH 
-        [Header("Fetch")]
+        
+        [Header("Item Characteristics")]
         public Item.ItemType itemType;
         public Item.ToolType toolType;
         public Item.MiscType miscType;
@@ -27,17 +26,21 @@ namespace NPC
         //for seeds 
         public Plont.PlantType cropType;
         public Shroom.ShroomType shroomType;
+
+        //FETCH 
+        [Header("Fetch/Plant")]
         public string itemName;
         public int desiredItemCount;
 
         //GOTO 
         [Header("Go-to")]
         public string zoneName;
+        
+        //CUT 
 
         [Header("Outcomes")] // what happens when this task is complete?
         public bool triggersMonologues;
         public int [] monologueIndeces;
-
         //rewards?
     }
 }

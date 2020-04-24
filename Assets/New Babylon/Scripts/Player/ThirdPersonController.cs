@@ -260,12 +260,6 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
 
-        //Restart game
-        if (Input.GetKeyDown(KeyCode.Delete))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
-
         //set grass shader to my pos 
         Shader.SetGlobalVector("playerPos", transform.position);
     }
