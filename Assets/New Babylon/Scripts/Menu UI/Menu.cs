@@ -30,10 +30,9 @@ public class Menu : MonoBehaviour {
     public Slider mouseSensitivity;
     //store cam sensitivity values 
     [Header("Cam sensitivity values")]
-    public float omTurnSmoothLook;
-        public float omTurnSmoothMove;
-    public float omMovingTurnLook, omMovingTurnMove;
-    public float omSmoothLookOrig, omSmoothMoveOrig;
+    //use this to get the various mouse sensitivity values 
+    //from the cinemachine cameras 
+    //and generalize for a single slider 
     //settings volume slider
     [Header("Audio Settings")]
     public AudioMixer audMixer;
@@ -88,7 +87,7 @@ public class Menu : MonoBehaviour {
                 TurnOffMenu();
             }
             //turn on
-            else if (!menuObj.activeSelf && !startViewer.startView)
+            else if (!menuObj.activeSelf && !startViewer.active)
             {
                 TurnOnMenu();
             }
@@ -100,8 +99,6 @@ public class Menu : MonoBehaviour {
         //cursor on
         Cursor.lockState = CursorLockMode.None;
         cursor.SetActive(true);
-        //turn off interact prompts 
-        interactEprompt.transform.parent.gameObject.SetActive(false);
 
         //menu on
         menuObj.SetActive(true);
@@ -116,9 +113,7 @@ public class Menu : MonoBehaviour {
     }
 
     public void TurnOffMenu()
-    {   
-        //turn on interact prompts 
-        interactEprompt.transform.parent.gameObject.SetActive(true);
+    { 
         //menu off
         menuObj.SetActive(false);
         tpc.menuOpen = false;
