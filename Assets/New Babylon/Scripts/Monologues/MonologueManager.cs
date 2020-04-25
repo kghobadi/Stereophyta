@@ -65,20 +65,24 @@ public class MonologueManager : MonoBehaviour
         boatPlayer = FindObjectOfType<BoatPlayer>();
 
         //player has used boat before -- activate it 
-        if (PlayerPrefs.GetString("lastZone") != "MountainIsland")
+        if (PlayerPrefs.HasKey("lastZone"))
         {
-            useBoat.enabled = true;
-            useBoat.boatAnimator.enabled = false;
-            useBoat.transform.position = useBoat.dockPos.position;
-            boatPlayer.enabled = true;
-            boatPlayer.SetNewDockPos();
-
-            //disable all mono triggers from intro
-            for(int i = 0; i < 11; i++)
+            if (PlayerPrefs.GetString("hasUsedBoat") == "yes")
             {
-                wmManager.allMonologues[i].mTrigger.gameObject.SetActive(false);
+                useBoat.enabled = true;
+                useBoat.boatAnimator.enabled = false;
+                useBoat.transform.position = useBoat.dockPos.position;
+                boatPlayer.enabled = true;
+                boatPlayer.SetNewDockPos();
+
+                //disable all mono triggers from intro
+                for (int i = 0; i < 11; i++)
+                {
+                    wmManager.allMonologues[i].mTrigger.gameObject.SetActive(false);
+                }
             }
         }
+        
     }
 
     void Start()
@@ -157,31 +161,31 @@ public class MonologueManager : MonoBehaviour
         if (allMyMonologues[currentMonologue].lockPlayer)
         {
             tpc.playerCanMove = false;
-        }
 
-        //set player pos
-        if (playerSpot)
-        {
-            tpc.playerCloak.enabled = false;
-
-            RaycastHit hit;
-
-            Vector3 targetPosition;
-            // Does the ray intersect any objects excluding the player layer
-            if (Physics.Raycast(playerSpot.position, Vector3.down, out hit, Mathf.Infinity, npcController.Movement.grounded))
+            //set player pos
+            if (playerSpot)
             {
-                targetPosition = hit.point + new Vector3(0, tpc.controller.height / 2, 0);
+                tpc.playerCloak.enabled = false;
 
-                tpc.transform.position = targetPosition;
+                RaycastHit hit;
+
+                Vector3 targetPosition;
+                // Does the ray intersect any objects excluding the player layer
+                if (Physics.Raycast(playerSpot.position, Vector3.down, out hit, Mathf.Infinity, npcController.Movement.grounded))
+                {
+                    targetPosition = hit.point + new Vector3(0, tpc.controller.height / 2, 0);
+
+                    tpc.transform.position = targetPosition;
+                }
+
+                //player look at npc 
+                Vector3 lookAtPos = new Vector3(transform.position.x, tpc.samita.transform.position.y, transform.position.z);
+                tpc.samita.transform.LookAt(lookAtPos);
+
+                tpc.playerCloak.enabled = true;
             }
-
-            //player look at npc 
-            Vector3 lookAtPos = new Vector3(transform.position.x, tpc.samita.transform.position.y, transform.position.z);
-            tpc.samita.transform.LookAt(lookAtPos);
-
-            tpc.playerCloak.enabled = true;
         }
-
+        
         //set talking anim
         if (npcController.Animation)
         {

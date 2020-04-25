@@ -36,8 +36,11 @@ public class BookPickUp : PickUp {
         base.PickUpTool(playSound);
 
         //switch out start monologues 
-        startingMonoHasBook.gameObject.SetActive(true);
-        startingMonoNoBook.gameObject.SetActive(false);
+        if(startingMonoNoBook.hasActivated == false)
+        {
+            startingMonoHasBook.gameObject.SetActive(true);
+            startingMonoNoBook.gameObject.SetActive(false);
+        }
         
         //this is the one we need
         PlayerPrefs.SetString("hasBook", "yes");

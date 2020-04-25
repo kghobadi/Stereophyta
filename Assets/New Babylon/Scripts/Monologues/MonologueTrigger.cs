@@ -38,7 +38,7 @@ public class MonologueTrigger : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            if(!hasActivated && canActivate)
+            if(!playerInZone && canActivate)
                 PlayerEnteredZone();
         }
 
@@ -47,6 +47,15 @@ public class MonologueTrigger : MonoBehaviour
         {
             //Debug.Log("can activate!");
             canActivate = true;
+        }
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            if (!playerInZone && canActivate)
+                PlayerEnteredZone();
         }
     }
 
@@ -72,29 +81,32 @@ public class MonologueTrigger : MonoBehaviour
     //called in OnTriggerEnter()
     public void PlayerEnteredZone()
     {
-        playerInZone = true;
-        tpc.canJump = false;
-        if (npcMovement.waitingToGiveMonologue == false)
+        if (!hasActivated)
         {
-            //tell npc to go to monologue point 
-            if (monologuePoint)
+            playerInZone = true;
+            tpc.canJump = false;
+            if (npcMovement.waitingToGiveMonologue == false)
             {
-                npcMovement.SetIdle();
-                npcMovement.NavigateToPoint(monologuePoint.position, true);
+                //tell npc to go to monologue point 
+                if (monologuePoint)
+                {
+                    npcMovement.SetIdle();
+                    npcMovement.NavigateToPoint(monologuePoint.position, true);
+                }
+                //wait to give monologue when you arrive 
+                else
+                {
+                    npcMovement.SetIdle();
+                    npcMovement.waitingToGiveMonologue = true;
+                }
             }
-            //wait to give monologue when you arrive 
-            else
-            {
-                npcMovement.SetIdle();
-                npcMovement.waitingToGiveMonologue = true;
-            }
+
+            //fade in space to talk 
+            if (spaceToTalk)
+                spaceToTalk.FadeIn();
+
+            ToggleInteractUI(playerInZone);
         }
-
-        //fade in space to talk 
-        if (spaceToTalk)
-            spaceToTalk.FadeIn();
-
-        ToggleInteractUI(playerInZone);
     }
 
     //activates monologues
