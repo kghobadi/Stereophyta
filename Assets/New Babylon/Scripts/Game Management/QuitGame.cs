@@ -14,56 +14,54 @@ public class QuitGame : MonoBehaviour {
         restartGroup.SetActive(false);
     }
 
-    void Update ()
-    {
-        bool pressed = false;
+    //void Update ()
+    //{
+    //    bool pressed = false;
 
-        //get input device 
-        var inputDevice = InputManager.ActiveDevice;
+    //    //get input device 
+    //    var inputDevice = InputManager.ActiveDevice;
 
-        //activate quit group   
-        if ((Input.GetKeyDown(KeyCode.Escape) ||  inputDevice.Command.WasPressed) && quitGroup.activeSelf == false && !pressed)
-        {
-            ActivateQuitMenu();
+    //    //activate quit group   
+    //    if ((Input.GetKeyDown(KeyCode.Escape) ||  inputDevice.Command.WasPressed) && quitGroup.activeSelf == false && !pressed)
+    //    {
+    //        ActivateQuitMenu();
 
-            pressed = true;
-        }
+    //        pressed = true;
+    //    }
 
-        //quit
-        if(inputDevice.Action1.WasPressed && quitGroup.activeSelf == true)
-        {
-            Quit();
-        }
+    //    //quit
+    //    if(inputDevice.Action1.WasPressed && quitGroup.activeSelf == true)
+    //    {
+    //        Quit();
+    //    }
 
-        //deactivate quit menu
-        if ((Input.GetKeyDown(KeyCode.Escape) || inputDevice.Command.WasPressed) && quitGroup.activeSelf == true && !pressed)
-        {
-            DeactivateObj(quitGroup);
+    //    //deactivate quit menu
+    //    if ((Input.GetKeyDown(KeyCode.Escape) || inputDevice.Command.WasPressed) && quitGroup.activeSelf == true && !pressed)
+    //    {
+    //        DeactivateObj(quitGroup);
 
-            pressed = true;
-        }
+    //        pressed = true;
+    //    }
 
-        //activate restart group
-        if (Input.GetKeyDown(KeyCode.Delete) && restartGroup.activeSelf == false && !pressed)
-        {
-            ActivateRestartMenu();
+    //    //activate restart group
+    //    if (Input.GetKeyDown(KeyCode.Delete) && restartGroup.activeSelf == false && !pressed)
+    //    {
+    //        ActivateRestartMenu();
 
-            pressed = true;
-        }
-        //deactivate restart menu
-        if (Input.GetKeyDown(KeyCode.Delete) && restartGroup.activeSelf == true && !pressed)
-        {
-            DeactivateObj(restartGroup);
+    //        pressed = true;
+    //    }
+    //    //deactivate restart menu
+    //    if (Input.GetKeyDown(KeyCode.Delete) && restartGroup.activeSelf == true && !pressed)
+    //    {
+    //        DeactivateObj(restartGroup);
 
-            pressed = true;
-        }
-    }
+    //        pressed = true;
+    //    }
+    //}
 
     public void ActivateQuitMenu()
     {
         quitGroup.SetActive(true);
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
 
         //turn off restart if open
         if (restartGroup.activeSelf)
@@ -73,8 +71,6 @@ public class QuitGame : MonoBehaviour {
     public void ActivateRestartMenu()
     {
         restartGroup.SetActive(true);
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
 
         //turn off quit if open
         if (quitGroup.activeSelf)
@@ -93,8 +89,10 @@ public class QuitGame : MonoBehaviour {
         Application.Quit();
     }
 
+    //restart & delete playerprefs
     public void RestartGame()
     {
+        PlayerPrefs.DeleteAll();
         SceneManager.LoadScene(0);
     }
 }

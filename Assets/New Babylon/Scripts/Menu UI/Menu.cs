@@ -141,7 +141,7 @@ public class Menu : MonoBehaviour {
     }
 
     //assigns Slider values to actual Mixer volumes 
-    void CheckVolumes()
+    public void CheckVolumes()
     {
         for (int i = 0; i < volGroupNames.Length;i++)
         {
