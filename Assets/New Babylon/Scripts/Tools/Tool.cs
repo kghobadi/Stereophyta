@@ -12,8 +12,6 @@ namespace Items
     public abstract class Tool : RhythmProducer
     {
         BookPage bookPage;
-        //audio source reference
-        protected AudioSource toolSource;
         [Header("Tool Vars")]
         public Animator toolAnimator;
 
@@ -43,7 +41,6 @@ namespace Items
         {
             base.Awake();
             //tool components
-            toolSource = GetComponent<AudioSource>();
             toolAnimator = GetComponent<Animator>();
             toolAnimator.enabled = false;
 
@@ -222,10 +219,11 @@ namespace Items
             }
         }
 
-        public virtual void PlaySound(AudioSource audSource, AudioClip[] sounds)
+        protected virtual void PlaySoundFromOther(AudioSource source, AudioClip[] sounds)
         {
             int randomSound = Random.Range(0, sounds.Length);
-            audSource.PlayOneShot(sounds[randomSound]);
-        }    }
+            source.PlayOneShot(sounds[randomSound]);
+        }
+    }
 
 }

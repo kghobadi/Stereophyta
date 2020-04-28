@@ -13,52 +13,7 @@ public class QuitGame : MonoBehaviour {
         quitGroup.SetActive(false);
         restartGroup.SetActive(false);
     }
-
-    //void Update ()
-    //{
-    //    bool pressed = false;
-
-    //    //get input device 
-    //    var inputDevice = InputManager.ActiveDevice;
-
-    //    //activate quit group   
-    //    if ((Input.GetKeyDown(KeyCode.Escape) ||  inputDevice.Command.WasPressed) && quitGroup.activeSelf == false && !pressed)
-    //    {
-    //        ActivateQuitMenu();
-
-    //        pressed = true;
-    //    }
-
-    //    //quit
-    //    if(inputDevice.Action1.WasPressed && quitGroup.activeSelf == true)
-    //    {
-    //        Quit();
-    //    }
-
-    //    //deactivate quit menu
-    //    if ((Input.GetKeyDown(KeyCode.Escape) || inputDevice.Command.WasPressed) && quitGroup.activeSelf == true && !pressed)
-    //    {
-    //        DeactivateObj(quitGroup);
-
-    //        pressed = true;
-    //    }
-
-    //    //activate restart group
-    //    if (Input.GetKeyDown(KeyCode.Delete) && restartGroup.activeSelf == false && !pressed)
-    //    {
-    //        ActivateRestartMenu();
-
-    //        pressed = true;
-    //    }
-    //    //deactivate restart menu
-    //    if (Input.GetKeyDown(KeyCode.Delete) && restartGroup.activeSelf == true && !pressed)
-    //    {
-    //        DeactivateObj(restartGroup);
-
-    //        pressed = true;
-    //    }
-    //}
-
+    
     public void ActivateQuitMenu()
     {
         quitGroup.SetActive(true);

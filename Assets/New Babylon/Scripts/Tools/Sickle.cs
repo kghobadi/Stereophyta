@@ -64,7 +64,7 @@ namespace Items
                     MainAction();
                     //tpc.transform.rotation = Camera.main.transform.rotation;
                     //virtual play sounds
-                    PlaySound(toolSource, sickleHits);
+                    PlayRandomSound(sickleHits, 1f);
                     SpawnSickleWind(transform.position + new Vector3(0, 0, 1));
                     showRhythm = false;
                 }
@@ -73,7 +73,7 @@ namespace Items
                 if (showRhythm && sickling)
                 {
                     //virtual play sounds
-                    PlaySound(toolSource, sickleHits);
+                    PlayRandomSound(sickleHits, 1f);
                     SpawnSickleWind(transform.position + new Vector3(0, 0, 1));
                     showRhythm = false;
                 }
@@ -111,7 +111,7 @@ namespace Items
                         if (!other.gameObject.GetComponent<Plont>().extraVoice.isPlaying)
                         {
                             other.GetComponent<Plont>().GrowPlant(false, true);
-                            PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, sickleHits);
+                            PlaySoundFromOther(other.gameObject.GetComponent<Plont>().extraVoice, sickleHits);
                         }
                     }
 

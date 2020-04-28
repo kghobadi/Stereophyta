@@ -87,7 +87,7 @@ namespace Items
             toolAnimator.SetTrigger("swing1");
 
             //virtual play sounds
-            PlaySound(toolSource, axHits);
+            PlayRandomSound(axHits, myAudioSource.volume);
             SpawnAxWinds(transform.position + new Vector3(0, 0, 1));
 
             axing = true;
@@ -106,7 +106,8 @@ namespace Items
                     {
                         //shrink plant and play guitar sound
                         other.GetComponent<Plont>().GrowPlant(false, true);
-                        PlaySound(other.gameObject.GetComponent<Plont>().extraVoice, axHits);
+                        //play sound from plant 
+                        PlaySoundFromOther(other.gameObject.GetComponent<Plont>().extraVoice, axHits);
                     }
                 }
                 //is it a shroom?
@@ -141,7 +142,6 @@ namespace Items
             yield return new WaitForSeconds(axtrail.time);
             axtrail.enabled = false;
         }
-        
     }
 
 }
