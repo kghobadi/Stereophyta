@@ -19,7 +19,7 @@ public class FootstepTrigger : MonoBehaviour
     //player enters trigger, switch to desiredFootsteps
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "Player" || other.gameObject.tag == "NPC")
+        if(other.gameObject.tag == "Player" /*|| other.gameObject.tag == "NPC"*/)
         {
             Footsteps footstepper = other.gameObject.GetComponent<Footsteps>();
 
@@ -39,7 +39,7 @@ public class FootstepTrigger : MonoBehaviour
     //player exits trigger, switch back
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "Player" || other.gameObject.tag == "NPC")
+        if (other.gameObject.tag == "Player" /*|| other.gameObject.tag == "NPC"*/)
         {
             Footsteps footstepper = other.gameObject.GetComponent<Footsteps>();
 

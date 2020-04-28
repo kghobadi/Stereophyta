@@ -97,6 +97,14 @@ namespace Items
             {
                 AddToolToInventory();
 
+                //check player pref for has seed
+                if (PlayerPrefs.GetString("hasUsedTool") != "yes")
+                {
+                    //show click prompt 
+                    interactPrompt.clickMessage = "Click to Use Tools";
+                    interactPrompt.ShowClickPrompt();
+                }
+
                 //has a book page to add 
                 if (bookPage)
                 {
@@ -173,6 +181,7 @@ namespace Items
                     {
                         interactPrompt.pickUpMessage = pickUpMessage;
                         interactPrompt.ShowPickupPrompt();
+                        interactPrompt.DeactivateClickPrompt();
                     }
 
                     //pick up when player presses E
@@ -204,7 +213,13 @@ namespace Items
         //this will be filled in by each tool individually
         public virtual void MainAction()
         {
-
+            //check player pref for has seed
+            if (PlayerPrefs.GetString("hasUsedTool") != "yes")
+            {
+                //fade out click message!
+                interactPrompt.DeactivateClickPrompt();
+                PlayerPrefs.SetString("hasUsedTool", "yes");
+            }
         }
 
         public virtual void PlaySound(AudioSource audSource, AudioClip[] sounds)

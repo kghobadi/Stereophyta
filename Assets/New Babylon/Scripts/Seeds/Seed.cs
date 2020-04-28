@@ -23,6 +23,7 @@ public class Seed : MonoBehaviour {
     GameObject player;
     ThirdPersonController tpc;
     Inventory inventoryScript;
+    InteractPrompt clickPrompt;
     Transform inventoryParent;
     Item itemScript;
     GameObject sun;
@@ -78,6 +79,7 @@ public class Seed : MonoBehaviour {
         tpc = player.GetComponent<ThirdPersonController>();
         inventoryScript = tpc.myInventory;
         inventoryParent = inventoryScript.transform;
+        clickPrompt = inventoryScript.GetComponent<InteractPrompt>();
         itemScript = GetComponent<Item>();
 
         //set tgs stuff
@@ -174,7 +176,7 @@ public class Seed : MonoBehaviour {
         }
 
         //plant seed
-        if (seedState == SeedStates.SEEDSELECTED && !tpc.menuOpen)
+        if (seedState == SeedStates.SEEDSELECTED && !tpc.menuOpen && inventoryScript.canSwitchItems)
         {
             //this is the seed the player is holding 
             RaycastToGround();
@@ -398,9 +400,17 @@ public class Seed : MonoBehaviour {
         seedBody.useGravity = true;
         seedCollider.isTrigger = false;
         seedAnimator.enabled = false;
-        if (!plantOnStart)
+        if (!plantOnStart && UIseed)
         {
             seedSource.PlayOneShot(dropSeed);
+        }
+
+        //check player pref for has seed
+        if (PlayerPrefs.GetString("hasUsedSeed") != "yes")
+        {
+            //show click prompt 
+            clickPrompt.DeactivateClickPrompt();
+            PlayerPrefs.SetString("hasUsedSeed", "yes");
         }
     }
 
@@ -442,7 +452,7 @@ public class Seed : MonoBehaviour {
         }
 
         //play spawn plant sound
-        if (!plantOnStart)
+        if (!plantOnStart && UIseed)
         {
             tpc.seedAudio.PlayOneShot(spawnPlant);
             tpc.PlayPlantingEffect(plantSpawnPos);
@@ -560,6 +570,14 @@ public class Seed : MonoBehaviour {
             seedBody.isKinematic = true;
             seedCollider.isTrigger = true;
             gameObject.SetActive(false);
+
+            //check player pref for has seed
+            if(PlayerPrefs.GetString("hasUsedSeed") != "yes")
+            {
+                //show click prompt 
+                clickPrompt.clickMessage = "Click to Plant Seeds";
+                clickPrompt.ShowClickPrompt();
+            }
         }
 
         tpc.SeedCollect();

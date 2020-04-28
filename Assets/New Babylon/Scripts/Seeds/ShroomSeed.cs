@@ -22,10 +22,6 @@ public class ShroomSeed : MonoBehaviour {
     GridManager gridMan;
     Cell currentCell;
     int currentCellIndex, previousCellIndex;
-    //All possible texture references. 
-    Texture2D groundTexture;
-    Texture2D canClickTexture;
-    public Texture2D plantedTexture;
    
     //physics
     Rigidbody shroomBody;
@@ -78,16 +74,11 @@ public class ShroomSeed : MonoBehaviour {
     void Start ()
     {
         originalPos = transform.localPosition;
-        if (gridMan)
-        {
-            groundTexture = gridMan.groundTexture;
-            canClickTexture = gridMan.canPlantTexture;
-        }
     }
 	
 	void Update () {
         //plant seed
-        if (shroomSelected && !planting && !tpc.menuOpen)
+        if (shroomSelected && !planting && !tpc.menuOpen && inventoryScript.canSwitchItems)
         {
             RaycastHit hit;
             // Does the ray intersect any objects excluding the player layer
@@ -95,13 +86,16 @@ public class ShroomSeed : MonoBehaviour {
             {
                 if (hit.transform.gameObject.tag == "Ground")
                 {
-                    //check if this spot is on the TGS
                     //grabs Cell tile and index
                     tgs = tpc.currentTGS;
+                    gridMan = tpc.currentGridMan;
+
+                    //check if this spot is on the TGS
                     if (tgs)
                         currentCell = tgs.CellGetAtPosition(hit.point, true);
                     else
                         currentCell = null;
+                    
 
                     //we have a grid cell
                     if (currentCell != null)
@@ -140,7 +134,7 @@ public class ShroomSeed : MonoBehaviour {
         if (tgs.CellGetTag(cellIndex) == 0)
         {
             //Sets texture to clickable
-            tgs.CellToggleRegionSurface(cellIndex, true, canClickTexture);
+            tgs.CellToggleRegionSurface(cellIndex, true, gridMan.canPlantTexture);
 
             //If player clicks, we plant seed and clear up Equip slot
             if (Input.GetButton("Plant") || inputDevice.Action3)
@@ -213,7 +207,7 @@ public class ShroomSeed : MonoBehaviour {
 
         //If it's a new cell, set last cell back to fertileTexture
         if (tgs.CellGetTag(previousCellIndex) == 0)
-            StartCoroutine(ChangeTexture(currentCellIndex, groundTexture));
+            StartCoroutine(ChangeTexture(currentCellIndex, gridMan.groundTexture));
     }
 
     //planting on terrain without grid
@@ -298,7 +292,7 @@ public class ShroomSeed : MonoBehaviour {
             //planted tag
             tgs.CellSetTag(currentCell, 1);
             //planted texture
-            tgs.CellToggleRegionSurface(currentCellIndex, true, plantedTexture);
+            tgs.CellToggleRegionSurface(currentCellIndex, true, gridMan.plantedTexture);
         }
 
         //generate clone and set Plont script values
