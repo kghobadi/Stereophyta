@@ -149,6 +149,9 @@ namespace NPC
             {
                 stateTimer -= Time.deltaTime;
 
+                //NPC will perform its action 
+                ActionCountdown();
+                
                 //set footstep timer to 0 since we arent moving 
                 if (footsteps)
                     footsteps.footstepTimer = 0;
@@ -159,10 +162,7 @@ namespace NPC
                     //play a sound
                     if (stateTimer < 0 && !waving && !controller.Monologues.inMonologue)
                     {
-                        if(npcSounds.idleSounds.Length > 0)
-                            npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
-
-                        npcAnimations.Animator.SetTrigger("action1");
+                        //idle action?
 
                         stateTimer = idleTime;
                     }
@@ -189,22 +189,7 @@ namespace NPC
                 //waits until player is near then walks to next point 
                 else if (npcType == NPCMovementTypes.PATHFINDER)
                 {
-                    actionTimer -= Time.deltaTime;
-
-                    //play a sound (cough)
-                    if (actionTimer < 0 && !waving && !controller.Monologues.inMonologue)
-                    {
-                        if(npcSounds.myAudioSource.isPlaying == false)
-                        {
-                            if (npcSounds.idleSounds.Length > 0)
-                                npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
-
-                            npcAnimations.Animator.SetTrigger("action1");
-                            
-                            actionTimer = actionTime;
-                        }
-                    }
-
+                
                     //goes to next point if timer reaches 0 or player is near 
                     //Only does this if there are currenltly points in my list 
                     if (!waitingToGiveMonologue)
@@ -243,6 +228,26 @@ namespace NPC
                             }
                         }
                     }
+                }
+            }
+        }
+
+        //can be called during IDLE state 
+        void ActionCountdown()
+        {
+            actionTimer -= Time.deltaTime;
+
+            //play a sound (cough)
+            if (actionTimer < 0 && !waving && !controller.Monologues.inMonologue)
+            {
+                if (npcSounds.myAudioSource.isPlaying == false)
+                {
+                    if (npcSounds.idleSounds.Length > 0)
+                        npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
+
+                    npcAnimations.Animator.SetTrigger("action1");
+
+                    actionTimer = actionTime;
                 }
             }
         }

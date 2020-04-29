@@ -23,6 +23,8 @@ public class Monologue : ScriptableObject
     public Task[] tasksToFulfill; 
     [Tooltip("The Monologue Manager will repeat this monologue until further notice")]
     public bool repeatsAtFinish;
+    [Tooltip("A condensed version of the Task assignment for repeating")]
+    public TextAsset condensedMonologue;
     [Tooltip("After this Monologue finishes, the manager will play a cinematic")]
     public bool playsCinematic;
     public Cinematic cinematic;

@@ -12,8 +12,6 @@ namespace Items
     public abstract class Tool : RhythmProducer
     {
         BookPage bookPage;
-        //audio source reference
-        protected AudioSource toolSource;
         [Header("Tool Vars")]
         public Animator toolAnimator;
 
@@ -43,7 +41,6 @@ namespace Items
         {
             base.Awake();
             //tool components
-            toolSource = GetComponent<AudioSource>();
             toolAnimator = GetComponent<Animator>();
             toolAnimator.enabled = false;
 
@@ -96,6 +93,14 @@ namespace Items
             else
             {
                 AddToolToInventory();
+
+                //check player pref for has seed
+                if (PlayerPrefs.GetString("hasUsedTool") != "yes")
+                {
+                    //show click prompt 
+                    interactPrompt.clickMessage = "Click to Use Tools";
+                    interactPrompt.ShowClickPrompt();
+                }
 
                 //has a book page to add 
                 if (bookPage)
@@ -173,6 +178,7 @@ namespace Items
                     {
                         interactPrompt.pickUpMessage = pickUpMessage;
                         interactPrompt.ShowPickupPrompt();
+                        interactPrompt.DeactivateClickPrompt();
                     }
 
                     //pick up when player presses E
@@ -204,13 +210,20 @@ namespace Items
         //this will be filled in by each tool individually
         public virtual void MainAction()
         {
-
+            //check player pref for has seed
+            if (PlayerPrefs.GetString("hasUsedTool") != "yes")
+            {
+                //fade out click message!
+                interactPrompt.DeactivateClickPrompt();
+                PlayerPrefs.SetString("hasUsedTool", "yes");
+            }
         }
 
-        public virtual void PlaySound(AudioSource audSource, AudioClip[] sounds)
+        protected virtual void PlaySoundFromOther(AudioSource source, AudioClip[] sounds)
         {
             int randomSound = Random.Range(0, sounds.Length);
-            audSource.PlayOneShot(sounds[randomSound]);
-        }    }
+            source.PlayOneShot(sounds[randomSound]);
+        }
+    }
 
 }

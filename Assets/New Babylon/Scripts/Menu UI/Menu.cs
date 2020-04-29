@@ -46,6 +46,7 @@ public class Menu : MonoBehaviour {
     //for first time opening Book
     public FadeUI[] escNotices;
     public GameObject cursor;
+    public QuitGame quitSettings;
 
     void Awake()
     {
@@ -57,6 +58,10 @@ public class Menu : MonoBehaviour {
         //player
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+
+        //quit settings 
+        if (quitSettings == null)
+            quitSettings = FindObjectOfType<QuitGame>();
     }
 
     void Start()
@@ -138,10 +143,14 @@ public class Menu : MonoBehaviour {
                 escNotices[i].FadeOut();
             }
         }
+
+        //deactivate quit submenus 
+        quitSettings.DeactivateObj(quitSettings.quitGroup);
+        quitSettings.DeactivateObj(quitSettings.restartGroup);
     }
 
     //assigns Slider values to actual Mixer volumes 
-    void CheckVolumes()
+    public void CheckVolumes()
     {
         for (int i = 0; i < volGroupNames.Length;i++)
         {

@@ -12,11 +12,19 @@ public class MonologueTrigger : MonoBehaviour
     //general
     [Tooltip("Only need this if the Trigger first becomes active when an NPC moves into it")]
     public GameObject speakerHost;
+    [Tooltip("Defaults to true, uncheck if player can only activate once an NPC enters it")]
     public bool canActivate = true;
+    [Tooltip("Check to auto activate when player enters trigger")]
     public bool autoActivate;
+    [Tooltip("True when monologue has been activated")]
     public bool hasActivated;
+    [Tooltip("True when player is within trigger")]
     public bool playerInZone;
+    [Tooltip("Check to display talking head UI")]
     public bool displayUI;
+    [Tooltip("Will attach to NPC upon activation")]
+    public bool parentToNPC;
+    int activationCount = 0;
 
     public GameObject interactDisplay;
     public FadeUItmp spaceToTalk;
@@ -118,7 +126,7 @@ public class MonologueTrigger : MonoBehaviour
             for (int i = 0; i < myMonologues.Length; i++)
             {
                 myMonologues[i].mTrigger = this;
-                myMonologues[i].SetMonologueSystem(monoNumbers[i]);
+                myMonologues[i].SetMonologueSystem(monoNumbers[i], activationCount);
                 myMonologues[i].EnableMonologue();
             }
 
@@ -128,6 +136,12 @@ public class MonologueTrigger : MonoBehaviour
 
             hasActivated = true;
             ToggleInteractUI(false);
+            activationCount++;
+            autoActivate = false;
+
+            //follow NPC 
+            if (parentToNPC)
+                transform.SetParent(myMonologues[0].transform);
         }
     }
     

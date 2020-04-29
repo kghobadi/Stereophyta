@@ -47,7 +47,8 @@ namespace Cameras
                 lastCam = camManager.currentCamera;
                 camManager.Set(desiredCam);
                 pcc.canSwitchCams = false;
-
+                if (limitPlayerMovement)
+                    tpc.canSprint = false;
                 active = true;
             }
         }
@@ -64,6 +65,8 @@ namespace Cameras
         {
             camManager.Set(lastCam);
             pcc.canSwitchCams = true;
+            if(limitPlayerMovement)
+                tpc.canSprint = true;
             active = false;
         }
     }

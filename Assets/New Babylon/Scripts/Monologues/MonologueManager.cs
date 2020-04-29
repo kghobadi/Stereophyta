@@ -88,17 +88,23 @@ public class MonologueManager : MonoBehaviour
     void Start()
     {
         //set text to first string in my list of monologues 
-        SetMonologueSystem(0);
+        SetMonologueSystem(0, 0);
     }
 
     //sets monologue system to values contained in Monologue[index]
-    public void SetMonologueSystem(int index)
+    public void SetMonologueSystem(int index, int activationCount)
     {
         //set current monologue
         currentMonologue = index;
 
         //set mono reader text lines 
-        monoReader.textLines = (allMyMonologues[currentMonologue].monologue.text.Split('\n'));
+        //reactivating, use condensed if there is one
+        if(activationCount > 0 && allMyMonologues[currentMonologue].condensedMonologue != null)
+            monoReader.textLines = (allMyMonologues[currentMonologue].condensedMonologue.text.Split('\n'));
+        //first activation, or no condensed available 
+        else
+            monoReader.textLines = (allMyMonologues[currentMonologue].monologue.text.Split('\n'));
+        //set current to 0 and end to length 
         monoReader.currentLine = 0;
         monoReader.endAtLine = monoReader.textLines.Length;
 
@@ -157,6 +163,7 @@ public class MonologueManager : MonoBehaviour
         camManager.Set(speakerCam);
         if (playerCam)
             playerCam.enabled = false;
+
         //lock player movement
         if (allMyMonologues[currentMonologue].lockPlayer)
         {
@@ -200,19 +207,7 @@ public class MonologueManager : MonoBehaviour
         //start the typing!
         monoReader.SetTypingLine();
     }
-
-    public void ResetMonologue()
-    {
-        DisableMonologue();
-
-        //if this monologue repeats at finish
-        if (allMyMonologues[currentMonologue].repeatsAtFinish)
-        {
-            //reset the monologue trigger after 3 sec 
-            mTrigger.WaitToReset(3f);
-        }
-    }
-
+    
     public void DisableMonologue()
     {
         StopAllCoroutines();
@@ -280,12 +275,28 @@ public class MonologueManager : MonoBehaviour
         }
 
         //npc assigns player task(s)
-        if (allMyMonologues[currentMonologue].tasksToAssign.Length > 0)
+        int tasksToAssign = allMyMonologues[currentMonologue].tasksToAssign.Length;
+        int tasksComplete = 0;
+        if (tasksToAssign > 0)
         {
             //loop through all tasks to assign 
-            for (int i = 0; i < allMyMonologues[currentMonologue].tasksToAssign.Length; i++)
+            for (int i = 0; i < tasksToAssign; i++)
             {
-                npcController.Tasks.AssignTask(allMyMonologues[currentMonologue].tasksToAssign[i]);
+                //task ref
+                Task task = allMyMonologues[currentMonologue].tasksToAssign[i];
+
+                //check that the TaskManager has not already Assigned / completed / fulfilled this task 
+                if (!npcController.Tasks.activeTasks.Contains(task)
+                    && !npcController.Tasks.completedTasks.Contains(task)
+                    && !npcController.Tasks.fulfilledTasks.Contains(task))
+                {
+                    npcController.Tasks.AssignTask(task);
+                }
+                //Task is complete
+                else if (npcController.Tasks.completedTasks.Contains(task))
+                {
+                    tasksComplete++;
+                }
             }
         }
 
@@ -297,10 +308,23 @@ public class MonologueManager : MonoBehaviour
             {
                 Task task = allMyMonologues[currentMonologue].tasksToFulfill[i];
 
-                npcController.Tasks.FulfillTask(task);
+                //fulfill only if its in completed 
+                if(npcController.Tasks.completedTasks.Contains(task))
+                     npcController.Tasks.FulfillTask(task);
             }
         }
-        
+
+        //if this monologue repeats at finish
+        if (allMyMonologues[currentMonologue].repeatsAtFinish)
+        {
+            //only repeat if tasks to assign is not equal to tasks complete 
+            if(tasksToAssign != tasksComplete)
+            {
+                //reset the monologue trigger after 3 sec 
+                mTrigger.WaitToReset(3f);
+            }
+        }
+
         //new npc movement?
         if (allMyMonologues[currentMonologue].newMovement)
         {

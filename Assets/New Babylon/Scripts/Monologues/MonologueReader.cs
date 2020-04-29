@@ -103,7 +103,7 @@ public class MonologueReader : MonoBehaviour {
         if (currentLine >= endAtLine)
         {
             hasFinished = true;
-            monoManager.ResetMonologue();
+            monoManager.DisableMonologue();
         }
         //set next typing line 
         else

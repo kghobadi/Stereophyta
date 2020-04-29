@@ -10,6 +10,7 @@ public class Zone : MonoBehaviour {
     Sun sun;
     GameObject player;
     ThirdPersonController tpc;
+    Menu gameMenu;
 
     [Header("Zone info")]
     public string zoneName;
@@ -46,6 +47,7 @@ public class Zone : MonoBehaviour {
         sun = GameObject.FindGameObjectWithTag("Sun").GetComponent<Sun>();
         player = GameObject.FindGameObjectWithTag("Player");
         tpc = player.GetComponent<ThirdPersonController>();
+        gameMenu = FindObjectOfType<Menu>();
 
         if(terrainType == TerrainType.TERRAIN)
             zoneGridMan = transform.parent.GetComponent<GridManager>();
@@ -137,6 +139,7 @@ public class Zone : MonoBehaviour {
         }
 
         zoneSnapshot.TransitionTo(3f);
+        gameMenu.CheckVolumes();
         //Debug.Log("Player entered zone: " + zoneName);
         //set last zone 
         PlayerPrefs.SetString("lastZone", zoneName);
