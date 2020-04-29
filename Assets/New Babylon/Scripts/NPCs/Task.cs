@@ -41,6 +41,8 @@ namespace NPC
         [Header("Outcomes")] // what happens when this task is complete?
         public bool triggersMonologues;
         public int [] monologueIndeces;
+        public bool disablesMonologues;
+        public int[] monoDisables;
         //rewards?
     }
 }
