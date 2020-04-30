@@ -103,7 +103,7 @@ public class Sun : MonoBehaviour
         }
 
         //if we are in start view, set to quicker rotation
-        if (startViewer.startView)
+        if (startViewer.startView && startViewer.active)
         {
             rotationSpeed = normalRotation * 2;
         }

@@ -60,31 +60,31 @@ public class ZoneSaver : MonoBehaviour
     public void SaveGameData()
     {
         //clear plants lists besides the initial game obj/script storage (these ones change)
-        mySaveStorage.plantPositions.Clear();
-        mySaveStorage.plantAges.Clear();
-        //grid clear
-        mySaveStorage.plantedOnGrid.Clear();
-        mySaveStorage.cellIndeces.Clear();
-        //clear shroom lists 
-        mySaveStorage.shroomPositions.Clear();
-        mySaveStorage.shroomsOnGrid.Clear();
-        mySaveStorage.shroomCellIndeces.Clear();
+        //mySaveStorage.plantPositions.Clear();
+        //mySaveStorage.plantAges.Clear();
+        ////grid clear
+        //mySaveStorage.plantedOnGrid.Clear();
+        //mySaveStorage.cellIndeces.Clear();
+        ////clear shroom lists 
+        //mySaveStorage.shroomPositions.Clear();
+        //mySaveStorage.shroomsOnGrid.Clear();
+        //mySaveStorage.shroomCellIndeces.Clear();
 
-        SavePlants();
-        SaveShrooms();
+        //SavePlants();
+        //SaveShrooms();
 
-        //actual save to json functionality
-        //set filepath
-        string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFileName);
-        //save the save storage class into the file 
-        string dataAsJson = JsonUtility.ToJson(mySaveStorage);
-        //write the file
-        File.WriteAllText(filePath, dataAsJson);
-        //adjust playerprefs so we know we save
-        int currentVisits = PlayerPrefs.GetInt(myZone.zoneName + "Visits");
-        PlayerPrefs.SetInt(myZone.zoneName + "Visits", currentVisits + 1);
+        ////actual save to json functionality
+        ////set filepath
+        //string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFileName);
+        ////save the save storage class into the file 
+        //string dataAsJson = JsonUtility.ToJson(mySaveStorage);
+        ////write the file
+        //File.WriteAllText(filePath, dataAsJson);
+        ////adjust playerprefs so we know we save
+        //int currentVisits = PlayerPrefs.GetInt(myZone.zoneName + "Visits");
+        //PlayerPrefs.SetInt(myZone.zoneName + "Visits", currentVisits + 1);
 
-        Debug.Log(myZone.zoneName + " saved");
+        //Debug.Log(myZone.zoneName + " saved");
     }
 
     void SavePlants()
@@ -166,34 +166,34 @@ public class ZoneSaver : MonoBehaviour
     public void LoadGameData()
     {
         //file to load
-        string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFileName);
+        //string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFileName);
 
-        //check if it exists
-        if (File.Exists(filePath))
-        {
-            //read it
-            string dataAsJson = File.ReadAllText(filePath);
+        ////check if it exists
+        //if (File.Exists(filePath))
+        //{
+        //    //read it
+        //    string dataAsJson = File.ReadAllText(filePath);
 
-            //set save storage
-            mySaveStorage = JsonUtility.FromJson<SaveStorage>(dataAsJson);
+        //    //set save storage
+        //    mySaveStorage = JsonUtility.FromJson<SaveStorage>(dataAsJson);
 
-            //set bool
-            canLoad = true;
-        }
-        else
-        {
-            Debug.Log("Cannot load save game data!");
-            canLoad = false;
-        }
+        //    //set bool
+        //    canLoad = true;
+        //}
+        //else
+        //{
+        //    Debug.Log("Cannot load save game data!");
+        //    canLoad = false;
+        //}
 
-        //we can load
-        if (canLoad)
-        {
-            LoadPlants();
-            LoadShrooms();
+        ////we can load
+        //if (canLoad)
+        //{
+        //    LoadPlants();
+        //    LoadShrooms();
 
-            Debug.Log("loaded " + myZone.zoneName);
-        }
+        //    Debug.Log("loaded " + myZone.zoneName);
+        //}
     }
 
     void LoadPlants()

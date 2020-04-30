@@ -244,6 +244,8 @@ public class MonologueManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
 
+        Monologue mono = allMyMonologues[currentMonologue];
+
         //stop that waiting!
         if (npcController.Movement)
         {
@@ -251,7 +253,7 @@ public class MonologueManager : MonoBehaviour
         }
 
         //unlock player
-        if (allMyMonologues[currentMonologue].lockPlayer)
+        if (mono.lockPlayer)
         {
             tpc.playerCanMove = true;
         }
@@ -261,21 +263,21 @@ public class MonologueManager : MonoBehaviour
 
 
         //check for cinematic to enable 
-        if (allMyMonologues[currentMonologue].playsCinematic)
+        if (mono.playsCinematic)
         {
-            npcController.cineManager.allCinematics[allMyMonologues[currentMonologue].cinematic.cIndex].cPlaybackManager.StartTimeline();
+            npcController.cineManager.allCinematics[mono.cinematic.cIndex].cPlaybackManager.StartTimeline();
         }
         //cinematic triggers to enable
-        if (allMyMonologues[currentMonologue].enablesCinematicTriggers)
+        if (mono.enablesCinematicTriggers)
         {
-            for (int i = 0; i < allMyMonologues[currentMonologue].cTriggers.Length; i++)
+            for (int i = 0; i < mono.cTriggers.Length; i++)
             {
-                npcController.cineManager.allCinematics[allMyMonologues[currentMonologue].cTriggers[i].cIndex].cTrigger.gameObject.SetActive(true);
+                npcController.cineManager.allCinematics[mono.cTriggers[i].cIndex].cTrigger.gameObject.SetActive(true);
             }
         }
 
         //npc assigns player task(s)
-        int tasksToAssign = allMyMonologues[currentMonologue].tasksToAssign.Length;
+        int tasksToAssign = mono.tasksToAssign.Length;
         int tasksComplete = 0;
         if (tasksToAssign > 0)
         {
@@ -283,7 +285,7 @@ public class MonologueManager : MonoBehaviour
             for (int i = 0; i < tasksToAssign; i++)
             {
                 //task ref
-                Task task = allMyMonologues[currentMonologue].tasksToAssign[i];
+                Task task = mono.tasksToAssign[i];
 
                 //check that the TaskManager has not already Assigned / completed / fulfilled this task 
                 if (!npcController.Tasks.activeTasks.Contains(task)
@@ -301,12 +303,12 @@ public class MonologueManager : MonoBehaviour
         }
 
         //tasks to complete ?
-        if (allMyMonologues[currentMonologue].tasksToFulfill.Length > 0)
+        if (mono.tasksToFulfill.Length > 0)
         {
             //loop thru all tasks to complete 
-            for (int i = 0; i < allMyMonologues[currentMonologue].tasksToFulfill.Length; i++)
+            for (int i = 0; i < mono.tasksToFulfill.Length; i++)
             {
-                Task task = allMyMonologues[currentMonologue].tasksToFulfill[i];
+                Task task = mono.tasksToFulfill[i];
 
                 //fulfill only if its in completed 
                 if(npcController.Tasks.completedTasks.Contains(task))
@@ -315,7 +317,7 @@ public class MonologueManager : MonoBehaviour
         }
 
         //if this monologue repeats at finish
-        if (allMyMonologues[currentMonologue].repeatsAtFinish)
+        if (mono.repeatsAtFinish)
         {
             //only repeat if tasks to assign is not equal to tasks complete 
             if(tasksToAssign != tasksComplete)
@@ -325,14 +327,27 @@ public class MonologueManager : MonoBehaviour
             }
         }
 
-        //new npc movement?
-        if (allMyMonologues[currentMonologue].newMovement)
+        //if this monologue has a new monologue to activate
+        if (mono.triggersMonologues)
         {
-            npcController.Movement.ResetMovement(allMyMonologues[currentMonologue].newMovement);
+            //enable the monologues but wait to make them usable to player 
+            for(int i = 0; i< mono.monologueIndeces.Length; i++)
+            {
+                MonologueTrigger mTrigger = wmManager.allMonologues[mono.monologueIndeces[i]].mTrigger;
+                mTrigger.gameObject.SetActive(true);
+                mTrigger.hasActivated = true;
+                mTrigger.WaitToReset(mono.monologueWaits[i]);
+            }
+        }
+
+        //new npc movement?
+        if (mono.newMovement)
+        {
+            npcController.Movement.ResetMovement(mono.newMovement);
         }
 
         //turn on the boat for player use
-        if (allMyMonologues[currentMonologue].enablesBoat)
+        if (mono.enablesBoat)
         {
             useBoat.enabled = true;
             useBoat.boatAnimator.enabled = false;

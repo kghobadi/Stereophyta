@@ -175,8 +175,14 @@ public class Plont : MonoBehaviour {
         //add to zone list 
         if(myZone == null)
             myZone = tpc.currentZone;
-        if (!myZone.plants.Contains(gameObject))
-            myZone.plants.Add(gameObject);
+        if (myZone)
+        {
+            if (!myZone.plants.Contains(gameObject))
+                myZone.plants.Add(gameObject);
+            //add data to save script
+            myZone.zoneSaver.AddPlant(this);
+        }
+        
         transform.SetParent(myZone.plantParent);
 
         //set tgs textures 
@@ -186,9 +192,6 @@ public class Plont : MonoBehaviour {
             wateredTexture = gridMan.wateredTexture;
             plantedTexture = gridMan.plantedTexture;
         }
-
-        //add data to save script
-        myZone.zoneSaver.AddPlant(this);
         
         //scale and set stages
         originalScale = transform.localScale;

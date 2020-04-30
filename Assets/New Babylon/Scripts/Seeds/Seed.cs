@@ -85,10 +85,13 @@ public class Seed : MonoBehaviour {
         //set tgs stuff
         if (!plantOnStart)
         {
-            if (tgs)
+            if(tgs == null)
             {
-                tgs = tpc.currentTGS;
-                gridMan = tgs.transform.parent.GetComponent<GridManager>();
+                if (tpc.currentZone.zoneTGS != null)
+                {
+                    tgs = tpc.currentTGS;
+                    gridMan = tgs.transform.parent.GetComponent<GridManager>();
+                }
             }
         }
 

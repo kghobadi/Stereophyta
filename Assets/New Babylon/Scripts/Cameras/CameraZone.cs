@@ -31,15 +31,7 @@ namespace Cameras
                 Activate();
             }
         }
-
-        void OnTriggerStay(Collider other)
-        {
-            if (other.gameObject.tag == "Player" && !active)
-            {
-                Activate();
-            }
-        }
-
+        
         void Activate()
         {
             if (desiredCam)
@@ -55,7 +47,7 @@ namespace Cameras
 
         void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.tag == "Player" && active)
+            if (other.gameObject.tag == "Player" )
             {
                 Deactivate();
             }
@@ -65,8 +57,11 @@ namespace Cameras
         {
             camManager.Set(lastCam);
             pcc.canSwitchCams = true;
-            if(limitPlayerMovement)
+            if (limitPlayerMovement)
+            {
                 tpc.canSprint = true;
+            }
+               
             active = false;
         }
     }
