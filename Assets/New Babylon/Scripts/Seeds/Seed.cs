@@ -135,7 +135,6 @@ public class Seed : MonoBehaviour {
         //fall to ground --> IDLE state
         else
         {
-            daysBeforePlanting = Random.Range(1, 3);
             SeedFall();
         }
     }

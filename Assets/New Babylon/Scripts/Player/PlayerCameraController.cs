@@ -22,7 +22,6 @@ public class PlayerCameraController : MonoBehaviour
     CinemachineFreeLook zInfreeLookCam;
     public GameCamera zOutCam;
     CinemachineFreeLook zOutfreeLookCam;
-    float zoomInput;
     
     // for boat stuff
     [Header("Camera Limits")]
@@ -71,8 +70,6 @@ public class PlayerCameraController : MonoBehaviour
             }
         }
 
-        CastToPlayer();
-
         //for lerping cam FOV 
         if (lerpingFOV)
         {
@@ -100,61 +97,69 @@ public class PlayerCameraController : MonoBehaviour
             if (inputDevice.DeviceClass == InputDeviceClass.Controller)
             {
                 //zoom with left and right triggers 
-                if (inputDevice.LeftTrigger.IsPressed)
+                if (inputDevice.LeftTrigger.WasPressed)
                 {
-                    zoomInput = Mathf.Clamp(-inputDevice.LeftTrigger.Value, -1f, 0f);
+                    ZoomIn();
                 }
-                if (inputDevice.RightTrigger.IsPressed)
+                if (inputDevice.RightTrigger.WasPressed)
                 {
-                    zoomInput = Mathf.Clamp(inputDevice.RightTrigger.Value, 0f, 1f);
+                    ZoomOut();
                 }
-
             }
+
             //keyboard + mouse 
-            //grab input from scroll wheel axis
-            zoomInput = Input.GetAxis("Mouse ScrollWheel");
-            if (inputDevice.DeviceClass == InputDeviceClass.Keyboard || inputDevice.DeviceClass == InputDeviceClass.Mouse)
+            //zoom with plus and minus 
+            if (Input.GetKeyDown(KeyCode.Minus))
             {
-                
+                //Debug.Log("zoom out!");
+                ZoomOut();
+            }
+            if (Input.GetKeyDown(KeyCode.Equals))
+            {
+                //Debug.Log("zoom in!");
+                ZoomIn();
             }
         }
-        
+    }
+
+    void ZoomIn()
+    {
         //can switch 
         if (canSwitchCams)
         {
-            //zoom in
-            if (zoomInput < 0)
+            //Debug.Log("zoom in!");
+            //zoom in from furthest to default
+            if (camManager.currentCamera == zOutCam)
             {
-                //zoom in from furthest to default
-                if (camManager.currentCamera == zOutCam)
-                {
-                    SwitchCamera(zInCam);
-                }
-
-                //zoom in for close up
-                else if (camManager.currentCamera == zInCam)
-                {
-                    SwitchCamera(closeUpCam);
-                }
-
+                SwitchCamera(zInCam);
             }
-            //zoom out
-            if (zoomInput > 0)
-            {
-                //zoom out to furthest from default
-                if (camManager.currentCamera == zInCam)
-                {
-                    SwitchCamera(zOutCam);
-                }
 
-                //zoom out from close up
-                else if (camManager.currentCamera == closeUpCam)
-                {
-                    SwitchCamera(zInCam);
-                }
+            //zoom in for close up
+            else if (camManager.currentCamera == zInCam)
+            {
+                SwitchCamera(closeUpCam);
             }
         }
-     
+    }
+
+    void ZoomOut()
+    {  
+        //can switch 
+        if (canSwitchCams)
+        {
+            //Debug.Log("zoom out!");
+            //zoom out to furthest from default
+            if (camManager.currentCamera == zInCam)
+            {
+                SwitchCamera(zOutCam);
+            }
+
+            //zoom out from close up
+            else if (camManager.currentCamera == closeUpCam)
+            {
+                SwitchCamera(zInCam);
+            }
+        }
     }
 
     void SwitchCamera(GameCamera cam)
