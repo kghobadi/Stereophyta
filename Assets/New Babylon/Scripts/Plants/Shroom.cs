@@ -14,7 +14,7 @@ public class Shroom : RhythmProducer
     //for obj pooling 
     public ObjectPooler shroomPooler;
     PooledObject _pooledObj;
-    public float heightAdjust = 0;
+    public float heightAdjust = 1f;
     //player and sun ref
     public bool hasReleasedSpores;
 
@@ -122,20 +122,30 @@ public class Shroom : RhythmProducer
 
     void Start()
     {
-        //add to save list if its not already
-        myZone.zoneSaver.AddShroom(this);
-
         //day passed listener
         sunScript.newDay.AddListener(DayPassed);
         inherentScale = transform.localScale;
 
         //add to zone list 
-        if (!myZone.shrooms.Contains(gameObject))
-            myZone.shrooms.Add(gameObject);
+        if (myZone == null)
+            myZone = tpc.currentZone;
+        if (myZone)
+        {
+            //add to zone list 
+            if (!myZone.shrooms.Contains(gameObject))
+                myZone.shrooms.Add(gameObject);
+            //add data to save script
+            myZone.zoneSaver.AddShroom(this);
+        }
+        //parent to myZone shroom parent 
         transform.SetParent(myZone.shroomParent);
-        if(gridMan)
+        //gridman check
+        if (gridMan)
+        {
             groundTexture = gridMan.groundTexture;
-
+            plantedTexture = gridMan.plantedTexture;
+        }
+           
         //player and environment 
         inventoryScript = tpc.myInventory;
         myShroomShader = shroomMR.material;
@@ -149,7 +159,8 @@ public class Shroom : RhythmProducer
             sporeScript.shroomPool = shroomPooler;
         }
         
-        AdjustHeight();
+        //set shroom y pos and object overall
+        AdjustHeight(0);
         SetShroom();
     }
 
@@ -227,7 +238,7 @@ public class Shroom : RhythmProducer
             //when wind is blowing, adjust my height to the ground
             if (blowing)
             {
-                AdjustHeight();
+                AdjustHeight(heightAdjust);
             }
         }
 
@@ -347,6 +358,7 @@ public class Shroom : RhythmProducer
         //end
         shroomMR.material = myShroomShader;
         plantingState = PlantingState.PLANTED;
+        shroomAnimator.enabled = true;
         shroomAnimator.SetBool("planted", true);
         blowing = false;
         BreatheIn();
@@ -439,7 +451,7 @@ public class Shroom : RhythmProducer
     public void ReleaseSpores()
     {
         //can only release spores once a day
-        if (myAge > 1 && !hasReleasedSpores)
+        if (myAge >= 1 && !hasReleasedSpores)
         {
             //check not already playing
             if (!shroomSpores.isPlaying)
@@ -498,13 +510,14 @@ public class Shroom : RhythmProducer
         hasReleasedSpores = false;
         transform.localScale = inherentScale;
         vortexSpeed = vortexOrig;
+        shroomAnimator.enabled = false;
 
         //the return...
         myZone.zoneSaver.RemoveShroom(this);
         shroomPooler.ReturnObject(gameObject);
     }
 
-    public void AdjustHeight()
+    public void AdjustHeight(float yOffset)
     {
         Vector3 down = transform.TransformDirection(Vector3.down) * 100f;
 
@@ -514,7 +527,7 @@ public class Shroom : RhythmProducer
         {
             if (hit.transform.gameObject.tag == "Ground")
             {
-                transform.position = hit.point + new Vector3(0, heightAdjust, 0);
+                transform.position = hit.point + new Vector3(0, yOffset, 0);
             }
         }
     }

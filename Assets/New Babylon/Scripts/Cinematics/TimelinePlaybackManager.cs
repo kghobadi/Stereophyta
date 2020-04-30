@@ -48,6 +48,10 @@ public class TimelinePlaybackManager : MonoBehaviour {
     public FadeUI cinematicFade;
     public bool fadesIn, fadesOut;
 
+    [Header("Sun Rotation")]
+    public bool activatesSun;
+    Sun sun;
+
     private bool playerInZone = false;
 	private bool timelinePlaying = false;
 	private float timelineDuration;
@@ -57,6 +61,7 @@ public class TimelinePlaybackManager : MonoBehaviour {
         playerObject = GameObject.FindWithTag(playerTag);
         inputController = playerObject.GetComponent<ThirdPersonController>();
         playerCutsceneSpeedController = playerObject.GetComponent<PlayerCutsceneSpeedController>();
+        sun = FindObjectOfType<Sun>();
     }
 
     void Start()
@@ -142,6 +147,14 @@ public class TimelinePlaybackManager : MonoBehaviour {
             {
                 SetCharacterPosition(i);
             }
+        }
+
+        //only for completing the intro 
+        if (activatesSun)
+        {
+            sun.rotates = true;
+
+            PlayerPrefs.SetString("introComplete", "yes");
         }
 
 		if (playableDirector)

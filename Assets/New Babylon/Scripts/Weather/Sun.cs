@@ -24,6 +24,8 @@ public class Sun : MonoBehaviour
     public UnityEvent newDay;
     public Transform rotation;
     public float rotationSpeed = 10, sleepRotation, normalRotation;
+    [Tooltip("Set true when Intro has finished, Or if dayCounter is already greater than 0 on start")]
+    public bool rotates;
     //day counters
     public int yesterday, dayCounter = 0;
     //angle of sun's rotation
@@ -97,9 +99,10 @@ public class Sun : MonoBehaviour
         timeState = TimeState.MORNING;
 
         //set dayCounter to saved player pref
-        if (PlayerPrefs.GetInt("dayCounter") > 0)
+        if (PlayerPrefs.GetInt("dayCounter") > 0 || PlayerPrefs.GetString("introComplete") == "yes")
         {
             dayCounter = PlayerPrefs.GetInt("dayCounter");
+            rotates = true;
         }
 
         //if we are in start view, set to quicker rotation
@@ -123,7 +126,8 @@ public class Sun : MonoBehaviour
     void Update()
     {
         //rotates sun around zero 
-        transform.RotateAround(Vector3.zero, Vector3.forward, rotationSpeed * Time.deltaTime);
+        if(rotates)
+            transform.RotateAround(Vector3.zero, Vector3.forward, rotationSpeed * Time.deltaTime);
 
         //always look at center of the map
         transform.LookAt(Vector3.zero);
@@ -145,8 +149,8 @@ public class Sun : MonoBehaviour
                 //time bool
                 timeState = TimeState.MORNING;
                 //resets day bools and sleep stuff every morning
-                //when its morning increase dayCounter && not in start view
-                if (dayCounter == yesterday && !startViewer.startView)
+                //when its morning increase dayCounter && start viewer is not active 
+                if (dayCounter == yesterday && !startViewer.active)
                 {
                     NewDay();
                 }

@@ -96,7 +96,7 @@ public class MonologueTrigger : MonoBehaviour
             if (npcMovement.waitingToGiveMonologue == false)
             {
                 //tell npc to go to monologue point 
-                if (monologuePoint)
+                if (monologuePoint && activationCount == 0)
                 {
                     npcMovement.SetIdle();
                     npcMovement.NavigateToPoint(monologuePoint.position, true);
@@ -151,6 +151,14 @@ public class MonologueTrigger : MonoBehaviour
         playerInZone = false;
         tpc.canJump = true;
         ToggleInteractUI(playerInZone);
+
+        //this is a repeat, so don't wait forever..
+        if(activationCount > 0 && npcMovement.GetComponent<MonologueManager>().inMonologue == false)
+        {
+            npcMovement.waitingToGiveMonologue = false;
+            npcMovement.monologueWaitTimer = 0;
+            npcMovement.waypointCounter--;
+        }
     }
     
     public void ToggleInteractUI(bool newState)

@@ -141,8 +141,8 @@ public class UseBoat : PickUp {
             tpc.transform.localEulerAngles = new Vector3(-90f, 0, 0);
             tpc.playerCloak.enabled = true;
 
+            //lock rot
             Quaternion rot = transform.rotation;
-
             //set boat vars
             boatScript.inBoat = true;
             boatScript.boatBody.isKinematic = false;
@@ -151,12 +151,8 @@ public class UseBoat : PickUp {
             //set oar anim
             boatScript.oarAnimator.SetTrigger("activateBoat");
             boatScript.oarAnimator.SetBool("rightOrLeft", true);
-
-            //player hasnt used boat before, set angle 
-            if (PlayerPrefs.GetString("hasUsedBoat") != "yes")
-            {
-                transform.rotation = rot;
-            }
+            //lock rot
+            transform.rotation = rot;
 
             interactPrompt.DeactivatePrompt();
         }

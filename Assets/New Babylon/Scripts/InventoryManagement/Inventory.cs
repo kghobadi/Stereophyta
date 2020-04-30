@@ -38,6 +38,7 @@ namespace Player
         public List<Sprite> ItemSprites = new List<Sprite>();
         public Sprite nadaSprite;
         public FadeUI[] ItemsUI;
+        public FadeUI[] howToSwitchInventory;
         IEnumerator fadeItems;
 
         //for altering seed count text
@@ -113,15 +114,33 @@ namespace Player
                 SwitchItemInputs();
 
                 //inventory overview 
-                if (Input.GetKeyDown(KeyCode.I) && canSwitchItems)
+                //if (Input.GetKeyDown(KeyCode.I) && canSwitchItems)
+                //{
+                //    if (inventoryOverviewEnabled)
+                //    {
+                //        DisableInventoryOverview();
+                //    }
+                //    else
+                //    {
+                //        EnableInventoryOverview();
+                //    }
+                //}
+            }
+            
+            //check for first time player has more than 1 item
+            if (PlayerPrefs.GetString("hasSwitchedItems") != "yes")
+            {
+                if (myItems.Count > 1)
                 {
-                    if (inventoryOverviewEnabled)
+                    //show HowToSwitch prompts
+                    for (int i = 0; i < howToSwitchInventory.Length; i++)
                     {
-                        DisableInventoryOverview();
-                    }
-                    else
-                    {
-                        EnableInventoryOverview();
+                        howToSwitchInventory[i].FadeIn();
+                        //active mouse anim
+                        if (howToSwitchInventory[i].GetComponent<AnimateDialogue>())
+                        {
+                            howToSwitchInventory[i].GetComponent<AnimateDialogue>().active = true;
+                        }
                     }
                 }
             }
@@ -171,9 +190,32 @@ namespace Player
         {
             //get input device 
             var inputDevice = InputManager.ActiveDevice;
+            //scroll wheel to cycle inventory 
+            float itemSwitchInput = Input.GetAxis("Mouse ScrollWheel");
+
+            //check for first time player has more than 1 item
+            if (PlayerPrefs.GetString("hasSwitchedItems") != "yes")
+            {
+                if (myItems.Count > 1 && itemSwitchInput != 0)
+                {
+                    //show HowToSwitch prompts
+                    for (int i = 0; i < howToSwitchInventory.Length; i++)
+                    {
+                        howToSwitchInventory[i].FadeOut();
+
+                        //active mouse anim
+                        if (howToSwitchInventory[i].GetComponent<AnimateDialogue>())
+                        {
+                            howToSwitchInventory[i].GetComponent<AnimateDialogue>().active = false;
+                        }
+                    }
+                    //set playerpref
+                    PlayerPrefs.SetString("hasSwitchedItems", "yes");
+                }
+            }
 
             //switch current item +
-            if ((inputDevice.DPadRight || Input.GetKey(KeyCode.E)) && canSwitchItems && myItems.Count > 1)
+            if ((inputDevice.DPadRight || itemSwitchInput > 0) && canSwitchItems && myItems.Count > 1)
             {
                 //only change if no pickable objs nearby 
                 if (playerPicker.closestPickableObj == null)
@@ -197,7 +239,7 @@ namespace Player
             }
 
             //switch current item -
-            if ((inputDevice.DPadLeft || Input.GetKey(KeyCode.Q)) && canSwitchItems && myItems.Count > 1)
+            if ((inputDevice.DPadLeft || Input.GetKey(KeyCode.Q) || itemSwitchInput < 0) && canSwitchItems && myItems.Count > 1)
             {
                 if (currentItemScript.itemType == Item.ItemType.SEED)
                 {
