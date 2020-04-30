@@ -292,7 +292,7 @@ public class ShroomSeed : MonoBehaviour {
             //planted tag
             tgs.CellSetTag(currentCell, 1);
             //planted texture
-            tgs.CellToggleRegionSurface(currentCellIndex, true, gridMan.plantedTexture);
+            tgs.CellToggleRegionSurface(currentCellIndex, true, gridMan.mushroomPlantedTexture);
         }
 
         //generate clone and set Plont script values

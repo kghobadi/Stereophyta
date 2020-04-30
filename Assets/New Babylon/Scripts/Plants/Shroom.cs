@@ -40,6 +40,7 @@ public class Shroom : RhythmProducer
     Vector3 inherentScale;
     public Vector3 originalSize;
     Vector3 largeSize, originalPosition;
+    Vector3 origEulers;
     
     //physics
     Rigidbody shroomBody;
@@ -125,6 +126,7 @@ public class Shroom : RhythmProducer
         //day passed listener
         sunScript.newDay.AddListener(DayPassed);
         inherentScale = transform.localScale;
+        origEulers = transform.localEulerAngles;
 
         //add to zone list 
         if (myZone == null)
@@ -143,7 +145,7 @@ public class Shroom : RhythmProducer
         if (gridMan)
         {
             groundTexture = gridMan.groundTexture;
-            plantedTexture = gridMan.plantedTexture;
+            plantedTexture = gridMan.mushroomPlantedTexture;
         }
            
         //player and environment 
@@ -510,7 +512,9 @@ public class Shroom : RhythmProducer
         hasReleasedSpores = false;
         transform.localScale = inherentScale;
         vortexSpeed = vortexOrig;
+        shroomAnimator.SetBool("planted", true);
         shroomAnimator.enabled = false;
+        transform.localEulerAngles = origEulers;
 
         //the return...
         myZone.zoneSaver.RemoveShroom(this);
