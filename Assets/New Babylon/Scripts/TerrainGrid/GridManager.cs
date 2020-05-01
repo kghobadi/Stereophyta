@@ -19,8 +19,7 @@ public class GridManager : MonoBehaviour {
     {
         for (int i = -1; i < tgs.cells.Count; i++)
         {
-            if (tgs.CellGetTag(i) == 0)
-                tgs.CellToggleRegionSurface(i, true, texture);
+            tgs.CellToggleRegionSurface(i, true, texture);
         }
     }
 

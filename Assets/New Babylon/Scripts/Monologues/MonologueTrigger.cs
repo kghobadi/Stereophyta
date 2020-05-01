@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NPC;
+using InControl;
 
 public class MonologueTrigger : MonoBehaviour
 {
@@ -35,6 +36,7 @@ public class MonologueTrigger : MonoBehaviour
     public int[] monoNumbers;
     public Movement npcMovement;
     public Transform monologuePoint;
+    public float npcWait = 0;
 
     private void Awake()
     {
@@ -46,15 +48,14 @@ public class MonologueTrigger : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            if(!playerInZone && canActivate)
+            if (!playerInZone && canActivate)
                 PlayerEnteredZone();
         }
 
         //can activate true when speaker arrives 
-        if(other.gameObject == speakerHost)
+        if (other.gameObject == speakerHost)
         {
-            //Debug.Log("can activate!");
-            canActivate = true;
+            NPCEnteredZone();
         }
     }
 
@@ -77,9 +78,12 @@ public class MonologueTrigger : MonoBehaviour
 
     void Update()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         if (playerInZone)
         {
-            if((Input.GetKeyUp(KeyCode.Space) || autoActivate) && !hasActivated)
+            if ((Input.GetKeyUp(KeyCode.Space) || inputDevice.Action3.WasPressed || autoActivate) && !hasActivated)
             {
                 ActivateMonologue();
             }
@@ -93,27 +97,44 @@ public class MonologueTrigger : MonoBehaviour
         {
             playerInZone = true;
             tpc.canJump = false;
-            if (npcMovement.waitingToGiveMonologue == false)
-            {
-                //tell npc to go to monologue point 
-                if (monologuePoint && activationCount == 0)
-                {
-                    npcMovement.SetIdle();
-                    npcMovement.NavigateToPoint(monologuePoint.position, true);
-                }
-                //wait to give monologue when you arrive 
-                else
-                {
-                    npcMovement.SetIdle();
-                    npcMovement.waitingToGiveMonologue = true;
-                }
-            }
+            SetNPCWait();
 
             //fade in space to talk 
             if (spaceToTalk)
                 spaceToTalk.FadeIn();
 
             ToggleInteractUI(playerInZone);
+        }
+    }
+
+    void NPCEnteredZone()
+    {
+        if (!hasActivated)
+        {
+            //Debug.Log("can activate!");
+            canActivate = true;
+
+            SetNPCWait();
+        }
+    }
+
+    //NPC will wait to give monologue
+    void SetNPCWait()
+    {
+        if (npcMovement.waitingToGiveMonologue == false)
+        {
+            //tell npc to go to monologue point 
+            if (monologuePoint && activationCount == 0)
+            {
+                npcMovement.SetIdle();
+                npcMovement.NavigateToPoint(monologuePoint.position, true);
+            }
+            //wait to give monologue when you arrive 
+            else
+            {
+                npcMovement.SetIdle();
+                npcMovement.waitingToGiveMonologue = true;
+            }
         }
     }
 
@@ -149,15 +170,16 @@ public class MonologueTrigger : MonoBehaviour
     public void PlayerExitedZone()
     {
         playerInZone = false;
-        tpc.canJump = true;
         ToggleInteractUI(playerInZone);
+        tpc.canJump = true;
 
         //this is a repeat, so don't wait forever..
         if(activationCount > 0 && npcMovement.GetComponent<MonologueManager>().inMonologue == false)
         {
             npcMovement.waitingToGiveMonologue = false;
             npcMovement.monologueWaitTimer = 0;
-            npcMovement.waypointCounter--;
+            if(npcMovement.waypointCounter > 0)
+                npcMovement.waypointCounter--;
         }
     }
     

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using InControl;
 
 //this script is responsible for the active reading out of a monologue 
 public class MonologueReader : MonoBehaviour {
@@ -59,11 +60,14 @@ public class MonologueReader : MonoBehaviour {
 
     void Update ()
     {
+        //get input device 
+        var inputDevice = InputManager.ActiveDevice;
+
         //speaker is typing out message
         if (isTyping)
         {
             //player skips to the end of the line
-            if (Input.GetKeyDown(KeyCode.Space) && canSkip)
+            if ((Input.GetKeyDown(KeyCode.Space) || inputDevice.Action3.WasPressed) && canSkip)
             {
                 if (currentTypingLine != null)
                 {
@@ -82,7 +86,7 @@ public class MonologueReader : MonoBehaviour {
         if (waiting)
         {
             //player skips to next line
-            if (Input.GetKeyDown(KeyCode.Space) && canSkip)
+            if ((Input.GetKeyDown(KeyCode.Space) || inputDevice.Action3.WasPressed) && canSkip)
             {
                 if (waitForNextLine != null)
                 {
