@@ -58,6 +58,13 @@ public abstract class AudioHandler : MonoBehaviour
         myAudioSource.pitch = randomPitch;
     }
 
+    //randomizes npc audio source pitch based on range provided 
+    public virtual void RandomizeAsourcePitch(AudioSource source, float min, float max)
+    {
+        float randomPitch = Random.Range(min, max);
+        source.pitch = randomPitch;
+    }
+
     [Header("Multi voice set up")]
     public int voiceCounter;
     public AudioSource[] voices;

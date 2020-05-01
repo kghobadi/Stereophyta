@@ -203,9 +203,20 @@ namespace NPC
                     //Only does this if there are currenltly points in my list 
                     if (!waitingToGiveMonologue)
                     {
-                        if (distFromPlayer < interactDistance || stateTimer < 0)
+                        //make sure there is more waypoints!
+                        if (waypointCounter < waypoints.Length - 1)
                         {
-                            if (waypointCounter < waypoints.Length - 1)
+                            float playerDist = 0;
+                            float myDist = 0;
+                            if (waypointCounter + 1 < waypoints.Length - 1 && waypoints.Length > 1)
+                            {
+                                //player dist from next waypoint
+                                playerDist = Vector3.Distance(player.transform.position, waypoints[waypointCounter + 1].position);
+                                myDist = Vector3.Distance(transform.position, waypoints[waypointCounter + 1].position);
+                            }
+                            
+                            //if I am close to player, stateTimer ended, or player is closer to my next dest
+                            if (distFromPlayer < interactDistance || stateTimer < 0 || playerDist < myDist)
                             {
                                 SetWaypoint(false);
                             }

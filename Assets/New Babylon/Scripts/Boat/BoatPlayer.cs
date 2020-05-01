@@ -69,7 +69,8 @@ public class BoatPlayer : MonoBehaviour
 
     UseBoat useBoatScript;
     Vector3 origRotation;
-    [Header ("Entering & Exiting")]
+    [Header("Entering & Exiting")]
+    public bool groundCheck, dockable;
     public bool inBoat;  //set when player is inBoat
     public float exitSphereRadius = 3f;
     public float dockDistance = 15f;
@@ -106,7 +107,7 @@ public class BoatPlayer : MonoBehaviour
     public void SetNewDockPos()
     {
         //set body & start angle
-        boatBody.isKinematic = false;
+        boatBody.isKinematic = true;
         boatCol.isTrigger = false;
         boatCol.enabled = false;
         origRotation = transform.localEulerAngles;
@@ -165,9 +166,10 @@ public class BoatPlayer : MonoBehaviour
             {
                 CalcPaddleForce();
             }
-            
+
             //if raycaster hits the ground nearby, can press E to exit boat
-            if (GroundCheck())
+            groundCheck = GroundCheck();
+            if (groundCheck)
             {
                 //force == boat pos - exitspot 
                 Vector3 heading = transform.position - exitSpot;
@@ -186,18 +188,23 @@ public class BoatPlayer : MonoBehaviour
                 }
                 
                 //exit boat 
-                if ((Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed) && paddleIdleTimer > 0.5f)
+                if ((Input.GetKeyDown(KeyCode.E) || inputDevice.Action3.WasPressed) && !dockable && paddleIdleTimer > 0.5f)
                 {
-                    useBoatScript.ExitBoat(exitSpot);
-                    paddleIdleTimer = 0;
-                    //set to idle 
-                    boatState = BoatStates.IDLE;
+                    ExitBoat(exitSpot);
                 }
             }
 
             //set last mouse pos to current 
             lastMousePos = currentMousePos;
         }
+    }
+
+    public void ExitBoat(Vector3 exit)
+    {
+        useBoatScript.ExitBoat(exit);
+        paddleIdleTimer = 0;
+        //set to idle 
+        boatState = BoatStates.IDLE;
     }
 
     // now that we have our inputs, we need to 
@@ -379,10 +386,7 @@ public class BoatPlayer : MonoBehaviour
         //play one shot of current sound
         boatSource.PlayOneShot(bigPaddles[currentBigPaddle]);
     }
-
-
-    //we want to see if we are on terrain that should make us slide downward
-    //only gets called while Player is considered to be grounded
+    
     //turn off boat's collision with ground
     //if boat is close to ground, should send equal and opposite force to push boat a little bit away from ground
     //direction decided by where we hit ground from with raycast
@@ -417,7 +421,7 @@ public class BoatPlayer : MonoBehaviour
             dockPrompt.pickUpMessage = "Dock Boat";
             dockPrompt.ShowPickupPrompt();
         }
-        else
+        else if(!nearGround && !dockable)
         {
             //fade out dock prompt
             dockPrompt.DeactivatePrompt();

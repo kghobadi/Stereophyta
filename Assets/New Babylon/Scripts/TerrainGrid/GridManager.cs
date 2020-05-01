@@ -7,7 +7,7 @@ public class GridManager : MonoBehaviour {
     public TerrainGridSystem tgs;
     public Vector3 cellCenter;
 
-    public Texture2D groundTexture, canPlantTexture, plantedTexture, wateredTexture;
+    public Texture2D groundTexture, canPlantTexture, plantedTexture, mushroomPlantedTexture, wateredTexture;
 
     void Start()
     {
@@ -19,8 +19,7 @@ public class GridManager : MonoBehaviour {
     {
         for (int i = -1; i < tgs.cells.Count; i++)
         {
-            if (tgs.CellGetTag(i) == 0)
-                tgs.CellToggleRegionSurface(i, true, texture);
+            tgs.CellToggleRegionSurface(i, true, texture);
         }
     }
 
