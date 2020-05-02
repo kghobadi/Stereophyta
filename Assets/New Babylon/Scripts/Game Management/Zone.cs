@@ -27,6 +27,7 @@ public class Zone : MonoBehaviour {
     public GridManager zoneGridMan;
     public Spawner[] zoneSpawners;
     public ZoneSaver zoneSaver;
+    public bool disableSpawnersAfterFirstSpawn;
 
     [Header("Audio snapshots")]
     public AudioMixerSnapshot Ocean;
@@ -174,6 +175,12 @@ public class Zone : MonoBehaviour {
                 for (int i = 0; i < zoneSpawners.Length; i++)
                 {
                     zoneSpawners[i].GenerateObjects();
+
+                    //disable zone spawner after spawn 
+                    if (disableSpawnersAfterFirstSpawn)
+                    {
+                        zoneSpawners[i].gameObject.SetActive(false);
+                    }
                 }
                 //will not load again this session 
                 playerHasVisited = true;
@@ -183,7 +190,8 @@ public class Zone : MonoBehaviour {
                 //then handle any regeneration
                 for (int i = 0; i < zoneSpawners.Length; i++)
                 {
-                    zoneSpawners[i].RegenerateObjects();
+                    if(zoneSpawners[i].gameObject.activeSelf)
+                        zoneSpawners[i].RegenerateObjects();
                 }
             }
         }

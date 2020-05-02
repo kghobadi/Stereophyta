@@ -13,6 +13,7 @@ public class Bird : AudioHandler {
     public Transform birdBody;
     public float singingDist, singTimer, singTimerMin, singTimerMax;
     public ParticleSystem songParticles;
+    ParticleSystem.MainModule soundsMain;
 
 	void Start () {
         tpc = GameObject.FindGameObjectWithTag("Player").GetComponent<ThirdPersonController>();
@@ -20,9 +21,15 @@ public class Bird : AudioHandler {
 
         singingDist = myAudioSource.maxDistance;
         singTimer = Random.Range(singTimerMin, singTimerMax);
-	}
+
+        //set particle color to my mat color 
+        if (songParticles)
+        {
+            soundsMain = songParticles.main;
+            soundsMain.startColor = GetComponentInChildren<SetRandomMaterial>().assignedMat.color;
+        }
+    }
 	
-	// Update is called once per frame
 	void Update () {
 
         //transform.LookAt(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z));

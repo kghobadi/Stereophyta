@@ -266,9 +266,6 @@ public class Shroom : RhythmProducer
         //increment age (within stage)
         myAge++;
 
-        //reset spore release
-        hasReleasedSpores = false;
-
         SwitchRhythm();
 
         //reached next stage, grow

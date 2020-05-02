@@ -174,12 +174,16 @@ public class Seed : MonoBehaviour {
         //idle seed
         if(seedState == SeedStates.IDLE)
         {
-            seedAnimator.enabled = true;
+            if (!seedAnimator.enabled)
+                seedAnimator.enabled = true;
         }
 
         //plant seed
         if (seedState == SeedStates.SEEDSELECTED && !tpc.menuOpen && inventoryScript.canSwitchItems)
         {
+            if(!seedAnimator.enabled)
+                seedAnimator.enabled = true;
+
             //this is the seed the player is holding 
             RaycastToGround();
         }
