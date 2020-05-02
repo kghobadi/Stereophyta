@@ -15,6 +15,7 @@ namespace NPC
         //list of active & complete tasks 
         public List<Task> activeTasks = new List<Task>();
         public List<Task> completedTasks = new List<Task>();
+        public List<Task> fulfilledTasks = new List<Task>();
         [Tooltip("How far NPC looks to check for Planted items")]
         public float visionRadius = 75f;
 
@@ -211,6 +212,11 @@ namespace NPC
                 {
                     npcController.Monologues.wmManager.allMonologues[task.monologueIndeces[i]].mTrigger.gameObject.SetActive(true);
                 }
+                //deactivate old ones
+                for (int i = 0; i < task.monoDisables.Length; i++)
+                {
+                    npcController.Monologues.wmManager.allMonologues[task.monoDisables[i]].mTrigger.gameObject.SetActive(false);
+                }
             }
 
             //move to completed list
@@ -264,6 +270,10 @@ namespace NPC
                     playerInventory.RemoveObjFromInventory(playerItemGroup.gameObject);
                 }
             }
+
+            //move to fulfilled list
+            completedTasks.Remove(task);
+            fulfilledTasks.Add(task);
         }
     }
 }

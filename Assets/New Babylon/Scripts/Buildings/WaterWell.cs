@@ -21,7 +21,7 @@ public class WaterWell : MonoBehaviour {
     //watercan near
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject == waterCan.gameObject)
+        if(other.gameObject.tag == "Player")
         {
             waterCan.nearWell = true;
 
@@ -37,7 +37,7 @@ public class WaterWell : MonoBehaviour {
     //watercan gone  
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject == waterCan.gameObject)
+        if (other.gameObject.tag == "Player")
         {
             waterCan.nearWell = false;
 

@@ -140,27 +140,47 @@ public class UseBoat : PickUp {
             tpc.myInventory.gameObject.SetActive(false);
             tpc.transform.localEulerAngles = new Vector3(-90f, 0, 0);
             tpc.playerCloak.enabled = true;
-
-            Quaternion rot = transform.rotation;
-
+            
             //set boat vars
             boatScript.inBoat = true;
-            boatScript.boatBody.isKinematic = false;
-            boatScript.boatCol.enabled = true;
-            boatAnimator.enabled = false;
+            StartCoroutine(WaitToEnablePhysics());
             //set oar anim
             boatScript.oarAnimator.SetTrigger("activateBoat");
             boatScript.oarAnimator.SetBool("rightOrLeft", true);
-
-            //player hasnt used boat before, set angle 
-            if (PlayerPrefs.GetString("hasUsedBoat") != "yes")
-            {
-                transform.rotation = rot;
-            }
-
+            //turn off prompt 
             interactPrompt.DeactivatePrompt();
         }
         
+    }
+
+    IEnumerator WaitToEnablePhysics()
+    {  
+        //lock rot
+        Quaternion rot = transform.rotation;
+        
+        if (boatScript.inBoat)
+        {
+            boatScript.boatBody.drag = 5f;
+
+            //enable physx
+            boatAnimator.enabled = false;
+            boatScript.boatBody.isKinematic = false;
+            if(boatScript.boatCol.enabled == false)
+                boatScript.boatCol.enabled = true;
+
+            //lock rot
+            transform.rotation = rot;
+            //zero velocities 
+            boatScript.boatBody.velocity = Vector3.zero;
+            boatScript.boatBody.angularVelocity = Vector3.zero;
+        }
+
+        yield return new WaitForSeconds(0.25f);
+
+        if (boatScript.inBoat)
+        {
+            boatScript.boatBody.drag = 0.1f;
+        }
     }
 
     public void ExitBoat(Vector3 exitPos)
@@ -186,7 +206,7 @@ public class UseBoat : PickUp {
         boatScript.boatBody.isKinematic = true;
 
         //reset boat & player rot
-        transform.rotation = Quaternion.Euler(90f, -180f, transform.localEulerAngles.z);
+        //transform.rotation = Quaternion.Euler(90f, -180f, transform.localEulerAngles.z);
         tpc.transform.rotation = Quaternion.Euler(0f, tpc.transform.localEulerAngles.y, 0f);
 
         //set oar anim

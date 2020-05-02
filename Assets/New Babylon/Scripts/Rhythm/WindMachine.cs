@@ -42,7 +42,7 @@ namespace Items
             tempoIndicator = GetComponent<TempoIndication>();
             if(tempoIndicator.myAudioSource == null)
             {
-                tempoIndicator.myAudioSource = toolSource;
+                tempoIndicator.myAudioSource = myAudioSource;
             }
             tempoIndicator.changeTempoSound = selectLower;
             //rhythm lever state -- timeScale should never exceed timeScaleMax 
@@ -163,7 +163,7 @@ namespace Items
                 //blocked
                 else
                 {
-                    toolSource.PlayOneShot(noNo);
+                    PlaySound(noNo, myAudioSource.volume);
                 }
             }
         }
@@ -217,7 +217,7 @@ namespace Items
         {
             //animate to become fan
             toolAnimator.SetBool("fan", true);
-            toolSource.PlayOneShot(placementSound, 0.1f);
+            PlaySound(placementSound, 0.05f);
 
             //set parent null, position
             transform.SetParent(null);

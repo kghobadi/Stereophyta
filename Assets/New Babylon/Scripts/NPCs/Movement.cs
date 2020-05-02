@@ -149,6 +149,9 @@ namespace NPC
             {
                 stateTimer -= Time.deltaTime;
 
+                //NPC will perform its action 
+                ActionCountdown();
+                
                 //set footstep timer to 0 since we arent moving 
                 if (footsteps)
                     footsteps.footstepTimer = 0;
@@ -159,10 +162,7 @@ namespace NPC
                     //play a sound
                     if (stateTimer < 0 && !waving && !controller.Monologues.inMonologue)
                     {
-                        if(npcSounds.idleSounds.Length > 0)
-                            npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
-
-                        npcAnimations.Animator.SetTrigger("action1");
+                        //idle action?
 
                         stateTimer = idleTime;
                     }
@@ -180,38 +180,43 @@ namespace NPC
                 //looping waypoints npc 
                 else if (npcType == NPCMovementTypes.WAYPOINT)
                 {
-                    if (stateTimer < 0 && !waving)
+                    //wait for monologue 
+                    if (!waitingToGiveMonologue)
                     {
-                        //Debug.Log("calling waypoints");
-                        SetWaypoint(true);
+                        if (stateTimer < 0 && !waving)
+                        {
+                            //Debug.Log("calling waypoints");
+                            SetWaypoint(true);
+                        }
+                    }
+                    //waiting to give monologue -- look at player 
+                    else
+                    {
+                        WaitToGiveMonologue();
                     }
                 }
                 //waits until player is near then walks to next point 
                 else if (npcType == NPCMovementTypes.PATHFINDER)
                 {
-                    actionTimer -= Time.deltaTime;
-
-                    //play a sound (cough)
-                    if (actionTimer < 0 && !waving && !controller.Monologues.inMonologue)
-                    {
-                        if(npcSounds.myAudioSource.isPlaying == false)
-                        {
-                            if (npcSounds.idleSounds.Length > 0)
-                                npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
-
-                            npcAnimations.Animator.SetTrigger("action1");
-                            
-                            actionTimer = actionTime;
-                        }
-                    }
-
+                
                     //goes to next point if timer reaches 0 or player is near 
                     //Only does this if there are currenltly points in my list 
                     if (!waitingToGiveMonologue)
                     {
-                        if (distFromPlayer < interactDistance || stateTimer < 0)
+                        //make sure there is more waypoints!
+                        if (waypointCounter < waypoints.Length - 1)
                         {
-                            if (waypointCounter < waypoints.Length - 1)
+                            float playerDist = 0;
+                            float myDist = 0;
+                            if (waypointCounter + 1 < waypoints.Length - 1 && waypoints.Length > 1)
+                            {
+                                //player dist from next waypoint
+                                playerDist = Vector3.Distance(player.transform.position, waypoints[waypointCounter + 1].position);
+                                myDist = Vector3.Distance(transform.position, waypoints[waypointCounter + 1].position);
+                            }
+                            
+                            //if I am close to player, stateTimer ended, or player is closer to my next dest
+                            if (distFromPlayer < interactDistance || stateTimer < 0 || playerDist < myDist)
                             {
                                 SetWaypoint(false);
                             }
@@ -220,29 +225,55 @@ namespace NPC
                     //waiting to give monologue -- look at player 
                     else
                     {
-                        LookAtObject(player.transform.position, true);
-
-                        //dont want this to count until start view is inactive 
-                        if(startViewer.active == false)
-                            monologueWaitTimer += Time.deltaTime;
-
-                        //stop waiting for monologue IF not in monologue 
-                        if(monologueWaitTimer > monoWaitTime && !monoManager.inMonologue)
-                        {
-                            waitingToGiveMonologue = false;
-
-                            monologueWaitTimer = 0;
-
-                            //deactivate monologue trigger if it does not repeat 
-                            if (!monoManager.allMyMonologues[monoManager.currentMonologue].repeatsAtFinish)
-                            {
-                                MonologueTrigger m_Trigger = controller.wmManager.allMonologues[monoManager.allMyMonologues[monoManager.currentMonologue].worldMonoIndex].mTrigger;
-                                if (m_Trigger.displayUI)
-                                    m_Trigger.ToggleInteractUI(false);
-                                m_Trigger.gameObject.SetActive(false);
-                            }
-                        }
+                        WaitToGiveMonologue();
                     }
+                }
+            }
+        }
+
+        //called from within Idle state only 
+        void WaitToGiveMonologue()
+        {
+            LookAtObject(player.transform.position, true);
+
+            //dont want this to count until start view is inactive 
+            if (startViewer.active == false)
+                monologueWaitTimer += Time.deltaTime;
+
+            //stop waiting for monologue IF not in monologue 
+            if (monologueWaitTimer > monoWaitTime && !monoManager.inMonologue)
+            {
+                waitingToGiveMonologue = false;
+
+                monologueWaitTimer = 0;
+
+                //deactivate monologue trigger if it does not repeat 
+                if (!monoManager.allMyMonologues[monoManager.currentMonologue].repeatsAtFinish)
+                {
+                    MonologueTrigger m_Trigger = controller.wmManager.allMonologues[monoManager.allMyMonologues[monoManager.currentMonologue].worldMonoIndex].mTrigger;
+                    if (m_Trigger.displayUI)
+                        m_Trigger.ToggleInteractUI(false);
+                    m_Trigger.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        //can be called during IDLE state 
+        void ActionCountdown()
+        {
+            actionTimer -= Time.deltaTime;
+
+            //play a sound (cough)
+            if (actionTimer < 0 && !waving && !controller.Monologues.inMonologue)
+            {
+                if (npcSounds.myAudioSource.isPlaying == false)
+                {
+                    if (npcSounds.idleSounds.Length > 0)
+                        npcSounds.PlayRandomSoundRandomPitch(npcSounds.idleSounds, npcSounds.myAudioSource.volume);
+
+                    npcAnimations.Animator.SetTrigger("action1");
+
+                    actionTimer = actionTime;
                 }
             }
         }

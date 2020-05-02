@@ -42,6 +42,7 @@ public class ThirdPersonController : MonoBehaviour
     public bool running;
     public bool jumping, swimming;
     public bool playerCanMove, menuOpen;
+    public bool canSprint = true;
     public bool indoors;
     public ParticleSystem runParticles;
     [HideInInspector]
@@ -399,7 +400,7 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         //run if pressing shift keys OR move timer is great enough
-        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2) && daysWithoutSleep < noSleepMax && !indoors)
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || inputDevice.Action2) && daysWithoutSleep < noSleepMax && !indoors && canSprint)
         {
             currentMovement = Vector3.SmoothDamp(currentMovement, targetMovementTotal * runSpeed, ref currentMovementV, moveSmoothUse);
 

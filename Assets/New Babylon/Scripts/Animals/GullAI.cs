@@ -7,6 +7,8 @@ public class GullAI : RhythmProducer
     Sun sun;
     GullAnimation gullAnim;
     MoveTowards mover;
+    ParticleSystem soundsPlayer;
+    ParticleSystem.MainModule soundsMain;
 
     [Header("Gull AI Settings")]
     public GullStates gullStates;
@@ -45,6 +47,7 @@ public class GullAI : RhythmProducer
         gullAnim = GetComponent<GullAnimation>();
         mover = GetComponent<MoveTowards>();
         origGlideSpeed = glideSpeed;
+        soundsPlayer = GetComponentInChildren<ParticleSystem>();
     }
 
     void Start()
@@ -58,6 +61,12 @@ public class GullAI : RhythmProducer
 
         transform.position = point;
         SetIdle(point);
+
+        if (soundsPlayer)
+        {
+            soundsMain = soundsPlayer.main;
+            soundsMain.startColor = GetComponentInChildren<SetRandomMaterial>().assignedMat.color;
+        }
     }
 
     void NewDay()
@@ -101,6 +110,8 @@ public class GullAI : RhythmProducer
         if (showRhythm)
         {
             PlayRandomSoundRandomPitch(idles, myAudioSource.volume);
+            if (soundsPlayer)
+                soundsPlayer.Play();
             showRhythm = false;
         }
 

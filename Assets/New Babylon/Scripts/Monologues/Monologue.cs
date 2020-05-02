@@ -17,12 +17,24 @@ public class Monologue : ScriptableObject
 
     [Tooltip("Check this to lock your player's movement")]
     public bool lockPlayer = true;
+    [Tooltip("The Monologue Manager will repeat this monologue until further notice")]
+    public bool repeatsAtFinish;
+    [Tooltip("A condensed version of the Task assignment for repeating")]
+    public TextAsset condensedMonologue;
+    [Tooltip("Use this for Monologues that do not assign tasks to activate a new dialogue after a certain amount of time")]
+    public bool triggersMonologues;
+    [Tooltip("Indeces of the Monologue Triggers to activate from within WorldMonoManager")]
+    public int[] monologueIndeces;
+    [Tooltip("How long should these Monologue Triggers wait to activate?")]
+    public float[] monologueWaits;
+
+    [Header("Tasks")]
     [Tooltip("This list will correspond to all my monologues in count, but may be null")]
     public Task[] tasksToAssign;
     [Tooltip("This NPC will take item from player during conversation using these tasks")]
     public Task[] tasksToFulfill; 
-    [Tooltip("The Monologue Manager will repeat this monologue until further notice")]
-    public bool repeatsAtFinish;
+   
+    [Header("Cinematics")]
     [Tooltip("After this Monologue finishes, the manager will play a cinematic")]
     public bool playsCinematic;
     public Cinematic cinematic;
@@ -33,7 +45,7 @@ public class Monologue : ScriptableObject
     public MovementPath newMovement;
     [Tooltip("After this Monologue finishes, the Boat will be enabled!")]
     public bool enablesBoat;
-
+  
     [Header("Info for Monologue Reader")]
     public float timeBetweenLetters = 0.1f;
     public float timeBetweenLines = 3f;

@@ -12,7 +12,7 @@ namespace Cameras
         PlayerCameraController pcc;
 
         public bool active;
-        public GameCamera desiredCam, lastCam;
+        public GameCamera desiredCam, lastCam, exitCam;
 
         [Tooltip("Player cannot sprint")]
         public bool limitPlayerMovement;
@@ -26,35 +26,26 @@ namespace Cameras
 
         void OnTriggerEnter(Collider other)
         {
-            if(other.gameObject.tag == "Player" && !active)
+            if(other.gameObject == tpc.gameObject && !active)
             {
                 Activate();
             }
         }
-
-        void OnTriggerStay(Collider other)
-        {
-            if (other.gameObject.tag == "Player" && !active)
-            {
-                Activate();
-            }
-        }
-
+        
         void Activate()
         {
-            if (desiredCam)
-            {
-                lastCam = camManager.currentCamera;
-                camManager.Set(desiredCam);
-                pcc.canSwitchCams = false;
+            lastCam = camManager.currentCamera;
+            camManager.Set(desiredCam);
 
-                active = true;
-            }
+            pcc.canSwitchCams = false;
+            if (limitPlayerMovement)
+                tpc.canSprint = false;
+            active = true;
         }
 
         void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.tag == "Player" && active)
+            if (other.gameObject == tpc.gameObject && active)
             {
                 Deactivate();
             }
@@ -62,9 +53,26 @@ namespace Cameras
 
         void Deactivate()
         {
-            camManager.Set(lastCam);
+            if (exitCam)
+                camManager.Set(exitCam);
+            else
+                camManager.Set(lastCam);
+
             pcc.canSwitchCams = true;
+            if (limitPlayerMovement)
+            {
+                StartCoroutine(WaitToSetSprint(true));
+            }
+
             active = false;
+        }
+
+        IEnumerator WaitToSetSprint(bool sprint)
+        {
+            yield return new WaitForSeconds(0.5f);
+
+            if(active == false)
+                tpc.canSprint = sprint;
         }
     }
 }
